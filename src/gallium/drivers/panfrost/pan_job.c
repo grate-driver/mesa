@@ -978,9 +978,9 @@ panfrost_batch_submit_ioctl(struct panfrost_batch *batch,
         panfrost_pool_get_bo_handles(&batch->invisible_pool, bo_handles + submit.bo_handle_count);
         submit.bo_handle_count += panfrost_pool_num_bos(&batch->invisible_pool);
 
-        /* Used by all tiler jobs (XXX: skip for compute-only) */
-        if (!(reqs & PANFROST_JD_REQ_FS))
-                bo_handles[submit.bo_handle_count++] = dev->tiler_heap->gem_handle;
+        /* Used by all tiler jobs, and occasionally by fragment jobs.
+         * (XXX: skip for compute-only) */
+        bo_handles[submit.bo_handle_count++] = dev->tiler_heap->gem_handle;
 
         submit.bo_handles = (u64) (uintptr_t) bo_handles;
         ret = drmIoctl(dev->fd, DRM_IOCTL_PANFROST_SUBMIT, &submit);
@@ -1014,9 +1014,18 @@ panfrost_batch_submit_ioctl(struct panfrost_batch *batch,
 static int
 panfrost_batch_submit_jobs(struct panfrost_batch *batch, uint32_t in_sync, uint32_t out_sync)
 {
+        struct panfrost_device *dev = pan_device(batch->ctx->base.screen);
         bool has_draws = batch->scoreboard.first_job;
-        bool has_frag = batch->scoreboard.tiler_dep || batch->clear;
+        bool has_tiler = batch->scoreboard.first_tiler;
+        bool has_frag = has_tiler || batch->clear;
         int ret = 0;
+
+        /* Take the submit lock to make sure no tiler jobs from other context
+         * are inserted between our tiler and fragment jobs, failing to do that
+         * might result in tiler heap corruption.
+         */
+        if (has_tiler)
+                pthread_mutex_lock(&dev->submit_lock);
 
         if (has_draws) {
                 ret = panfrost_batch_submit_ioctl(batch, batch->scoreboard.first_job,
@@ -1032,13 +1041,15 @@ panfrost_batch_submit_jobs(struct panfrost_batch *batch, uint32_t in_sync, uint3
                  * *only* clears, since otherwise the tiler structures will be
                  * uninitialized leading to faults (or state leaks) */
 
-                mali_ptr fragjob = panfrost_fragment_job(batch,
-                                batch->scoreboard.tiler_dep != 0);
+                mali_ptr fragjob = panfrost_fragment_job(batch, has_tiler);
                 ret = panfrost_batch_submit_ioctl(batch, fragjob,
                                                   PANFROST_JD_REQ_FS, 0,
                                                   out_sync);
                 assert(!ret);
         }
+
+        if (has_tiler)
+                pthread_mutex_unlock(&dev->submit_lock);
 
         return ret;
 }

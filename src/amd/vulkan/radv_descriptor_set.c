@@ -449,7 +449,13 @@ VkResult radv_CreatePipelineLayout(
 		}
 		dynamic_offset_count += layout->set[set].dynamic_offset_count;
 		dynamic_shader_stages |= layout->set[set].dynamic_offset_stages;
-		_mesa_sha1_update(&ctx, set_layout, set_layout->layout_size);
+
+		/* Hash the entire set layout except for the vk_object_base. The
+		 * rest of the set layout is carefully constructed to not have
+		 * pointers so a full hash instead of a per-field hash should be ok. */
+		_mesa_sha1_update(&ctx,
+		                  (const char*)set_layout + sizeof(struct vk_object_base),
+		                  set_layout->layout_size - sizeof(struct vk_object_base));
 	}
 
 	layout->dynamic_offset_count = dynamic_offset_count;
@@ -516,6 +522,7 @@ radv_descriptor_set_create(struct radv_device *device,
 
 		set = (struct radv_descriptor_set*)pool->host_memory_ptr;
 		pool->host_memory_ptr += mem_size;
+		memset(set->descriptors, 0, sizeof(struct radeon_winsys_bo *) * buffer_count);
 	} else {
 		set = vk_alloc2(&device->vk.alloc, NULL, mem_size, 8,
 		                VK_SYSTEM_ALLOCATION_SCOPE_OBJECT);
@@ -877,6 +884,8 @@ static void write_texel_buffer_descriptor(struct radv_device *device,
 
 	if (!buffer_view) {
 		memset(dst, 0, 4 * 4);
+		if (!cmd_buffer)
+			*buffer_list = NULL;
 		return;
 	}
 
@@ -898,6 +907,8 @@ static void write_buffer_descriptor(struct radv_device *device,
 
 	if (!buffer) {
 		memset(dst, 0, 4 * 4);
+		if (!cmd_buffer)
+			*buffer_list = NULL;
 		return;
 	}
 
@@ -962,6 +973,7 @@ static void write_dynamic_buffer_descriptor(struct radv_device *device,
 
 	if (!buffer) {
 		range->va = 0;
+		*buffer_list = NULL;
 		return;
 	}
 
@@ -997,6 +1009,8 @@ write_image_descriptor(struct radv_device *device,
 
 	if (!iview) {
 		memset(dst, 0, size);
+		if (!cmd_buffer)
+			*buffer_list = NULL;
 		return;
 	}
 

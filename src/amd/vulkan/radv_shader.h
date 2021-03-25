@@ -135,6 +135,7 @@ struct radv_nir_compiler_options {
 	bool explicit_scratch_args;
 	bool clamp_shadow_reference;
 	bool robust_buffer_access;
+	bool robust_buffer_access2;
 	bool dump_shader;
 	bool dump_preoptir;
 	bool record_ir;
@@ -418,8 +419,8 @@ struct radv_shader_slab {
 };
 
 void
-radv_optimize_nir(struct nir_shader *shader, bool optimize_conservatively,
-		  bool allow_copies);
+radv_optimize_nir(const struct radv_device *device, struct nir_shader *shader,
+		  bool optimize_conservatively, bool allow_copies);
 bool
 radv_nir_lower_ycbcr_textures(nir_shader *shader,
                              const struct radv_pipeline_layout *layout);

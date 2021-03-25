@@ -359,6 +359,7 @@ struct radv_instance {
 	 */
 	bool enable_mrt_output_nan_fixup;
 	bool disable_tc_compat_htile_in_general;
+	bool disable_shrink_image_store;
 };
 
 VkResult radv_init_wsi(struct radv_physical_device *physical_device);
@@ -822,8 +823,9 @@ struct radv_device {
 	struct radv_device_extension_table enabled_extensions;
 	struct radv_device_dispatch_table dispatch;
 
-	/* Whether the app has enabled the robustBufferAccess feature. */
+	/* Whether the app has enabled the robustBufferAccess/robustBufferAccess2 features. */
 	bool robust_buffer_access;
+	bool robust_buffer_access2;
 
 	/* Whether the driver uses a global BO list. */
 	bool use_global_bo_list;

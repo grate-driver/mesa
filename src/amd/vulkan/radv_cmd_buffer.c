@@ -1190,10 +1190,8 @@ radv_emit_rbplus_state(struct radv_cmd_buffer *cmd_buffer)
 			break;
 
 		case V_028C70_COLOR_10_11_11:
-			if (spi_format == V_028714_SPI_SHADER_FP16_ABGR) {
+			if (spi_format == V_028714_SPI_SHADER_FP16_ABGR)
 				sx_ps_downconvert |= V_028754_SX_RT_EXPORT_10_11_11 << (i * 4);
-				sx_blend_opt_epsilon |= V_028758_11BIT_FORMAT << (i * 4);
-			}
 			break;
 
 		case V_028C70_COLOR_2_10_10_10:
@@ -1586,7 +1584,8 @@ radv_emit_fb_color_state(struct radv_cmd_buffer *cmd_buffer,
 
 	if (radv_image_has_fmask(image) &&
 	    (radv_is_fmask_decompress_pipeline(cmd_buffer) ||
-	     radv_is_hw_resolve_pipeline(cmd_buffer))) {
+	     radv_is_hw_resolve_pipeline(cmd_buffer) ||
+	     radv_is_blit2d_msaa_pipeline(cmd_buffer))) {
 		/* Make sure FMASK is enabled if it has been cleared because:
 		 *
 		 * 1) it's required for FMASK_DECOMPRESS operations to avoid
@@ -2798,7 +2797,7 @@ radv_flush_vertex_descriptors(struct radv_cmd_buffer *cmd_buffer,
 			}
 
 			if (cmd_buffer->device->physical_device->rad_info.chip_class != GFX8 && stride)
-				num_records /= stride;
+				num_records = DIV_ROUND_UP(num_records, stride);
 
 			uint32_t rsrc_word3 = S_008F0C_DST_SEL_X(V_008F0C_SQ_SEL_X) |
 					      S_008F0C_DST_SEL_Y(V_008F0C_SQ_SEL_Y) |

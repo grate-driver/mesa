@@ -196,8 +196,9 @@ static Temp emit_bpermute(isel_context *ctx, Builder &bld, Temp index, Temp data
       /* GFX10 wave64 mode: emulate full-wave bpermute */
       if (!ctx->has_gfx10_wave64_bpermute) {
          ctx->has_gfx10_wave64_bpermute = true;
-         ctx->program->config->num_shared_vgprs = 8; /* Shared VGPRs are allocated in groups of 8 */
-         ctx->program->vgpr_limit -= 4; /* We allocate 8 shared VGPRs, so we'll have 4 fewer normal VGPRs */
+         /* Shared VGPRs are allocated in groups of 8/16 */
+         ctx->program->config->num_shared_vgprs = ctx->program->chip_class >= GFX10_3 ? 16 : 8;
+         ctx->program->vgpr_limit -= ctx->program->chip_class >= GFX10_3 ? 8 : 4;
       }
 
       Temp index_is_lo = bld.vopc(aco_opcode::v_cmp_ge_u32, bld.def(bld.lm), Operand(31u), index);
@@ -712,8 +713,10 @@ Temp convert_pointer_to_64_bit(isel_context *ctx, Temp ptr)
    if (ptr.size() == 2)
       return ptr;
    Builder bld(ctx->program, ctx->block);
-   if (ptr.type() == RegType::vgpr)
+   if (ptr.type() == RegType::vgpr) {
       ptr = bld.vop1(aco_opcode::v_readfirstlane_b32, bld.def(s1), ptr);
+      ptr = emit_wqm(ctx, ptr);
+   }
    return bld.pseudo(aco_opcode::p_create_vector, bld.def(s2),
                      ptr, Operand((unsigned)ctx->options->address32_hi));
 }
@@ -1153,6 +1156,18 @@ Temp emit_floor_f64(isel_context *ctx, Builder& bld, Definition dst, Temp val)
    return add->definitions[0].getTemp();
 }
 
+Temp uadd32_sat(Builder& bld, Definition dst, Temp src0, Temp src1)
+{
+   if (bld.program->chip_class >= GFX9) {
+      Builder::Result add = bld.vop2_e64(aco_opcode::v_add_u32, dst, src0, src1);
+      static_cast<VOP3A_instruction*>(add.instr)->clamp = 1;
+   } else {
+      Builder::Result add = bld.vadd32(bld.def(v1), src0, src1, true);
+      bld.vop2_e64(aco_opcode::v_cndmask_b32, dst, add.def(0).getTemp(), Operand((uint32_t) -1), add.def(1).getTemp());
+   }
+   return dst.getTemp();
+}
+
 void visit_alu_instr(isel_context *ctx, nir_alu_instr *instr)
 {
    if (!instr->dest.dest.is_ssa) {
@@ -1509,6 +1524,22 @@ void visit_alu_instr(isel_context *ctx, nir_alu_instr *instr)
          emit_vop1_instruction(ctx, instr, op, msb_rev);
          Temp msb = bld.tmp(v1);
          Temp carry = bld.vsub32(Definition(msb), Operand(31u), Operand(msb_rev), true).def(1).getTemp();
+         bld.vop2_e64(aco_opcode::v_cndmask_b32, Definition(dst), msb, Operand((uint32_t)-1), carry);
+      } else if (src.regClass() == v2) {
+         aco_opcode op = instr->op == nir_op_ufind_msb ? aco_opcode::v_ffbh_u32 : aco_opcode::v_ffbh_i32;
+
+         Temp lo = bld.tmp(v1), hi = bld.tmp(v1);
+         bld.pseudo(aco_opcode::p_split_vector, Definition(lo), Definition(hi), src);
+
+         lo = uadd32_sat(bld, bld.def(v1), bld.copy(bld.def(s1), Operand(32u)),
+                                           bld.vop1(op, bld.def(v1), lo));
+         hi = bld.vop1(op, bld.def(v1), hi);
+         Temp found_hi = bld.vopc(aco_opcode::v_cmp_lg_u32, bld.def(bld.lm), Operand((uint32_t)-1), hi);
+
+         Temp msb_rev = bld.vop2(aco_opcode::v_cndmask_b32, bld.def(v1), lo, hi, found_hi);
+
+         Temp msb = bld.tmp(v1);
+         Temp carry = bld.vsub32(Definition(msb), Operand(63u), Operand(msb_rev), true).def(1).getTemp();
          bld.vop2_e64(aco_opcode::v_cndmask_b32, Definition(dst), msb, Operand((uint32_t)-1), carry);
       } else {
          isel_err(&instr->instr, "Unimplemented NIR instr bit size");
@@ -3315,7 +3346,7 @@ Temp lds_load_callback(Builder& bld, const LoadEmitInfo &info,
    } else if (bytes_needed >= 8 && align % 8 == 0) {
       size = 8;
       op = aco_opcode::ds_read_b64;
-   } else if (bytes_needed >= 8 && align % 4 == 0 && const_offset % 4 == 0) {
+   } else if (bytes_needed >= 8 && align % 4 == 0 && const_offset % 4 == 0 && usable_read2) {
       size = 8;
       read2 = true;
       op = aco_opcode::ds_read2_b32;
@@ -3330,14 +3361,16 @@ Temp lds_load_callback(Builder& bld, const LoadEmitInfo &info,
       op = aco_opcode::ds_read_u8;
    }
 
-   unsigned max_offset_plus_one = read2 ? 254 * (size / 2u) + 1 : 65536;
-   if (const_offset >= max_offset_plus_one) {
-      offset = bld.vadd32(bld.def(v1), offset, Operand(const_offset / max_offset_plus_one));
-      const_offset %= max_offset_plus_one;
+   unsigned const_offset_unit = read2 ? size / 2u : 1u;
+   unsigned const_offset_range = read2 ? 255 * const_offset_unit : 65536;
+
+   if (const_offset > (const_offset_range - const_offset_unit)) {
+      unsigned excess = const_offset - (const_offset % const_offset_range);
+      offset = bld.vadd32(bld.def(v1), offset, Operand(excess));
+      const_offset -= excess;
    }
 
-   if (read2)
-      const_offset /= (size / 2u);
+   const_offset /= const_offset_unit;
 
    RegClass rc = RegClass(RegType::vgpr, DIV_ROUND_UP(size, 4));
    Temp val = rc == info.dst.regClass() && dst_hint.id() ? dst_hint : bld.tmp(rc);
@@ -4720,12 +4753,18 @@ void visit_load_input(isel_context *ctx, nir_intrinsic_instr *instr)
          unsigned fetch_offset = attrib_offset + channel_start * vtx_info->chan_byte_size;
          bool expanded = false;
 
-         /* use MUBUF when possible to avoid possible alignment issues */
+         /* Use MUBUF when possible to avoid possible alignment issues.
+          * We don't use MUBUF for multi-component loads because
+          * robustBufferAccess2 requires that bounds checking is per-attribute,
+          * but MUBUF is per-dword. Other generations get around this by doing
+          * bounds checking with the index, instead of the offset like GFX8. */
          /* TODO: we could use SDWA to unpack 8/16-bit attributes without extra instructions */
          bool use_mubuf = (nfmt == V_008F0C_BUF_NUM_FORMAT_FLOAT ||
                            nfmt == V_008F0C_BUF_NUM_FORMAT_UINT ||
                            nfmt == V_008F0C_BUF_NUM_FORMAT_SINT) &&
-                          vtx_info->chan_byte_size == 4;
+                          vtx_info->chan_byte_size == 4 &&
+                          (fetch_component == 1 || ctx->options->chip_class != GFX8 ||
+                           !ctx->options->robust_buffer_access2);
          unsigned fetch_dfmt = V_008F0C_BUF_DATA_FORMAT_INVALID;
          if (!use_mubuf) {
             fetch_dfmt = get_fetch_data_format(ctx, vtx_info, fetch_offset, attrib_stride, &fetch_component);
@@ -5463,8 +5502,10 @@ Temp get_sampler_desc(isel_context *ctx, nir_deref_instr *deref_instr,
             constant_index += array_size * const_value->u32;
          } else {
             Temp indirect = get_ssa_temp(ctx, deref_instr->arr.index.ssa);
-            if (indirect.type() == RegType::vgpr)
+            if (indirect.type() == RegType::vgpr) {
                indirect = bld.vop1(aco_opcode::v_readfirstlane_b32, bld.def(s1), indirect);
+               indirect = emit_wqm(ctx, indirect);
+            }
 
             if (array_size != 1)
                indirect = bld.sop2(aco_opcode::s_mul_i32, bld.def(s1), Operand(array_size), indirect);
@@ -7900,7 +7941,7 @@ void visit_intrinsic(isel_context *ctx, nir_intrinsic_instr *instr)
       Temp src = get_ssa_temp(ctx, instr->src[0].ssa);
       Temp dst = get_ssa_temp(ctx, &instr->dest.ssa);
       Definition tmp = bld.def(dst.regClass());
-      Definition lanemask_tmp = dst.size() == bld.lm.size() ? tmp : bld.def(src.regClass());
+      Definition lanemask_tmp = dst.size() == bld.lm.size() ? tmp : bld.def(bld.lm);
       if (instr->src[0].ssa->bit_size == 1) {
          assert(src.regClass() == bld.lm);
          bld.sop2(Builder::s_and, lanemask_tmp, bld.def(s1, scc), Operand(exec, bld.lm), src);
@@ -10363,6 +10404,7 @@ static bool export_fs_mrt_color(isel_context *ctx, int slot)
    unsigned target, col_format;
    unsigned enabled_channels = 0;
    aco_opcode compr_op = (aco_opcode)0;
+   bool compr = false;
 
    slot -= FRAG_RESULT_DATA0;
    target = V_008DFC_SQ_EXP_MRT + slot;
@@ -10417,7 +10459,7 @@ static bool export_fs_mrt_color(isel_context *ctx, int slot)
       for (int i = 0; i < 2; i++) {
          bool enabled = (write_mask >> (i*2)) & 0x3;
          if (enabled) {
-            enabled_channels |= 1 << i;
+            enabled_channels |= 0x3 << (i*2);
             if (is_16bit) {
                values[i] = bld.pseudo(aco_opcode::p_create_vector, bld.def(v1),
                                       values[i*2].isUndefined() ? Operand(v2b) : values[i*2],
@@ -10435,6 +10477,9 @@ static bool export_fs_mrt_color(isel_context *ctx, int slot)
             values[i] = Operand(v1);
          }
       }
+      values[2] = Operand(v1);
+      values[3] = Operand(v1);
+      compr = true;
       break;
 
    case V_028714_SPI_SHADER_UNORM16_ABGR:
@@ -10521,7 +10566,7 @@ static bool export_fs_mrt_color(isel_context *ctx, int slot)
          /* check if at least one of the values to be compressed is enabled */
          bool enabled = (write_mask >> (i*2)) & 0x3;
          if (enabled) {
-            enabled_channels |= 1 << (i*2);
+            enabled_channels |= 0x3 << (i*2);
             values[i] = bld.vop3(compr_op, bld.def(v1),
                                  values[i*2].isUndefined() ? Operand(0u) : values[i*2],
                                  values[i*2+1].isUndefined() ? Operand(0u): values[i*2+1]);
@@ -10531,13 +10576,14 @@ static bool export_fs_mrt_color(isel_context *ctx, int slot)
       }
       values[2] = Operand(v1);
       values[3] = Operand(v1);
-   } else {
+      compr = true;
+   } else if (!compr) {
       for (int i = 0; i < 4; i++)
          values[i] = enabled_channels & (1 << i) ? values[i] : Operand(v1);
    }
 
    bld.exp(aco_opcode::exp, values[0], values[1], values[2], values[3],
-           enabled_channels, target, (bool) compr_op);
+           enabled_channels, target, compr);
    return true;
 }
 
@@ -10902,7 +10948,7 @@ void fix_ls_vgpr_init_bug(isel_context *ctx, Pseudo_instruction *startpgm)
    /* If there are no HS threads, SPI mistakenly loads the LS VGPRs starting at VGPR 0. */
 
    Temp instance_id = bld.vop2(aco_opcode::v_cndmask_b32, bld.def(v1),
-                               get_arg(ctx, ctx->args->rel_auto_id),
+                               get_arg(ctx, ctx->args->ac.vertex_id),
                                get_arg(ctx, ctx->args->ac.instance_id),
                                ls_has_nonzero_hs_threads);
    Temp rel_auto_id = bld.vop2(aco_opcode::v_cndmask_b32, bld.def(v1),
