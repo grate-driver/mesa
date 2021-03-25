@@ -1147,7 +1147,7 @@
         "description": "Revert \"CI: Disable Panfrost T760\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "fc2814417e9961883feb079e0eef3d4d1705d2d6"
     },
