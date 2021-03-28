@@ -13,7 +13,7 @@
         "description": "r600: don't set an index_bias for indirect draw calls",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c6c532faa8cf172715b38783ec7175b626a63944"
     },
