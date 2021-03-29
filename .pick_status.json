@@ -508,7 +508,7 @@
         "description": "compiler/glsl: drop rogue argument to _mesa_glsl_error",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "02dc74fbd72d82a21506a5984a92e5db08fcfc5c"
     },
