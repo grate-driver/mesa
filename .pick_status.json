@@ -22,7 +22,7 @@
         "description": "compiler/glsl: avoid null-pointer deref",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5910c938a293c03337911ca3c067b4ecf4b406ee"
     },
