@@ -499,7 +499,7 @@
         "description": "compiler/glsl: do not cast struct to string",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2d03f48a65a666ecdcfaffa3d39ad1b77f2b25b6"
     },
