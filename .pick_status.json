@@ -292,7 +292,7 @@
         "description": "gallivm: increase size of texture target enum bitfield",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0ce7c4a7c98122996af849b0f1199da13cd7efa2"
     },
