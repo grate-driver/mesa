@@ -229,7 +229,7 @@
         "description": "iris: clamp PointWidth in 3DSTATE_SF like i965 does",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
