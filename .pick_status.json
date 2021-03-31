@@ -202,7 +202,7 @@
         "description": "nir: Fix shader calls with nir_opt_dead_write_vars.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5a2889327970ce2e7f342c357efb50fa25c2a5e4"
     },
