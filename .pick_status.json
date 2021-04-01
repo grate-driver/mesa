@@ -778,7 +778,7 @@
         "description": "gallium/xlib: Fix for recent gl_config changes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4daef7ffe373f067249e052d96dcac145984b6e8"
     },
