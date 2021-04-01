@@ -220,7 +220,7 @@
         "description": "meson: Fix missing xcb-xrandr dependency for Vulkan X11 WSI",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1de2fd0cf205eda4f26c97a323d1cc509f3668f9"
     },
