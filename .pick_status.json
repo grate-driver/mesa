@@ -1354,7 +1354,7 @@
         "description": "nv50/ir: fix texture size for msaa textures",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
