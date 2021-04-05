@@ -31,7 +31,7 @@
         "description": "radv: Flush caches for shader read operations.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8f8d72af555c2f4d7a44107bf52602571fc0c4d2"
     },
