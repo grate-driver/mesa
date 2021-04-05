@@ -508,7 +508,7 @@
         "description": "nir/lower_tex: handle deref casts",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bc438c91d9b61bbfd3bc2436ee4ab36716540614"
     },
