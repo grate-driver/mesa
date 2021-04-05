@@ -751,7 +751,7 @@
         "description": "ac/nir: set TRUNC_COORD=0 for nir_texop_tg4",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "58f25098a0dc4f4976dadacdc4e7a9db42ec0c50"
     },
