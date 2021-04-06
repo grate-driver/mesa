@@ -733,7 +733,7 @@
         "description": "Revert \"radeonsi: set TRUNC_COORD=0 for Total War: WARHAMMER to fix it\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cd12fcff96cc7db794047e2a045142ea861254a2"
     },
