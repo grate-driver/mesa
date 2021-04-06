@@ -148,7 +148,7 @@
         "description": "wsi/x11: Wait for fences with IMMEDIATE on Xwayland",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e8f50bd60087805aa89144ecdd6e5a9b4368b532"
     },
