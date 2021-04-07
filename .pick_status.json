@@ -463,7 +463,7 @@
         "description": "pan/bi: Skip nir_opt_move/sink for blend shaders",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "52863f2e60fae865ef6a2a2e5a385b252c73364c"
     },
