@@ -238,7 +238,7 @@
         "description": "draw: fix pstipple, aaline and aapoint without LLVM",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d0f8fe5909107aa342f62813ced9ce535ed6da32"
     },
