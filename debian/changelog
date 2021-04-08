@@ -1,9 +1,9 @@
-mesa (21.0.2-1) UNRELEASED; urgency=medium
+mesa (21.0.2-1) experimental; urgency=medium
 
   * New upstream release.
   * drisw-move-zink-down.diff: Dropped, upstream.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 08 Apr 2021 11:14:20 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 08 Apr 2021 13:57:35 +0300
 
 mesa (21.0.1-2) experimental; urgency=medium
 
