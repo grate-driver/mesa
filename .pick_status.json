@@ -1975,7 +1975,7 @@
         "description": "anv: Clean up anv_device_memory::base on failure",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "682c81bdfb7ea28efccea1e8cbfeb7cfc67d02b8"
     },
