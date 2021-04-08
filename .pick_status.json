@@ -1,5 +1,698 @@
 [
     {
+        "sha": "b927de8b7fc843e5c0f131a2170910b062f6930a",
+        "description": "aux/trace: dump all the blend state members",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "edb89e7c4d1286fd4cf2c5a654a5759b392a5ab3",
+        "description": "nir: Do not reset shared_size in nir_lower_io.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ca4de50f75bf1940e6b1867351a2ffcd8633cef",
+        "description": "nir: Remove nir_shader->shared_size.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "580f1ac4736eec90e2e7dbe67ba76cac4d0e5319",
+        "description": "nir: Extract shader_info->cs.shared_size out of union.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "afd2f489d338260bd40727db76cec18c141a26ff",
+        "description": "anv: Drop unused anv_image_create_info::stride",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e6db1916860ec217eac60903e0a9d10189d1c53",
+        "description": "anv: Remove vkCreateDmaBufINTEL (v4)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4c6988184486c0e13cc78783971a931772695d6",
+        "description": "anv: Enable VK_EXT_image_drm_format_modifier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13ee22c662079fa606bf85004fc96ca1a86aaaf0",
+        "description": "anv/image: Support VkImageDrmFormatModifierExplicitCreateInfoEXT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d526fcba0d7a8acfde22c1e886cf80a31d9e873f",
+        "description": "anv/image: Add 'offset' param to add_surface()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13498cdd346c277456dee0af2775164d6be35703",
+        "description": "anv: Declare anv_layout_to_* as pure functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e3199d912ac159b6b543b0a02276253f2ca1132",
+        "description": "anv: Implement image acquire/release of modifier images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fcec8ea5e41dd3228fd2f51734a4a11ef683c93",
+        "description": "anv/image: Fix vkGetImageSubresourceLayout for modifier images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46f0e5b1e9310dda1a1ef959d34adf0d8c683eaf",
+        "description": "anv: Move assert in vkGetImageSubresourceLayout",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3a62d02c1784ffe75c6115df4aca4b2bca6a7205",
+        "description": "anv/image: Fix Vk*ImagePlaneMemory*Info for modifier images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9fa09ec92f68a5c05a7019bde6e620d25e8ba48",
+        "description": "anv/image: Add ANV_IMAGE_MEMORY_BINDING_PRIVATE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c21dc4101a5473f5a0ec17559a0305c61525de7a",
+        "description": "anv/image: Fix cleanup of failed image creation",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2e4c153c6ba89682401210a1195d08fe7dfd3467",
+        "description": "anv/image: Refactor check_memory_bindings()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7a59d8dd122898ba1444636d356f060a9217ff5",
+        "description": "anv/image: Check that anv_image is compatible with its modifier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "96f4568b637be9dc941970986e0a7e468834f149",
+        "description": "anv/image: In vkCreateDmaBufImageINTEL use modifiers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12e8e208021875d6826841778bd610a7e5ffc751",
+        "description": "anv/image: Fix tiling if VkImageSwapchainCreateInfoKHR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "de870cc4b240c09cc34b236ee8e434ba1bb6787c",
+        "description": "anv/image: Simplify assertions in anv_image_from_swapchain()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0845cabc7250cc793c6943d6a10d92e385fb89fb",
+        "description": "vulkan: Track dependencies of Python imports",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "84e0f6dbd80c37d678c28cbafb86ca9737712fdd",
+        "description": "nir: Fix shader calls with nir_opt_dead_write_vars.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "5a2889327970ce2e7f342c357efb50fa25c2a5e4"
+    },
+    {
+        "sha": "95c4f0f91098a0da5a8e8ec76cb38f2c95bafe1c",
+        "description": "v3d: Enables DRM_FORMAT_MOD_BROADCOM_SAND128 support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2470bcb946d7009ef6b9f87672cfb3143bda6c98",
+        "description": "meson: Fix missing xcb-xrandr dependency for Vulkan X11 WSI",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "1de2fd0cf205eda4f26c97a323d1cc509f3668f9"
+    },
+    {
+        "sha": "961361cdc96fd52750c2b5786ea92b9854b84847",
+        "description": "aco: ensure loops nested in a WQM loop are in WQM",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "f0074a6f0532196f5d9d2be00a9d884100401816"
+    },
+    {
+        "sha": "49cb1fac138c6c79079195ceba1d247afe2261bb",
+        "description": "draw: fix pstipple, aaline and aapoint without LLVM",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d0f8fe5909107aa342f62813ced9ce535ed6da32"
+    },
+    {
+        "sha": "49be175a4bc0b34fdae0ef88f7fc4f73efafa4da",
+        "description": "intel/fs: limit OW reads to 8 owords on XeHP+",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "369eab9420cfc8c33e67f250aa09ff913db9168b"
+    },
+    {
+        "sha": "655251ad308f7f65578d91dcd0d0f9b4c1148584",
+        "description": "anv: put correct number of BT prefetch for compute on XeHP+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a3d4963981e969ce0480140062adc91cd44b90b",
+        "description": "radv: make sure FMASK decompress and FCE are performed on gfx queue",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6528cd762d09f444f99af87b08f1f4ce746e036b",
+        "description": "zink: support ARB_fragment_shader_interlock",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7580a698444c42b32ba91155c80d81df1e914583",
+        "description": "zink: hook up EXT_fragment_shader_interlock",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "911486360902ef2339c7307f09fd5cbec0d45661",
+        "description": "zink: use explicit subpass deps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6536d5a947b22d717b33fe4f42942071103d74e4",
+        "description": "zink: use set_foreach_remove()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7e4f28a162c48f656e6dd5eab543b4e1edb2405",
+        "description": "zink: simplify clear-apply on fb state change",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f19946ca6ecd236592e136a2c45e9bce329f691c",
+        "description": "zink: stop unmapping resources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eab985d070c94917b743058eedfcc6eedcded418",
+        "description": "zink: fix conditional when assigning tess variable io",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "2d98efd3232565fe4942627e2e8c23a0eb2a670c"
+    },
+    {
+        "sha": "8ebdb8c687de2e44f1d0742c24f9e4526859060f",
+        "description": "zink: bypass separate stencil path in resource_reference_rw when not a zs image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "40e8328ce5fe7445749e461dbd070a7e9d72322c",
+        "description": "zink: remove atomic usage from batch tracking comparisons",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "15f2c1f6612d7d22170acb0a2a1919ef410b681d",
+        "description": "zink: add env var to force uniform inlining",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f28775edcc727791528d8439c86e8dffd5059a9",
+        "description": "zink: implement uniform inlining",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b47815c772e220ad2e0333b8954640c3874b8da2",
+        "description": "zink: add a pipe_screen::finalize_nir hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "193c02e0cfcf832e4556ada5de251f32e6ca4768",
+        "description": "aux/trace: add GALLIUM_TRACE_TRIGGER mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad88e2f959daa610b5d9b3c65c488514ec8ff475",
+        "description": "microsoft/spirv_to_dxil: Use non-zero exit code on failed compilations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5756f2cd2c96ca89732e82a35bada349a4a2227d",
+        "description": "microsoft/spirv_to_dxil: Add support for load_vulkan_descriptor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "31e546a762b7ed4c73d7207868ace87fcc01f063",
+        "description": "util/hash_table: add macro for destructively iterating entries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "759cc914501fa13d0093cfe8a9b0fc32e36bfb5c",
+        "description": "util/set: add macro for destructively iterating set entries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "539c7ca5084feb786f5a7aaa138c206192982fcd",
+        "description": "aux/trace: add a bunch of methods for lavapipe",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c1270d4845d39939d6a7d3b1b81e0d2f9e33133d",
+        "description": "aux/trace: add screen deduplication for zink+lavapipe tracing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f89c8ba4101fb6a74ec61a43d1def8973e9f0849",
+        "description": "docs: update lavapipe bits for 1.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1ba6158c06020a7cee4f1bc87e8f9bb5ab95438",
+        "description": "zink: export PIPE_CAP_PREFER_BLIT_BASED_TEXTURE_TRANSFER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1eb72ae3cf32ad29a923461a5d80815b730b429",
+        "description": "lavapipe: enable Vulkan 1.1 support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b79db11c2eadb4913de97d6413386b83d6ae390",
+        "description": "lavapipe: enable correct workgroup sizing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34525bb088da43b3ec492ca0f439064ee077a167",
+        "description": "lavapipe: enable subgroups features",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "50049bd241c8e902d64067a6ef30690abfc8bc06",
+        "description": "gallivm: add compute shader subgroup system values support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf6fd9a2eb76f0148d18222b68548fc3e24bc089",
+        "description": "gallivm: add subgroup lowering support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8dc398848a443342db3ccedbabedd3d5c54dbb9b",
+        "description": "gallivm: add subgroup read invocation support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d6a0a8620bb70153b4238b17b283e3c508da81b",
+        "description": "gallivm: add subgroup ballot support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b3073ad44af8b9576203cdee2dc4e2ca10a7b54",
+        "description": "gallivm: add subgroup reduction + in/ex scan support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2e1266d1fe9ef7ba152a86ef1dfa2bb3a8b61b94",
+        "description": "gallivm: add subgroup elect intrinsic support.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "52415cd39ee19a6db060cabe79f5adb759d3e070",
+        "description": "gallivm: add subgroup system values support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b8145eee9eaed84a40e84b68d0f5a832e1e5664",
+        "description": "gallivm: move get_flt_bld to header.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2e2310827493ba307454ceb0ddd9286b20146b31",
+        "description": "gallivm: add subgroup vote 64-bit and feq support.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a18ed018b4b64ff89f6c537638e70374976ed21",
+        "description": "lavapipe: fix missing protected memory properties",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e47b742810be26e89516e07d329c0956f9d78b42",
+        "description": "lavapipe: add vulkan 1.1 properties/features apis",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35c02f79c9b82b512d86152bf1d8da0b9a7e298f",
+        "description": "lavapipe: add some asserts for blit region extents",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be477f39aa9f1fa2f38b0fc804ed643ba2b6fc47",
+        "description": "ci: update zink/virgl results for depth clamping fixes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "60bdf61d6859f18ec151e332d6bbc6f014669a8e",
+        "description": "llvmpipe: always take depth clamping from state tracker",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f96f016c2280bb7df1c67f251abeac866ff3997e",
+        "description": "llvmpipe: when depth clamp is disable clamp to 0.0/1.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da166f648f61e7f628e20697936667cd9879d074",
+        "description": "radv: enable DCC for concurrent images on GFX10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37d48de83e438aab3b3d523851c4e27fcb80ca97",
+        "description": "radv: simplify a check when enabling DCC for concurrent images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "05ecb6780ca37439bcd567fe1376404b8a378491",
+        "description": "zink: emit WorkgroupSize when not using ExecutionModeLocalSize",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "636170c8880b5d3051b7f8dc4f5b13f73b3d50b3",
+        "description": "docs: update calendar and link releases notes for 21.0.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f4e17a4bb61aa16e7f499473238a6efa4410d03",
+        "description": "relnotes: Add sha256sum for 21.0.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8368598c44afd057d8341c2df84b0a9d777647c9",
+        "description": "docs: add release notes for 21.0.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e5ea3761255d98cf21cdadb87091750c15606b4",
+        "description": "ci: Use lavacli from master",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4db68b338a9c6b009fa9d9fa05e13ce0215861b",
+        "description": "radv: enable DCC stores with MSAA 4x/8x on GFX10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "1286e73c2c0c5aac1bbc5a979230e9fd2c4a0600",
         "description": "nir/lower_idiv: Add 8-bit and 16-bit lowering path",
         "nominated": false,
