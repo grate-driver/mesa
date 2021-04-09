@@ -1876,7 +1876,7 @@
         "description": "gallium/st: correct range for int16",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1af8fe4ed5225efa53a3ee0b105961aa29cdae3e"
     },
