@@ -553,7 +553,7 @@
         "description": "lavapipe: ask pipe-driver for int16 support",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b38879f8c5f57b7f1802e433e33181bdf5e72aef"
     },
