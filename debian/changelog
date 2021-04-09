@@ -1,3 +1,10 @@
+mesa (21.0.2-2) UNRELEASED; urgency=medium
+
+  * rules: Limit d3d12 by DEB_HOST_ARCH, not DEB_HOST_ARCH_CPU. (Closes:
+    #986660)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 09 Apr 2021 13:46:32 +0300
+
 mesa (21.0.2-1) experimental; urgency=medium
 
   * New upstream release.

@@ -92,7 +92,7 @@ else
 	endif
 
 	# WSL supports only amd64 and arm64
-	ifneq (,$(filter amd64 arm64,$(DEB_HOST_ARCH_CPU)))
+	ifneq (,$(filter amd64 arm64,$(DEB_HOST_ARCH)))
 		GALLIUM_DRIVERS += d3d12
 	endif
   endif
