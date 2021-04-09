@@ -1903,7 +1903,7 @@
         "description": "glsl: fix int16 type",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7f00d4dac813836d9767efa381c43514b2a999cc"
     },
