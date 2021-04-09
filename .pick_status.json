@@ -1912,7 +1912,7 @@
         "description": "glsl: fix is_integer_16_32",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a052a9c27777fc2cc92ed7ac3cd820e828abf2f0"
     },
