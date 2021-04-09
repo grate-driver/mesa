@@ -1885,7 +1885,7 @@
         "description": "gallium/st: correct range for float16",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b83f4b9fa23dc3d94ebb885897c19590c750cb83"
     },
