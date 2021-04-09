@@ -1908,6 +1908,7 @@ static void handle_draw_indexed(struct lvp_cmd_buffer_entry *cmd,
 static void handle_draw_indirect(struct lvp_cmd_buffer_entry *cmd,
                                  struct rendering_state *state, bool indexed)
 {
+   struct pipe_draw_start_count draw = {};
    if (indexed) {
       state->info.index_bounds_valid = false;
       state->info.index_size = state->index_size;
@@ -1919,7 +1920,7 @@ static void handle_draw_indirect(struct lvp_cmd_buffer_entry *cmd,
    state->indirect_info.stride = cmd->u.draw_indirect.stride;
    state->indirect_info.draw_count = cmd->u.draw_indirect.draw_count;
    state->indirect_info.buffer = cmd->u.draw_indirect.buffer->bo;
-   state->pctx->draw_vbo(state->pctx, &state->info, &state->indirect_info, &state->draw, 1);
+   state->pctx->draw_vbo(state->pctx, &state->info, &state->indirect_info, &draw, 1);
 }
 
 static void handle_index_buffer(struct lvp_cmd_buffer_entry *cmd,
@@ -2349,6 +2350,7 @@ static void handle_resolve_image(struct lvp_cmd_buffer_entry *cmd,
 static void handle_draw_indirect_count(struct lvp_cmd_buffer_entry *cmd,
                                        struct rendering_state *state, bool indexed)
 {
+   struct pipe_draw_start_count draw = {};
    if (indexed) {
       state->info.index_bounds_valid = false;
       state->info.index_size = state->index_size;
@@ -2362,7 +2364,7 @@ static void handle_draw_indirect_count(struct lvp_cmd_buffer_entry *cmd,
    state->indirect_info.buffer = cmd->u.draw_indirect_count.buffer->bo;
    state->indirect_info.indirect_draw_count_offset = cmd->u.draw_indirect_count.count_buffer_offset;
    state->indirect_info.indirect_draw_count = cmd->u.draw_indirect_count.count_buffer->bo;
-   state->pctx->draw_vbo(state->pctx, &state->info, &state->indirect_info, &state->draw, 1);
+   state->pctx->draw_vbo(state->pctx, &state->info, &state->indirect_info, &draw, 1);
 }
 
 static void handle_compute_push_descriptor_set(struct lvp_cmd_buffer_entry *cmd,
@@ -2516,18 +2518,18 @@ static void handle_draw_indirect_byte_count(struct lvp_cmd_buffer_entry *cmd,
                                             struct rendering_state *state)
 {
    struct lvp_cmd_draw_indirect_byte_count *dibc = &cmd->u.draw_indirect_byte_count;
-
+   struct pipe_draw_start_count draw = {};
    pipe_buffer_read(state->pctx,
                     dibc->counter_buffer->bo,
                     dibc->counter_buffer->offset + dibc->counter_buffer_offset,
-                    4, &state->draw.count);
+                    4, &draw.count);
 
    state->info.start_instance = cmd->u.draw_indirect_byte_count.first_instance;
    state->info.instance_count = cmd->u.draw_indirect_byte_count.instance_count;
    state->info.index_size = 0;
 
-   state->draw.count /= cmd->u.draw_indirect_byte_count.vertex_stride;
-   state->pctx->draw_vbo(state->pctx, &state->info, &state->indirect_info, &state->draw, 1);
+   draw.count /= cmd->u.draw_indirect_byte_count.vertex_stride;
+   state->pctx->draw_vbo(state->pctx, &state->info, &state->indirect_info, &draw, 1);
 }
 
 static void lvp_execute_cmd_buffer(struct lvp_cmd_buffer *cmd_buffer,
