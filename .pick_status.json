@@ -1426,7 +1426,7 @@
         "description": "panfrost: Fix AFBC body_size for shared resources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e8b997e175827d8ee907b3813d1e5a05388c606a"
     },
