@@ -175,7 +175,7 @@
         "description": "nir: Generate load_ubo_vec4 directly for !PIPE_CAP_NATIVE_INTEGERS",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cf3fc79cd0ab55776bbbabe76237c272ab07133e"
     },
