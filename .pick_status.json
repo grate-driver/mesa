@@ -1075,7 +1075,7 @@
         "description": "lima: use passed surface to get mipmap level for reload, not cbuf",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "b8c31ac06d35f09792681a1e9311a044bac1df18"
     },
