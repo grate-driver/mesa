@@ -1075,7 +1075,7 @@
         "description": "radv: Allocate buffer list for MUTABLE descriptor types as well.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "86644b84b94910ddb78b7a1117b8bcf55bb76265"
     },
