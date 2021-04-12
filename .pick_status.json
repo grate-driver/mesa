@@ -625,7 +625,7 @@
         "description": "nir_opt_deref: ptr_as_array(deref_cast<T*>(x))[0] isn't the same as x[0] if the cast has alignment",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "99bb2a4de66fa662fb4bcb29df8e2749972ee986"
     },
