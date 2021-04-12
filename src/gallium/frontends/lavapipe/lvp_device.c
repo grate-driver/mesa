@@ -334,6 +334,14 @@ min_vertex_pipeline_param(struct pipe_screen *pscreen, enum pipe_shader_cap para
    return val;
 }
 
+static int
+min_shader_param(struct pipe_screen *pscreen, enum pipe_shader_cap param)
+{
+   return MIN3(min_vertex_pipeline_param(pscreen, param),
+               pscreen->get_shader_param(pscreen, PIPE_SHADER_FRAGMENT, param),
+               pscreen->get_shader_param(pscreen, PIPE_SHADER_COMPUTE, param));
+}
+
 void VKAPI_CALL lvp_GetPhysicalDeviceFeatures(
    VkPhysicalDevice                            physicalDevice,
    VkPhysicalDeviceFeatures*                   pFeatures)
@@ -488,7 +496,7 @@ void lvp_GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
       .maxImageDimensionCube                    = (1 << pdevice->pscreen->get_param(pdevice->pscreen, PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS)),
       .maxImageArrayLayers                      = pdevice->pscreen->get_param(pdevice->pscreen, PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS),
       .maxTexelBufferElements                   = 128 * 1024 * 1024,
-      .maxUniformBufferRange                    = pdevice->pscreen->get_shader_param(pdevice->pscreen, PIPE_SHADER_FRAGMENT, PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE),
+      .maxUniformBufferRange                    = min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE),
       .maxStorageBufferRange                    = pdevice->pscreen->get_param(pdevice->pscreen, PIPE_CAP_MAX_SHADER_BUFFER_SIZE),
       .maxPushConstantsSize                     = MAX_PUSH_CONSTANTS_SIZE,
       .maxMemoryAllocationCount                 = 4096,
@@ -496,11 +504,11 @@ void lvp_GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
       .bufferImageGranularity                   = 64, /* A cache line */
       .sparseAddressSpaceSize                   = 0,
       .maxBoundDescriptorSets                   = MAX_SETS,
-      .maxPerStageDescriptorSamplers            = 32,
-      .maxPerStageDescriptorUniformBuffers      = pdevice->pscreen->get_shader_param(pdevice->pscreen, PIPE_SHADER_FRAGMENT, PIPE_SHADER_CAP_MAX_CONST_BUFFERS),
-      .maxPerStageDescriptorStorageBuffers      = pdevice->pscreen->get_shader_param(pdevice->pscreen, PIPE_SHADER_FRAGMENT, PIPE_SHADER_CAP_MAX_SHADER_BUFFERS),
-      .maxPerStageDescriptorSampledImages       = pdevice->pscreen->get_shader_param(pdevice->pscreen, PIPE_SHADER_FRAGMENT, PIPE_SHADER_CAP_MAX_SAMPLER_VIEWS),
-      .maxPerStageDescriptorStorageImages       = pdevice->pscreen->get_shader_param(pdevice->pscreen, PIPE_SHADER_FRAGMENT, PIPE_SHADER_CAP_MAX_SHADER_IMAGES),
+      .maxPerStageDescriptorSamplers            = min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS),
+      .maxPerStageDescriptorUniformBuffers      = min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_CONST_BUFFERS),
+      .maxPerStageDescriptorStorageBuffers      = min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_SHADER_BUFFERS),
+      .maxPerStageDescriptorSampledImages       = min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_SAMPLER_VIEWS),
+      .maxPerStageDescriptorStorageImages       = min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_SHADER_IMAGES),
       .maxPerStageDescriptorInputAttachments    = 8,
       .maxPerStageResources                     = 128,
       .maxDescriptorSetSamplers                 = 32 * 1024,
