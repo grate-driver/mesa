@@ -229,7 +229,7 @@
         "description": "gallivm: handle 16-bit input in i2b32",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "dac8cb981f4f2951a14e16851d59fb8d49a3e19b"
     },
