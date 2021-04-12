@@ -1192,7 +1192,7 @@
         "description": "nir_to_tgsi: Use ARL instead of UARL in the !native_integers case.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cf3fc79cd0ab55776bbbabe76237c272ab07133e"
     },
