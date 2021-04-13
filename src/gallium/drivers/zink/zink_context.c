@@ -1771,7 +1771,7 @@ copy_scanout(struct zink_context *ctx, struct zink_resource *res)
       NULL,
       0,
       VK_ACCESS_TRANSFER_WRITE_BIT,
-      VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+      res->scanout_obj_init ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_UNDEFINED,
       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
       VK_QUEUE_FAMILY_IGNORED,
       VK_QUEUE_FAMILY_IGNORED,
@@ -1804,6 +1804,8 @@ copy_scanout(struct zink_context *ctx, struct zink_resource *res)
       0, NULL,
       1, &imb
    );
+   /* separate flag to avoid annoying validation errors for new scanout objs */
+   res->scanout_obj_init = true;
 }
 
 static void
