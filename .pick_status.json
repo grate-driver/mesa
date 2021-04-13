@@ -5539,7 +5539,7 @@
         "description": "lavapipe: fix only clearing depth or stencil paths.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "b38879f8c5f57b7f1802e433e33181bdf5e72aef"
     },
@@ -6889,7 +6889,7 @@
         "description": "iris: disable dynamic VAO fastpath on GFX version 9",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "42842306d3c7ba71f89022a1ebb09a4454a1b6e0"
     },
@@ -6898,7 +6898,7 @@
         "description": "gallium: add PIPE_CAP_ALLOW_DYNAMIC_VAO_FASTPATH",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "42842306d3c7ba71f89022a1ebb09a4454a1b6e0"
     },
@@ -6988,7 +6988,7 @@
         "description": "lavapipe: Free sorted descriptor array.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "abc724e440ea1809c7c53cee42a99b68afbb1b11"
     },
@@ -10912,7 +10912,7 @@
         "description": "radv: Dedupe winsyses per device.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "7bef19201822ab2aebfd244142ff3a23535019a7"
     },
@@ -13369,7 +13369,7 @@
         "description": "lavapipe: fix primitive-restart for uint8 indices",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "6526e6d11b82a96139c3e5d16120765262d5707e"
     },
@@ -18625,7 +18625,7 @@
         "description": "lavapipe: sort bindings before creating descriptor set",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "b38879f8c5f57b7f1802e433e33181bdf5e72aef"
     },
@@ -18634,7 +18634,7 @@
         "description": "lavapipe: reorder descriptor set stages to get correct binding",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "b38879f8c5f57b7f1802e433e33181bdf5e72aef"
     },
