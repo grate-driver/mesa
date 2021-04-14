@@ -1273,7 +1273,7 @@
         "description": "ac: add missing BUF_DATA_FORMAT_10_11_11 vertex format on GFX10+",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
