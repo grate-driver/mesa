@@ -769,7 +769,7 @@
         "description": "mesa: texparam: Add a clamping macro to handle out-of-range floats returned as integers.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "53c36dfcfe3eb3749a53267f054870280afb0d71"
     },
