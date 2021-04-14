@@ -529,6 +529,14 @@ panfrost_walk_dmabuf_modifiers(struct pipe_screen *screen,
         struct panfrost_device *dev = pan_device(screen);
         afbc &= !(dev->quirks & MIDGARD_NO_AFBC);
 
+        /* On Bifrost, AFBC is not supported if the format has a non-identity
+         * swizzle. For internal resources we fix the format at runtime, but
+         * this fixup is not applicable when we export the resource. Don't
+         * advertise AFBC modifiers on such formats.
+         */
+        if (panfrost_afbc_format_needs_fixup(dev, format))
+                afbc = false;
+
         unsigned count = 0;
 
         for (unsigned i = 0; i < PAN_MODIFIER_COUNT; ++i) {

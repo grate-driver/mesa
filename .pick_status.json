@@ -1192,7 +1192,7 @@
         "description": "panfrost: Don't advertise AFBC mods when the format is not supported",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "44217be92134b03e7426860b42918b1d4602e08e"
     },
