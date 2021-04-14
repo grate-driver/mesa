@@ -1579,7 +1579,7 @@
         "description": "aco/ra: use original names when renaming loop carried phi operands",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7c64623e9489a37297808f7346e6e80bd1c78587"
     }
