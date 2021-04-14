@@ -1264,7 +1264,7 @@
         "description": "anv: bump internal descriptor index fields to 32bits",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6e230d7607f9b3e082d00859bd7725c4dc87e5cf"
     },
