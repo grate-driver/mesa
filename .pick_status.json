@@ -1,5 +1,131 @@
 [
     {
+        "sha": "165a69d2f74aefe80b070209e77950446a97c8b5",
+        "description": "nir: handle mediump varyings in varying compaction helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "30ab38ba6d8b78164074569aa1f103c895753090",
+        "description": "radeonsi: enable FP16 for mediump on gfx9+ if radeonsi_fp16=true",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c53f25b66834cc4357325b7d18ab61002bcc8946",
+        "description": "radeonsi: kill 16-bit VS outputs if PS doesn't use them or doing Z-only draw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5efdf4afaced47cc7aa2b0e40760d8c68eafa628",
+        "description": "radeonsi: optimize and legalize 16-bit samplers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9fa0f5f1ba5671fd528c8809f4a60c381075c3bf",
+        "description": "radeonsi: implement 16-bit VS inputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7db43960f61cc5a8d76dd747c939720790baaf24",
+        "description": "radeonsi: implement 16-bit VS->PS varyings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1dff4950574cc24b48276339d9d0910e31c9d276",
+        "description": "ac/llvm: implement 16-bit packed VS outputs and FS inputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "80b67a3b444f31462890a8e390650fa77c4d2010",
+        "description": "glx: Lift sending the MakeCurrent request to top-level code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8236bcb7444157c0acbf9b775856be7075e97e1",
+        "description": "glx: Be more robust against null fbconfigs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2b474c333f39ce00ba1b020d1721404c44b9a86",
+        "description": "glx: Move {Bind,Release}TexImage from context to screen vtable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8d10a15f1da00dfec68a8b7e247076d19958851",
+        "description": "glx: Don't pointlesly add -D_REENTRANT to libGL's cflags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b1cb0af596e204023333043ebfe8d9c4bdea2b05",
+        "description": "glx: Remove some #if 0'd DRI config attribute fetch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f9dd4170113b47e2628f2bd4c2be35f2edda9d0",
+        "description": "glx: Clean up fbconfig attribute handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7474f19d4a5312544918c07407ca27e2c79ead0",
+        "description": "glx: Default sRGBCapable in the same place as the other config attribs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "dc265008c70b76b39b86a4d5b0f9da69d12eb31d",
         "description": "aux/trace: use ralloc_free for ralloc()ed state pointers",
         "nominated": false,
@@ -3829,7 +3955,7 @@
         "description": "gallium/u_threaded: split draws that don't fit in a batch",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": null
     },
@@ -4342,7 +4468,7 @@
         "description": "mesa/st: ignore texture_index if tex_instr has deref src",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": null
     },
@@ -12334,7 +12460,7 @@
         "description": "ac/gpu_info: fix more non-coherent RB and GL2 combinations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "master_sha": null,
         "because_sha": "abed921ce710d3a4463e0f8ccca2cfadf113e42b"
     },
