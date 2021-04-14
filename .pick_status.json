@@ -1570,7 +1570,7 @@
         "description": "aco/ra: remove live-in temporary from live_out_per_block when moving it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7c64623e9489a37297808f7346e6e80bd1c78587"
     },
