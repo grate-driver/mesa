@@ -823,7 +823,7 @@
         "description": "freedreno: Fix YUV sampler regression.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "de17b4aab568aca2fcf243bfb5871fc465b0ccee"
     },
