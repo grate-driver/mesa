@@ -40,7 +40,7 @@
         "description": "panfrost: Fix ZS reloading on Bifrost v6",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8ba2f9f698584d20830ef31bbc2fb8a6635c8314"
     },
