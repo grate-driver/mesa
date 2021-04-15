@@ -805,7 +805,7 @@
         "description": "Revert \"glx: Lift sending the MakeCurrent request to top-level code\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "80b67a3b444f31462890a8e390650fa77c4d2010"
     },
