@@ -463,7 +463,7 @@
         "description": "panfrost: Unset shared/scanout binding flags for staging resources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e00d94f14f7f75d4974c1d48b4ec177f052723d3"
     },
