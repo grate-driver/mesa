@@ -958,7 +958,7 @@
         "description": "zink: fix stencil-export cap emission",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8724d4fb361795be68eeced4947758e30feffc1b"
     },
