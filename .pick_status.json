@@ -1111,7 +1111,7 @@
         "description": "v3dv: fix descriptor set limits",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cbd299b051a7a6a7192a9d87ee0a1afbbaf1d0cc"
     },
