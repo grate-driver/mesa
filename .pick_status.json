@@ -949,7 +949,7 @@
         "description": "zink: always copy the nir shader before compiling",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2b4609b66cd129d77a72ac1cc3502213d1c1640f"
     },
