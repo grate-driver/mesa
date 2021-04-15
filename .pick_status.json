@@ -940,7 +940,7 @@
         "description": "zink: fix tcs slot map eval for user vars",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5c5e1abea24f44adaa904239031af71b4ff283c0"
     },
