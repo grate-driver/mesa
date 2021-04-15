@@ -931,7 +931,7 @@
         "description": "zink: fix tcs input reservation for user vars",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2d98efd3232565fe4942627e2e8c23a0eb2a670c"
     },
