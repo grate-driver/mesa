@@ -427,7 +427,7 @@
         "description": "zink: track persistent resource objects, not resources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "616720d6aec7db5c919bb3e79510b1c83fb99c47"
     },
