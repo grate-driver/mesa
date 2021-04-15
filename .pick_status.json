@@ -319,7 +319,7 @@
         "description": "st/nine: Fix compilation error on non-x86 platforms",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d9e79bfe4f03eb0412a5535fce2a98c10623f53d"
     },
