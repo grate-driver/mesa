@@ -391,7 +391,7 @@
         "description": "zink: only reset query on suspend if the query has previously been stopped",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "00fc85a01194e9fc150d4a0ec80826f2f16504ee"
     },
