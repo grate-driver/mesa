@@ -41314,7 +41314,7 @@
         "description": "egl/android: include \"util/compiler.h\" for FALLTHROUGH macro",
         "nominated": false,
         "nomination_type": 1,
-        "resolution": 4,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2928c21eb73b66d22d1f383abf62de583547f81f"
     },
