@@ -94,7 +94,7 @@
         "description": "radeonsi: fix automatic DCC retiling after DCC clear and DCC decompression",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d4f7962d48b46d34319f75bba03fad22c30efdff"
     },
