@@ -28,6 +28,7 @@
 struct iris_perf_query {
    struct gl_perf_query_object base;
    struct gen_perf_query_object *query;
+   bool begin_succeeded;
 };
 
 static unsigned
@@ -106,7 +107,7 @@ iris_begin_perf_query(struct pipe_context *pipe, struct pipe_query *q)
    struct gen_perf_query_object *obj = perf_query->query;
    struct gen_perf_context *perf_ctx = ice->perf_ctx;
 
-   return gen_perf_begin_query(perf_ctx, obj);
+   return (perf_query->begin_succeeded = gen_perf_begin_query(perf_ctx, obj));
 }
 
 static void
@@ -117,7 +118,8 @@ iris_end_perf_query(struct pipe_context *pipe, struct pipe_query *q)
    struct gen_perf_query_object *obj = perf_query->query;
    struct gen_perf_context *perf_ctx = ice->perf_ctx;
 
-   gen_perf_end_query(perf_ctx, obj);
+   if (perf_query->begin_succeeded)
+      gen_perf_end_query(perf_ctx, obj);
 }
 
 static void
@@ -186,7 +188,8 @@ iris_wait_perf_query(struct pipe_context *pipe, struct pipe_query *q)
    struct gen_perf_query_object *obj = perf_query->query;
    struct gen_perf_context *perf_ctx = ice->perf_ctx;
 
-   gen_perf_wait_query(perf_ctx, obj, &ice->batches[IRIS_BATCH_RENDER]);
+   if (perf_query->begin_succeeded)
+      gen_perf_wait_query(perf_ctx, obj, &ice->batches[IRIS_BATCH_RENDER]);
 }
 
 static bool
@@ -199,11 +202,13 @@ iris_is_perf_query_ready(struct pipe_context *pipe, struct pipe_query *q)
 
    if (perf_query->base.Ready)
       return true;
+   if (!perf_query->begin_succeeded)
+      return true;
 
    return gen_perf_is_query_ready(perf_ctx, obj, &ice->batches[IRIS_BATCH_RENDER]);
 }
 
-static void
+static bool
 iris_get_perf_query_data(struct pipe_context *pipe,
                          struct pipe_query *q,
                          size_t data_size,
@@ -215,8 +220,12 @@ iris_get_perf_query_data(struct pipe_context *pipe,
    struct gen_perf_query_object *obj = perf_query->query;
    struct gen_perf_context *perf_ctx = ice->perf_ctx;
 
-   gen_perf_get_query_data(perf_ctx, obj, &ice->batches[IRIS_BATCH_RENDER],
-         data_size, data, bytes_written);
+   if (perf_query->begin_succeeded) {
+      gen_perf_get_query_data(perf_ctx, obj, &ice->batches[IRIS_BATCH_RENDER],
+            data_size, data, bytes_written);
+   }
+
+   return perf_query->begin_succeeded;
 }
 
 void
