@@ -382,7 +382,7 @@
         "description": "anv: fix 3DSTATE_MULTISAMPLE emission on gen8+",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4ad4cd89069bfc98533182d2ae9151fa74fb5414"
     },
