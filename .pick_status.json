@@ -193,7 +193,7 @@
         "description": "nir/dce: fix DCE of loops with a halt or return instruction in the pre-header",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "71a985d80b1c29cced979b3c8d16f74463d1170b"
     },
