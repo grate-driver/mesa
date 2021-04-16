@@ -490,7 +490,7 @@
         "description": "meson: OpenMP is supposed to be optional",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "cd2832ee5107201493d59f70983f162653e53c7d"
     },
