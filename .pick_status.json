@@ -346,7 +346,7 @@
         "description": "anv: fix perf query pass with command buffer batching",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0a7224f3ff7542f1560f06759dbdc375e298e853"
     },
