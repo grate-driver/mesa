@@ -787,7 +787,7 @@
         "description": "freedreno/ir3: Fix use after free",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7821e5a3f8d593e1e9738924f5f4dc5996583518"
     },
