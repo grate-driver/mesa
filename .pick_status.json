@@ -472,7 +472,7 @@
         "description": "virgl: move new added field to the end.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e778aceaae0505e4d3bc322f689338f18d662090"
     },
