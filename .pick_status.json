@@ -976,7 +976,7 @@
         "description": "Revert \"r600: don't set an index_bias for indirect draw calls\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "acdf1a123436cb3fa7d4bbc9cfbb9566c7693de4"
     },
