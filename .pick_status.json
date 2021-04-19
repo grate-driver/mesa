@@ -409,7 +409,7 @@
         "description": "zink: use cached memory for staging resources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6ff6d01c3777ed2bed7b80029f946425835d918e"
     },
