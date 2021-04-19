@@ -13,7 +13,7 @@
         "description": "zink: force scanout sync when mapping scanout resource",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "104603fa763c52e98a79785dd514beab949546db"
     },
