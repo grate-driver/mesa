@@ -553,7 +553,7 @@
         "description": "spirv: fix uToAccelerationStructure handling",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7f223a2329a7d392b8860f488b3797012cdd37fe"
     },
