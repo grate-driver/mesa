@@ -193,7 +193,7 @@
         "description": "radv: fix emitting depth bias when beginning a command buffer",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8a47422d9778056b2263d5f253fab49dfed91486"
     },
