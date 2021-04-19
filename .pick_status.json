@@ -841,7 +841,7 @@
         "description": "aco: fix opquantize2f16 on GFX6-7",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "54a09545ec639e9204e6ee823e52872897e793df"
     },
