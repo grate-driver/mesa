@@ -427,7 +427,7 @@
         "description": "spirv: fixup pointer_to/from_ssa with acceleration structures",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ed907e5d84cba4632320bad4dfc35462ca0dd927"
     },
