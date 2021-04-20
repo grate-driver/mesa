@@ -1381,7 +1381,7 @@
         "description": "anv: disable baked in pipeline bits from dynamic emission path",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "4ad4cd89069bfc98533182d2ae9151fa74fb5414"
     },
@@ -1390,7 +1390,7 @@
         "description": "anv: fix 3DSTATE_MULTISAMPLE emission on gen8+",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "4ad4cd89069bfc98533182d2ae9151fa74fb5414"
     },
@@ -2083,7 +2083,7 @@
         "description": "radv: Allocate buffer list for MUTABLE descriptor types as well.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "86644b84b94910ddb78b7a1117b8bcf55bb76265"
     },
@@ -2092,7 +2092,7 @@
         "description": "radv: Take image alignment into account when allocating MUTABLE pool.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "86644b84b94910ddb78b7a1117b8bcf55bb76265"
     },
@@ -3676,7 +3676,7 @@
         "description": "gallium/u_threaded: skip refcounting only once",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "363c1ef0c0e10781799abe87ace5cc87621eb3bf"
     },
@@ -4297,7 +4297,7 @@
         "description": "radv: fix needed dynamic state for VRS",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": null
     },
@@ -5728,7 +5728,7 @@
         "description": "panfrost: Only do point coord replacement for PIPE_PRIM_POINTS",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": null
     },
@@ -6889,7 +6889,7 @@
         "description": "vulkan: Track dependencies of Python imports",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": null
     },
@@ -6925,7 +6925,7 @@
         "description": "aco: ensure loops nested in a WQM loop are in WQM",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "f0074a6f0532196f5d9d2be00a9d884100401816"
     },
@@ -9193,7 +9193,7 @@
         "description": "freedreno/a6xx: Fix alpha tests.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "0369dd907778d8636e2b074717846bb658d76d90"
     },
@@ -9364,7 +9364,7 @@
         "description": "mesa: Add anything dynamically indexed before any non-dynamically indexed",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "b9bff76b630b1655a934db6e5f3e6a59a5b6cde7"
     },
@@ -10984,7 +10984,7 @@
         "description": "freedreno: Fix file descriptor leak.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "5a13507164a26fc796f02c57a24468b834254b4d"
     },
@@ -11083,7 +11083,7 @@
         "description": "st/glthread: allow for invalid L3 cache id.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "d8ea50996580a34b17059ec5456c75bb0d1f8750"
     },
@@ -11893,7 +11893,7 @@
         "description": "lavapipe: stop tracking draw start/count on rendering state",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "448e60314ae0956af92cfac1a63a783a8f94ece7"
     },
@@ -16051,7 +16051,7 @@
         "description": "anv/apply_pipeline_layout: Rework the early pass index/offset helpers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "3cf78ec2bdc22833082d026d59ccb28d79b07f6f"
     },
@@ -19453,7 +19453,7 @@
         "description": "nir/range_analysis: Fix analysis of fmin, fmax, or fsat with NaN source",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "405de7ccb6cb0b2e38a861e9ddbb535598718734"
     },
@@ -19462,7 +19462,7 @@
         "description": "nir/range_analysis: Add \"is a number\" range analysis tracking",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "405de7ccb6cb0b2e38a861e9ddbb535598718734"
     },
@@ -19471,7 +19471,7 @@
         "description": "nir/range_analysis: Add \"is finite\" range analysis tracking",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "405de7ccb6cb0b2e38a861e9ddbb535598718734"
     },
@@ -21118,7 +21118,7 @@
         "description": "intel/mi_builder: Use AddCSMMIOStartOffset for LRI",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "06cf838cbdcb0318441093370dd518839a8c1737"
     },
@@ -21172,7 +21172,7 @@
         "description": "pan/bi: Treat +DISCARD.f32 as message-passing",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": null
     },
@@ -23332,7 +23332,7 @@
         "description": "ci: add libdrm to the x86_test-vk container",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "5d0ba8b183427e14399a5792a6fd7d515595af94"
     },
@@ -26608,7 +26608,7 @@
         "description": "intel/perf: fix roll over PERF_CNT counter accumulation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "5ba6d9941b5dda95b88b924ac51133f36bd0f653"
     },
@@ -26716,7 +26716,7 @@
         "description": "lavapipe: reset object base on recycled command buffers",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": null
     },
@@ -26743,7 +26743,7 @@
         "description": "vulkan/util: add api to reset object magic + private data.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": null
     },
@@ -27049,7 +27049,7 @@
         "description": "turnip: consider HW limit on number of views when apply multipos opt",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "8d2757789a72714489fc1fd5dfee04e48c52fee8"
     },
@@ -27310,7 +27310,7 @@
         "description": "lavapipe: implement physical device group enumeration",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "6af87193c4f7fe1dbdc15553ecd453cfe913c64e"
     },
@@ -27625,7 +27625,7 @@
         "description": "pan/bi: Fix blend shaders using LD_TILE with MRT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "c7e1ef7c0c5a989a3bae4aa8bd682afe5e231829"
     },
@@ -28669,7 +28669,7 @@
         "description": "ci: tracie dashboard URLs only in the failure after the testcase",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "27f8c466486b6e25d301681d3610fbe57ad8c032"
     },
@@ -34600,7 +34600,7 @@
         "description": "ci: Fix MESA_TEMPLATES_COMMIT value",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "48f78dfd1ac10d5d309aff437f81d44d1ed06cd2"
     },
@@ -36373,7 +36373,7 @@
         "description": "vulkan: Make vk_debug_report_callback derive from vk_object_base",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "51c6bc13ce3a70b1948ce5c4edbc1d29c5460986"
     },
@@ -38596,7 +38596,7 @@
         "description": "Revert \"glcpp: disable 'windows' tests\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "f7527f7f652814a700dddc13a5b737571248c86d"
     },
