@@ -22,7 +22,7 @@
         "description": "Revert \"r600: Don't advertise support for scaled int16 vertex formats\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "00a1521529ccb4f7527c6d55a471ef18d1b000d1"
     },
