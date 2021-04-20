@@ -463,7 +463,7 @@
         "description": "radeonsi: make the gfx9 DCC MSAA clear shader depend on the number of samples",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3120113ee77621964bb009f9cbd13488b087e734"
     },
