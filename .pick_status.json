@@ -103,7 +103,7 @@
         "description": "Revert \"zink: force scanout sync when mapping scanout resource\"",
         "nominated": false,
         "nomination_type": 2,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "874535752b497bd8ab49cf97add6de2ed9b16f81"
     },
