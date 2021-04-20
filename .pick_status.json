@@ -94,7 +94,7 @@
         "description": "amd/common: Use cap to test kernel modifier support.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9a937330efbc21de64a85a4e80d1e3e92ef2a750"
     },
