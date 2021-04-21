@@ -454,7 +454,7 @@
         "description": "softpipe: fix render condition checking",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "41450b03a8e8e0f94f8eefc6880d32e9b0ef6f6d"
     },
