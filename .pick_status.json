@@ -49,7 +49,7 @@
         "description": "zink: correct image cap checks",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3f9a6d333b3e5f05ef6560123ee98d217358be89"
     },
