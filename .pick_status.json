@@ -238,7 +238,7 @@
         "description": "radv/winsys: fix resetting the number of padded IB words",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
