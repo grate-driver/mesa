@@ -94,7 +94,7 @@
         "description": "zink: do not read outside of array",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "dd29a7e5b0ec289a8de978b5ad44e8fe7d1760ac"
     },
