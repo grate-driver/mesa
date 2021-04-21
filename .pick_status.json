@@ -202,7 +202,7 @@
         "description": "pan/decode: Allow frame shader DCDs to be in another BO than the FBD",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "96b71a59c0ae6e3fb336608a10b1c27de11db922"
     },
