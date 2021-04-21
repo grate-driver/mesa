@@ -22,7 +22,7 @@
         "description": "intel: Fix GEN_GEN macro checks",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "9da8a55b08f4c44707f2471bbf7b61e98033a3ad"
     },
