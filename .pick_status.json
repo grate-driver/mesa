@@ -463,7 +463,7 @@
         "description": "i965/bufmgr: fix invalid assertion",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "57e4d0aa1c16d3be36ccee4065c55901cb6fad43"
     },
