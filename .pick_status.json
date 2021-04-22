@@ -616,7 +616,7 @@
         "description": "ir3: Prevent oob writes to inputs/outputs array",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a6291b1b1177f5728e2e1998225f0b8676c6e710"
     },
