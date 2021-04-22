@@ -244,35 +244,45 @@ static struct drisw_loader_funcs lvp_sw_lf = {
    .put_image2 = lvp_put_image2,
 };
 
-VkResult lvp_EnumeratePhysicalDevices(
+static VkResult
+lvp_enumerate_physical_devices(struct lvp_instance *instance)
+{
+   VkResult result;
+
+   if (instance->physicalDeviceCount != -1)
+      return VK_SUCCESS;
+
+   /* sw only for now */
+   instance->num_devices = pipe_loader_sw_probe(NULL, 0);
+
+   assert(instance->num_devices == 1);
+
+   pipe_loader_sw_probe_dri(&instance->devs, &lvp_sw_lf);
+
+
+   result = lvp_physical_device_init(&instance->physicalDevice,
+                                     instance, &instance->devs[0]);
+   if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
+      instance->physicalDeviceCount = 0;
+   } else if (result == VK_SUCCESS) {
+      instance->physicalDeviceCount = 1;
+   }
+
+   return result;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL lvp_EnumeratePhysicalDevices(
    VkInstance                                  _instance,
    uint32_t*                                   pPhysicalDeviceCount,
    VkPhysicalDevice*                           pPhysicalDevices)
 {
    LVP_FROM_HANDLE(lvp_instance, instance, _instance);
    VkResult result;
-
-   if (instance->physicalDeviceCount < 0) {
-
-      /* sw only for now */
-      instance->num_devices = pipe_loader_sw_probe(NULL, 0);
-
-      assert(instance->num_devices == 1);
-
-      pipe_loader_sw_probe_dri(&instance->devs, &lvp_sw_lf);
-
-
-      result = lvp_physical_device_init(&instance->physicalDevice,
-                                        instance, &instance->devs[0]);
-      if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
-         instance->physicalDeviceCount = 0;
-      } else if (result == VK_SUCCESS) {
-         instance->physicalDeviceCount = 1;
-      } else {
-         return result;
-      }
-   }
-
+ 
+   result = lvp_enumerate_physical_devices(instance);
+   if (result != VK_SUCCESS)
+      return result;
+ 
    if (!pPhysicalDevices) {
       *pPhysicalDeviceCount = instance->physicalDeviceCount;
    } else if (*pPhysicalDeviceCount >= 1) {
@@ -285,7 +295,54 @@ VkResult lvp_EnumeratePhysicalDevices(
    return VK_SUCCESS;
 }
 
-void lvp_GetPhysicalDeviceFeatures(
+VKAPI_ATTR VkResult VKAPI_CALL lvp_EnumeratePhysicalDeviceGroups(
+   VkInstance                                 _instance,
+   uint32_t*                                   pPhysicalDeviceGroupCount,
+   VkPhysicalDeviceGroupProperties*            pPhysicalDeviceGroupProperties)
+{
+   LVP_FROM_HANDLE(lvp_instance, instance, _instance);
+   VK_OUTARRAY_MAKE_TYPED(VkPhysicalDeviceGroupProperties, out,
+                          pPhysicalDeviceGroupProperties,
+                          pPhysicalDeviceGroupCount);
+ 
+   VkResult result = lvp_enumerate_physical_devices(instance);
+   if (result != VK_SUCCESS)
+      return result;
+ 
+   vk_outarray_append_typed(VkPhysicalDeviceGroupProperties, &out, p) {
+      p->physicalDeviceCount = 1;
+      memset(p->physicalDevices, 0, sizeof(p->physicalDevices));
+      p->physicalDevices[0] = lvp_physical_device_to_handle(&instance->physicalDevice);
+      p->subsetAllocation = false;
+   }
+ 
+   return vk_outarray_status(&out);
+}
+
+static int
+min_vertex_pipeline_param(struct pipe_screen *pscreen, enum pipe_shader_cap param)
+{
+   int val = INT_MAX;
+   for (int i = 0; i < PIPE_SHADER_COMPUTE; ++i) {
+      if (i == PIPE_SHADER_FRAGMENT ||
+          !pscreen->get_shader_param(pscreen, i,
+                                     PIPE_SHADER_CAP_MAX_INSTRUCTIONS))
+         continue;
+
+      val = MAX2(val, pscreen->get_shader_param(pscreen, i, param));
+   }
+   return val;
+}
+
+static int
+min_shader_param(struct pipe_screen *pscreen, enum pipe_shader_cap param)
+{
+   return MIN3(min_vertex_pipeline_param(pscreen, param),
+               pscreen->get_shader_param(pscreen, PIPE_SHADER_FRAGMENT, param),
+               pscreen->get_shader_param(pscreen, PIPE_SHADER_COMPUTE, param));
+}
+
+void VKAPI_CALL lvp_GetPhysicalDeviceFeatures(
    VkPhysicalDevice                            physicalDevice,
    VkPhysicalDeviceFeatures*                   pFeatures)
 {
@@ -318,7 +375,7 @@ void lvp_GetPhysicalDeviceFeatures(
       .textureCompressionBC                     = true,
       .occlusionQueryPrecise                    = true,
       .pipelineStatisticsQuery                  = true,
-      .vertexPipelineStoresAndAtomics           = (pdevice->pscreen->get_shader_param(pdevice->pscreen, PIPE_SHADER_VERTEX, PIPE_SHADER_CAP_MAX_SHADER_BUFFERS) != 0),
+      .vertexPipelineStoresAndAtomics           = (min_vertex_pipeline_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_SHADER_BUFFERS) != 0),
       .fragmentStoresAndAtomics                 = (pdevice->pscreen->get_shader_param(pdevice->pscreen, PIPE_SHADER_FRAGMENT, PIPE_SHADER_CAP_MAX_SHADER_BUFFERS) != 0),
       .shaderTessellationAndGeometryPointSize   = true,
       .shaderImageGatherExtended                = true,
@@ -334,7 +391,7 @@ void lvp_GetPhysicalDeviceFeatures(
       .shaderCullDistance                       = (pdevice->pscreen->get_param(pdevice->pscreen, PIPE_CAP_CULL_DISTANCE) == 1),
       .shaderFloat64                            = (pdevice->pscreen->get_param(pdevice->pscreen, PIPE_CAP_DOUBLES) == 1),
       .shaderInt64                              = (pdevice->pscreen->get_param(pdevice->pscreen, PIPE_CAP_INT64) == 1),
-      .shaderInt16                              = true,
+      .shaderInt16                              = (min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_INT16) == 1),
       .alphaToOne                               = true,
       .variableMultisampleRate                  = false,
       .inheritedQueries                         = false,
@@ -439,7 +496,7 @@ void lvp_GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
       .maxImageDimensionCube                    = (1 << pdevice->pscreen->get_param(pdevice->pscreen, PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS)),
       .maxImageArrayLayers                      = pdevice->pscreen->get_param(pdevice->pscreen, PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS),
       .maxTexelBufferElements                   = 128 * 1024 * 1024,
-      .maxUniformBufferRange                    = pdevice->pscreen->get_shader_param(pdevice->pscreen, PIPE_SHADER_FRAGMENT, PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE),
+      .maxUniformBufferRange                    = min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE),
       .maxStorageBufferRange                    = pdevice->pscreen->get_param(pdevice->pscreen, PIPE_CAP_MAX_SHADER_BUFFER_SIZE),
       .maxPushConstantsSize                     = MAX_PUSH_CONSTANTS_SIZE,
       .maxMemoryAllocationCount                 = 4096,
@@ -447,11 +504,11 @@ void lvp_GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
       .bufferImageGranularity                   = 64, /* A cache line */
       .sparseAddressSpaceSize                   = 0,
       .maxBoundDescriptorSets                   = MAX_SETS,
-      .maxPerStageDescriptorSamplers            = 32,
-      .maxPerStageDescriptorUniformBuffers      = pdevice->pscreen->get_shader_param(pdevice->pscreen, PIPE_SHADER_FRAGMENT, PIPE_SHADER_CAP_MAX_CONST_BUFFERS),
-      .maxPerStageDescriptorStorageBuffers      = pdevice->pscreen->get_shader_param(pdevice->pscreen, PIPE_SHADER_FRAGMENT, PIPE_SHADER_CAP_MAX_SHADER_BUFFERS),
-      .maxPerStageDescriptorSampledImages       = pdevice->pscreen->get_shader_param(pdevice->pscreen, PIPE_SHADER_FRAGMENT, PIPE_SHADER_CAP_MAX_SAMPLER_VIEWS),
-      .maxPerStageDescriptorStorageImages       = pdevice->pscreen->get_shader_param(pdevice->pscreen, PIPE_SHADER_FRAGMENT, PIPE_SHADER_CAP_MAX_SHADER_IMAGES - 8),
+      .maxPerStageDescriptorSamplers            = min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_TEXTURE_SAMPLERS),
+      .maxPerStageDescriptorUniformBuffers      = min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_CONST_BUFFERS),
+      .maxPerStageDescriptorStorageBuffers      = min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_SHADER_BUFFERS),
+      .maxPerStageDescriptorSampledImages       = min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_SAMPLER_VIEWS),
+      .maxPerStageDescriptorStorageImages       = min_shader_param(pdevice->pscreen, PIPE_SHADER_CAP_MAX_SHADER_IMAGES),
       .maxPerStageDescriptorInputAttachments    = 8,
       .maxPerStageResources                     = 128,
       .maxDescriptorSetSamplers                 = 32 * 1024,

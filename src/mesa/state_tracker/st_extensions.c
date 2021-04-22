@@ -283,6 +283,19 @@ void st_init_limits(struct pipe_screen *screen,
          pc->LowInt.RangeMax = 30;
          pc->LowInt.Precision = 0;
          pc->MediumInt = pc->HighInt = pc->LowInt;
+
+         if (screen->get_shader_param(screen, sh, PIPE_SHADER_CAP_INT16)) {
+            pc->LowInt.RangeMin = 15;
+            pc->LowInt.RangeMax = 14;
+            pc->MediumInt = pc->LowInt;
+         }
+      }
+
+      if (screen->get_shader_param(screen, sh, PIPE_SHADER_CAP_FP16)) {
+         pc->LowFloat.RangeMin = 15;
+         pc->LowFloat.RangeMax = 15;
+         pc->LowFloat.Precision = 10;
+         pc->MediumFloat = pc->LowFloat;
       }
 
       /* TODO: make these more fine-grained if anyone needs it */
@@ -586,7 +599,8 @@ void st_init_limits(struct pipe_screen *screen,
       screen->get_param(screen, PIPE_CAP_SIGNED_VERTEX_BUFFER_OFFSET);
 
    c->MultiDrawWithUserIndices = true;
-   c->AllowDynamicVAOFastPath = true;
+   c->AllowDynamicVAOFastPath =
+         screen->get_param(screen, PIPE_CAP_ALLOW_DYNAMIC_VAO_FASTPATH);
 
    c->glBeginEndBufferSize =
       screen->get_param(screen, PIPE_CAP_GL_BEGIN_END_BUFFER_SIZE);

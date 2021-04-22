@@ -2151,6 +2151,9 @@ static bool si_is_format_supported(struct pipe_screen *screen, enum pipe_format 
       return false;
    }
 
+   if (util_format_get_num_planes(format) >= 2)
+      return false;
+
    if (MAX2(1, sample_count) < MAX2(1, storage_sample_count))
       return false;
 

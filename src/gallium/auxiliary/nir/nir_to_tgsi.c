@@ -356,7 +356,10 @@ ntt_reladdr(struct ntt_compile *c, struct ureg_src addr)
       c->addr_declared[c->next_addr_reg] = true;
    }
 
-   ureg_UARL(c->ureg, c->addr_reg[c->next_addr_reg], addr);
+   if (c->native_integers)
+      ureg_UARL(c->ureg, c->addr_reg[c->next_addr_reg], addr);
+   else
+      ureg_ARL(c->ureg, c->addr_reg[c->next_addr_reg], addr);
    return ureg_scalar(ureg_src(c->addr_reg[c->next_addr_reg++]), 0);
 }
 
@@ -1384,7 +1387,7 @@ ntt_emit_load_input(struct ntt_compile *c, nir_intrinsic_instr *instr)
           * emit the extra TGSI interp instruction, we can just read the
           * input.
           */
-         if (c->centroid_inputs & (1 << nir_intrinsic_base(instr))) {
+         if (c->centroid_inputs & (1ull << nir_intrinsic_base(instr))) {
             ntt_store(c, &instr->dest, input);
          } else {
             ureg_INTERP_CENTROID(c->ureg, ntt_get_dest(c, &instr->dest),

@@ -3699,6 +3699,7 @@ VkResult anv_AllocateMemory(
    return VK_SUCCESS;
 
  fail:
+   vk_object_base_finish(&mem->base);
    vk_free2(&device->vk.alloc, pAllocator, mem);
 
    return result;

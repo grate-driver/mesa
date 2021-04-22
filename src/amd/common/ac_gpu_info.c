@@ -637,7 +637,7 @@ bool ac_query_gpu_info(int fd, void *dev_p, struct radeon_info *info,
    /* convert the shader/memory clocks from KHz to MHz */
    info->max_shader_clock = amdinfo->max_engine_clk / 1000;
    info->max_memory_clock = amdinfo->max_memory_clk / 1000;
-   info->num_tcc_blocks = device_info.num_tcc_blocks;
+   info->max_tcc_blocks = device_info.num_tcc_blocks;
    info->max_se = amdinfo->num_shader_engines;
    info->max_sa_per_se = amdinfo->num_shader_arrays_per_engine;
    info->has_hw_decode = (uvd.available_rings != 0) || (vcn_dec.available_rings != 0) ||
@@ -698,14 +698,18 @@ bool ac_query_gpu_info(int fd, void *dev_p, struct radeon_info *info,
       info->tcc_cache_line_size = 128;
 
       if (info->drm_minor >= 35) {
-         info->tcc_harvested = device_info.tcc_disabled_mask != 0;
+         info->num_tcc_blocks = info->max_tcc_blocks - util_bitcount64(device_info.tcc_disabled_mask);
       } else {
          /* This is a hack, but it's all we can do without a kernel upgrade. */
-         info->tcc_harvested = (info->vram_size / info->num_tcc_blocks) != 512 * 1024 * 1024;
+         info->num_tcc_blocks = info->vram_size / (512 * 1024 * 1024);
+         if (info->num_tcc_blocks > info->max_tcc_blocks)
+            info->num_tcc_blocks /= 2;
       }
    } else {
       info->tcc_cache_line_size = 64;
+      info->num_tcc_blocks = info->max_tcc_blocks;
    }
+
    info->mc_arb_ramcfg = amdinfo->mc_arb_ramcfg;
    info->gb_addr_config = amdinfo->gb_addr_cfg;
    if (info->chip_class >= GFX9) {
@@ -926,7 +930,7 @@ bool ac_query_gpu_info(int fd, void *dev_p, struct radeon_info *info,
 
    /* The number of SDPs is the same as the number of TCCs for now. */
    if (info->chip_class >= GFX10)
-      info->num_sdp_interfaces = device_info.num_tcc_blocks;
+      info->num_sdp_interfaces = info->num_tcc_blocks;
 
    if (info->chip_class >= GFX10_3)
       info->max_wave64_per_simd = 16;
@@ -1058,9 +1062,10 @@ void ac_print_gpu_info(struct radeon_info *info, FILE *f)
    fprintf(f, "    all_vram_visible = %u\n", info->all_vram_visible);
    fprintf(f, "    smart_access_memory = %u\n", info->smart_access_memory);
    fprintf(f, "    num_sdp_interfaces = %u\n", info->num_sdp_interfaces);
+   fprintf(f, "    max_tcc_blocks = %i\n", info->max_tcc_blocks);
    fprintf(f, "    num_tcc_blocks = %i\n", info->num_tcc_blocks);
    fprintf(f, "    tcc_cache_line_size = %u\n", info->tcc_cache_line_size);
-   fprintf(f, "    tcc_harvested = %u\n", info->tcc_harvested);
+   fprintf(f, "    tcc_rb_non_coherent = %u\n", info->tcc_rb_non_coherent);
    fprintf(f, "    pc_lines = %u\n", info->pc_lines);
    fprintf(f, "    lds_size_per_workgroup = %u\n", info->lds_size_per_workgroup);
    fprintf(f, "    lds_granularity = %i\n", info->lds_granularity);

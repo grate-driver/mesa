@@ -1807,7 +1807,7 @@ void tu_CmdPushDescriptorSetKHR(VkCommandBuffer commandBuffer,
 
    /* preserve previous content if the layout is the same: */
    if (set->layout == layout)
-      memcpy(set_mem.map, set->mapped_ptr, MIN2(set->size, layout->size));
+      memcpy(set_mem.map, set->mapped_ptr, layout->size);
 
    set->layout = layout;
    set->mapped_ptr = set_mem.map;
@@ -1846,7 +1846,7 @@ void tu_CmdPushDescriptorSetWithTemplateKHR(
 
    /* preserve previous content if the layout is the same: */
    if (set->layout == layout)
-      memcpy(set_mem.map, set->mapped_ptr, MIN2(set->size, layout->size));
+      memcpy(set_mem.map, set->mapped_ptr, layout->size);
 
    set->layout = layout;
    set->mapped_ptr = set_mem.map;
