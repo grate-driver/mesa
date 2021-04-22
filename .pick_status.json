@@ -220,7 +220,7 @@
         "description": "docs: do not generate redirects on error",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "64a4ba9e1ceeccbc7adeae368b5bc2553be88610"
     },
