@@ -607,7 +607,7 @@
         "description": "nir/lower_clip_disable: Fix store writemask",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "fb2fe802f638d7a70f0d00ec1d496f317d241765"
     },
