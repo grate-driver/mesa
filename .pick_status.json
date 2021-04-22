@@ -220,7 +220,7 @@
         "description": "panfrost: Fix formats converting uninit from AFBC",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9d0ad7fd2e1c56a1771e253086a5d4862d54e358"
     },
