@@ -85,7 +85,7 @@
         "description": "intel/compiler: Don't insert barriers for NULL sources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "eab1c55590b15260d6e1ceb65f96661a5e42ad00"
     },
