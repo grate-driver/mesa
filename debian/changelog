@@ -1,5 +1,6 @@
-mesa (21.0.2-2) UNRELEASED; urgency=medium
+mesa (21.0.3-1) UNRELEASED; urgency=medium
 
+  * New upstream release.
   * rules: Limit d3d12 by DEB_HOST_ARCH, not DEB_HOST_ARCH_CPU. (Closes:
     #986660)
 
