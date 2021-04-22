@@ -9094,7 +9094,7 @@
         "description": "nir/lower_fragcolor: Fix driver_location assignment",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
