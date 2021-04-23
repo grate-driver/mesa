@@ -238,7 +238,7 @@
         "description": "mesa: fix incomplete GL_NV_half_float implementation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ef66e02a408c4b8d11a3b7122b0e8e05ffac8eb8"
     },
