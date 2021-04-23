@@ -67,7 +67,7 @@
         "description": "tgsi_exec: Fix NaN behavior of min and max",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "ffe58739da9eee2e99682747cc8f26e412c87430"
     },
