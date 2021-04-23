@@ -31,7 +31,7 @@
         "description": "vulkan: fix use-after-free in vk_common_DestroyDebugReportCallbackEXT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bd1705a4808f61513f5ff818679efd5c5f105f8a"
     },
