@@ -229,7 +229,7 @@
         "description": "radv: make sure CP DMA is idle before executing secondary command buffers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e8707961134daa9b91599840ad5698366a6229b7"
     },
