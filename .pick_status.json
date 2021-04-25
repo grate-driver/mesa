@@ -13,7 +13,7 @@
         "description": "clover/nir: Set constant buffer pointer size to host",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7c6f1d3bf9903fe403b31a995c4dfce726fd3a27"
     },
