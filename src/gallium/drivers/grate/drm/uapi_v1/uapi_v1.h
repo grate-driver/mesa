@@ -55,7 +55,7 @@ static inline struct drm_tegra_pushbuf_private *
 drm_tegra_pushbuf(struct drm_tegra_pushbuf *pb)
 {
 	struct drm_tegra_pushbuf_private *priv;
-	priv = container_of(pb, priv, base);
+	priv = container_of(pb, struct drm_tegra_pushbuf_private, base);
 	return priv;
 }
 
