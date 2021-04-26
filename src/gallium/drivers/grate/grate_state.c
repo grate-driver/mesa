@@ -176,9 +176,16 @@ grate_set_sampler_views(struct pipe_context *pcontext,
    unimplemented();
 }
 
+static void
+grate_set_blend_color(struct pipe_context *pctx,
+                      const struct pipe_blend_color *blend_color)
+{
+}
+
 void
 grate_context_state_init(struct pipe_context *pcontext)
 {
+   pcontext->set_blend_color = grate_set_blend_color;
    pcontext->set_sample_mask = grate_set_sample_mask;
    pcontext->set_constant_buffer = grate_set_constant_buffer;
    pcontext->set_framebuffer_state = grate_set_framebuffer_state;
@@ -354,11 +361,11 @@ grate_create_zsa_state(struct pipe_context *pcontext,
 
    uint32_t depth_test = 0;
    depth_test |= TGR3D_VAL(DEPTH_TEST_PARAMS, FUNC,
-                           grate_compare_func(template->depth.func));
+                           grate_compare_func(template->depth_func));
    depth_test |= TGR3D_BOOL(DEPTH_TEST_PARAMS, DEPTH_TEST,
-                            template->depth.enabled);
+                            template->depth_enabled);
    depth_test |= TGR3D_BOOL(DEPTH_TEST_PARAMS, DEPTH_WRITE,
-                            template->depth.writemask);
+                            template->depth_writemask);
    depth_test |= 0x200;
 
    so->commands[0] = host1x_opcode_incr(TGR3D_DEPTH_TEST_PARAMS, 1);

@@ -77,7 +77,7 @@ grate_resource_transfer_map(struct pipe_context *pcontext,
    void *ret = NULL;
    struct pipe_transfer *ptrans;
 
-   if (usage & PIPE_TRANSFER_MAP_DIRECTLY)
+   if (usage & PIPE_MAP_DIRECTLY)
       return NULL;
 
    ptrans = slab_alloc(&context->transfer_pool);
@@ -448,12 +448,14 @@ grate_clear(struct pipe_context *pcontext, unsigned int buffers,
    }
 
    if (buffers & PIPE_CLEAR_DEPTH || buffers & PIPE_CLEAR_STENCIL) {
-      /* TODO: handle the case where both are not set! */
-      if (fill(context->gr2d, grate_resource(fb->zsbuf->texture),
-               util_pack_z_stencil(fb->zsbuf->format, depth, stencil),
-               util_format_get_blocksize(fb->zsbuf->format),
-               0, 0, fb->zsbuf->width, fb->zsbuf->height) < 0)
-         return;
+      if (fb->zsbuf) {
+         /* TODO: handle the case where both are not set! */
+         if (fill(context->gr2d, grate_resource(fb->zsbuf->texture),
+                  util_pack_z_stencil(fb->zsbuf->format, depth, stencil),
+                  util_format_get_blocksize(fb->zsbuf->format),
+                  0, 0, fb->zsbuf->width, fb->zsbuf->height) < 0)
+            return;
+      }
    }
 }
 
