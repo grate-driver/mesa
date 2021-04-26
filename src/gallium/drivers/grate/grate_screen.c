@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include "drm-uapi/drm_fourcc.h"
+
 #include "util/u_memory.h"
 #include "util/u_screen.h"
 
@@ -102,6 +104,7 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
       return 0;
 
    case PIPE_CAP_PRIMITIVE_RESTART:
+   case PIPE_CAP_PRIMITIVE_RESTART_FIXED_INDEX:
       return 0; /* probably possible to do by splitting draws, but not sure */
 
    case PIPE_CAP_INDEP_BLEND_ENABLE:
@@ -429,7 +432,7 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
          return INT_MAX;
 
       case PIPE_SHADER_CAP_SUPPORTED_IRS:
-         return PIPE_SHADER_IR_TGSI;
+         return 1 << PIPE_SHADER_IR_TGSI;
 
       case PIPE_SHADER_CAP_PREFERRED_IR:
          return PIPE_SHADER_IR_TGSI;
@@ -445,6 +448,12 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
 
       case PIPE_SHADER_CAP_MAX_HW_ATOMIC_COUNTERS:
       case PIPE_SHADER_CAP_MAX_HW_ATOMIC_COUNTER_BUFFERS:
+          return 0;
+
+      case PIPE_SHADER_CAP_FP16:
+      case PIPE_SHADER_CAP_FP16_DERIVATIVES:
+      case PIPE_SHADER_CAP_INT16:
+      case PIPE_SHADER_CAP_GLSL_16BIT_CONSTS:
           return 0;
 
       default:
@@ -519,7 +528,7 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
          return 0;
 
       case PIPE_SHADER_CAP_SUPPORTED_IRS:
-         return PIPE_SHADER_IR_TGSI;
+         return 1 << PIPE_SHADER_IR_TGSI;
 
       case PIPE_SHADER_CAP_PREFERRED_IR:
          return PIPE_SHADER_IR_TGSI;
@@ -535,6 +544,12 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
 
       case PIPE_SHADER_CAP_MAX_HW_ATOMIC_COUNTERS:
       case PIPE_SHADER_CAP_MAX_HW_ATOMIC_COUNTER_BUFFERS:
+          return 0;
+
+      case PIPE_SHADER_CAP_FP16:
+      case PIPE_SHADER_CAP_FP16_DERIVATIVES:
+      case PIPE_SHADER_CAP_INT16:
+      case PIPE_SHADER_CAP_GLSL_16BIT_CONSTS:
           return 0;
 
       default:
@@ -590,6 +605,50 @@ grate_screen_fence_finish(struct pipe_screen *screen,
    return FALSE;
 }
 
+static const uint64_t grate_available_modifiers[] = {
+   DRM_FORMAT_MOD_LINEAR,
+};
+
+static void
+grate_screen_query_dmabuf_modifiers(struct pipe_screen *pscreen,
+                                    enum pipe_format format, int max,
+                                    uint64_t *modifiers,
+                                    unsigned int *external_only,
+                                    int *count)
+{
+   int num_modifiers = ARRAY_SIZE(grate_available_modifiers);
+
+   if (!modifiers) {
+      *count = num_modifiers;
+      return;
+   }
+
+   *count = MIN2(max, num_modifiers);
+   for (int i = 0; i < *count; i++) {
+      modifiers[i] = grate_available_modifiers[i];
+      if (external_only)
+         external_only[i] = false;
+   }
+}
+
+static bool
+grate_screen_is_dmabuf_modifier_supported(struct pipe_screen *pscreen,
+                                          uint64_t modifier,
+                                          enum pipe_format format,
+                                          bool *external_only)
+{
+   for (int i = 0; i < ARRAY_SIZE(grate_available_modifiers); i++) {
+      if (grate_available_modifiers[i] == modifier) {
+         if (external_only)
+            *external_only = false;
+
+         return true;
+      }
+   }
+
+   return false;
+}
+
 struct pipe_screen *
 grate_screen_create(int fd)
 {
@@ -627,6 +686,8 @@ grate_screen_create(int fd)
    screen->base.get_shader_param = grate_screen_get_shader_param;
    screen->base.context_create = grate_screen_context_create;
    screen->base.is_format_supported = grate_screen_is_format_supported;
+   screen->base.query_dmabuf_modifiers = grate_screen_query_dmabuf_modifiers;
+   screen->base.is_dmabuf_modifier_supported = grate_screen_is_dmabuf_modifier_supported;
 
    /* fence functions */
    screen->base.fence_reference = grate_screen_fence_reference;
