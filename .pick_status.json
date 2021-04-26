@@ -1,5 +1,257 @@
 [
     {
+        "sha": "72eca47c660b6c6051be5a5a80660ae765ecbaa5",
+        "description": "docs: someome -> someone",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c8ac6a1292d4489daba16bca494d956f61749ba",
+        "description": "anv: Implement VK_EXT_provoking_vertex",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d5ee5f6104a9a97261421ccd526e5f0e4688ece3",
+        "description": "vulkan: Update the XML and headers to 1.2.177",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22b8bcda2c42cb6a8a9d6cc4f3aa20c8d18041b8",
+        "description": "anv: Use the same re-order mode for streamout as for GS",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "36ee2fd61c8f943be1d1e2b0354f7a121ffef28f"
+    },
+    {
+        "sha": "ecac7f3da1a81b96e7184d9ea0b6bf582693d83c",
+        "description": "docs: add missing zink-requirement",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "341332b23af84e8e77cc7d71de92b2edfa0eb2b0",
+        "description": "zink: correct image cap checks",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "3f9a6d333b3e5f05ef6560123ee98d217358be89"
+    },
+    {
+        "sha": "5ec8cbb9c06197663d85dcf05a97707b359fd951",
+        "description": "mesa: fix _mesa_add_state_reference() declaration mismatch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d84a89cf601b7d6306043c097f9976eb635eb58",
+        "description": "mesa: fix _mesa_add{_typed}_unnamed_constant() declarations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db717677e7bbaa40f0553dd3b2d7ccf23d392705",
+        "description": "mesa: make _mesa_find_temp_intervals() a static function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7e95dfca5cc67f6e08f2fa3b9ca8649f530aa15",
+        "description": "docs: fix quoting around a few limits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0747fb546c75a7c57c43289d0d9cb5603d47eb77",
+        "description": "docs: fixup link to extension",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "ff007afce252548f797be180fd8719ed8d6a2db0"
+    },
+    {
+        "sha": "6e540ca7caa437b4d29c4357cf9187bab20c7397",
+        "description": "zink: remove memory-model leftovers",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "95d9d811c91076d50385b2fbd330335b68688c69"
+    },
+    {
+        "sha": "816ec3ecb4667a509c4ded1972151c00907f7f5d",
+        "description": "radv: disable VK_FORMAT_R64_SFLOAT",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "496f99e8d11068dd6a6f1c7d21fd92dc27f02171",
+        "description": "zink: only emit extended-formats cap if needed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ef9379040378492a7742ce03d398a858adcc31a",
+        "description": "docs: use code-block for ini",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dc2eca51ed110367df920bdef7d9117c1370a67d",
+        "description": "docs: use code-block for c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "63496d25deaeeae2b60d4e2aca869c024ebad552",
+        "description": "docs: use code-block for glsl",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "54ad6f91c6875ead25d7a1f743a8a5e35081fa60",
+        "description": "docs: use code-block for console-content",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6e002fc34b744d15fbb5135b64eb6d8e2a54388",
+        "description": "docs: use math notation for example matrices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "525f7b6a236fe3e0157937d7b3977e8f42255d33",
+        "description": "docs: use tables instead of pre-formatted text",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1e4e22e6baa38143ef1637795b463917b326cab2",
+        "description": "docs: nest cherry-pick example under note",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "de0fbffb81407e4e6b3caa8f5db8482966548fbc",
+        "description": "docs: remove documentation of MESA_HPCR_CLEAR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67f46d70ded29dcdfff97cc480d8394aefc323b3",
+        "description": "docs: remove documentation of MESA_PRIVATE_CMAP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1637f1dedfab877d24e2dc5b5893a45e063a3040",
+        "description": "docs: remove documentation of MESA_CI_VISUAL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dc310fc2e7374967970903ae212f01f24fea8262",
+        "description": "docs: remove out-of-date gles info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc1d24e5525c606dd4f63daf2290eeb866f8125b",
+        "description": "radv: re-introduce missing skip list for Polaris10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a02a0df2a264c20fd6ac7f4faaddcea89e572da6",
+        "description": "mesa: fix incomplete GL_NV_half_float implementation",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "ef66e02a408c4b8d11a3b7122b0e8e05ffac8eb8"
+    },
+    {
+        "sha": "48d48fbf3c59bd2aad5e62ce74994bb661528562",
+        "description": "docs/lima: add an initial page for Lima",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "7e905bd00f32b4fa48689a8e6266b145662cfc48",
         "description": "microsoft/spirv_to_dxil: Treat read-only storage images as SRVs",
         "nominated": false,
