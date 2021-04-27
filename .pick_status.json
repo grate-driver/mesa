@@ -94,7 +94,7 @@
         "description": "util/hash_table: do not leak u64 struct key",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "608257cf82f49109c8f1a2bab1d6e30fa14f9ba7"
     },
