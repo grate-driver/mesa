@@ -310,7 +310,7 @@
         "description": "aco/spill: Fix improper handling of exec phis",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a56ddca4e80a6ef7bb0c44edb4e5b6169510aaca"
     },
