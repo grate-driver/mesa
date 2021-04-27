@@ -1,5 +1,635 @@
 [
     {
+        "sha": "ee9b744cb5d1466960e78b1de44ad345590e348c",
+        "description": "radv,aco: use nir_address_format_vec2_index_32bit_offset",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a7838529a01f12c869d137c192692ccc327501b",
+        "description": "nir/lower_non_uniform: allow lowering with vec2 handles",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "00d52492bfd68a35843ed065d149f5dff8ba8528",
+        "description": "radv: implement vulkan_resource_reindex",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8be3d8cc9ba6b8e50c0b5502a03692fcc0ebe58c",
+        "description": "radv: cleanup LLVM implementation of vulkan_descriptor_index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be4d17ccf56ab91e2a5454c1cc8ddfe480a5fbb1",
+        "description": "zink: correct an extension-link",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "0747fb546c75a7c57c43289d0d9cb5603d47eb77"
+    },
+    {
+        "sha": "4ec8533f69a3514030b493dfdb40ef92bda5982d",
+        "description": "zink: fix shader-image requirements",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "341332b23af84e8e77cc7d71de92b2edfa0eb2b0"
+    },
+    {
+        "sha": "0b5c898c226e550ba0126ba3591eadfc3f5946da",
+        "description": "docs: remove out-of-date versions doc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d93153a56437f2ecc066f16cbf6f9d23e369fb98",
+        "description": "glsl: ignore interface precision qualifier on desktop GL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc3625f5a2e4fc5dc5b1f02448661b42ac5fdf57",
+        "description": "zink: fixup bad indentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bef99f8caa4715c03bcbf2479aab7444dc401ab7",
+        "description": "zink: remove stray semicolons",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd73a2ec04e17fe27c2f31bd770ffd123af4f770",
+        "description": "zink: make zink_binding private",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1bc43492b600b9a65ccd8449ddc51c2e377422fd",
+        "description": "radv: implement VK_EXT_provoking_vertex",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c2add8cbababf9598319de831e1d2232b90f6c2",
+        "description": "aco: adjust NGG if provoking vertex mode is last",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "937a18a6af77fba3acc2379c0ff99dc00dafd71a",
+        "description": "radv/llvm: adjust NGG if provoking vertex mode is last",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d21ffa9c7db87934b876bd0f8cca0a1b9999d48f",
+        "description": "radv: add the provoking vertex mode to the pipeline/shader keys",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "337957956e26890347deb98e8f3b558aa8f4329c",
+        "description": "pan/mdg: improve tex opcode decoding and add missing ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a12ea02feeebac4be8986616327db31926b3ce7",
+        "description": "pan/mdg: properly encode/decode ldst instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b933260d94fb4112f872fb77022b220e28505de",
+        "description": "pan/mdg: print names of non-work registers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2119073de1b7f2a6d5de3f1b262a1d635482ce7",
+        "description": "pan/mdg: improve ldst opcode names and add missing ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a567f60b3ee86adbd015b1ce14728d488972cb8f",
+        "description": "pan/mdg: add helpers for load/store special read regs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "733d25cfceee5642987cee73531ebcae02457500",
+        "description": "pan/mdg: misc cleanups",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "291df07edba3a07e74cec041616e2a7968006f24",
+        "description": "pan/mdg: print special alu arg outmods",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cefa2e27da3d9ce7eff507e3cf4446c9751827be",
+        "description": "pan/mdg: remove register prefixes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ef3efb7fa88ae82c78a3fd383b69f623e6c3f05",
+        "description": "pan/mdg: improve mask decoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7abeee1effc2d9326352eb3ed93823167729d9c6",
+        "description": "pan/mdg: fix midgard.h indentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb7527a9ef8d6113f45e218e919ef30a4b535d30",
+        "description": "pan/mdg: stop using size disambiguation suffixes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce445c0e472ef7f9fcbef9325edec7202838cb69",
+        "description": "pan/mdg: print input data type for ALU opcodes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d8301977b42fdfbd5ae9f230b65c0a93c52c7bf",
+        "description": "pan/mdg: stop querying datatype by reading opcode name",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fdae70b807041f1d981afa0fc707879c7688f4e1",
+        "description": "pan/mdg: fix/change ALU opcodes descriptions and add some missing ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94c03264d89b7b78b5edcbd8b4deec1078dd01cf",
+        "description": "pan/mdg: improve swizzle decoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f0bf3d82d8678751f903675142cb2a6936e3394",
+        "description": "pan/mdg: improve input modifier printing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "baea01816a6e0011a6b06fe22f09167cdecace45",
+        "description": "pan/mdg: add midgard_src_expand_mode validation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b6c7da98bec9eadbabc35e44ce0fb8085d429fcf",
+        "description": "pan/mdg: encode/decode expand_mode properly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8a8dc16450cc4f00bbb510b65216d0ce23c04f3",
+        "description": "pan/mdg: add proper expand_mode enum",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "77e05b6a86a814f80813c87d83378fdb9cee5ca1",
+        "description": "pan/mdg: refactor mir_pack_swizzle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ea3115027e3d148fc1741388acb1272b29aad22d",
+        "description": "pan/mdg: improve outmod printing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4cc7f2d84e0aa6c5540a18e6f6ca70cb0438de99",
+        "description": "pan/mdg: rename dest_override to shrink_mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eddb2a898826ef229285ddb401c571a90d748686",
+        "description": "pan/mdg: clean up redundant/unused variables in disassemble.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8074a040e7a99a66cf7149d470f3a0f8eb6f3fd4",
+        "description": "util: add util_sign_extend",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a854a9fa623d3269eeebdc34c06ae442a65e2e41",
+        "description": "radv: fix various CMASK regressions on GFX9",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d636c5660cd6b9a7c11a795070797be9463d8202",
+        "description": "v3dv: implement wsi hook to decide if we can present directly on device",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c0c1418aeee7c733d743cfc386e957c2228789e",
+        "description": "vulkan/wsi: give drivers the option to decide if they need to blit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1f3770a5cb5b13c573dc2ef1f4b29a1fae11d40",
+        "description": "glx: fix compilation error when function name not found",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "01ba8a8d02ba04575860570ce51fc282c9b7866e"
+    },
+    {
+        "sha": "d42d7e0df42fd72fb325db38382b467e347665f0",
+        "description": "ci: Use the caching proxy for Mesa artifacts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3a3ab2f8ee3e67559b8e19ccb51c7314b99076f7",
+        "description": "microsoft/compiler: zero out unused WebGPU system values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95844b0978eb378290e04a4c2dbef8227299ee89",
+        "description": "venus: use VK_EXT_image_drm_format_modifier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34f37fb780e1c7e29d524658b0af84ed03d514a0",
+        "description": "venus: implement VK_ANDROID_native_buffer v7",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c79909779ae227e39cacfc869bdee630063e7baf",
+        "description": "venus: update venus-protocol headers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "282e2c949663505115bc2b862b70e0ad43a59222",
+        "description": "venus: set bo->size to 0 for classic resource",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b18fcb38badfe5f02c554d8997a0c6696d9ab99",
+        "description": "amd: addrlib update for April",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "804e29244066f70d7111d8c07ff922a0e1362b65",
+        "description": "radeonsi: remove the separate DCC optimization for Stoney",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f8fa964120218cb408cc9df493f31d38ae7c9af",
+        "description": "radeonsi: make the gfx9 DCC MSAA clear shader depend on the number of samples",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "3120113ee77621964bb009f9cbd13488b087e734"
+    },
+    {
+        "sha": "f3112c532b01f8ed1832d6a1fae457ce6f362da8",
+        "description": "ac/surface: document more meta equation dependencies",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9712cd31863cdbd139ed0f32c60a6bfe9da2cda6",
+        "description": "zink: use non-atomic load/store ops if intrinsic is not actually coherent",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c8dfed0c12d42a16a53d328139013c802262a0a2",
+        "description": "nir/gl_lower_buffers: set access for ssbo load/store instrs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a02328395de5b2eff4485fdaf9321bf1087c28fb",
+        "description": "android: amd/common: add nir include path",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e213bfd3304856b671ef62fb5d144a8f5673cf78",
+        "description": "android: gallium/radeonsi: add nir include path",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "1c702a82397bb0c84bee1478912c0e5b69f95eb5"
+    },
+    {
+        "sha": "7888ef8c480c7931c51d1b7cfbc72cc31415eaea",
+        "description": "zink: update docs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd4637cf1fd4dd79e77ba980b801ee5cc8fd8640",
+        "description": "zink: ci updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bee38fba1bc0743d467929b681c22bd2d581726e",
+        "description": "zink: implement VK_EXT_provoking_vertex",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "78232665dbde04c872bb92655d8bf7bb0aa5c23c",
+        "description": "zink: hook up VK_EXT_provoking_vertex",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e439541a5b8a785914ffa8a6a523ceef41ef813",
+        "description": "lavapipe: implement VK_EXT_provoking_vertex",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a60767ec266a06fe04362c4df715d467e155a8dc",
+        "description": "vulkan/x11: Mark present complete using serial instead of MSC",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad853fc0e1a4ba5f561d5bfca488cbbae0b055f0",
+        "description": "r600: update pipe_draw_info::restart_index only when primitive_restart is enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d42c9e478751c3aa97ae2d3a0e480d2e1e876f48",
+        "description": "virgl: use pipe_draw_info::restart_index only when primitive_restart is enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a07ab4f9142e8154ae140d8a5c755b0eb413f304",
+        "description": "freedreno: Don't lower indirects in GLSL IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "643f2cb8a33578e38f47b54b9c312cf44a75b7c0",
+        "description": "ir3, tu: Cleanup indirect i/o lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "77fcb01f7f0e9301c994fbae71f8019b32e012db",
+        "description": "nir/lower_clip_disable: Fix store writemask",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "fb2fe802f638d7a70f0d00ec1d496f317d241765"
+    },
+    {
+        "sha": "decfea2f4e8128afeb6d4bb0d0c9c0740a01f766",
+        "description": "ir3: Prevent oob writes to inputs/outputs array",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "a6291b1b1177f5728e2e1998225f0b8676c6e710"
+    },
+    {
+        "sha": "b2b8b6c0e3c8a76b6a1946e7a2a342363cefd8f8",
+        "description": "zink: enable required instance ext",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "bbeee415eebf214c1658a86db9b6a48b5ece3056"
+    },
+    {
         "sha": "72eca47c660b6c6051be5a5a80660ae765ecbaa5",
         "description": "docs: someome -> someone",
         "nominated": false,
