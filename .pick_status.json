@@ -553,7 +553,7 @@
         "description": "ir3/postsched: Fix dependencies for a0.x/p0.x",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0f78c32492ed096649b015a4967d6d56c18dd14a"
     },
