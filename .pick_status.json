@@ -1957,7 +1957,7 @@
         "description": "meson/vulkan: fix linkage on windows",
         "nominated": false,
         "nomination_type": 1,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "48d31a6280c4de07279435606a5c0524c1787cad"
     },
