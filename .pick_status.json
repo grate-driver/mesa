@@ -364,7 +364,7 @@
         "description": "Revert \"gallium/u_threaded: align batches and call slots to 16 bytes\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "3b1ce49bc1e5aff87805b0bab255885c84bf5052"
     },
