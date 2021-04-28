@@ -1,5 +1,599 @@
 [
     {
+        "sha": "cbd6e5f2e592a9834a03004a473537f25aea4336",
+        "description": "freedreno/ci: Skip texsubmimage cube_map_array",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d19325483a58faccba9da2d8dc2e927f5c9540f",
+        "description": "freedreno/ci: Disable counterstrike trace on a306 for now",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f92f31455a45e49354d083da088a8e17cef8bf11",
+        "description": "freedreno/drm: Assume explicit fences if in_fence_fd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e9a9ac6f77fe876b84edfb638c3075d6a149c812",
+        "description": "freedreno/drm: Async submit support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c9e8db28d3572db7aedf89dc693dd8987d357ab",
+        "description": "freedreno/drm: pipe should hold reference to device",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad9654a4c153c6dbe93ce9b8459837a9c008a138",
+        "description": "freedreno/drm: fd_submit should hold ref to fd_pipe",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55eb75d3e6d70f6ebbe973679867aa7001479e83",
+        "description": "freedreno: Avoid flushing deferred submits for u_trace",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cccdc513e3ee58b4119e9686c3086b606500d6a9",
+        "description": "freedreno/drm/sp: Implement deferred submit merging",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7dc5cf3cb3b9f4c73d51f234e3c09dc4eca22a5",
+        "description": "freedreno/drm/sp: Split submit prep and finish",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "62a6773d804977ff9d4589d075838eedfba87413",
+        "description": "freedreno/drm: Add pipe tracking for deferred submits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aafcd8aacb8feda179017ba9064272ff6573a78e",
+        "description": "freedreno: Re-work fd_submit fence interface",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d531c8d22a52fa08209069c70dbaf6650682a24e",
+        "description": "freedreno/drm: Reference count submits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9cb264f966cecbe4aa1e9373c9104dd374475db5",
+        "description": "freedreno: Drop unused create_fence() arg",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f4b85c7cfdd089128e75ef31ca38ae26fed2517",
+        "description": "freedreno: Move fence struct to header",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3f4835b99cfb6bb1fa677a6a86debbaeb590101",
+        "description": "freedreno: last_fence optimization for TC async flushes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "807bfa6be8915b44032d77c8ea74fe3ca9a658dc",
+        "description": "freedreno/batch: Don't create fences for every batch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "49852ace2a734dde8f157769a841f15892361b11",
+        "description": "freedreno/drm: Inline the fence-table",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7dabd62464982e545a094f22d9ca23a77730c536",
+        "description": "freedreno/drm: Userspace fences",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df78934cdf98c399b217d58f73c1d8d876f1585b",
+        "description": "freedreno/drm: Add locked version fd_{bo,pipe}_del()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f5c89350f0b3becb1ae525b35e497559927c382",
+        "description": "freedreno/drm: Move the growable array helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c98ada6ad122e218136fa73f3fce9f3430d8a3c8",
+        "description": "freedreno/drm: Add FD_BO_PREP_FLUSH",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ab227c3738b30357799130ebe4587222b8c91f7",
+        "description": "freedreno/drm: Cleanup bo cpu_prep flags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f0abd9048b6fbe54a500cbe89ebdf749877113c",
+        "description": "freedreno/drm: Cleanup bo allocation flags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef0c5007f25786619f2fd20277419def613a7c25",
+        "description": "freedreno/drm: Move submit->primary to base class",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c64bc095e715b744991621c4ae4ae1a379fcafde",
+        "description": "freedreno: Allow resource shadowing for TC",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ecd4793d6cb673ac44d9f959e9a150b72a7b993c",
+        "description": "freedreno: Add a couple debug traces",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a8d43028251100c750674a64c0f34e7d7761d159",
+        "description": "freedreno: Make sure we actually flush if we need a fence",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb058a89223295db91382fffc1f1d4ae24f1c076",
+        "description": "freedreno: Avoid staging blits with stencil on older gens",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "224dbd77d5d3e8bce890a3906466b0e0790f3ae0",
+        "description": "freedreno: Small indent fix",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dfe50e02c9c19be313e8c433cf04a2768de5731d",
+        "description": "ci/broadcom: update expected results",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d44bfbd252597a1a27489d48adb993966785729",
+        "description": "docs: mark external memory and semaphore extensions done for i965",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "57697745941ef8cd6c638769e9350bba48544559",
+        "description": "i965: Enable EXT_memory_object_* for Gen 7 and above",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58890ea199fee8108de0c7be1471bdc4cfd50951",
+        "description": "i965: fix in fences backend for ext_external_objects edge case",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3a9786d4eef583ee3dae4bba3669fe8ad7ca3670",
+        "description": "i965: Implement BufferDataMem",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b564e52d7e7500ac9eecf37282a3d331da0b6d2",
+        "description": "i965: Implement semaphore support for EXT_external_objects",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f73aeca0ce3ef4c09c2d07d5c7b2724cc84f1e91",
+        "description": "i965: Initial implementation for EXT_memory_object_*",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "62b51bb43b635bdc2617e7bde4594f1f3bfb8018",
+        "description": "i965: plumb device/driver UUID generators",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "41a42955d537f66c5b89215d5fc84fa8acdc6e95",
+        "description": "zink: remove leftover references to flatshading in shader keys",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02e85777cbbaed78c08e1a9ecb336d8d69a6f7bc",
+        "description": "u_format: Add missing BE swizzles for R8SG8SB8UX8U_NORM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "82c6f2ea32ade11aa3816930a582f1c28118d6d1",
+        "description": "u_format: Fix z32_s8x24 s8 unpacking on big-endian.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d526eecc87d62b2871d9386bce8583f8bc43189",
+        "description": "util/format: fix value declarations for big endian",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fc4085493765421e852a431ff33dfc86d057a606",
+        "description": "glx: revert \"Downgrade sRGB-ful fbconfigs\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "79e445143054a8001cf28ccb6803148a67f1bb55",
+        "description": "v3dv: move extensions table to v3dv_device",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d72992ed5c0ff28c1731ec2aea9a0bf9f274b2f",
+        "description": "v3dv: remove custom icd json generation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "addab037f0290fd27eed60b9b8909fead4dfc878",
+        "description": "tu: do not corrupt unwritten render targets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa038773b75d0d4c610aa7d5068427fbea435afa",
+        "description": "docs: document r600 envvars",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39c0cf55c23bf83ac9d79d01c900892da1a2afbd",
+        "description": "docs: fixup indentation of radeonsi envvar values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9bcaeddf77298a32f567723359e714b61eef6479",
+        "description": "radv: enable TC-compat CMASK on GFX8-9",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ae16578099f2181afc401db7e132402c6c3e56e",
+        "description": "ci/baremetal: propagate ASAN_OPTIONS to devices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2da01e6123581bd4f2d74d49c2980e129811b83c",
+        "description": "ci/v3dv: update flakes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9be055a22a17e221b4a1f46f16bdbc992e5bd926",
+        "description": "ci/v3d: fix typo in job name",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03e97e94e791ce64a0478f369aaf6afc80cfbe8f",
+        "description": "i965/bufmgr: fix invalid assertion",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "57e4d0aa1c16d3be36ccee4065c55901cb6fad43"
+    },
+    {
+        "sha": "eb6d99014f027c3325024d6f3482f6427f254f13",
+        "description": "lavapipe: mark event_storage as volatile",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "29ad039d131cf5914d8c7611ae01c65c8c3b7311",
+        "description": "microsoft/compiler: Handle unbounded arrays",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "611934c556ad0a63324a269ef63fff8e6296ebe3",
+        "description": "microsoft/compiler: Map descriptor set -> binding space",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c218f4a56e7ccc7886fae52ca673c02fb6658138",
+        "description": "microsoft/compiler: Fix function signature for bufferStore to support overloads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46bc7cf6783f184073a123add854c82cc7140d27",
+        "description": "microsoft/compiler: Rewrite sampler splitting pass to be smarter and handle derefs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec9fa0ed134a13dcbfa5983993595390c90ef634",
+        "description": "d3d12, microsoft/compiler: Use SRV/sampler variable binding data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f64c7cb246cade6387c27719b658dee4bc31cbb1",
+        "description": "ci: Add timeout for traces jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8adf41ac0e77548f59b1d2b6eb48b674a301850d",
+        "description": "ci: Update kernel with a few freedreno related fixes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b61fbca8bcade59576fd9c5291533d1390907b3",
+        "description": "vulkan/wsi/display: don't report support if there is no drm fd",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f1d3a684d545d47bdd4319344469a8eb88b4eebf",
+        "description": "ci: Add missing vulkan dep for freedreno (turnip) and v3dv test jobs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0245b8257066fe786d1999e107ac140b85365e18",
+        "description": "vulkan/wsi/x11: lower resize events to VK_SUBOPTIMAL_KHR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a1f230e35759d7e01a307b6a6c27fd437ffb631",
+        "description": "vulkan/wsi/x11: return VK_SUBOPTIMAL_KHR on mismatched swapchain",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "91cbe8d855c19d5e252fe4b29adf2a424c46a23d",
+        "description": "gallium: Add a transcode_astc driconf option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ae07191172a5d4fb402d196f68edb9ef1bdb0fe",
+        "description": "turnip: Only write the tu_RegisterDeviceEXT() out fence on success.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "ee9b744cb5d1466960e78b1de44ad345590e348c",
         "description": "radv,aco: use nir_address_format_vec2_index_32bit_offset",
         "nominated": false,
