@@ -130,7 +130,7 @@
         "description": "pan/mdg: Fix calculation of available work registers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "c6ed8bf77cb8b78f98ff4924816ee052a9aa2c7b"
     },
