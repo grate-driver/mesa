@@ -229,7 +229,7 @@
         "description": "v3d: DRM_FORMAT_MOD_BROADCOM_SAND128 only available for NV12 format.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "95c4f0f91098a0da5a8e8ec76cb38f2c95bafe1c"
     },
