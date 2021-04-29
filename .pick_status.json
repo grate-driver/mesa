@@ -922,7 +922,7 @@
         "description": "aco/ra: Fix off-by-one-error in print_regs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3675aefa84e363d820a3e596b9f2795a0d51c39f"
     },
