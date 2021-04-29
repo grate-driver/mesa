@@ -1,5 +1,437 @@
 [
     {
+        "sha": "ede0b3c643279f4126fb10552a2f1d00be27f16d",
+        "description": "docs: mark off GL_ARB_shader_clock for zink",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ec25d54cf29af4799243b1b7a473ec5ae5dc51c",
+        "description": "radv: fix possible use-after-free when inserting GS copy shader from cache",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d6894b643b8079b2c2b16de18c856008cd922cca",
+        "description": "radv: fix use-after-free upon GS copy shader cache hits",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32ebbd8c2351ac45953667e0fa4d82ebc49eaf7d",
+        "description": "vulkan: fix use-after-free in vk_common_DestroyDebugReportCallbackEXT",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "bd1705a4808f61513f5ff818679efd5c5f105f8a"
+    },
+    {
+        "sha": "c425b67c76b86fca046bfdda063695daf3d46766",
+        "description": "radv: fix computation of the number of user SGPRS for NGG GS state",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b52a7f2455227e7794cd826a19ca4f20f4f9dbf",
+        "description": "zink: hook up EXT_image_drm_format_modifier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4df25407e9b80125292040a478cba5a9470187ba",
+        "description": "zink: hook up VK_EXT_shader_subgroup_ballot",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b1aef8ccc6ba0a9c063be1d476a39e95a5497a53",
+        "description": "zink: hook up VK_EXT_conservative_rasterization",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "817a8fa22f9bb32431aef1b4309a9bb92d290b80",
+        "description": "zink: hook up VK_EXT_sample_locations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0477fbc6558444d9f33de50a0656dbe997b6b928",
+        "description": "driconf: add workaround for Golf With Friends",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e532a47f76cc8d763e2534c61b27dce0f5bc86a0",
+        "description": "util/hash_table: do not leak u64 struct key",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "608257cf82f49109c8f1a2bab1d6e30fa14f9ba7"
+    },
+    {
+        "sha": "33f9b06b0e91d8d22217106700210f3bfa723275",
+        "description": "v3dv: check dest bitsize in color blit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd8d71ce41a3c51edb507fff927dee606a4ea5fa",
+        "description": "v3dv: rename VC5 to V3D",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26618dfb87465149b49e24b1c988c8e67858f72e",
+        "description": "broadcom/simulator: change references to VC5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a77002584d0aa60041616d1ed3a31c35487059e1",
+        "description": "broadcom/qpu: rename from VC5 to V3D",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "14b66e27dc5e0fff1397c834521401f01ec06908",
+        "description": "v3d: rename VC5 enums and definitions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c318e63357af805143049feb3e2e66fdca8923e",
+        "description": "v3d: rename header include guards",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e763db4a475367a65def578b708b291ff20ca57a",
+        "description": "spirv: Don't replicate patch bool in vtn_variable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3cd5e1b40f89799d27d99762bf433469c6bf7373",
+        "description": "clover: Add constructor for constant_argument.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "656c30ac59c542409abafbff70417fb33513a03c",
+        "description": "intel/isl: There are seven aux states",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8243115836c490fd79ccaae18cf31c86b91bf376",
+        "description": "zink: use first-created shader variant as the default",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6dab5898db6514dac0c5553396e8f07cece3c292",
+        "description": "zink: add fastpath for getting default shader variants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ff40cedf01dfab6e363f78a674d30cadf60766a",
+        "description": "zink: create entrypoints for descriptor variables with spirv 1.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3bf52471cc21a63b5bff6720c78d52f3fd0e7d03",
+        "description": "zink: generate spirv 1.5 from ntv when using vk >= 1.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6398605f287cb6f91f62e8372da69a425ea1fa19",
+        "description": "zink: export PIPE_CAP_TGSI_CLOCK",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff5e0cb1bb7f6547d225ba75ad9e912091cea1ec",
+        "description": "zink: support nir_intrinsic_shader_clock",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0fba3bc2365fe0131f1ca890dd213cbd5664a45c",
+        "description": "zink: add spirv builder for unops with a const operand",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73210e3a992ef1f5444a3d8624037a6f334a6ff9",
+        "description": "zink: add conversion util for nir_scope -> SpvScope",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c06eede9cbaeff9da7f21d8af40ebf6c5b60225",
+        "description": "zink: hook up VK_KHR_shader_clock",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3572e24e74154150e875c05b9c4eff425cde0698",
+        "description": "ci: Uprev piglit to b3a9fa345 (\"framework/replay: Quote resource names before signing\")",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1e3981f69c76f13d29e01906f87bbd9278dd2f52",
+        "description": "venus: enable external memory support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "efa185ed5cd6dfa4be7783c9095cbbe12f0f09b3",
+        "description": "venus: rework external memory capability queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fbaa6dbf4eab872536823846814a713364cf5c5a",
+        "description": "venus: update venus-protocol for external memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "88f481dd7422f09ac28de50667fd36ad2ab5f891",
+        "description": "venus: make sure gem_handle and vn_renderer_bo are 1:1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f41a79f9481b20975bd4dc0b26100e0598214a1a",
+        "description": "venus: use sparse array to manage vn_renderer_bo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c62026165cd2c34b0f7b17c8d10b10f7de1cea4b",
+        "description": "venus: move some common members to vn_renderer_bo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b39ea79c952dc848b54d46fd9b07ca9f3011a9ca",
+        "description": "venus: merge bo create and init ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2db720330b877d4cd5e6c54024df80d59726e119",
+        "description": "venus: move vn_renderer_bo_ops to vn_renderer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d703b9d641084733d0645a439f76fa4c57697fc",
+        "description": "venus: pass vn_renderer in vn_renderer_bo functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6db21119b7c637b5bb79bf5c24b6ba79ac5b02f6",
+        "description": "venus: add dev->renderer pointer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b54a262421b665972126d45300fb8b6482ad2a73",
+        "description": "venus: use vn_renderer_shmem",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "452a49fe198e34dec60b85c0bf35b04f3ae1f85d",
+        "description": "venus: add vn_renderer_shmem",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c2fb015cceef49f7b5da8872f55010760ae1e3e",
+        "description": "venus: rename VN_CS_ENCODER_INITIALIZER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b1f25da0b47edae33d8cba0882f875c74493a8a8",
+        "description": "venus: update venus-protocol headers to use accessors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c8255f602567f316b07ca62fb4c256cac6a83c3",
+        "description": "venus: provide accessors for vn_instance_submit_command",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce2706fc92e79ae150a46cef16d741180ceac97f",
+        "description": "docs: update calendar for 21.1.0-rc3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7dd23ff614583fb5747d7b7f2607e7270f14322",
+        "description": "docs: update calendar for 21.1.0-rc2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "82484b9787b4a33f0d86a92189739d9a3646814c",
+        "description": "docs: update calendar for 21.1.0-rc1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "cbd6e5f2e592a9834a03004a473537f25aea4336",
         "description": "freedreno/ci: Skip texsubmimage cube_map_array",
         "nominated": false,
