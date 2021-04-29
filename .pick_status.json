@@ -166,7 +166,7 @@
         "description": "util: fix (re-enable) L3 cache pinning",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "11d2db17c522e5a123e781f001d7f75e9abe2bcd"
     },
