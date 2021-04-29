@@ -661,7 +661,7 @@
         "description": "nir: Move shared_memory_explicit_layout bit into common shader_info",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "5de6c5973a68dd1ac9dbe40bc6e51f8313e5c768"
     },
