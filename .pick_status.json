@@ -301,7 +301,7 @@
         "description": "radv: fix fast clearing DCC if one level can't be compressed on GFX10+",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
