@@ -247,7 +247,7 @@
         "description": "v3d: YUV formats at is_dmabuf_modifier_supported are external_only",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6ee10ab3de8664011a6c75e2357faba1ec95c094"
     },
