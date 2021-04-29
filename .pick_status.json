@@ -139,7 +139,7 @@
         "description": "intel/compiler: Fix INTEL_DEBUG=hex",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bc4a127d6e10318d48fa8b540b9c1ff7d62c8d29"
     },
