@@ -229,7 +229,7 @@
         "description": "tu: Fix SP_GS_PRIM_SIZE for large sizes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "012773be26aafb71ab232a5838d8e5e7dcc3dc55"
     },
