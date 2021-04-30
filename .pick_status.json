@@ -364,7 +364,7 @@
         "description": "util: disable glthread in CSGO",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "6f2017205e62402b7b2e340620e39cb71730c565"
     },
