@@ -1,5 +1,392 @@
 [
     {
+        "sha": "b80720acb13e1014aea89e6bd25f22d43df85356",
+        "description": "intel/isl: Fix isl_color_value_unpack to match the prototype",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "09ced6542049986f7fe52af8087aec9fc23d9f16"
+    },
+    {
+        "sha": "1201aa9332a9b74c231bd7733b0aef5af42dc6fe",
+        "description": "ir3: do not move varying inputs that depend on unmovable instrs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d5f7c79a58a8c1e93d9b6060d4a3cd0d6591ea5",
+        "description": "ci: add the dEQP expectations for radv on Renoir",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "91727182dc0cdcc74ff757074ae243cbfa7d18ba",
+        "description": "zink: also enable float16 from KHR extension",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8966029f9562d1089adb05813a23ddb5a9e9c7a6",
+        "description": "zink/codegen: prefer first definition of prop/feature structs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b59b42ec5e2f7c3bf69766818918b74e21c9c8ac",
+        "description": "zink: enable 16-bit float support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "903b6af298851faa5ee3f9f68959599a059dbbff",
+        "description": "zink: perform fp16 texture-lookups as fp32 and then convert",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1971efe5ba7c2e3fdeacfe6b019073c237baf55b",
+        "description": "zink: support emitting 16-bit float types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "404521529ce58ea48d102f32895b4f6c086a5d47",
+        "description": "zink: enable 16-bit int support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b45dbea13f88fa52b818fe832edb392c1e6d3d8",
+        "description": "zink: support emitting 16-bit int types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f2d6b9d4ff59c41601c7e251d240be7c43e85c5",
+        "description": "zink: always lower function-temp derefs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3f4eacb38aaf80fd0d1a94feffaed23b8b971e01",
+        "description": "zink: run nir_opt_algebraic_late",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "204cd1b8938557c7901eb558a3eb9754912cb294",
+        "description": "zink: respect bit-size of dref-result",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab1fc9e32cc476163adb20c6278ec844af5ed477",
+        "description": "zink: use UINT32_MAX instead of UINT_MAX",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f85b7aa5d409ffcc7e0ae013f43068a698d3517e",
+        "description": "pan/mdg: Fix calculation of available work registers",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "c6ed8bf77cb8b78f98ff4924816ee052a9aa2c7b"
+    },
+    {
+        "sha": "3f04383521d59ec5716ba4a81db7b97086914573",
+        "description": "intel/compiler: Fix INTEL_DEBUG=hex",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "bc4a127d6e10318d48fa8b540b9c1ff7d62c8d29"
+    },
+    {
+        "sha": "ab1d66a111460687d72b1e4876be71eb18c90368",
+        "description": "ci/v3d: Update piglit expectations.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86c8db60093df56b2bd9efddff4d3be112b50c9c",
+        "description": "util/tc: split out drawid-using draws into a separate call",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d8f8cfec97b284f4aa1833b4d9be585a157986a",
+        "description": "gallium: remove padding members from pipe_draw_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dae3113c3d87a02204aa12f5623c4cb1b30def6a",
+        "description": "gallium: split drawid out of pipe_draw_info and as a separate draw_vbo param",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ed8e5db3aa52c7ac5d8209d731f02b354a31815",
+        "description": "mesa/st: rename DrawGalliumComplex -> DrawGalliumMultiMode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4566383ae4bf28b99576ae9d293c50decc771888",
+        "description": "gallium: move pipe_draw_info::index_bias to pipe_draw_start_count_bias",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4fe6c8552603fb78ec06d3b28c4e9dd01a6bdce6",
+        "description": "gallium: rename pipe_draw_start_count -> pipe_draw_start_count_bias",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "60fa555e615a49efd92c7396618907bc9f83eaa2",
+        "description": "mesa: fix glShaderSource() error handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58f843a193b99994479da48f0d65360efe8a4a8d",
+        "description": "microsoft/compiler: Maintain sorting of resource type in the context",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a503727f24e3ccde49eab97b9bfbfb9cff79d1f",
+        "description": "v3d: DRM_FORMAT_MOD_BROADCOM_SAND128 only available for NV12 format.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "95c4f0f91098a0da5a8e8ec76cb38f2c95bafe1c"
+    },
+    {
+        "sha": "9094ad7c6a0cb45fc1f4985878603055d7ddf453",
+        "description": "v3d: YUV formats at query_dmabuf_modifiers are external_only",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "95c4f0f91098a0da5a8e8ec76cb38f2c95bafe1c"
+    },
+    {
+        "sha": "3d7b378980cdcf67e282649b06e5792466313e8f",
+        "description": "v3d: YUV formats at is_dmabuf_modifier_supported are external_only",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "6ee10ab3de8664011a6c75e2357faba1ec95c094"
+    },
+    {
+        "sha": "af00c9258684a63a95960c6955b25be71ea3f4e3",
+        "description": "glx: init __GLXvendorInfo to NULL",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "01ba8a8d02ba04575860570ce51fc282c9b7866e"
+    },
+    {
+        "sha": "53e6ff4d64d8020af5f6f939b45a461fddf75e7a",
+        "description": "glx: Remove some dead declarations from glxclient.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b02b26b87cd124b05a409b680817ee1950d6d94a",
+        "description": "glx: s/Display */struct glx_display */ over internal API",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21411368a3fb308e12c9656d92460293bab27b3a",
+        "description": "glx: Move server GLX vendor and version strings to glx_screen",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b91e58ad79b8bddc3e3917c7188f96457e3fab81",
+        "description": "glx: Simplify some overuse of GetGLXScreenConfigs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c8a85b712e03c0033f200ed9fe3dc780ab7834d",
+        "description": "glx: Stash a copy of the XExtCodes in the glx_display",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f096b51c6576b95df7ef8d69597388652c4da23",
+        "description": "glx: Remove unused opcode argument to __glX{Get,QueryServer}String",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f853135e6d1b3af521018741e04d88605feb050",
+        "description": "glx: Remove warn-once-ery around GLX 1.3 functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8edbe8761f2712a72f37a7640a17584179c5ff22",
+        "description": "glx: Simplify glXIsDirect",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "416e6b174cbf674d5b7cde2a0a2c32d3a7205cb8",
+        "description": "glx: Stop force-enabling extensions \"implied\" by GLX 1.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e716088c24a5544dc81c8118273bcb018d46c5b0",
+        "description": "glx: Stop pretending the GLX major number isn't 1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "96ec6b3d8fa828bd4bc58cd2183797953caaa405",
+        "description": "venus: handle wsi image queue ownership transfer for Android",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "174fca5498e8fcaf471a9692c1fcaa3945417429",
+        "description": "venus: handle VK_IMAGE_LAYOUT_PRESENT_SRC_KHR transfer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "293255889c29d30ea55d9c80e81497f365d936d9",
+        "description": "venus: enable VK_EXT_queue_family_foreign",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1846f0cead613053a4bdfb5e2dd5c6db4eb1d0f1",
+        "description": "venus: update venus-protocol headers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "ede0b3c643279f4126fb10552a2f1d00be27f16d",
         "description": "docs: mark off GL_ARB_shader_clock for zink",
         "nominated": false,
