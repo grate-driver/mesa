@@ -166,7 +166,7 @@
         "description": "v3d: fix resource leak in error path",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "bf6973199d186c93da35becc695db58fd3d1b4e5"
     },
