@@ -1777,7 +1777,7 @@
         "description": "freedreno/a6xx: Fix SP_GS_PRIM_SIZE for large sizes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0eebedb6190fdab8956769b2485180cc4a07119a"
     },
