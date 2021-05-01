@@ -4018,7 +4018,7 @@
         "description": "panfrost: Make pan_select_crc_rt a non-static function",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
