@@ -40,7 +40,7 @@
         "description": "glx: Assign unique serial number to GLXBadFBConfig error",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "f39fd3dce72eaef59ab39a23b75030ef9efc2a40"
     },
