@@ -1,5 +1,329 @@
 [
     {
+        "sha": "f3d2fade82c168a7ffffa4bd7bf22585c45c711b",
+        "description": "freedreno: Fix TC last_fence optimization",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e9a9ac6f77fe876b84edfb638c3075d6a149c812"
+    },
+    {
+        "sha": "c554757bc2448cf9b3398af8303be769793b1941",
+        "description": "freedreno/drm: Initialize control->fence",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "7dabd62464982e545a094f22d9ca23a77730c536"
+    },
+    {
+        "sha": "636a7cf84b78db7f92b396b4cbe1e15e3689cb66",
+        "description": "lima: switch resource to linear layout if there's to many full updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d6356b81a47b27706be50f6c2abbb6cd73b4d5e4",
+        "description": "glx: Fix macOS build.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "1cb664c15cb3e108d32c8a4f39b9defcf8d168f3"
+    },
+    {
+        "sha": "960c86d6787437b643825baa230bc0cd7f9f7540",
+        "description": "glx: Assign unique serial number to GLXBadFBConfig error",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "f39fd3dce72eaef59ab39a23b75030ef9efc2a40"
+    },
+    {
+        "sha": "3326861f4f4bd44448659821e6d6fb5ccea0327b",
+        "description": "nv50: add indirect compute support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b53b96a86a13cc321ef8812b9ec96c2c229e8e5c",
+        "description": "nv50: add support for doing membars",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f451854f39f580c6c95a574428498e32ffb6e840",
+        "description": "nv50: add remapping of buffers/images into unified space",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58d47ca32447fdf7762be22efd2394b9f399f0f8",
+        "description": "nv50: add compute invocations counter",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bd2f14a5ea5eea2f178736223cd65730d798108f",
+        "description": "nv50/ir: add lowering for shared atomics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b1a526ac51d7df2dd5ac722c5761ee62b76ba9a",
+        "description": "nv50/ir: add surface op lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67f98497af00c37697adca91e1ee072636cae36c",
+        "description": "nv50: pass surface/buffer parameters to shader via aux buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e762061127f3be73a224529f42f37b7276db9e03",
+        "description": "nv50/ir: optimize shift of 0 bits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dbdc2b160c4662af37f3667e43b8dc6a4ba66cf7",
+        "description": "nv50/ir: wipe any info about memory when seeing a locking op",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1cf864ef9e151c846f7bcf0b9592d4203b22ddff",
+        "description": "nv50/ir: mark ATOM as having 3 arguments",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "348db055dd06ca3c8ce8f6c71c051e222c31be8d",
+        "description": "nv50/ir: \"zero\" register does not work with g[] memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21f9b1cbe7ce5147272f2a57553a0f3a4a4c1a21",
+        "description": "nv50/ir: refine limitation on load/store loading offsets, include atomics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c95d2a86d38bab02214dba3bdca0269f8ee4a3e0",
+        "description": "nv50/ir: offset accesses to shared memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "967757a2088b00fa0e564ebfe31411ec1ec3e8be",
+        "description": "gallium+(u_threaded,r300,r600,radeonsi): move transfer offset into pipe_transfer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6005b86893e4a388b037717742de3e5894b83c81",
+        "description": "gallium: remove 4 bytes from pipe_transfer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "00c30dad78b0eb0a7e45caf38eda4e636a454ff6",
+        "description": "gallium: renumber PIPE_MAP_* enums to remove holes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22575a7b1142fc5cef1d692a6caf5d05bc365faa",
+        "description": "freedreno/ci: Update piglit skips/fails",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "928453ccb29d15cebe02885a9bdbb97ad176f92f",
+        "description": "freedreno/ci: Mark client_wait_sync_finish as flake",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc3f66311da13b614650ad8711a8a8bb7e4a2b5b",
+        "description": "freedreno: Flush resources harder",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e9a9ac6f77fe876b84edfb638c3075d6a149c812"
+    },
+    {
+        "sha": "5181f4067001cfadb3a6b3d23527f4099013ebe3",
+        "description": "freedreno/drm: Allow FD_BO_PREP_FLUSH without _NOSYNC",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dbdc979320135bc2baa94fb661ba07388f8788ce",
+        "description": "freedreno: Remove samples-per-tex tracking",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9fa33127737ddbab7908f7ddefa1363e20955952",
+        "description": "freedreno/ci: Isolate dEQP-EGL reset_context tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cee167368446a1b8527927522718819b2c973bd3",
+        "description": "ci: Add DEQP_CASELIST_INV_FILTER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec7923bd9750a5f7367599825a59695b5e22cddb",
+        "description": "ci/freedreno: Mark another recent piglit flake.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fc9ba9a911661b98e5e7d349c40d2fe8651ee823",
+        "description": "ci/freedreno: Mark new flakes from the go-fast branch.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0987df6a3e047083cd0aff1191044d605a71f5fd",
+        "description": "ci/freedreno: Mark dEQP-EGL flakes reported on IRC since its introduction.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab8e531cf03018ebd4d99d3ea47750332ac96e71",
+        "description": "panfrost: Fix viewport scissor for preload draws",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "8ba2f9f698584d20830ef31bbc2fb8a6635c8314"
+    },
+    {
+        "sha": "9910a14a1a06a8071a98f309eb5a1e020c21e225",
+        "description": "panfrost: Remove incorrect comment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f03da01fe374b87b5144c77f56ab78cf7c2a2ed3",
+        "description": "meson/vulkan: fix linkage on windows",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "48d31a6280c4de07279435606a5c0524c1787cad"
+    },
+    {
+        "sha": "d47c2af8d2857ade99fbeab225a2c3d70e7f2603",
+        "description": "gitlab-ci: enable all 3 intel devices as manual in MR pipelines",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5e06bb89454cd7c7d52cc59ea99c8bb92a99089",
+        "description": "gitlab-ci: rule anchor for experimental devices as manual in MRs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "b80720acb13e1014aea89e6bd25f22d43df85356",
         "description": "intel/isl: Fix isl_color_value_unpack to match the prototype",
         "nominated": true,
