@@ -256,7 +256,7 @@
         "description": "radv: Only require DRM 3.23.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1df4f11eb5f82819f4c14d35947fd14db58ffa84"
     },
