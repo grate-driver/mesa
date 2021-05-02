@@ -328,7 +328,7 @@
         "description": "vulkan: Support 32-bit \"weak\" symbols on MSVC",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "9be7aa3fc83ba3117bae7907765fdf2023c2683b"
     },
