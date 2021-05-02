@@ -148,7 +148,7 @@
         "description": "compiler/nir: check whether var is an input in lower_fragcoord_wtrans",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "418c4c0d7d48a42f475df1ffb93b3a33763e7a4a"
     },
