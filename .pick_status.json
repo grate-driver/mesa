@@ -3190,7 +3190,7 @@
         "description": "ac/surface: Handle non-retiled displayable DCC correctly for modifiers.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0833dd7d124bfd94161bff15e5b4293987920fce"
     },
