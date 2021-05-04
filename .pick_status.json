@@ -13,7 +13,7 @@
         "description": "iris: refcount separate screen objects for resource tracking",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "0a497eb1303d23f04ad7d9c28abf953a9105e32a"
     },
