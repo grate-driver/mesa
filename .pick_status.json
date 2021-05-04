@@ -175,7 +175,7 @@
         "description": "intel/vec4: Don't spill fp64 registers more than once",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "82c69426a5a32f9189c8b01059f831c84e9b83a3"
     },
