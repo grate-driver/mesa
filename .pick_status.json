@@ -175,7 +175,7 @@
         "description": "gallium/u_vbuf: avoid dereferencing NULL pointer",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "a8e8204b18697e8f45643abdd5b32b6c8f3659ac"
     },
