@@ -391,7 +391,7 @@
         "description": "aco/scheduler: Fix register demand computation for downwards moves",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8235bc64112c701ae763c76417ad8bb0644ad8cb"
     },
