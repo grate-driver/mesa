@@ -211,7 +211,7 @@
         "description": "iris: Re-emit MEDIA_VFE_STATE for variable group size shaders",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "33c61eb2f10526c0b90c5ad376e5b0433aec296d"
     },
