@@ -1,11 +1,11 @@
-mesa (21.1.0-1) UNRELEASED; urgency=medium
+mesa (21.1.0-1) experimental; urgency=medium
 
   * New upstream release.
   * Build with llvm-12.
   * path_max.diff: Refreshed.
   * rules: vulkan_intel.h is gone.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 06 May 2021 09:29:33 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 06 May 2021 16:05:12 +0300
 
 mesa (21.0.3-1) experimental; urgency=medium
 
