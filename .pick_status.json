@@ -1300,7 +1300,7 @@
         "description": "gallivm: handle texture arrays in non-fragment shaders with lod.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "e168d148d76d780eda6f9aaa6c66608c4df3096c"
     },
