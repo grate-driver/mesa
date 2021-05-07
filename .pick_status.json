@@ -958,7 +958,7 @@
         "description": "radv: fix extending the dirty bits to 64-bit",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "7bdd569d7e12143dc576d63606772b493a80f257"
     },
