@@ -787,7 +787,7 @@
         "description": "android: nir: add nir_lower_fragcolor.c to Makefile.sources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1fd356302590b30524fb190360247a6c45e1d96c"
     },
