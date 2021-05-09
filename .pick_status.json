@@ -175,7 +175,7 @@
         "description": "egl/x11: don't forget to exit the attrib list loop",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4aebd86f9a1b0db0ebcc69c30c00f0981a28e6a6"
     },
