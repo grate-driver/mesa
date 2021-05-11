@@ -49,7 +49,7 @@
         "description": "panfrost: fix GL_EXT_multisampled_render_to_texture regression",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ff3eada7eb4e4df0abe93ee76b77101f9d24e72c"
     },
