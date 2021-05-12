@@ -418,7 +418,7 @@
         "description": "llvmpipe: fix non-multisampled rendering to multisampled framebuffer",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "210d714f46e72c954857ba32ca9ffcffbc264c9c"
     },
