@@ -1,5 +1,554 @@
 [
     {
+        "sha": "e8640fef9089bb31a9e602a8894ae4fe84086118",
+        "description": "ci: Uprev piglit to 3351e8952 (\"max-texture-size: report merged results\")",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5818380f86bcd4744ddde9fb08930779ec1d00ca",
+        "description": "gallium/u_threaded: fix 32-bit breakage due to incorrect pointer arithmetic",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "1233c90ab4aa85331dadc7f5e5243ac8252b6669"
+    },
+    {
+        "sha": "989e9867a64045421cf77c0d0bb2d184408ed21f",
+        "description": "aco: fix additional register requirements for spilling",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb127c2130c550b222541aaaac3da377083e8e56",
+        "description": "radv: Use new NIR lowering of NGG GS when ACO is used.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "60ac5dda82e1a5c020aa51a02fa65131e9bfb2ca",
+        "description": "ac: Add NIR lowering for NGG GS.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9732881729bd0da8096e03efe77e511d4d6f815d",
+        "description": "radv: Use new NGG NIR lowering for VS/TES when ACO is used.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d589b8b464828dc19c4e7d73f5cc078c24915e1",
+        "description": "ac: Add new NIR pass to lower NGG VS/TES.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89a76ff78679aee99e6caa34a71444b3b9bb5b57",
+        "description": "aco: Implement new NGG specific NIR intrinsics.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33e29f8f9be128eace0e79cbf086c7bd46cb9c39",
+        "description": "radv: Gather NGG info sooner.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1630ec96d30ac5d8f47be78f2daa20d7d64add72",
+        "description": "radv: Fill shader info earlier.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "75a002f809919ffafe699c7c55ed8c39e35fd4ee",
+        "description": "aco: Split ngg_emit_sendmsg_gs_alloc_req from the wave0 check.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad8dd39bd35320c02d8f9be036e458aa479fffff",
+        "description": "aco: Fixup the NIR metadata after sanitize_cf_list.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "00fd087f0a8c9268328058e0e0afc67096840e75",
+        "description": "aco: Allow workgroup barrier and shared scope for NGG shaders.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d6b6c850f2f35f22b6b08eb9fa933af072e2484",
+        "description": "nir: Add AMD specific intrinsics for merged shaders and NGG.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "641707a8074ab32415eb80c5ab03b68b9533aaaf",
+        "description": "nir: Allow load_primitive_id in VS in nir_divergence_analysis.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e905e0938a7f027e3ccda99ac0dd3cb7c4d46901",
+        "description": "nir: Support upper bound of unsigned bit size conversions.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a2ffe1abbfe287a1aaf5e76b45278d791986e6f",
+        "description": "nir: Support upper bound of subgroup_id/num_subgroups for non-compute.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac5ba2dfadb46edb260be631f128e264c1711237",
+        "description": "panfrost: Implement framebuffer invalidation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c8161bf05d783618f52a65995893008c82f83b9c",
+        "description": "panfrost: Set discard based on the resolve set",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bff8c7e611a26a8fad5d603ff9c33fbac48788f5",
+        "description": "panfrost: Track buffers needing resolve",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c3e2d69bd1e1ab715783f0ef41daf99519ed12e",
+        "description": "nir: handle float atomics in nir_lower_memory_model",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "2adb337256f146b10b31365ac6ba8ab820d9014e"
+    },
+    {
+        "sha": "27073b59bce6b52ea5ec10abf1f1903f7edd5d61",
+        "description": "nir: handle float atomics in nir_gather_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8166e41e1fc9ea304b710049ece872a7de5c88cb",
+        "description": "translate: assert that nr_elements is in range",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "100c4dbd9ca9b03cf50eff4818a2582e12a2c3f4",
+        "description": "translate: reserve more vertex-shader outputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "790b9a5872b6456614de186ecea190450f7d0273",
+        "description": "lavapipe: correct reported number of UBOs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7db79fa6773bd4168980fad5c8c8785adb34de76",
+        "description": "panfrost: Flag indirect draw/dispatch shaders as internal",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec2b46a1cec72d6562f620997bd540a43fd1d583",
+        "description": "panfrost: Expose the DRAW_PARAMETERS cap on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5ba2e20457bb52b04b379f701dc8783dfdcfd4a",
+        "description": "pan/bi: Add support for gl_DrawID",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7cc4c8c5e568be9d1a5660301edcb5913131201f",
+        "description": "pan/bi: Add support for gl_{BaseVertex,BaseInstance}",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69d81edaf8e502785a615e587ec2581cc540efa0",
+        "description": "pan/bi: Add first_vertex to vertex ID",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e74598e3658237ab817db204fc7b008d16b92be",
+        "description": "panfrost: Split the indexed and !indexed indirect draw info structs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d6608ef78b79e41b6c5aa41534e139b2eaa524b",
+        "description": "iris/ci: enable intel devices automatically in MR pipelines",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12f0b14e2d4b86a449be8dbeee4dbb8d710dff3c",
+        "description": "iris/ci: disable failing gimark test for now",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fe1378dcb6e60573b5af1859dece95f031c79a4b",
+        "description": "nv50/ir: Initialize GCRA::RIG_Node members.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3f229e34c9793b71001f85e08ef64b7f33565d50",
+        "description": "turnip: Implement VK_KHR_timeline_semaphore.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "daefc6e2a40b70f0665b21cf7688e711b4b1ae09",
+        "description": "turnip: prep work for timeline semaphore support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73a9dbce6b6052136feab850c93a41259db03227",
+        "description": "zink: pop descriptor refs when invalidating sets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3933548c2cbe398084fc28ef45419b662127702",
+        "description": "zink: remove screen param from zink_descriptors_update()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "987b0eb638e23f5861c84d2c69091a91e2a3ada8",
+        "description": "zink: make zink_context_update_descriptor_states() static",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21868216c94d3d30a8595247a56657c96fbd236b",
+        "description": "zink: call invalidate on invalid descriptor sets during recycle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2ff25c70805056696ab298a793cf3b332563857",
+        "description": "zink: use better iterating for buffer rebinds",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7cc47e59c80efd574a35cadf93f8b352a4ecaa84",
+        "description": "zink: add slot params to zink_context_invalidate_descriptor_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "402eaa0795a91bef8a8fa050216e68bbdb95dc31",
+        "description": "zink: track number of tbos in shader data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1082dc5f4a0723e7bc36e5a76b1889ed5255349d",
+        "description": "zink: track max slot idx for descriptor types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "095b8ad8b1c381f5e50bbb966f779aa8bd886a21",
+        "description": "zink: don't track sampler states onto buffer sampler sets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "208e34e1102799e0ea46b2c6778d6aaaa78176f6",
+        "description": "zink: update samplerview descriptor layouts when image binds are set",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c7d951b7626c588bbcdee327aaf21ed2d394150",
+        "description": "zink: track bind counts for descriptors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27a4ba52dba48101c22d4d86e47785bcd827a22d",
+        "description": "zink: unify resource rebinding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42634824f8c6ec50f19e69299bb8f820ad3787c7",
+        "description": "zink: add context-based descriptor info tracking infrastructure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a8e80b334428cb2f1deb3143011c20784eb3c761",
+        "description": "zink: stop invalidating descriptor sets on pool destroy",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47eabd0e6b926535a68a7173eba2ceeb4ed9747e",
+        "description": "virgl: do not use winsys info for guest storage of classic resource",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "494255c82162f3cec8497d7f8a483a90141797c5",
+        "description": "iris: Use const uploader for user index data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cdadb84e4175d1520f44fa7e21d0ef115d39bda9",
+        "description": "iris: Use const uploader for draw parameters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19ea0974dae0dcb1e27d4bcb39027c3c44ce97e9",
+        "description": "iris: Use const uploader for blorp vertex data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "beceb392d77ec5dbc985527c4b4cff424aa2bb28",
+        "description": "iris: Use const_uploader for iris_create_stream_output_target",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8838861ea39e14038624e26a933178b4cd3ee01e",
+        "description": "iris: Upload constant resources for efficient GPU access",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ecd75318e3950829e2079fe3099d899d9c38b04f",
+        "description": "iris: Increase the size of upload buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "161478ad4c471786e7a71c60d5f6ddadf211f10b",
+        "description": "ci/iris: Add some more traces to replay.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd142cc483a30c65aec13fd88442503c07da15e6",
+        "description": "ci/panfrost: Add some more traces to replay.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7520ac54dd0f4e2626c07c0b8dcab4bd5d336d31",
+        "description": "ci: Switch to apitraces for glmark2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8b04b7711819d6103b627555a4d3b177c7cf78ec",
+        "description": "ci: Remove the need for an empty Piglit results file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "584145ea882b710027ce620a5d505bd25ab284b1",
         "description": "zink/ntv: Don't call free() on ralloc'd memory",
         "nominated": false,
