@@ -805,7 +805,7 @@
         "description": "glsl: create validate_component_layout_for_type() helper",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": null
     },
