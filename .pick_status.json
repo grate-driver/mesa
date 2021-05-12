@@ -454,7 +454,7 @@
         "description": "glsl: add missing support for explicit components in interface blocks",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d99a040bbf2c385c0ad096ec140aa62f805a68b2"
     },
