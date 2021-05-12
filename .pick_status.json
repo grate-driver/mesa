@@ -364,7 +364,7 @@
         "description": "i915g: add HW atomic counters as unsupported",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "2a06423c0094749126afced82c400380221fadac"
     },
