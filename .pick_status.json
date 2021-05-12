@@ -27778,7 +27778,7 @@
         "description": "freedreno/ir3: Don't force RTNE if rounding mode is undefined",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "de195671bdb4fde7cdebd6cecd28206d08551d15"
     },
