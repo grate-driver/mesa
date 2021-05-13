@@ -310,7 +310,7 @@
         "description": "zink: stop overwriting buffer map pointers for stream uploader",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "d179c5d28e6ae86dd95d906fff8197e35270dad8"
     },
