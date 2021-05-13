@@ -1102,7 +1102,7 @@
         "description": "radeonsi: add a gfx10 hw bug workaround with the barrier before gs_alloc_req",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8845a23698c98c8b377b3a451d13bde4c1bc5a70"
     },
