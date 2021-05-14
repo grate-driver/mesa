@@ -121,7 +121,7 @@
         "description": "aco/ra: prevent underflow register for p_create_vector operands",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "8962510e38fbaff792f60bc17d46507bb77401ac"
     },
