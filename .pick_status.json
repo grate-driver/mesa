@@ -1570,7 +1570,7 @@
         "description": "radv: Allow DCC images to be compressed with foreign queues.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8b9033ad0a007ffe76f0f691c5540ce1b7c28499"
     },
