@@ -112,7 +112,7 @@
         "description": "radv: call nir_copy_prop() after load-store vectorization",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "1958381c9ae15dc252bcab8612f39fdca45d4843"
     },
