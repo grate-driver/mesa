@@ -130,7 +130,7 @@
         "description": "i915g: fix implicit fallthrough",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "4e861ac4a1f1bdbd28f66e3f15eb45aa45a47bad"
     },
