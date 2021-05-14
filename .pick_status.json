@@ -2317,7 +2317,7 @@
         "description": "panfrost: Fix the reads_dest prototype",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "93824b6451a4cc3eece1d7afa77e9a440ee41ee3"
     },
