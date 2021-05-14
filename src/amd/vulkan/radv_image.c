@@ -1985,7 +1985,7 @@ radv_layout_dcc_compressed(const struct radv_device *device, const struct radv_i
 {
    /* If the image is read-only, we can always just keep it compressed */
    if (!(image->usage & RADV_IMAGE_USAGE_WRITE_BITS) && radv_image_has_dcc(image))
-      return false;
+      return true;
 
    /* Don't compress compute transfer dst when image stores are not supported. */
    if ((layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL || layout == VK_IMAGE_LAYOUT_GENERAL) &&
