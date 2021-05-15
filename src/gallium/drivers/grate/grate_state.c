@@ -24,8 +24,8 @@ grate_set_sample_mask(struct pipe_context *pcontext,
 }
 
 static void
-grate_set_constant_buffer(struct pipe_context *pcontext,
-                          unsigned int shader, unsigned int index,
+grate_set_constant_buffer(struct pipe_context *pcontext, enum pipe_shader_type shader,
+                          uint index, bool take_ownership,
                           const struct pipe_constant_buffer *buffer)
 {
    struct grate_context *context = grate_context(pcontext);
@@ -33,7 +33,8 @@ grate_set_constant_buffer(struct pipe_context *pcontext,
    assert(index == 0);
    assert(!buffer || buffer->user_buffer);
 
-   util_copy_constant_buffer(&context->constant_buffer[shader], buffer);
+   util_copy_constant_buffer(&context->constant_buffer[shader], buffer,
+                             take_ownership);
 }
 
 static void
@@ -157,20 +158,23 @@ grate_set_viewport_states(struct pipe_context *pcontext,
 static void
 grate_set_vertex_buffers(struct pipe_context *pcontext,
                          unsigned int start, unsigned int count,
+                         unsigned unbind_num_trailing_slots,
+                         bool take_ownership,
                          const struct pipe_vertex_buffer *buffer)
 {
    struct grate_context *context = grate_context(pcontext);
    struct grate_vertexbuf_state *vbs = &context->vbs;
 
-   util_set_vertex_buffers_mask(vbs->vb, &vbs->enabled, buffer, start, count);
+   util_set_vertex_buffers_mask(vbs->vb, &vbs->enabled, buffer, start, count,
+                                unbind_num_trailing_slots, take_ownership);
    vbs->count = util_last_bit(vbs->enabled);
 }
 
 
 static void
-grate_set_sampler_views(struct pipe_context *pcontext,
-                        unsigned shader,
+grate_set_sampler_views(struct pipe_context *pctx, enum pipe_shader_type shader,
                         unsigned start_slot, unsigned num_views,
+                        unsigned unbind_num_trailing_slots,
                         struct pipe_sampler_view **views)
 {
    unimplemented();
