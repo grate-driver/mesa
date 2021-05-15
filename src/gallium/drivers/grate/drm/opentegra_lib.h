@@ -31,9 +31,29 @@
 
 #include "opentegra_drm.h"
 
+#ifndef __maybe_unused
+#define __maybe_unused  __attribute__((unused))
+#endif
+
 enum drm_tegra_class {
 	DRM_TEGRA_GR2D,
 	DRM_TEGRA_GR3D,
+};
+
+enum drm_tegra_soc_id {
+	DRM_TEGRA_INVALID_SOC,
+	DRM_TEGRA_UNKOWN_SOC,
+	DRM_TEGRA20_SOC,
+	DRM_TEGRA30_SOC,
+	DRM_TEGRA114_SOC,
+};
+
+static __maybe_unused const char * const drm_tegra_soc_names[] = {
+	[DRM_TEGRA_INVALID_SOC] = "invalid",
+	[DRM_TEGRA_UNKOWN_SOC] = "unknown",
+	[DRM_TEGRA20_SOC] = "Tegra20",
+	[DRM_TEGRA30_SOC] = "Tegra30",
+	[DRM_TEGRA114_SOC] = "Tegra114",
 };
 
 struct drm_tegra_bo;
@@ -43,6 +63,8 @@ int drm_tegra_new(struct drm_tegra **drmp, int fd);
 void drm_tegra_close(struct drm_tegra *drm);
 
 int drm_tegra_version(struct drm_tegra *drm);
+
+enum drm_tegra_soc_id drm_tegra_get_soc_id(struct drm_tegra *drm);
 
 int drm_tegra_bo_new(struct drm_tegra_bo **bop, struct drm_tegra *drm,
 		     uint32_t flags, uint32_t size);

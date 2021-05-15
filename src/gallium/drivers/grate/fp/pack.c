@@ -75,6 +75,15 @@ grate_fp_pack_alu(uint32_t *dst, struct fp_alu_instr *instr)
       .rD_sub_reg_select_high = instr->src[3].sub_reg_select_high,
    };
 
+   /* Tegra114 uses these bits for extra opcodes when rD is disabled */
+   if (!tmp.rD_reg_select) {
+      tmp.rD_fixed10 = 0;
+      tmp.rD_absolute_value = 0;
+      tmp.rD_enable = 0;
+      tmp.rD_minus_one = 0;
+      tmp.rD_sub_reg_select_high = 0;
+   }
+
    /* copy packed instruction into destination */
    for (int i = 0; i < 2; ++i)
       dst[i] = tmp.words[1 - i];
@@ -191,6 +200,27 @@ grate_fp_pack_sched(struct fp_sched *sched)
    } tmp = {
       .num_instructions = sched->num_instructions,
       .address = sched->address
+   };
+   return tmp.word;
+}
+
+uint32_t
+grate_fp_pack_alu_sched_t114(struct fp_sched *sched)
+{
+   assert(sched->num_instructions >= 0 && sched->num_instructions < 4);
+   assert(sched->address >= 0 && sched->address < 64);
+   union {
+      struct __attribute__((packed)) {
+         unsigned __pad:8;
+         unsigned num_instructions:8;
+         unsigned address:8;
+         unsigned unk24_31:8;
+      };
+      uint32_t word;
+   } tmp = {
+      .num_instructions = sched->num_instructions,
+      .address = sched->address,
+      .unk24_31 = 0xe0,
    };
    return tmp.word;
 }
