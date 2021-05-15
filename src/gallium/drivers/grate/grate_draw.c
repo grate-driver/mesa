@@ -79,7 +79,7 @@ grate_draw_vbo(struct pipe_context *pcontext,
          return;
 
       util_primconvert_save_rasterizer_state(context->primconvert, &context->rast->base);
-      util_primconvert_draw_vbo(context->primconvert, info, &draws[0]);
+      util_primconvert_draw_vbo(context->primconvert, info, indirect, draws, num_draws);
       return;
    }
 
