@@ -124,6 +124,12 @@ grate_set_viewport_states(struct pipe_context *pcontext,
 {
    struct grate_context *context = grate_context(pcontext);
    static const float zeps = powf(2.0f, -21);
+   unsigned int hw_scale;
+
+   if (context->tegra114)
+      hw_scale = 0xFFFFFF;
+   else
+      hw_scale = 0xFFFFF;
 
    assert(num_viewports == 1);
    assert(start_slot == 0);
@@ -136,8 +142,8 @@ grate_set_viewport_states(struct pipe_context *pcontext,
    context->viewport[5] = u_bitcast_f2u(viewports[0].scale[1] * 16.0f);
    context->viewport[6] = u_bitcast_f2u(viewports[0].scale[2] - zeps);
 
-   uint32_t depth_near = (viewports[0].translate[2] - viewports[0].scale[2]) * ((1 << 20) - 1);
-   uint32_t depth_far = (viewports[0].translate[2] + viewports[0].scale[2]) * ((1 << 20) - 1);
+   uint32_t depth_near = (viewports[0].translate[2] - viewports[0].scale[2]) * hw_scale;
+   uint32_t depth_far = (viewports[0].translate[2] + viewports[0].scale[2]) * hw_scale;
    context->viewport[7] = host1x_opcode_incr(TGR3D_DEPTH_RANGE_NEAR, 2);
    context->viewport[8] = depth_near;
    context->viewport[9] = depth_far;
@@ -357,6 +363,7 @@ static void *
 grate_create_zsa_state(struct pipe_context *pcontext,
                        const struct pipe_depth_stencil_alpha_state *template)
 {
+   struct grate_context *context = grate_context(pcontext);
    struct grate_zsa_state *so = CALLOC_STRUCT(grate_zsa_state);
    if (!so)
       return NULL;
@@ -374,6 +381,13 @@ grate_create_zsa_state(struct pipe_context *pcontext,
 
    so->commands[0] = host1x_opcode_incr(TGR3D_DEPTH_TEST_PARAMS, 1);
    so->commands[1] = depth_test;
+   so->num_commands = 2;
+
+   if (context->tegra114) {
+      so->commands[2] = host1x_opcode_incr(0xe45, 1);
+      so->commands[3] = depth_test;
+      so->num_commands = 4;
+   }
 
    return so;
 }
@@ -571,7 +585,8 @@ static void
 emit_zsa_state(struct grate_context *context)
 {
    struct grate_stream *stream = &context->gr3d->stream;
-   grate_stream_push_words(stream, context->zsa->commands, 2, 0);
+   grate_stream_push_words(stream, context->zsa->commands,
+                           context->zsa->num_commands, 0);
 }
 
 static void
