@@ -22,7 +22,7 @@
         "description": "venus: Fix zero-initialized fd causing apps to hang/crash",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "247232d5969235b7f24b5ab9fbfc9dc5570c578e"
     },
