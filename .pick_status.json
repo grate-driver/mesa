@@ -31,7 +31,7 @@
         "description": "radv: Handle unnormalized samplers in YCbCr lowering",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "master_sha": null,
         "because_sha": "91702374d5d70296c967c324fff1844cc2933dd4"
     },
