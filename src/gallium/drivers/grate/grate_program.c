@@ -86,6 +86,7 @@ static void *
 grate_create_fs_state(struct pipe_context *pcontext,
                       const struct pipe_shader_state *template)
 {
+   struct grate_context *context = grate_context(pcontext);
    struct grate_fragment_shader_state *so =
       CALLOC_STRUCT(grate_fragment_shader_state);
 
@@ -128,6 +129,13 @@ grate_create_fs_state(struct pipe_context *pcontext,
    PUSH(host1x_opcode_incr(TGR3D_FP_PSEQ_DW_CFG, 1));
    PUSH(0x00000040);
 
+   if (context->tegra114) {
+      /* XXX: maybe not needed */
+      PUSH(host1x_opcode_incr(0x547, 0x0002));
+      PUSH(0xc0000000);
+      PUSH(0x00000000);
+   }
+
    PUSH(host1x_opcode_imm(TGR3D_FP_PSEQ_UPLOAD_INST_BUFFER_FLUSH, 0));
 
    PUSH(host1x_opcode_nonincr(TGR3D_FP_PSEQ_UPLOAD_INST, num_fp_instrs));
@@ -155,8 +163,12 @@ grate_create_fs_state(struct pipe_context *pcontext,
       PUSH(0x00000000);
 
    PUSH(host1x_opcode_nonincr(TGR3D_FP_UPLOAD_ALU_SCHED, num_fp_instrs));
-   list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link)
-      PUSH(grate_fp_pack_sched(&instr->alu_sched));
+   list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link) {
+      if (context->tegra114)
+         PUSH(grate_fp_pack_alu_sched_t114(&instr->alu_sched));
+      else
+         PUSH(grate_fp_pack_sched(&instr->alu_sched));
+   }
 
    int num_alu_instrs = list_length(&fp.alu_instructions);
    PUSH(host1x_opcode_nonincr(TGR3D_FP_UPLOAD_ALU_INST,

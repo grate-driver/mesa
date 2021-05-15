@@ -981,3 +981,45 @@ int drm_tegra_bo_cpu_prep(struct drm_tegra_bo *bo,
 
 	return ret;
 }
+
+static enum drm_tegra_soc_id read_chip_id(const char *path)
+{
+	FILE *file = fopen(path, "r");
+	if (file) {
+		unsigned int id = 0;
+
+		if (fscanf(file, "%d", &id) != 1)
+			fprintf(stderr, "fscanf failed for %s\n", path);
+		fclose(file);
+
+		switch (id) {
+		case 0x20:
+			return DRM_TEGRA20_SOC;
+		case 0x30:
+			return DRM_TEGRA30_SOC;
+		case 0x35:
+			return DRM_TEGRA114_SOC;
+		}
+
+		return DRM_TEGRA_UNKOWN_SOC;
+	}
+
+	return DRM_TEGRA_INVALID_SOC;
+}
+
+enum drm_tegra_soc_id drm_tegra_get_soc_id(struct drm_tegra *drm)
+{
+	static enum drm_tegra_soc_id sid = DRM_TEGRA_INVALID_SOC;
+
+	if (sid != DRM_TEGRA_INVALID_SOC)
+		return sid;
+
+	sid = read_chip_id("/sys/devices/soc0/soc_id");
+	if (sid != DRM_TEGRA_INVALID_SOC)
+		return sid;
+
+	VDBG_DRM(drm, "failed to identify SoC version\n");
+	sid = DRM_TEGRA_UNKOWN_SOC;
+
+	return sid;
+}

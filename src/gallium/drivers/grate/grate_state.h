@@ -14,7 +14,8 @@ struct grate_rasterizer_state {
 
 struct grate_zsa_state {
    struct pipe_depth_stencil_alpha_state base;
-   uint32_t commands[2];
+   uint32_t commands[4];
+   unsigned int num_commands;
 };
 
 struct grate_vertexbuf_state {
