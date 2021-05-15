@@ -165,4 +165,7 @@ grate_fp_pack_mfu(uint32_t *dst, struct fp_mfu_instr *instr);
 uint32_t
 grate_fp_pack_sched(struct fp_sched *sched);
 
+uint32_t
+grate_fp_pack_alu_sched_t114(struct fp_sched *sched);
+
 #endif
