@@ -1165,7 +1165,7 @@
         "description": "i915g: Disable 3D-pipeline clears.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6358e6371b31671acbfa7c00336673f62ee928c5"
     },
