@@ -1,5 +1,347 @@
 [
     {
+        "sha": "6d56c16c9ceb864af6bb71d0bdcdd21064d94307",
+        "description": "radv: dump the trap handler shader with RADV_DEBUG=metashaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "77d04989135233c7b276bca3912ab07a12d9f362",
+        "description": "panfrost: Fix major flaw in BO cache",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22a750465d9044a717ffa568a01a868d43f6ad61",
+        "description": "ci: Build asahi in meson-gallium job",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a46fcaf025a4918f593cbfc8d918d1de2813b46",
+        "description": "Revert \"CI: Disable all Panfrost/AMD/Iris automatic jobs\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e1d74c9cfde45ecff1927c2ebf47fc0f42ab0b6a"
+    },
+    {
+        "sha": "fb31dda9093885c00f04816354832e034cf91dcf",
+        "description": "aco/ra: use flags instead of booleans for update_renames()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6fd6374e276644890efc1292d9fdd9a60a7b2b41",
+        "description": "aco/ra: fix get_reg_for_operand() with vector operands",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c08bfa110cce2c5d0c613490de02b13b1e4afb82",
+        "description": "aco/ra: fix get_reg_for_operand() when the blocking var is a vector",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc95d55e1f4ce54ff086352d5e52dc733d85118d",
+        "description": "aco/ra: fix get_reg_for_operand() with no free registers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e459df0fcb42cfb7223e15ffd7e20bcc9b16e75",
+        "description": "aco/ra: initialize temp_in_scc earlier",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "93c8ebfa780ebd1495095e794731881aef29e7d3"
+    },
+    {
+        "sha": "d517996ae556cdbcdb0c898c1dbc547616285558",
+        "description": "zink: add even more validation for linear images before creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df6ab67e99269eff56f0f43f27b6cc31bdaac49f",
+        "description": "zink: populate images with u_blitter if transfer_dst isn't available",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a67315d8a60288e0cc7c8c92e8eb497e7250e8a",
+        "description": "zink: don't multiply cube array image layers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b960169257e42caca23c6e61c72bff7e53df123e",
+        "description": "aco/ra: also prevent overflow register for p_create_vector operands",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "d659ce0d6c5781a1230b182ef5ed1a77de485565"
+    },
+    {
+        "sha": "dc525cbe0c359f301f80b47cd61182dfe40e52ba",
+        "description": "ci: remove expected robustness2 fails for Renoir",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "157c6b0f336088704981d2bc6d740b02b0a598e6"
+    },
+    {
+        "sha": "3828081c929305c00571dc406ef735bb9ac0ff27",
+        "description": "util: add thread-safe version of idalloc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6fed423ade729ddd876778c399feae9f9c8b346d",
+        "description": "gallium/u_threaded: don't reference resource in pipe_transfer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ac085966bb9f3e7f37977dc55ed689f4acffa5f",
+        "description": "gallium/u_threaded: always map idle buffers unsynchronized",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8b27794554ee1f24681702ccd3006aa5343bf9b",
+        "description": "gallium/u_threaded: don't invalidate idle buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89bd06f57a11a5a80329382a42c6457ae7ed2d06",
+        "description": "gallium/u_threaded: add driver-internal flush tracking for buffer lists",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e9c41b321488c23b7d8ec5744f68218bac753505",
+        "description": "gallium/u_threaded: add buffer lists - tracking of buffers referenced by tc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "88b97567d413568e956a73cce12daecc6b9cacc7",
+        "description": "gallium/u_threaded: query shader resource limits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39447cc8944a299e5f45d38c7c6505625a791892",
+        "description": "gallium/u_threaded: track whether TCS, TES, or GS have ever been used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec77a2d43a1fb9fae862c53c948e2533acdb690f",
+        "description": "gallium/u_threaded: add callbacks and documentation for resource busy checking",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab58fce7b9280ca4c230648413a08ef2a0196e42",
+        "description": "gallium/u_threaded: merge draws in tc_call_draw_single",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1cb58243b19a3ff3372ee340c121a8a718a29fc",
+        "description": "gallium/u_threaded: pass last into and return call size from execute callbacks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "72fd126070ba749e10f7f58b1dfbb52198fb7eb9",
+        "description": "anv: require rendering support for blit destination feature",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a40714abf7e03f1c68a3a6e7ead3b901bea232bd",
+        "description": "nir/lower_phis_to_scalar: Add \"lower_all\" option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e6a7dba1e0590c95152863d798d10977a851bff",
+        "description": "intel/isl: replace format_gen by verx10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f2c48b04043ab84b91084a38a18b3d2cebf8e087",
+        "description": "i965: simplify gfx version checks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b1933d769f3148cc9e214fa87a88728a226e4b4a",
+        "description": "intel: simplify is_haswell checks, part 2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3340d5ee02deb8c6784eb4d5e0bce9681257cc37",
+        "description": "intel: simplify is_haswell checks, part 1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3a29e45a9084c1ade5b3975bcb29a23290160fcd",
+        "description": "turnip: do not ignore early_fragment_tests",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "b2a60c157e4d6cc62c55d8fe8777f7cbd548a722"
+    },
+    {
+        "sha": "075d43821a40eb65b20aa8ded271effe51ff4d95",
+        "description": "panfrost: Try to align scanout resource stride on 64 bytes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b036d13502c8aff12b382af0bab5c7680ee24fd",
+        "description": "panfrost: Relax the stride check when importing resources",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "051d62cf041054bf0fdbd0ae5d2160d1b02e0203"
+    },
+    {
+        "sha": "d661e32bfb7c6ef40bb75a8abf1be6f3df722d37",
+        "description": "venus: stop advertising KHR_driver_properties for Android",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a49346979ae13192e29a5057fd3de72045b8e883",
+        "description": "venus: fix vkEnumeratePhysicalDeviceGroups",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fb7be7870c258e566f4da6b7d5d0218d717b82c5",
+        "description": "vulkan: Support 32-bit \"weak\" symbols on MSVC",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "9be7aa3fc83ba3117bae7907765fdf2023c2683b"
+    },
+    {
+        "sha": "a5a86adc231d0b9aa8b04441978aff9cb178e59e",
+        "description": "freedreno/a6xx: Add a few registers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "0c30ad402d0011c957576681d2aaf9b2e68c318e",
         "description": "freedreno/regs: split DSI PHY registers to separate xml files.",
         "nominated": false,
