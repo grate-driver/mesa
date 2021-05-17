@@ -1,5 +1,140 @@
 [
     {
+        "sha": "e17e3df476ec0f3f537f0169ccd5488f27802bf6",
+        "description": "drisw: Don't bzero displaytarget pixels",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b9a172c5afd2d18d430d584c58e45ff5456838fc",
+        "description": "gallium/dri: Remove unused dri_drawable::drisw_surface",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "931ad19a18174bb01dfd76f3a1224a97db684d31",
+        "description": "turnip: make cmdstream bo's read-only to GPU",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "413e7c6dc86961bcc0163ffe739169bc8283a21d",
+        "description": "turnip: make possible to create read-only bo with tu_bo_init_new",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d6f993e5d4e343f36563d3ed4d4da57f5672a5e6",
+        "description": "panfrost: Shorten iffy comment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5aee982aec07706e3d2e922d453edbf96dbfc234",
+        "description": "panfrost: Garbage collect comment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e249eaf141a0e96dc9bf66201a74c5113b91148f",
+        "description": "panfrost: Make clear which limits are arbitrary",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fdbf8c96fe2b0f3818fc328114fdac766647bf8e",
+        "description": "panfrost: Use natural shader limits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73ca229690b2b9694f847fc0debc40709602157d",
+        "description": "panfrost: Drop random #define",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "958f11d537334417af010b3d887a7dbacd0ca311",
+        "description": "midgard: Fix type for vertex_builtin_arg() and compute_builtin_arg().",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "306800d747bcf210baa84594cdbdca21e435ddd9"
+    },
+    {
+        "sha": "542585556275298779c29ac618dc50b2d9353279",
+        "description": "panfrost: Limit the number of active batch to 32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6af15aa5b6a3458fdaa2ff8ae24fcba4e81cd23",
+        "description": "panfrost: Simplify the dependency tracking logic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "82571f977ae0cf927f65df85e683a211cf7b077e",
+        "description": "panfrost: Avoid duplicate entries in access->readers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c684d10be87467f06d9b73c4f9ccb2cce154dee",
+        "description": "panfrost: Don't freeze blit batches",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e74bbf631f06aa8d58dc7a9aa87165521e6cef8",
+        "description": "i915g: fix implicit fallthrough",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "4e861ac4a1f1bdbd28f66e3f15eb45aa45a47bad"
+    },
+    {
         "sha": "6d56c16c9ceb864af6bb71d0bdcdd21064d94307",
         "description": "radv: dump the trap handler shader with RADV_DEBUG=metashaders",
         "nominated": false,
