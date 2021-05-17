@@ -868,7 +868,7 @@
         "description": "frontends/va/picture:Fix wrong reallocation even surface is protected",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "81be8b3c2f2785932b63d4b82ee33cc3d6ac2765"
     },
