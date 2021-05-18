@@ -877,7 +877,7 @@
         "description": "util/prim_restart: fix util_translate_prim_restart_ib",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0c85d6c523f137571768ab3bb190a201ae294421"
     },
