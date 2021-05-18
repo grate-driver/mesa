@@ -1026,6 +1026,11 @@ llvmpipe_create_screen(struct sw_winsys *winsys)
 {
    struct llvmpipe_screen *screen;
 
+   util_cpu_detect();
+
+   if (!util_get_cpu_caps()->has_neon)
+      return NULL;
+
    glsl_type_singleton_init_or_ref();
 
 #ifdef DEBUG
