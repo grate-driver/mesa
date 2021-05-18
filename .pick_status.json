@@ -1813,7 +1813,7 @@
         "description": "Revert \"gallium/util: Fix depth/stencil blit shaders\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "master_sha": null,
         "because_sha": "7ca72f172678116d29d254b786a9422b864aef3d"
     },
