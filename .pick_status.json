@@ -1,5 +1,581 @@
 [
     {
+        "sha": "5be00fe88abb618454e1c448e6e61c8dea49c27f",
+        "description": "r600: Enable NIR debug flags also for Cayman",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ed595c1785dd229e53ce4cc256d0b61852aa6a50",
+        "description": "r600/sfn: legalize image access on Cayman",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27f51577774149d788adc2e3221a1b2b733ebb9f",
+        "description": "r600/sfn: Add lowering pass to legalize image access",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ffc5be25ca0b1571fb3640cd181a3477eec6c9e7",
+        "description": "r600/sfn: Fix cube query layer number for indirect access",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a15c7d9ad286e26a4365cc52e31d86106e15a87",
+        "description": "r600/sfn: read number of images from shader info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "efdb888b299e94cf89b6786557065ad3b4647e1b",
+        "description": "r600/sfn: Fix Geometry shader for Cayman",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "80efb6369a5574fadfa942f760605d376559523b",
+        "description": "r600/sfn: Fix Cayman SSBO write with more than one value",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b1f82c7778a713748fa8236f7cdd3c4770fe591",
+        "description": "r600/sfn: Fix ssbo/image atomic swap for Cayman",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9898bc2915d7e3d951980140ec4d0956f539f0de",
+        "description": "r600/sfn: Fix texture gather for Cayman",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d8b27507d57799a670a61e1b3d5a1c88b8ac44d",
+        "description": "r600/sfn: Use unified code path for index register load",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e9be6be49bb230daf0d9f8a7056f2141dceef0e4",
+        "description": "r600/sfn: Use unified index register code for samplers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07514ff2c850030bff6da75c5465a3b2f616ef52",
+        "description": "r600/sfn: Fix Cayman trans ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89672820b7f05b5a345673a9e3943acd194f647b",
+        "description": "r600/sfn: count only distinct literals per instruction group",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa055f78bad48d526907b094eb61f1e7502f401c",
+        "description": "r600/sfn: Don't check the faction when searching for the input slot",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b4b962c1524075d0578f3fbac8a9b7a13f36036",
+        "description": "r600/sfn: Lower FS pos input w-transform in NIR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba8d19ab80b44d36fb6d06ca9caf59f26e6ba0ac",
+        "description": "r600/sfn: force new CF if fetch through TC would be used in same clause",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "91209206f2a078c45c498ba19aa5c2e489189d17",
+        "description": "r600/sfn: Use valid pixel mode for SSBO and Image result fetches",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "129de7ee606540c34cd6addd682541d9ee8dcd63",
+        "description": "r600/sfn: Use valid pixel mode only in fragment shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9bf5033941a9ab319b6d13ad86fd3c591bd81a54",
+        "description": "r600: don't put INTERP_X and INTERP_Z into one instruction group",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6bd33ce2dc57c4ca888247989eb3aced8bdfb82a",
+        "description": "panfrost: Reduce blitter pool size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c900236569278004551fff8a1703479401398c84",
+        "description": "panfrost: Pool texture views",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f1e0efff8dfcf3ef97e29c486ddc68d319fb0cc0",
+        "description": "panfrost: Pool shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "93d5fbf23ddaa24b9c3cbc493de3ef19526bc74f",
+        "description": "panfrost: Add reference type for unowned pool",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bd55b6a72722ff1db25ad5a7e2c86001b071c96f",
+        "description": "panfrost: Make pool slab size configurable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab859cfffe37eaa263abaf77c5c51a384cc8968b",
+        "description": "panfrost: Label pools",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3fa1f93dace64d9f71869e08f3665f3e48b07286",
+        "description": "panfrost: Label all BOs in userspace",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ecd0cf0b27c66b3f9b4dff4b22d25dc6d00ae9ea",
+        "description": "panfrost: Add unowned mode to pan_pool",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b131f96aa83c115457e6bc5534dc0a5edb049b2e",
+        "description": "pan/mdg: Set lower_uniforms_to_ubo",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "24d7c413fe73767be99a3c0143556cdb95c1a39b"
+    },
+    {
+        "sha": "a89bc59980b3ea7b2f03d2994bae7dda689f637f",
+        "description": "pan/mdg: Fix spills to TLS",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "6a12ea02feeebac4be8986616327db31926b3ce7"
+    },
+    {
+        "sha": "8d2d7110260291833d9b20bbaa59f46197ff2a49",
+        "description": "pan/mdg: Fix output types for scalar fields",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "4d9c0a32e7eccc4850e5e495954d108a9cd5f170"
+    },
+    {
+        "sha": "6f2ea57e1d5ff47e42d6ad34c33900d3186baeb7",
+        "description": "pan/mdg: Remove unused midgard_int_alu_op_prefix",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74d36c4f986c7bd38390d0803074e97057fd4a71",
+        "description": "radv: Use correct border swizzle on GFX9+.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "57e796a12a883f5845c8e0ed05ec6bdb6d055b53"
+    },
+    {
+        "sha": "32f710c09d3b978158c5e4c07e83823080cea48b",
+        "description": "virgl: implement EXT_multisampled_render_to_texture",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07e0aab9d9b07da10bb1fb87f1e48731c2fccea4",
+        "description": "radv: Implement vkCmdTraceRays.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "733c9b6d17f65e3c282e550fc0445d0ae27e7e14",
+        "description": "radv: Add RT pipeline bind.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eba2b4137ebf8dde0a1026af4f1a4e871d9e418e",
+        "description": "radv: Add support for RT bind point.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf2b9906181067e1692c5b6c6a3e201d7ef8c6f8",
+        "description": "radv: Use global BO list with raytracing.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bfe28021888f639f38e6dc8066b532347681fd7b",
+        "description": "aco: Add load_sbt_amd intrinsic implementation.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "197d9f008e923233c0e3fa3e16dfd5daf34519b4",
+        "description": "radv: Add sbt descriptors user SGPR input.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa82f91c38f3eeec077eff018e5a813c61926d83",
+        "description": "nir: Add load_sbt_amd intrinsic.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "53ef2a7e6981c3a0e8663878f08874f7f4b36dc9",
+        "description": "ci/broadcom: update expected results",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "41039d8ee977879bf457daba76336860af288e62",
+        "description": "pps: Intel documentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92180a4376345a23a69e63ecdb679f49134f30f5",
+        "description": "pps: Intel pps driver",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d95aa3964a766c57cf6ccb14b27de2ac51b209a",
+        "description": "intel/perf: allow metric sets to be loaded with on OA reports",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fba189a349a5311be6247b8b8ced09e5a88fd48b",
+        "description": "intel/perf: allow opening perf stream with no context filtering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b18a4bb8c66aba9fa1d9af21f5ae240152de7413",
+        "description": "intel/perf: Extern C",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46ded8cda9f74290513072183c7c2745a9baffba",
+        "description": "docs/features: mark a few more extensions as done for zink",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "065a60b405ce7b731fca38e1ecbbfdecd437e683",
+        "description": "docs/features: document GL_ARB_ES3_2_compatibility support for zink",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2cc59f41d9bfb8f38c3b94b5be5e46c821d068ba",
+        "description": "panfrost/ci: Improve coverage for T860",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc130497472cb4ec4ec60695ed99b169d6681118",
+        "description": "aco: Eliminate useless exec writes in jump threading.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e230dcc30b1b9f242c0052251715056f4adfbd03",
+        "description": "aco: Refactor SSA elimination phi info to use vector instead of map.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25a7947da7ca309bb9a6bf76687a21a83031be8e",
+        "description": "aco: Don't use s_and_saveexec with branches when exec is constant.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c850af936acacc0ae0c780a41ecf451edf82ce91",
+        "description": "aco: Remember when exec mask is const, and restore the const then.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "04f90db9a067e1d40bd879fa9e4cfd4879409382",
+        "description": "aco: Use Operand instead of Temp for the exec mask stack.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "662bbf6ad4948caa364bda2c8e3a1edc3a2f961a",
+        "description": "aco: Determine whether a few more instructions need exec.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b06b24191f28e836f10d5b0ae8a44236eeb47ac8",
+        "description": "broadcom/ci: update fail list for v3dv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39c41169ba1998c11d486ef644b904d9f9c6fa02",
+        "description": "broadcom/compiler: consider RT component size when lowering logic ops in Vulkan",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df7185d0d14542eeec7f4159b423537f34381d6e",
+        "description": "broadcom/compiler: don't emit TLB loads for components that don't exist",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5eaf8b59c858bc93f0b18045f49dcdfe6b1d6e75",
+        "description": "i965: export GEM handle with RDWR access rights",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "143c7f03755c40d4c042ce9c1868ce05c15dd38d",
+        "description": "radv: add missing entrypoints for VK_EXT_extended_dynamic_state2",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "d96507b73f2282eca2508c469df92037f3a8dfda"
+    },
+    {
+        "sha": "92ed827fbdb4debedf2ed534daab4e3d8d8f6b9a",
+        "description": "etnaviv: fix vertex sampler setup",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": "81ab9fe2d0c2c2d9961107c88209f2fff1f136c4"
+    },
+    {
+        "sha": "b74898ef699486d0513fcd3af2587a831df99dff",
+        "description": "iris: export GEM handle with RDWR access rights",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b1c726ca91dff781363b1b0980b47ca18f86a76",
+        "description": "nir/opt_access: fix getting variables in presence of similar bindings/desc",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "master_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6eff881097fb77eed91885b8cf29a044ef288147",
+        "description": "ci/freedreno: Skip a test that's taking out the a530 boards.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "master_sha": null,
+        "because_sha": "e8640fef9089bb31a9e602a8894ae4fe84086118"
+    },
+    {
         "sha": "e17e3df476ec0f3f537f0169ccd5488f27802bf6",
         "description": "drisw: Don't bzero displaytarget pixels",
         "nominated": false,
