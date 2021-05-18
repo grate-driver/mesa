@@ -1023,7 +1023,7 @@ llvmpipe_create_screen(struct sw_winsys *winsys)
 
    util_cpu_detect();
 
-   if (!util_cpu_caps.has_neon)
+   if (!util_get_cpu_caps()->has_neon)
       return NULL;
 
    glsl_type_singleton_init_or_ref();
