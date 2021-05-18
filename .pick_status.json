@@ -175,7 +175,7 @@
         "description": "panfrost: v7 does not support RGB32_UNORM textures",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c6bdd976e6110fbf4ec1add9c11d0382e38236d3"
     },
