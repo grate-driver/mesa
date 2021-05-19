@@ -193,7 +193,7 @@
         "description": "pan/blit: Fix a NULL dereference in the preload path",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1de393fec5394e4423de20f8542f4a20cd1a38df"
     },
