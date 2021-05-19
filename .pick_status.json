@@ -1354,7 +1354,7 @@
         "description": "radv: Fix compatible image handle type for dmabufs.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6c83e3ea98b7e2c8972e9897c5971f78c69a7138"
     },
