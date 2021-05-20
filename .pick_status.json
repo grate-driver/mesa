@@ -1057,7 +1057,7 @@
         "description": "iris: Don't advertise Y-tiled modifiers for scanout buffers on Gfx8",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c03e79d7831f253b16d6f52f2fb959eb02257a8b"
     },
