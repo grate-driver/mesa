@@ -526,7 +526,7 @@
         "description": "iris: Check data alignment for copy_mem_mem",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9b1b9714915c3e3d08582fd1d77f182cdf3e5090"
     },
