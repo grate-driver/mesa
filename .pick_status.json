@@ -787,7 +787,7 @@
         "description": "vc4: initialize array",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7bc39c8418ee5de49e3d38aaf5f9e478ff78874c"
     },
