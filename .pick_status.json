@@ -535,7 +535,7 @@
         "description": "aux/vbuf: prevent uint underflow and assert if no vbs are dirty",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e73bf3b805de78299f1a652668ba4e6eab9bac94"
     },
