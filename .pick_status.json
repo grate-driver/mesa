@@ -220,7 +220,7 @@
         "description": "panfrost: Fix polygon list size computations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ff3eada7eb4e4df0abe93ee76b77101f9d24e72c"
     },
