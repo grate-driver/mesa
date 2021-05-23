@@ -1201,7 +1201,7 @@
         "description": "llvmpipe: add the interesting bit of cpu detection to the cache.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6c0c61cb48e87d9b0fc545cf30016d3947a47b6a"
     },
