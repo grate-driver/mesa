@@ -1390,7 +1390,7 @@
         "description": "panfrost: Increase tiler_heap max allocation to 64MB",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
