@@ -988,6 +988,11 @@ static const struct gen_device_info gen_device_info_adl_gt1 = {
    .is_alderlake = true,
 };
 
+static const struct gen_device_info gen_device_info_adl_gt2 = {
+   GFX12_GT_FEATURES(2),
+   .is_alderlake = true,
+};
+
 #define GFX12_DG1_FEATURES                      \
    GFX12_GT_FEATURES(2),                        \
    .is_dg1 = true,                              \

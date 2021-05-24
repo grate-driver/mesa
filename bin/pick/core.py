@@ -196,9 +196,9 @@ class Commit:
 
 
 async def get_new_commits(sha: str) -> typing.List[typing.Tuple[str, str]]:
-    # Try to get the authoritative upstream master
+    # Try to get the authoritative upstream main
     p = await asyncio.create_subprocess_exec(
-        'git', 'for-each-ref', '--format=%(upstream)', 'refs/heads/master',
+        'git', 'for-each-ref', '--format=%(upstream)', 'refs/heads/main',
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.DEVNULL)
     out, _ = await p.communicate()
