@@ -1327,7 +1327,7 @@
         "description": "intel/fs: Fix synchronization of accumulator-clearing W/A move on TGL+.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a27542c5ddec8dd6a64a9c236cf6bea1db1b9e48"
     },
