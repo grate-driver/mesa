@@ -778,7 +778,7 @@
         "description": "svga: Use shader_key info to declare resources if TGSI shader is missing it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "584b1070372a0e010a0e9a221493e5042575abb1"
     },
