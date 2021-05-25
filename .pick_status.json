@@ -40,7 +40,7 @@
         "description": "zink: fix caching of shader variants with inlined uniforms",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7f28775edcc727791528d8439c86e8dffd5059a9"
     },
