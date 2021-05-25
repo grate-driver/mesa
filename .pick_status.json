@@ -1,5 +1,437 @@
 [
     {
+        "sha": "507e8907af913ab7b89211240568b8002b3475f1",
+        "description": "ci/piglit: Use wget instead of ci-fairy to check a file exists",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c8e90a022e70651738f526412e89c5ac2a4305dd",
+        "description": "radv: fix AHB leak upon exportable allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2797c75426cf76bd2717fe0695d3f8e66cd41441",
+        "description": "anv: fix AHB leak upon exportable allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f18c55708a6d32bae6e3c70213e14477273d3901",
+        "description": "pan/mdg: Try scheduling load/store ops in pairs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af78f52493688a5e87e7f8efdb2d64d22f185bc9",
+        "description": "panfrost: Only link varyings once in good conditions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c746747cb82f10fb5f1f3b625e5833d8d2c1e042",
+        "description": "panfrost: fix GL_EXT_multisampled_render_to_texture regression",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "ff3eada7eb4e4df0abe93ee76b77101f9d24e72c"
+    },
+    {
+        "sha": "80f0726e4c47c15a3d78ff9afde41e0f4160e2fe",
+        "description": "amd: add Beige Goby support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c54bb135aad025cad747dedb75541474505c28ae",
+        "description": "amd: add Yellow Carp support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e8100bf581df25052ee35f4d2d03f3088660307",
+        "description": "radeonsi: simplify the NGG culling vertex count heuristic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a76ec17f12c39a88cf44e039a62ed74aca4a19f2",
+        "description": "mesa/st: Fix iris regression with clip distances.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7b1f30d1f0f169d0ba7c1c426362e59cd690162",
+        "description": "ci/freedreno: Add glx-copy-sub-buffer to flakes on a530 and a630.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c322a0dd241dfb8a06d618a1c137f225ba9ac619",
+        "description": "ci/freedreno: Also mark waitformsc as flaky.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd2151e5f266dc08263d17c0f3402192d8e72fe8",
+        "description": "ci/freedreno: Mark a630 glx-visuals-depth/stencil as piglit flakes.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee408df29c35b626aa0bc41239e33130994acdfc",
+        "description": "ci/freedreno: Consolidate ssbo.fragment_binding_array flake annotation.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fec60d5bee78352afa8f470ea151bf150f163f26",
+        "description": "ci/freedreno: Drop VK flake annotations not seen in the last ~year.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4caf9b430dc28d1580cecc566f1ffca34999f69d",
+        "description": "ci/freedreno: Add a link explaining get_display_plane_capabilities",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a8c3783982442cef1599cd13b20a740162754826",
+        "description": "ci/freedreno: Drop a630 flake annotation from the go-fast changes.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1dbaaa22f9e0fd85a516fe3bc3f91d6fde6403a9",
+        "description": "ci/freedreno: Clear stale validation failure flake annotation.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a40479b6bc138eb3a4c24296f76e154e70d17488",
+        "description": "ci/freedreno: Clear compswap flake annotation.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af2bf08bba478d97d15c86c8defedf0337b2acfc",
+        "description": "gbm: list to stderr all the missing extension",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "77edb2d40d4ba6272e9e8b735e339673f015f808",
+        "description": "v3dv: don't use typedef enum with broadcom stages",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55db3712230c0ffca9884e7c0feadbbfee171823",
+        "description": "ci: Condition s390x on specific drivers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebe1d2585b8a80177da64d4f978e46acec274e26",
+        "description": "ci: Condition ppc64-el on specific drivers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1595a9421b49f287171b7470db71d78772dff5c4",
+        "description": "panfrost/ci: Split rules by ISA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fe9d37b0c6e89f11a5f25022a851da81d19dab73",
+        "description": "panfrost: Fix polygon list size computations",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "ff3eada7eb4e4df0abe93ee76b77101f9d24e72c"
+    },
+    {
+        "sha": "f1ba85995c2eebddf307561b2202f2dacb94a400",
+        "description": "radeonsi: explicitly return support for all index buffer formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "324dd35d7c3383a025b8cb91cf6869c2b228e4a8",
+        "description": "ci/lava: Add caching proxies for trace downloads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1e207528f3404f885d1e05e4b8fc02452fcc915",
+        "description": "docs: update link to #lima",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e0bb2c5873419b1d4ebf97eee63007e30b5383d1",
+        "description": "docs: update location of #panfrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "04b00a65a4a822451c5f7cebebd7c864db638ade",
+        "description": "docs: update link to #zink",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6baf3777836d6d39e6e2d91c847767ca4c06c46",
+        "description": "docs: promote #dri-devel on oftc over freenode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a00be79d804fd30332725ad24b0f05a064b3460a",
+        "description": "radv: remove small overhead of radv_pipeline_has_ngg()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca783612e721bc66af545075d76dc578ddbf7666",
+        "description": "radv: simplify radv_pipeline_has_gs_copy_shader()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e98c61e9f33d3ab8d07f950af3f248554ac2d835",
+        "description": "radv: fix fast clearing DCC if one level can't be compressed on GFX10+",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b830613516e53618dd0b3c8e8321f2d7d1ce77a6",
+        "description": "ci: Update to a new kernel fixing a bug in the panfrost driver",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36e63677478e6c5fc9c631e2795ed95776909c11",
+        "description": "radv/ci: Test on Stoney on CI",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b6dd4d28b94bd8e0609abc387d080cfd3b870299",
+        "description": "ci/iris: Switch GLK back to manual testing.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd34c7f5b8ba0de28d3e80c89d61026f0bf22883",
+        "description": "radv: set RADEON_FLAG_GTT_WC flag for prime memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "474eaa25ad209f3d8c5e2dbcab32b20f2a9b5006",
+        "description": "intel/fs: make sure shuffle is lowered to supported types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ab36670e96ae4cfadccff13eea7263baf298c85",
+        "description": "aux/trace: dump 'wait' param for get_query_result",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebd69c718cd41c9db55e6a53d4b27e6146c88b88",
+        "description": "aux/trace: add a pipe_context::clear_buffer hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33e70015721711382086dcc9b751d6d54ffc63ed",
+        "description": "aux/trace: fix query handling with tc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dce827f69c6163c6390f3d561024356d8a50d16e",
+        "description": "aux/trace: fix set_inlinable_constants hook",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "8926c4a313e409a6098846de605f99436c0f0255"
+    },
+    {
+        "sha": "3fedd2bbe8807742867843a5753a693a668c4a45",
+        "description": "aux/trace: hook tc methods",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2ae8e6d5eee64f34b60ee02226886a121fbe67d",
+        "description": "aux/trace: stop dumping transfer data for threaded contexts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94ab82a3ca659b358238f5f967d12185f7e12717",
+        "description": "aux/trace: trace transfer ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1c7279a7f151fc8df621889f5f32641933eca50",
+        "description": "aux/trace: more effectively unwrap pipe_context params from screen functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a54cb49d9875c94e68f9c27d04f43f5d871995c",
+        "description": "aux/trace: add pipe_context::set_debug_callback hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "b663c544177e9547793ee405887f0d41c50e6d1d",
         "description": "ci: update some radv trace checksums",
         "nominated": false,
