@@ -94,7 +94,7 @@
         "description": "virgl:Fix the leak of hw_res used as fence",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c54fb6ef3d81b5c1e88c6d4ae2ea5d534cb18c8c"
     },
