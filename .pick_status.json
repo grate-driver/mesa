@@ -1,5 +1,14 @@
 [
     {
+        "sha": "761383720617b46617bd278ec6015c9520f43f5c",
+        "description": "zink: use actual const for const offset",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "3179daf61393ee8a0fac943b94335b114e34873b",
         "description": "v3dv: add v3dv_GetImageSparseMemoryRequirements back",
         "nominated": false,
