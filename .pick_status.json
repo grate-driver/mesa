@@ -1120,7 +1120,7 @@
         "description": "nv50/ir/nir: fix smem size for GL",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "dc667b1f192d33d073832a50b0e920734f9fb8ef"
     },
