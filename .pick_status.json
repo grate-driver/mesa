@@ -661,7 +661,7 @@
         "description": "util/prim_restart: revert part of bad fix",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1272c2e05246cad647324ffdccf56435b97dec1c"
     },
