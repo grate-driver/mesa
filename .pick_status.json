@@ -1624,7 +1624,7 @@
         "description": "sparc: Avoid some redefinition warnings",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "67ffb853f05eb24222970261018f6ed0982e6be4"
     },
