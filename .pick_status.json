@@ -760,7 +760,7 @@
         "description": "radeonsi: fix encryption check for buffers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8873ea0e253b90eb91da514e36bd845d6a5f9734"
     },
