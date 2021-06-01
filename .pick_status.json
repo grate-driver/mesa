@@ -778,7 +778,7 @@
         "description": "frontend/dri: fix bool/int comparison",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "18b7cafc700055869f1209b32a3ecb9dc9ee6752"
     },
