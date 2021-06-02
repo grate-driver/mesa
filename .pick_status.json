@@ -508,7 +508,7 @@
         "description": "docs/install: remove one extra when",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0fa854aea5ff0a8fe7ed21fef8e9ae2551bae486"
     },
