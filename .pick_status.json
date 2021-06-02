@@ -1084,7 +1084,7 @@
         "description": "aco: don't create 4 and 5 dword NSA instructions on GFX10",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c353895c92270c0e2a6e2b849c24d558efae0d5e"
     },
