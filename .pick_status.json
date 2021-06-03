@@ -4855,7 +4855,7 @@
         "description": "radeonsi: add a gfx10 bug workaround for NOT_EOP",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cc24ec8c0772015d8ef0d10e646e89e9014e9e1d"
     },

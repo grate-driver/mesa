@@ -1192,6 +1192,16 @@ static void si_emit_draw_packets(struct si_context *sctx, const struct pipe_draw
             return;
          }
 
+         if (GFX_VERSION == GFX10) {
+            /* GFX10 has a bug that consecutive draw packets with NOT_EOP must not have
+             * count == 0 in the last draw (which doesn't set NOT_EOP).
+             *
+             * So remove all trailing draws with count == 0.
+             */
+            while (num_draws > 1 && !draws[num_draws - 1].count)
+               num_draws--;
+         }
+
          for (unsigned i = 0; i < num_draws; i++) {
             uint64_t va = index_va + draws[i].start * index_size;
 
