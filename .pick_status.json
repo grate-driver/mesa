@@ -445,7 +445,7 @@
         "description": "zink: Correct compiler issue with have_moltenvk member having been moved.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "598dc3dca41e3b1a9bf9e94b17e5426773ed6830"
     },
