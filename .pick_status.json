@@ -877,7 +877,7 @@
         "description": "intel/vec4: Also use MOV_FOR_SCRATCH for swizzle resolves",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2db88679432bd34a2c4ed761baec747192fa3e60"
     },
