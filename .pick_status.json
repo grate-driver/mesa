@@ -1345,7 +1345,7 @@
         "description": "egl: zero is a valid fd",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0201f01dc4e903d9b60cbbf87fde3ffa7c76f248"
     },
