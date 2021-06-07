@@ -1156,7 +1156,7 @@
         "description": "radv: emit PA_SC_CONSERVATIVE_RASTERIZATION_CNTL only on GFX9+",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
