@@ -751,7 +751,7 @@
         "description": "aco: fix range checking for SSBO loads/stores with SGPR offset on GFX6-7",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
