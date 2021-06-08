@@ -2254,7 +2254,7 @@
         "description": "llvmpipe: fix edge-rule logic for lines",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2737abb44efebfa10ac84b183c20fc5818d1514e"
     },
@@ -3019,7 +3019,7 @@
         "description": "panfrost: Allocate XFB buffers per-instance",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
@@ -3145,7 +3145,7 @@
         "description": "pan/mdg: Fix incorrect rewrite in Midgard scheduler",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
