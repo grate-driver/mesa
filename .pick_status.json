@@ -841,7 +841,7 @@
         "description": "anv: Handle OOM in the pinned path in anv_reloc_list_add",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b3c0b1b21880987d90bd5738736f2bd920f76b18"
     },
