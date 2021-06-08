@@ -652,7 +652,7 @@
         "description": "util: Zero out all of mask in util_set_thread_affinity",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9758b1d416a109f92e911d7bac6f00f9419affab"
     },
