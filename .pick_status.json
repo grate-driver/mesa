@@ -283,7 +283,7 @@
         "description": "classic/xlib: Fix the build after !9817",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4daef7ffe373f067249e052d96dcac145984b6e8"
     },
