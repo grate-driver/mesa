@@ -1939,7 +1939,7 @@
         "description": "zink: fix typo that's definitely not at all embarrassing or anything like that",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "787412b7eb8a25f92b62fbd9e04d48b1c5fb0023"
     },
