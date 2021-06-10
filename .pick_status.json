@@ -1993,7 +1993,7 @@
         "description": "zink: use scissor region for discarding clears during blit",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a8e047e8f4a4ec544632fec20d1d6b441fd3ef31"
     },
