@@ -364,7 +364,7 @@
         "description": "panfrost: Use blendable check for tib read check",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
@@ -373,7 +373,7 @@
         "description": "panfrost: Fix UNORM 10 sizes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "56047fb64d713512edfb89067ef2be2fb68916b1"
     },
