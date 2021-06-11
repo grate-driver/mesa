@@ -1075,7 +1075,7 @@
         "description": "anv: fix dynamic primitive topology for tess",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f6fa4a8000053fc6e9a25a30f482c59466390898"
     },
