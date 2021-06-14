@@ -1408,7 +1408,7 @@
         "description": "mesa: unreference zombie buffers when creating buffers to lower memory usage",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e014e3b6be638f4192d6eddd3d1033fd571f3a76"
     },
