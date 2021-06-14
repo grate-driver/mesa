@@ -814,7 +814,7 @@
         "description": "mesa: fix incorrect comment in draw_gallium_multimode",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4566383ae4bf28b99576ae9d293c50decc771888"
     },
