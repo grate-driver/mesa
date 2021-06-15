@@ -787,7 +787,7 @@
         "description": "compiler/glsl: Use mutex lock while freeing up mem_ctx",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e4da8b9c331cc3ae1b86b3a7860231e202463db0"
     },
