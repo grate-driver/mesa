@@ -1021,7 +1021,7 @@
         "description": "zink: drop repeated usage-bit",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "00dc0036bb6d0c6de1ec3dc395e1d9e63d05ed83"
     },
