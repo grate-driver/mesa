@@ -706,7 +706,7 @@
         "description": "anv: Fix dynamic primitive topology for tess on Gfx7.x too",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "24342e499bc58348b257716f629dccca3c1b0833"
     },
