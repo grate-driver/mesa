@@ -292,7 +292,7 @@
         "description": "nir/lower_mediump_io: Don't remap base unless needed",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "fb29cef8ddabdd05aeddc5220017bb28a83bb19c"
     },
