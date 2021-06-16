@@ -445,7 +445,7 @@
         "description": "intel/nir: Fix txs for null surfaces",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "05a37e2422080278a668f048cd8bc7a0e4d5d644"
     },
