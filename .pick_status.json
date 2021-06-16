@@ -1156,7 +1156,7 @@
         "description": "zink: do not unmap dt-buffers twice",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5159f406d895c6a253e90c6b076045ac133e55af"
     },
