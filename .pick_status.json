@@ -913,7 +913,7 @@
         "description": "zink: remove duplicate format-mapping on little-endian",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a22a1c0324e0d20c03ee4dceb9ddc4fa4d07ec04"
     },
