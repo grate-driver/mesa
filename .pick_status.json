@@ -49,7 +49,7 @@
         "description": "nir/opt_if: Don't split ALU for single block infinite loops",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0881e90c09965818b02e359474a6f7446b41d647"
     },
