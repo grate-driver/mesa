@@ -3370,7 +3370,7 @@
         "description": "ac/nir: Update TCS output barriers with nir_var_mem_shared.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bf966d1c1dd968116b8b547ca2739f5113caccb5"
     },
