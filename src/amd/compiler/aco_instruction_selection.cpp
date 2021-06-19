@@ -11836,6 +11836,13 @@ void select_program(Program *program,
          create_workgroup_barrier(bld);
       }
 
+      if (program->chip_class == GFX10 &&
+          program->stage.hw == HWStage::NGG &&
+          program->stage.num_sw_stages() == 1) {
+         /* Workaround for Navi 1x HW bug to ensure all NGG waves launch before s_sendmsg(GS_ALLOC_REQ). */
+         Builder(ctx.program, ctx.block).sopp(aco_opcode::s_barrier, -1u, 0u);
+      }
+
       if (check_merged_wave_info) {
          Temp cond = merged_wave_info_to_mask(&ctx, i);
          begin_divergent_if_then(&ctx, &ic_merged_wave_info, cond);
