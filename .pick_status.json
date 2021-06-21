@@ -3262,7 +3262,7 @@
         "description": "zink: handle custom border color without matching wrap mode case",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "36f4e61403a32081ffebfa3d178bfb7ba483559f"
     },
