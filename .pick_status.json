@@ -148,7 +148,7 @@
         "description": "radeonsi: fix fb_too_small condition",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f7c58559f5731790f4e68f1b1cb38c10818efa96"
     },
