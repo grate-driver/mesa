@@ -1615,7 +1615,7 @@
         "description": "radeon/vcn/enc: Add missing line to HEVC SPS header code",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e62c7e7c6caa6c9531afb694e7952a7fc3ac4401"
     },
