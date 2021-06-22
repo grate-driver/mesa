@@ -2713,7 +2713,7 @@
         "description": "iris: Tile cache flush for depth before fast clear",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c85ea824bcab971dc2d9052b5dc937ee4b139cf5"
     },
