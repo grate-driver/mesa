@@ -2893,7 +2893,7 @@
         "description": "i965: fix regression in pipe control on g45",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b505db3864b097fa3bbf2a35bd3184554eb449d7"
     },
