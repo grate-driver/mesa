@@ -1606,7 +1606,7 @@
         "description": "amd/addrlib: remove Meson debug message()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d0767fc045a1210f9fff464b96dd68cf36fe57f9"
     },
