@@ -490,7 +490,7 @@
         "description": "aux/trace: fix bool argument",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c1270d4845d39939d6a7d3b1b81e0d2f9e33133d"
     },
