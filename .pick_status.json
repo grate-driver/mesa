@@ -769,7 +769,7 @@
         "description": "libgl-gdi: add missing include",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "fdfe4a4d307377f078a01d05a247c4f61d208be8"
     },
