@@ -796,7 +796,7 @@
         "description": "zink: remove unused moltenvk functions",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c2cb2dd3bc68d0d61fa483a3927563bab08c93e9"
     },
