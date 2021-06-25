@@ -58,7 +58,7 @@
         "description": "amdgpu/bo: update uses_secure_bos when importing buffers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "90b98c06493f8a9759e5496d5ec91fb60edf7b92"
     },
