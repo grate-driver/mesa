@@ -130,7 +130,7 @@
         "description": "ac/surface: don't print stencil info if tex has no stencil",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "988f148db3c9163246e1260750c8e6e43f6bbd5b"
     },
