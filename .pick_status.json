@@ -112,7 +112,7 @@
         "description": "nir: return progress from nir_lower_packing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "adb157ddfd52ab495878a8b2b1bf70586d773aa2"
     },
