@@ -1534,7 +1534,7 @@
         "description": "ir3: Fix infinite loop in scheduler when splitting",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d2f4d332dbb552af62fe5caabe67664d98f32229"
     },
