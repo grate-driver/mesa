@@ -517,7 +517,7 @@
         "description": "util/tests: initialise key in cache_test",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e8495646afb06a9dd7786e9d11f4cdd7ac49279a"
     },
