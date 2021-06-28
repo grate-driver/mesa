@@ -139,7 +139,7 @@
         "description": "radeonsi/gfx7: always sync pfp/me",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c53261645deca271522367e4af40393ff152eaee"
     },
