@@ -2488,7 +2488,7 @@
         "description": "iris: Don't leak the surface if uncompressed re-interp fails",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a032a9665f275085c825b54b62128ae90adba1c6"
     },
