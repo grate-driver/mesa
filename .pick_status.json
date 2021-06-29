@@ -1687,7 +1687,7 @@
         "description": "intel/fs: fix shader call lowering pass",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "423c47de991643269a7c76ea37efe59b237fa6e7"
     },
