@@ -859,7 +859,7 @@
         "description": "radv: fix applying radv_disable_dcc for DOOM 2016 again",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
@@ -1309,7 +1309,7 @@
         "description": "radv: fix applying radv_disable_dcc for DOOM and Wolfenstein II",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "28e1b02a6f12e7a74b4f6970d226f8c9c01515a5"
     },
@@ -4576,7 +4576,7 @@
         "description": "radv: disable DCC for DOOM 2016 and Wolfenstein II",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "da166f648f61e7f628e20697936667cd9879d074"
     },

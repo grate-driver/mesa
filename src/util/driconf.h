@@ -490,4 +490,8 @@
    DRI_CONF_OPT_I(radv_override_uniform_offset_alignment, def, 0, 128, \
                   "Override the minUniformBufferOffsetAlignment exposed to the application. (0 = default)")
 
+#define DRI_CONF_RADV_DISABLE_DCC(def) \
+   DRI_CONF_OPT_B(radv_disable_dcc, def, \
+                  "Disable DCC for color images")
+
 #endif
