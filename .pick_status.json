@@ -4855,7 +4855,7 @@
         "description": "freedreno/a6xx: Fix framebuffer_barrier crash",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "02298ed1fc640f89d66c1e22e68e1f9fecc14205"
     },
