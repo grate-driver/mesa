@@ -4234,7 +4234,7 @@
         "description": "Fix up leftover \"state_trackers\" references to \"frontends\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d6287a94b697ffe12a4e576a38943cdf4e90cdb0"
     },
