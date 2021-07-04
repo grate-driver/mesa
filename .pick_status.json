@@ -2146,7 +2146,7 @@
         "description": "util/radeonsi: add radeonsi workaround for Nuclear Throne",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f1cc13727c6875ee5aae7656652dda231267cccf"
     },
