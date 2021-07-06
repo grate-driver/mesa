@@ -1777,7 +1777,7 @@
         "description": "softpipe: add missing sentinel to debug option array",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "991def0edc823293d593fc23d2243556cbdc0ff4"
     },
