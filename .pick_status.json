@@ -1390,7 +1390,7 @@
         "description": "ac/surface/tests: fix the ARM build",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8771d45a741da6c6b764826a95f99e453e7afeb9"
     },
