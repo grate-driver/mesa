@@ -283,7 +283,7 @@
         "description": "nir/lower_mediump: Fix metadata in all passes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "fb29cef8ddabdd05aeddc5220017bb28a83bb19c"
     },
