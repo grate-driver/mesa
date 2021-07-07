@@ -166,7 +166,7 @@
         "description": "anv: Use intel_i915_query_alloc for memory regions",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "65e8d72bc106b0cce62d2037aa0e7f1babf42d13"
     },
