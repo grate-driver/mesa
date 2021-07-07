@@ -1381,7 +1381,7 @@
         "description": "radeonsi,radv: fix a late alloc deadlock with <= 6 CUs per SA",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c377f45c1833052f3d0d9d4ac341ee9917f9184c"
     },
