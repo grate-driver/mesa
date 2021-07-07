@@ -31,7 +31,7 @@
         "description": "intel/isl: Add a missing assert in isl_tiling_get_intratile_offset_sa",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a4dafe1faddb569424c7d60fb8da96d0542cedca"
     },
