@@ -1741,7 +1741,7 @@
         "description": "st/mesa: fix size miss match for some check",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d947e3e2c8c23dd9622c6af20d2fb887a43475f5"
     },
