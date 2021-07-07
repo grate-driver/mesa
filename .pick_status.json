@@ -193,7 +193,7 @@
         "description": "broadcom/compiler: fix add vs. mul",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7f61ff7b4d1dfe791264148ff3cbe8b03c76aeca"
     },
