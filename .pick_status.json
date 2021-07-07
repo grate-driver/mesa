@@ -58,7 +58,7 @@
         "description": "intel/isl: Explicitly set offset_B = 0 in get_uncomp_surf for arrays",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9946120d2b4e898b58f5d255558a27affc78e928"
     },
