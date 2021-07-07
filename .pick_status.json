@@ -1561,7 +1561,7 @@
         "description": "anv: Handle errors properly in anv_i915_query",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c0d07c838a9fcd67e4ae8cf948ced2daa3edf8c6"
     },
