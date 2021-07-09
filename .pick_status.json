@@ -625,7 +625,7 @@
         "description": "nir/lower_tex: Rework invalid implicit LOD lowering",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e382890e25c0d95b0765ec00126f27dacc0e1da9"
     },
