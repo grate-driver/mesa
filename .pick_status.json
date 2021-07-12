@@ -2893,7 +2893,7 @@
         "description": "ac: fix win32 build",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "e2e9dd44f42261445d1af87624cedb3d09d63600"
     },
