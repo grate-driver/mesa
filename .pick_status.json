@@ -265,7 +265,7 @@
         "description": "vulkan: do not map zero-sized region of memory",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8af568e4ae77332e1cc09031301e559996b81fe9"
     },
