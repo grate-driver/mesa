@@ -256,7 +256,7 @@
         "description": "lavapipe: do not assert on more than 32 samplers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c18ff60087ef655b9a584c4586859df5e2bf7d28"
     },
