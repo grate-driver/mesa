@@ -103,7 +103,7 @@
         "description": "glsl: Add operator for .length() method on implicitly-sized arrays",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "273f61a0051a794d1a39d70fb1dbf46a3ca3c63f"
     },
