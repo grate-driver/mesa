@@ -256,7 +256,7 @@
         "description": "lvp: fixup multi draw memcpys",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f99f7c06e71d6194d4206bde58a8acb5a42d90ed"
     },
