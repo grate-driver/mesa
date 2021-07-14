@@ -292,7 +292,7 @@
         "description": "nine: Fix assert in tx_src_param",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5974401a4adba2373232fc72940db96c32bbb4b6"
     },
