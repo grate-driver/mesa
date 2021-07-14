@@ -112,7 +112,7 @@
         "description": "lima: handle fp16 vertex formats",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "12128fb1351eee6ec681039fe8483b3c39db7c8e"
     },
