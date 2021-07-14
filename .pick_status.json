@@ -30118,7 +30118,7 @@
         "description": "freedreno: Consolidate needs_flush and clearing last_fence",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
