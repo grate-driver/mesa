@@ -238,7 +238,7 @@
         "description": "zink: improve detection for broken drawids",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2d32d123e5624e631fa1eda02da647d0065b7ae8"
     },
