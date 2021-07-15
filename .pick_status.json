@@ -40,7 +40,7 @@
         "description": "asahi: Move assignment after null check.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "dcd2d8ca5008ec619732c21f9ff0ed4f7ee7f7f6"
     },
