@@ -355,7 +355,7 @@
         "description": "draw: handle resetting draw_id between instances.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ce0b1f23c30e1943be67d81231722e76e074f823"
     },
