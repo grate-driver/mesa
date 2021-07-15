@@ -202,7 +202,7 @@
         "description": "radv: Don't compile NGG culling into shaders that write viewport index.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f30e4351de2f562955435a04cf75dd641639d31c"
     },
