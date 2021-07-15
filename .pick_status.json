@@ -193,7 +193,7 @@
         "description": "radv: Remove num_viewports from radv_skip_ngg_culling.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9a95f5487f5ab83fa44bea12afa30cf1a25fc9db"
     },
