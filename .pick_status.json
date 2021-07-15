@@ -1,0 +1,344 @@
+[
+    {
+        "sha": "f40a08d25c91256cd3dff0211b8e10d5bbb3734e",
+        "description": "anv: Don't advertise unsupported shader stages",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19c828372975573d0e83b8b11c0a7cf9d73b55ed",
+        "description": "radv: Use 128-sized vertex grouping for NGG shaders.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "17e62a3c23f68df802bcbfdab947dff4226fa281",
+        "description": "mesa: (correctly) flush more in _mesa_make_current",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34342cce895b4d666c3f6a1cbf3f3b7da859afc2",
+        "description": "glx/drisw: Nerf PutImage when loaderPrivate == NULL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5c8761edab0f3982ab22de774afa81148b47795",
+        "description": "asahi: Move assignment after null check.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "dcd2d8ca5008ec619732c21f9ff0ed4f7ee7f7f6"
+    },
+    {
+        "sha": "8351ad17193224a2b6c0bc635b405e677a31c7c1",
+        "description": "Revert \"ci:  disable Broadcom CI\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "87cdcf56455b78b0ca799adccb20c7d23d1b3a51"
+    },
+    {
+        "sha": "f62ff2e7dc934179ebc1eaa412adbc449351d138",
+        "description": "util: document that workaround also fixes Riptale",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f481c290b0edb9deb009674bf9e29905511ce4cc",
+        "description": "v3dv: refactor meta copy/clear code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "18642987fdd4dd69ce64852228afa022cedfd1e1",
+        "description": "v3dv: remove more dead clearing code",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "5ba7f64b454b78c71be0827c74f37497fd135822"
+    },
+    {
+        "sha": "87cdcf56455b78b0ca799adccb20c7d23d1b3a51",
+        "description": "ci:  disable Broadcom CI",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ea156f44c7ce8d6880217ef4d46692cc7ac0219",
+        "description": "radv: only init the TC-compat ZRANGE metadata for the depth aspect",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6e4e6d952715fbcbf92dfcf8ded366274e4ab1a4",
+        "description": "nv50/ir: Initialize Value member id in constructor.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a3269dff65e198ac3d493b676800978ce0c01e5",
+        "description": "lima: handle fp16 vertex formats",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "12128fb1351eee6ec681039fe8483b3c39db7c8e"
+    },
+    {
+        "sha": "12d18abfe7a523d91739a6f0fb0f59c66d0478f3",
+        "description": "venus: refactor vn_EndCommandBuffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f144d914966eba2fd816b2948d5832b14f01a947",
+        "description": "lavapipe: fix multi-draw regression in shader parameters test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bedbe35d6bb176475dbe9c4d8345e5774270a196",
+        "description": "pan/gen_pack: Use 1U for unpacking log2 to avoid undefined behaviour",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "04c02418d74703812a39405df14e130c2d6fd098",
+        "description": "pan/decode: Avoid undefined behaviour on shift in bits()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6642749458b6a2e0800bb5e606dcf15e4db0c479",
+        "description": "intel/dev: Add a max_cs_workgroup_threads field",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "915e5a8cc306c35dad2f7e3a83c18ce72b16e3d6",
+        "description": "intel/dev: Handle BSW naming issues",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56d70ba6861545d13071a6c3be46648c668091f6",
+        "description": "intel/dev: Put the device name in intel_device_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c24ba6cecbacf2d81345c1112f083006f22b65ea",
+        "description": "intel/dev: Handle CHV CS thread weirdness in get_device_info_from_fd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1744372714421d741f256f99148e792796888562",
+        "description": "lavapipe: Use common Vulkan format helpers",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "b38879f8c5f57b7f1802e433e33181bdf5e72aef"
+    },
+    {
+        "sha": "376fb4f55f080929df8ca5a2a975fc88a00eec06",
+        "description": "docs: drop duplicate `21.1` branch name from release calendar",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1fe0bb0ca28a1aefcd81a9b909424124ff30b25",
+        "description": "docs: update calendar and link releases notes for 21.1.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd3d8f0f7abef7427e0ea870b395d5f627859435",
+        "description": "docs: add release notes for 21.1.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6689c3917e876bf1719b5808e2c0832ee4d50aed",
+        "description": "lavapipe: increment drawid for multidraws",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f99f7c06e71d6194d4206bde58a8acb5a42d90ed"
+    },
+    {
+        "sha": "d08c84ab0c3ab1f8061e5d9ea1bcff2ed8b6cf57",
+        "description": "zink: improve detection for broken drawids",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "2d32d123e5624e631fa1eda02da647d0065b7ae8"
+    },
+    {
+        "sha": "28c5e88931a0d5a37df50915686d027e2ca81f0d",
+        "description": "docs: update calendar for 21.2.0-rc1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a3271b3f73d40dbbfa9e733498b7ded8810a6d17",
+        "description": "lvp: fixup multi draw memcpys",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f99f7c06e71d6194d4206bde58a8acb5a42d90ed"
+    },
+    {
+        "sha": "a18f434d58b8f1be4edf212a6aa2df4cedc13413",
+        "description": "panfrost: Warn on transitions to linear",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d5fc0ceafda78420094b00d43b6c81c5ea38858d",
+        "description": "panfrost: Warn on get_fresh_batch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f2e3ac5c6277f8bd18277a311e8ee7c2d43589e3",
+        "description": "panfrost: Warn on get_fresh_batch_for_fbo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a266a0fbbb1cf7b5653807c86db8ddfe60cae495",
+        "description": "panfrost: Log reasons for flushes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bcd915622b23ed194e92f810ceb9bd89c27fedd5",
+        "description": "panfrost: Warn on going out of AFBC",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5bd91a632bb2ce13f03ab4d78a114ca110270348",
+        "description": "panfrost: Warn on software conditional rendering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "256f4a5b02a06ffc701baa3e4fd150796b33b28a",
+        "description": "panfrost: Add perf_debug macros",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fae28b0fce7b36b3f31713758025e4ab8d73046b",
+        "description": "docs/relnotes/new_features: empty for next release cycle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a05c595a3a09ea2e764d5d6f18c1dc55601fea3",
+        "description": "VERSION: bump version for 21.3 development cycle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    }
+]
