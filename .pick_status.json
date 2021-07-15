@@ -850,7 +850,7 @@
         "description": "anv: fix feature/property/sizes reported for fragment shading rate",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "790ff1ceac8a406467b38c929e0ae75200da59f0"
     },
