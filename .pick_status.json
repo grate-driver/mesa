@@ -76,7 +76,7 @@
         "description": "v3dv: remove more dead clearing code",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5ba7f64b454b78c71be0827c74f37497fd135822"
     },
