@@ -1147,7 +1147,7 @@
         "description": "softpipe/aniso: move DDQ calculation to after scaling.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2135aba8d99d5b0b5f73d97d4aac6a25d69de57c"
     },
