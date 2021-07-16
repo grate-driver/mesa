@@ -445,7 +445,7 @@
         "description": "mesa: fix bindless uniform samplers update",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "736f1f70ab8a7995041a707d28d0e1a5f2940f4c"
     },
