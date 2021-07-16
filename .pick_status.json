@@ -1,5 +1,401 @@
 [
     {
+        "sha": "a62973580b7846f2213cbd2589e9473c26596683",
+        "description": "intel/eu: Start validating LSC message descriptors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89b7a40212880bc104758be5895f1ad915052854",
+        "description": "intel/compiler: Enable has_iadd3 option on XeHP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "06ab73768612084b0ea614c0da87f2f63587b788",
+        "description": "nir: Add optimizations for iadd3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6db2299a8e872336b5d43f78e78222c0f9cb279",
+        "description": "intel/compiler: Allow ternary add to promote source to immediate",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cde9ca616d7bd2ecdf3281f087e9c7acccc85192",
+        "description": "intel/compiler: Make decision based on source type instead of opcode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "705285b9f4a11b19c550ef3acbb40eb0a1d6bc41",
+        "description": "intel/compiler: Add support for ternary add instruction on XeHP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8dff256c07fac1484b66c7f7a71f1b9c5ffe1dd",
+        "description": "nir: Add new opcode for ternary addition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6e17931d2120148dd71d5014421303816611df60",
+        "description": "radv: Use pre-computed viewport transform for NGG culling state.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9a478f1cd1d911431b619e0db5551207131dfc1",
+        "description": "radv: remove unused variable from radv_emit_viewport",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2ef92d7a58ee07d6b44131712b6b85700503e38",
+        "description": "radv: pre-calculate viewport transforms",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1e13cb1965ae608a48f7fd2579f8a27119f4e04a",
+        "description": "radv: merge si_write_viewport into radv_emit_viewport",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "53d4485a028525f9a041e527e50d79ecd3e999fc",
+        "description": "freedreno: fix wrong tile aligment for 3 CCU gpu",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "78c8a8af80d5b0ccd68dd85ff7ecbb699be31f7d"
+    },
+    {
+        "sha": "60c5abf6857b57893f313e2228e2ec0fac8f1995",
+        "description": "aco: Remove s_and with exec when all lanes are active.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e66f54e5c83fd545e1a4062e683b584a35dacc00",
+        "description": "aco: Allow elect to take advantage of knowing when all lanes are active.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b12318f26c2440bed3cc0cc9261666d1253a05ba",
+        "description": "aco: Swap s_and operand order for ballot.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5008a48d39fc7df788ce15eac0154f428632022",
+        "description": "intel/perf: Use intel_i915_query_flags instead of hand-rolling it",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba99d2a3288d87245ce9787106b6118595bd4fb4",
+        "description": "intel/dev: Use intel_i915_query_alloc in query_topology",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3fa6b8d0417f215a859386c9c41aca3cd4ec201e",
+        "description": "iris: Use intel_i915_query for meminfo",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "e60114b2ae117b0f9cc55de57ab397804c8d6bf8"
+    },
+    {
+        "sha": "35ec1d9730cd1d0e3d8f212d5edcea53fe7cc518",
+        "description": "anv: Use intel_i915_query_alloc for memory regions",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "65e8d72bc106b0cce62d2037aa0e7f1babf42d13"
+    },
+    {
+        "sha": "ffdf4d76838b906030f17d7d1b50fddd1c8679f3",
+        "description": "intel: Pull anv_i915_query into common code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b664481ba91603d69b294ca5b1243e42c86a5863",
+        "description": "anv: Handle errors properly in anv_i915_query",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c0d07c838a9fcd67e4ae8cf948ced2daa3edf8c6"
+    },
+    {
+        "sha": "d07e5bde751a7f85ded96b35660075d8f782b49c",
+        "description": "radv: Remove num_viewports from radv_skip_ngg_culling.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "9a95f5487f5ab83fa44bea12afa30cf1a25fc9db"
+    },
+    {
+        "sha": "aa247403703b27938fd86ff60428c91a0e76aa6c",
+        "description": "radv: Don't compile NGG culling into shaders that write viewport index.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f30e4351de2f562955435a04cf75dd641639d31c"
+    },
+    {
+        "sha": "e56d5db341eaf2112be366ee015a9956b2c3b704",
+        "description": "iris: Re-emit MEDIA_VFE_STATE for variable group size shaders",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "33c61eb2f10526c0b90c5ad376e5b0433aec296d"
+    },
+    {
+        "sha": "d7e1c0ec2e1d467b9f71e97544428910f235bea8",
+        "description": "v3dv: don't emit frame setup more than once for multilayered framebuffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "51d0d83667c31ed33992175c9d07a7eb05d6714a",
+        "description": "v3dv: don't overallocate tile state for meta TLB operations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fcc518473f7c5de9a34af397f77018dc5a211e9",
+        "description": "v3dv: allow limiting amount of tile state allocated",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "93e7534a66a42d1b14d3ff1b6dc532abb1c2c62c",
+        "description": "v3dv: improve TLB layered image clears",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "308041095c4c12263ee7df2784572eef0e61c73e",
+        "description": "v3dv: remove unused layer field from struct rcl_clear_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b637919a8a30041c64a201f62aba032254a0e0d",
+        "description": "radv: fix specifying the stencil layout for separate depth/stencil layouts",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cadf2d63b736b610728d508ed507551dd74ba16a",
+        "description": "radv: report APUs as discrete GPUs for Red Dead Redemption 2",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a1cc56e405b247702e91180c1143ca96b96b5bf",
+        "description": "radv: fix bounds checking for zero vertex stride on GFX6-7",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ee322acdb633a0935f542494f7113d86df3f78a",
+        "description": "nir: Better document the Boissinot algorithm in nir_from_ssa()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb589ee394287fa1291cc7ce564f946d8af73583",
+        "description": "intel/dev: Drop a bogus assert",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "c24ba6cecbacf2d81345c1112f083006f22b65ea"
+    },
+    {
+        "sha": "fce0027d913f6538cb1f1d40675191d2a9ffadfe",
+        "description": "anv: Unbreak wide lines on HSW/BDW",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "004fcfe6985e6573de62f7482386a51b0750f3dc"
+    },
+    {
+        "sha": "dfcb47bcec0fb0e7cd812015640706a445acf065",
+        "description": "anv: Zero initialize pipeline structs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34aae6a1f2221bdd6ae812c11fafaaca10ca2419",
+        "description": "vulkan/util: Add and use vk_multialloc_zalloc variants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "49a7c92793ebcc4e2814ef295e51673dc4c9674c",
+        "description": "vulkan/wsi/wayland: Initialise wl_shm pointer in VkImage",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "6b36f35734a9ffa2c6fde475933eb46d7f4fb6f4"
+    },
+    {
+        "sha": "1061ebb6da6435caf4f38d6d0a592ab6d1ca7bdc",
+        "description": "vulkan/wsi/wayland: Cosmetic alignment fix",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b3d2642ca4fe10faf05d51962339a598e622028e",
+        "description": "draw: handle resetting draw_id between instances.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "ce0b1f23c30e1943be67d81231722e76e074f823"
+    },
+    {
+        "sha": "5447330a25f82eff4b449fb5a0304e1d4a762821",
+        "description": "lavapipe: fix indexed multi draw draw_id increment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb35195b73824d2aa4ac89aa80ff84f54bc9b108",
+        "description": "nir: Validate after deserialization.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f855b25fd0091d76a2ed6dc9f5c873d75a1c78d8",
+        "description": "docs: mark mesa 21.0 as done",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "004fcfe6985e6573de62f7482386a51b0750f3dc",
+        "description": "anv: fix some multisample lines_wide CTS tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "f40a08d25c91256cd3dff0211b8e10d5bbb3734e",
         "description": "anv: Don't advertise unsupported shader stages",
         "nominated": false,
