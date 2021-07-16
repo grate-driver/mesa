@@ -103,7 +103,7 @@
         "description": "freedreno: fix wrong tile aligment for 3 CCU gpu",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "78c8a8af80d5b0ccd68dd85ff7ecbb699be31f7d"
     },
