@@ -346,7 +346,7 @@
         "description": "zink: Fix unused-variable warning",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9b40fc4892c24a5eb5558719682fad6bfc3dd79b"
     },
