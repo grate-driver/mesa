@@ -76,7 +76,7 @@
         "description": "virgl: disable anisotropic filtering.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a8987b88ff1db4ac00720a9b56c4bc3aeb666537"
     },
