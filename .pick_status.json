@@ -76,7 +76,7 @@
         "description": "aco: include <cstddef> in aco_util.h",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "59fdaa1985f9269c40f0ca4704fbeb3fb05c4c2f"
     },
