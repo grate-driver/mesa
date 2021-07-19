@@ -967,7 +967,7 @@
         "description": "llvmpipe: add support for time elapsed queries.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "506e51b8560f30bc67ee84def535a324b5748208"
     },

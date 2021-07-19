@@ -1532,7 +1532,8 @@ lp_setup_begin_query(struct lp_setup_context *setup,
    if (!(pq->type == PIPE_QUERY_OCCLUSION_COUNTER ||
          pq->type == PIPE_QUERY_OCCLUSION_PREDICATE ||
          pq->type == PIPE_QUERY_OCCLUSION_PREDICATE_CONSERVATIVE ||
-         pq->type == PIPE_QUERY_PIPELINE_STATISTICS))
+         pq->type == PIPE_QUERY_PIPELINE_STATISTICS ||
+         pq->type == PIPE_QUERY_TIME_ELAPSED))
       return;
 
    /* init the query to its beginning state */
@@ -1584,7 +1585,8 @@ lp_setup_end_query(struct lp_setup_context *setup, struct llvmpipe_query *pq)
           pq->type == PIPE_QUERY_OCCLUSION_PREDICATE ||
           pq->type == PIPE_QUERY_OCCLUSION_PREDICATE_CONSERVATIVE ||
           pq->type == PIPE_QUERY_PIPELINE_STATISTICS ||
-          pq->type == PIPE_QUERY_TIMESTAMP) {
+          pq->type == PIPE_QUERY_TIMESTAMP ||
+          pq->type == PIPE_QUERY_TIME_ELAPSED) {
          if (pq->type == PIPE_QUERY_TIMESTAMP &&
                !(setup->scene->tiles_x | setup->scene->tiles_y)) {
             /*
@@ -1620,7 +1622,8 @@ fail:
    if (pq->type == PIPE_QUERY_OCCLUSION_COUNTER ||
       pq->type == PIPE_QUERY_OCCLUSION_PREDICATE ||
       pq->type == PIPE_QUERY_OCCLUSION_PREDICATE_CONSERVATIVE ||
-      pq->type == PIPE_QUERY_PIPELINE_STATISTICS) {
+      pq->type == PIPE_QUERY_PIPELINE_STATISTICS ||
+      pq->type == PIPE_QUERY_TIME_ELAPSED) {
       unsigned i;
 
       /* remove from active binned query list */
