@@ -418,7 +418,7 @@
         "description": "broadcom/compiler: emit TMU flush before a jump",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "197090a3fcae47a4aa0faa06ea3a45e1bb64a458"
     },
