@@ -310,7 +310,7 @@
         "description": "egl/surfaceless: try kms_swrast before swrast",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f7e0cdcf1a5b639b4df610be600fa5d8db100289"
     },
