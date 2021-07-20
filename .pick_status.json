@@ -121,7 +121,7 @@
         "description": "dlist: don't handle unmerged draws as merged",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b328d8e9bc9900a0372d7c3307f18ad11d708af9"
     },
