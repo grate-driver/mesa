@@ -58,7 +58,7 @@
         "description": "nir/gcm: Clear out pass_flags before starting",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8dfe6f672f4f3e226089c6cc8d392fcd39dff5cb"
     },
