@@ -166,7 +166,7 @@
         "description": "ci: actually run piglit tests with virgl",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f1b952fa739998f87cec16d09799a65ea7c631be"
     },
