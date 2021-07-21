@@ -85,7 +85,7 @@
         "description": "v3dv: assert job->cmd_buffer is valid",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "31a786c80addde6a4d9fd6b1f66b96f8cc3a72ef"
     },
