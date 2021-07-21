@@ -355,7 +355,7 @@
         "description": "nir/algebraic: fix imod by negative power-of-two",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0ef5f3552f68076747211ec81f687b37a5540d8e"
     },
