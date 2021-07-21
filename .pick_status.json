@@ -301,7 +301,7 @@
         "description": "meson: allow egl_native_platform to be specified",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f8dc22bf61c1e6008f6954ffd25c1ee322f500c6"
     },
