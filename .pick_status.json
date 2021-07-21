@@ -760,7 +760,7 @@
         "description": "freedreno: Lock access to msm_pipe for RB object suballocation.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "737d4caa83a949ad38eb9f4663ec020e189886a9"
     },
