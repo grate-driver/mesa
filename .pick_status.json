@@ -103,7 +103,7 @@
         "description": "aco: don't create v_madmk_f32/v_madak_f32 from v_fma_legacy_f16",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
