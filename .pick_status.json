@@ -3064,7 +3064,7 @@
         "description": "vulkan/wsi: Set MUTABLE_FORMAT_BIT in the prime path",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4bdf8547f4dc1a383bf4e67110f44610a3790189"
     },
