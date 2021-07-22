@@ -76,7 +76,7 @@
         "description": "aco/tests: add idep_amdgfxregs_h",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9bf30c4a5cba7e148da7ccb042906eff8a8ad96a"
     },
