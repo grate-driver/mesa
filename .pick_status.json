@@ -670,7 +670,7 @@
         "description": "etnaviv: fix gbm_bo_get_handle_for_plane for multiplanar images",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "788f6dc85781c58b37c0d762085090d2d5d8d3d5"
     },
