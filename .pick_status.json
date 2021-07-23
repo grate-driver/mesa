@@ -103,7 +103,7 @@
         "description": "st/pbo: only use x coord when reading a PIPE_TEXTURE_1D",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a01ad3110a92e88f815242b59ad1da6d2623decc"
     },
