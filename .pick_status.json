@@ -517,7 +517,7 @@
         "description": "pan/mdg: Use the correct swizzle for condition moves",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "70072a20e0086ad2d3714216a2b8fb4a97776385"
     },
