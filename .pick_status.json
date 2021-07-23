@@ -1138,7 +1138,7 @@
         "description": "ir3/ra: Fix available bitset for live-through collect srcs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0ffcb19b9d9fbe902224542047c389a661fbf816"
     },
