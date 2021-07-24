@@ -265,7 +265,7 @@
         "description": "agx: Fix mismatched units in load_ubo",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "033d4d09fc7e76db8b6af4477a661d4b1e979b95"
     },
