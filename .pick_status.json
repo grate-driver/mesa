@@ -94,7 +94,7 @@
         "description": "isl: fix mapping of format->stringname",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ed6e586562f4443c56e385017a109e5a5ca5294e"
     },
