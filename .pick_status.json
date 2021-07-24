@@ -373,7 +373,7 @@
         "description": "asahi: Fix sampler filtering flag",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cad54e2721ded55c0ffa8257c943c1a3be4a8a99"
     },
