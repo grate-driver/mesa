@@ -228,5 +228,6 @@ agx_ra(agx_context *ctx)
       }
    }
 
+   free(ssa_to_reg);
    free(alloc);
 }
