@@ -40,7 +40,7 @@
         "description": "amd/registers: fix fields conflict detection",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e6184b089240b76942650e847b8a4879821caaa6"
     },
