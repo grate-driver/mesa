@@ -436,7 +436,7 @@
         "description": "zink: use array size in spirv bo length calculations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c1cdf30a119cc523616b3825daf144c1620c17b7"
     },
