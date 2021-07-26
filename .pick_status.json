@@ -301,7 +301,7 @@
         "description": "llvmpipe: fix nir dot products (fsum op)",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4eb0475b5a0047e368129550e4c07a450a233a74"
     },
