@@ -1,5 +1,572 @@
 [
     {
+        "sha": "49908c602ffd2d84063effa7ddd0ee842be41a89",
+        "description": "anv/android: Rework our handling of AHardwareBuffer imports",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d903f51631cb003747b69f74454fa1823310786e",
+        "description": "tu: Triage some CTS failures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59c2337f2264c7e98600fae049812934e00a66b1",
+        "description": "panvk: Implement vkCmdClearAttachments",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd97eb123e1ba2c63809df402b8e27c4c0af5a4a",
+        "description": "panvk: Expose panvk_cmd_alloc_fb_desc and panvk_cmd_alloc_tls_desc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f295e7f1d951a1555f7b3ede1506f176d676b521",
+        "description": "panvk: A pipeline might not be bound when the render pass is ended",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a0acc35af113f54f2e6ec93f27312822a01c363",
+        "description": "panvk: Move check for fragment requirement up to the draw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cef56d5824427d6fb23fd2017a08ad873bccf364",
+        "description": "panvk: Close batch when ending a command buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "616aa3f1386c121e2517fc35a565524c2d0e9adf",
+        "description": "panvk: Start a new batch when the job index gets above the limit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "498e5f44fa9b3195818b212505fe840777a1ebea",
+        "description": "panvk: Don't try to update samplers if they are immutable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "15ac51f7583ac38287aa082c0b01014c2fcd5b70",
+        "description": "ci/v3dv: update vulkan expected results",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3f47f6e300ef1ec18b2c55ec82bccf263292351",
+        "description": "glsl: Properly handle .length() of an unsized array",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "273f61a0051a794d1a39d70fb1dbf46a3ca3c63f"
+    },
+    {
+        "sha": "441826aaaac54e84629269c4622be2f17a465209",
+        "description": "glsl: Add operator for .length() method on implicitly-sized arrays",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "273f61a0051a794d1a39d70fb1dbf46a3ca3c63f"
+    },
+    {
+        "sha": "e6cdb01c517b42dece9ed532fd6eba7a74aa8f71",
+        "description": "lima: avoid crash with negative viewport values",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "11d6441b94c7bf59ee32c8bcb0e30d370f3bd42c",
+        "description": "dlist: don't handle unmerged draws as merged",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "b328d8e9bc9900a0372d7c3307f18ad11d708af9"
+    },
+    {
+        "sha": "0b36c2916dcdf4785c46194a1ef83e64b52b0430",
+        "description": "v3dv: expose VK_KHR_multiview",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c19dcec60474ef4eaf7a46ad11ce29fe2140eac2",
+        "description": "v3dv: implement interaction of queries with multiview",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "374215de1a32239ab8cc4e3e9d210b1675147b75",
+        "description": "v3dv: fix query error handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b1620caaaf849c8a0d6b5aa51de880c0af75faea",
+        "description": "v3dv: track first and last subpass that use a view index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34724bafa46a6f25fd3ddc617ab3b67b2f9f5788",
+        "description": "v3dv: skip processing tiles for layers that are not in the view mask",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32cb8809aa32f34245100f9661e19e5933adfb19",
+        "description": "v3dv: use correct number of layers for multiview",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f46f5eac7ce95e5e59969d60df3895db76c362a0",
+        "description": "v3dv: don't merge subpasses with different view masks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5fd55ab16d770b9f59a63d125834a6e82e69bf51",
+        "description": "v3dv: broadcast multiview draw commands",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d5acae3206d7742717a2c8c7f6da06f357b7a88b",
+        "description": "broadcom/compiler: implement nir_intrinsic_load_view_index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5872c7ca7ba79f5e5bf8824ee474b30fa9c12948",
+        "description": "v3dv: inject a custom passthrough geometry shader for multiview pipelines",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9da26af07417d32130727bef8a7f3d6dfb2962aa",
+        "description": "v3dv: move all our NIR pre-processing to preprocess_nir",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5e67e1ce79b8e04847f1ea35b66790aa7fe5db3",
+        "description": "v3dv: store multiview info in our render pass data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dc86e032cba24461dd43ccb40865f90950f79e21",
+        "description": "v3dv: drop unused parameters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "72f55cf7c4eb78b4f8ccebcdde31305af6245f7c",
+        "description": "radv: implement VK_EXT_shader_atomic_float2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6694c37ea0d259f261a7fec4d1bec5d87186f2e3",
+        "description": "aco: implement VK_EXT_shader_atomic_float2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "71912de1d2916759f3307f5b9ab8fb943c4c8322",
+        "description": "venus: log more WSI messages",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee3495e46504d93c019bb3406a89deaee8a4c774",
+        "description": "turnip: Add support for VK_VALVE_mutable_descriptor_type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "567bbfd56b507735d00868774c4b73866ae0a10f",
+        "description": "venus: suballocate memory in more cases",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f06b0df741e018bb02218e149ef5e4e17f339162",
+        "description": "venus: clean up vn_AllocateMemory",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cac5711d433fa1519be101ad3dae1e1d53c9a55a",
+        "description": "llvmpipe: fix nir dot products (fsum op)",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "4eb0475b5a0047e368129550e4c07a450a233a74"
+    },
+    {
+        "sha": "6691a48bcc617bd8ec3ba248a4fa79ceb25e86e3",
+        "description": "zink: EXT_vertex_input_dynamic_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "907e4a0f0284f2ed370f9fa52cf24999c86aea59",
+        "description": "zink: improve oom flushing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9460c350b1b594f4808034eb902debd7eeb2e88c",
+        "description": "zink: merge draw_count and compute_count, move to batch struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "48473ec967bc0ca80a0c3ae1d8d23247613d0190",
+        "description": "zink: more explicitly check shader stages during compile",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7665e656c1a5cab8f05b7de4aeb461e9ead9f739",
+        "description": "zink: remove no longer used internal resource function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3137795e38b5e846e6d7f0b56b88dbfe861bdcde",
+        "description": "zink: replace some direct batch_usage calls with resource abstractions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12417c030b24a88c9b1c7931dc35ab5142458b42",
+        "description": "zink: use new resource batch usage utils for is_resource_busy",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6bda555cc0e0b8c511b77989069402d6019452d2",
+        "description": "zink: simplify some dumb code in invalidate_buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "79ccc17da5d867dc43a0ee6f9468c94e21b87943",
+        "description": "zink: use resource batch usage helpers in invalidate_buffer()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e5d6ce6e5ed3f9608a860d71cc40ea4efcac957d",
+        "description": "zink: collapse a conditional in zink_batch_resource_usage_set()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13d732ec5b44c603edf5534d1f70f469ec071aaf",
+        "description": "zink: add some resource util functions for batch usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a2b03376d610790d4cdba5e41b68f6542c878bf",
+        "description": "zink: force batch completion check on query result",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5bab4cc546f56f3e0d6afc2591258e3b799974b9",
+        "description": "zink: add screen function for checking usage completion",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "53c39f710ffa86fbc1107002b818cb5ed8ddd1f0",
+        "description": "freedreno/a6xx: Add missing PC_CCU_INVALIDATE_x",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "cccdc513e3ee58b4119e9686c3086b606500d6a9"
+    },
+    {
+        "sha": "1dc7b9b08b6a272693f85e956ec3c4e498823a65",
+        "description": "zink: use array size in spirv bo length calculations",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c1cdf30a119cc523616b3825daf144c1620c17b7"
+    },
+    {
+        "sha": "ed98e54f193000156104af9cc8d797a99bd62316",
+        "description": "kmsro: Add 'kirin' driver support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5bf6ec31ccf6c24a407df9443a534f8036d26861",
+        "description": "crocus/gen4: restrict memcpy mapping to gen5",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f3630548f1da904ec6c63b43ece7e68afdb8867e"
+    },
+    {
+        "sha": "856e2b75291bf29ecdbce8879b3da1e8cad826c1",
+        "description": "frontends/va: change to per-layer rate control",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c2695823fd121e508256c4593ceff46df89da4af",
+        "description": "frontends/omx: change rate ctrl struct to array",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "687bbe2270bee2a19f6ce8dba0a67f77ef96b106",
+        "description": "radeon/vcn/enc: change to per-temporal layer rate control",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65ad80f1d843af47fda04449df61031df0fa099c",
+        "description": "radeon/vce: change rate ctrl struct to array",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21da3be7a252eca8a0784857da82b509b448efdb",
+        "description": "r600: change rate ctrl struct to array",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1e0d51259519aa93a6bfa267dcfb8eaa32001e8e",
+        "description": "gallium: change rate ctrl struct to array",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec53e519c31255291f68c66ea2eb0dc84b3eb991",
+        "description": "frontends/va: handle h264 num_temporal_layers for SVC encoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8236320a0be393c3bfc81d47575d656e885158be",
+        "description": "radeonsi: enable H.264 temporal encoding support for VCN",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "51935d594ed97fac8f798e7686b8b9c8809b1380",
+        "description": "radeon/vcn/enc: H.264 SVC encode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "41f4b69354d50d2bb496066cb3a16a95a2c9bfa5",
+        "description": "gallium: update h264 struct to track temporal layers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "96c581e8979e79f95245f8a222c1cc925a02923d",
+        "description": "frontends/va: check number of temporal layers supported by encoder",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a23beb9c4369bb6e258558427f22aa8a9a701c94",
+        "description": "gallium: add temporal layers cap enum",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "b45cddda183230232937387f91d009500b2372c9",
         "description": "tu: handle half-reg fs outputs",
         "nominated": false,
