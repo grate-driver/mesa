@@ -40,7 +40,7 @@
         "description": "lavapipe: do not mark unsupported tests as crashing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2e29857bb6574b0f3505233b82adae1b3eeb8ff7"
     },
