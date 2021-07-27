@@ -274,7 +274,7 @@
         "description": "freedreno/ir3: Add build id to the disassembler test",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1462b00391711ff86350e802c1a3e5075a3a1632"
     },
