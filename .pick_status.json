@@ -49,7 +49,7 @@
         "description": "broadcom: remove v3dv3 from neon library",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d198e26a1ebc32c43e5bef10dcf0f8cc3234301d"
     },
