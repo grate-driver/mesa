@@ -265,7 +265,7 @@
         "description": "freedreno: fail in get_handle(TYPE_KMS) without a scanout resource",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
