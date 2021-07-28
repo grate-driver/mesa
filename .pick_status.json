@@ -1,5 +1,824 @@
 [
     {
+        "sha": "dff0d9911d176802b54890c796e19f56c50f24e1",
+        "description": "iris: Split iris_upload_shader in two",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42c34e1ac8da3a000087c02cfd9f6fcb83e84fbc",
+        "description": "iris: Enable threaded shader compilation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9011cc74056dfe1c815eb7d68a8b0b0bdeb29ff1",
+        "description": "iris: add sync_compile option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d1a2a1c095cbe0df84fa856bbd227ee61f751d1",
+        "description": "iris: Don't pass the shader key to iris_compile_[shader stage]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2024d470483d85a0b954d1c614b0af8eeb95d993",
+        "description": "iris: Add the variant to the list as early as possible",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e48b1a99d70cbf06a331bf69cb96850e708ac44",
+        "description": "iris: Allocate shader variant in caller of iris_upload_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca19be1a8d3c7da7e966c09ce7f3638c8ddc3b27",
+        "description": "iris: Extract allocation bits from iris_upload_shader to iris_create_shader_variant",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d0fac4e4f88debc80b06018f73dd23d5e4e55bcb",
+        "description": "iris: Ref count the uncompiled shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d5ec4716de994ccfe45b663216c6287c8f9d0f03",
+        "description": "iris: Merge iris_create_[shader stage]_state funcs into iris_create_shader_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eafcee4ab17d244445a7d683d27376ff65d0819e",
+        "description": "iris: Unify iris_create_[shader stage]_state functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d32ec54678904fabe9754389503f81ea9574c31",
+        "description": "iris: Unify iris_delete_[shader stage]_state functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "16b34334dc4dc9121032ab9f140989f931ce499c",
+        "description": "iris: Fix return type of iris_compile_*",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38dea8ef35cc2317744481c23e8d108d96746e98",
+        "description": "iris: Add a comment for iris_uncompiled_shader::nir",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d78e980523b4099aeff38e398d7fc795264d8859",
+        "description": "util/queue: Don't crash in util_queue_destroy when init failed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2b4a5947491d993270fb93ff2b663620fa21716",
+        "description": "st/texture: refactor get_src_format() to be more useful",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f0a24c8c9d842b228d9a01a42ba81835e0bba3f3",
+        "description": "mesa/st: add format-finding capabilities to pbo get_dst_format()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25788721c1bc80bb1fea6178c1561c7e74d56118",
+        "description": "mesa/st: enable calling st_choose_format() purely for translation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "daf2a039f55bf51a7c6ad3372b25e234de371b08",
+        "description": "mesa/st: break up st_choose_matching_format()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6276973a9a2061b9dfa3dad7fe87c2d054e42ecb",
+        "description": "mesa/st: break up st_GetTexSubImage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a14484bca7619e016b9b901637ee3172b9dca70",
+        "description": "ir3: Preserve gl_ViewportIndex in the binning shader",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "efff73422049d738b4adfaa34d5fde78a2805d5e"
+    },
+    {
+        "sha": "c0d5c06fed44396c7fc7b8cb24b1db8cfec8f535",
+        "description": "gallium/tests: Fix warning calculating absdiff",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f1a66e7c90ceb4796085989d0d8374689753121e",
+        "description": "loader/dri3: create linear buffer with scanout support",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "20547a110edb7913fc1176b9605498a58e691cb5",
+        "description": "tu: delay decision of forcing sysmem due to subpass self-dependencies",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d8a91617d1756e386a0cab082165cd08b666ae7",
+        "description": "docs/ci: Update http cache config to let Authorization headers pass through",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92f9141f009f9ffe98bea42ba002a8c4bd7a74bd",
+        "description": "ci/freedreno: Test with non-redistributable traces",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b88fd3ccc0deeb3776ed4fd0c72b4ab649e1a208",
+        "description": "gallium/vl: don't leak fd in vl_dri3_screen_create",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bdcefb8ec4a1d19c625ce9aefa1be4cc074e78bd",
+        "description": "radeonsi: preserve derivatives after discards for ARB shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8cd2e82c890a8cb7e95c52cb9cee23a8f05292b9",
+        "description": "mesa: move gl_program::is_arb_asm to shader_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bff8a948f70af672b2a9311e3ae262928648f818",
+        "description": "lavapipe: do not assert on more than 32 samplers",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c18ff60087ef655b9a584c4586859df5e2bf7d28"
+    },
+    {
+        "sha": "206fe780d509b3e0814c52bf15765a0de33743bf",
+        "description": "vulkan/wsi/x11: do not inherit last_present_mode",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "61309c2a727d52d543207d6ae79fcb3e68b5cff3"
+    },
+    {
+        "sha": "6bfbce0447b1391a4cb44316f2bfec493a12d256",
+        "description": "zink: rework buffer mapping",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "de2da3dadfce31671a3b863924f0bdc147dfe55d",
+        "description": "zink: use MAP_ONCE for qbo readback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce6d43548bdb87691b7dfa58a949865cf047ab2b",
+        "description": "pan/va: Allow floating-point swizzles on ATEST",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5649f24d16ee314074a4cc56355cb17ea75837b5",
+        "description": "pan/bi: Align staging registers on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6ccbf48e98f3cd85913b00fa191255ca307a600",
+        "description": "pan/bi: Clarify the logic of bi_reconverge_branches",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "30f8fb82c99dfbb45542196ed60c37e47b3f5d73",
+        "description": "pan/bi: Clean up and export bi_reconverge_branches",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3554a9a3aa1e2c59a952375b326c3fdb3618cf8",
+        "description": "pan/bi: Add branch_offset immediate",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f359cae437ff62d39a6231bc2fa2c529b0b7de5",
+        "description": "pan/bi: Garbage collect stuff in bi_layout.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73f8ef2961483f5d25bf383d9d28802a1ace854c",
+        "description": "pan/bi: Fix UBO push with nir_opt_shrink_vectors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "16579ca4b7569f9a62037823507b94c3e990b916",
+        "description": "pan/bi: Add constant folding unit test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "87ebad74e5d1d7b8c77218caa3199706d01df731",
+        "description": "pan/bi: Refactor constant folding for testability",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "972d517d41f72c68661b7478bd9a54963cc85da8",
+        "description": "pan/bi: Use bi_apply_swizzle in constant folding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce8e269e606375845c68e4ccf5bd031cced33ff9",
+        "description": "pan/bi: Add helper to swizzle a constant",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b55fb073a46056fed5f41126e4bff8fba2735b00",
+        "description": "pan/bi: Add strip_index helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5727909e10fb671703d0a419ab4b57b3ad87d4e",
+        "description": "pan/bi: Rename CLPER_V7 back to CLPER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9616b74636b2594e7ecab5a504f8d2cf988c973",
+        "description": "pan/bi: Rename NOP.i32 to NOP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "245c0ec75563e6f060de18aa01000918f60e7fff",
+        "description": "pan/bi: Fix typo in FAU enum",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fccbf4985d4554ac595e1cfa6543973a77d3ecd5",
+        "description": "pan/bi: Model Valhall special values as FAU",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "932451017317358293ea69f0a0dc447a90a20130",
+        "description": "pan/bi: Model RSCALE for Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "62147d41264178ba7b392c932e3c7795402c053e",
+        "description": "pan/bi: Model *ADD_IMM instructions in IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5b0d6672f03241b4c4c850aaa77db21d171322fb",
+        "description": "pan/bi: Remove unused BIR_FAU_HI",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1cde245f76416791faf96034d9d513019f2dcbe0",
+        "description": "pan/bi: Add discard flag to bi_index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be95198de58b87cffff20de1ecd73635c28ff95e",
+        "description": "pan/bi: DCE after bifrost_nir_lower_algebraic_late",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6fdbb85bc9ff9c05f318d43c275c26051d132d8",
+        "description": "pan/bi: Constify BIR manipulation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0149dee377d08f5edd0109efbd400b35c29cc9ac",
+        "description": "pan/bi: Remove redundant check in clamp fusing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07b259defc051df2462ecd5bf5d97ba2961ec060",
+        "description": "pan/bi: Add instruction unit test macro",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "60537416100356b4daaa10053293a5b93e0e5eaf",
+        "description": "pan/bi: Add instruction equality helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0394cc7c1db5774989c2db2c07075b6c4aa57a94",
+        "description": "pan/bi: Add helpers for unit testing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cdc79d2a03007a0c066628468c1651922010cc4d",
+        "description": "pan/bi: Output binaries from standalone compiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8cbabbd532b59c070fd6cf2a66de55c350a57bf7",
+        "description": "pan/bi: Only call clause code on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dc569585a6a07ae3e9872834c06250cc00c1d07d",
+        "description": "pan/bi: Add quirks for Mali G78",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "18dedd80db99d2424f9c99ae7c1c20d2db62db06",
+        "description": "pan/bi: Do more mesa/st stuff in standalone compiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f01f5e71686170de64f668f23777d635d00f16c7",
+        "description": "pan/bi: Zero initialize shader_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "027a8bf82cfccd087e42a44a8bf92a941a6eb0ab",
+        "description": "pan/bi: Parse file names in standalone compiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e5b5132c6375a315d27772165b585e969d4cb2e9",
+        "description": "pan/bi: Remove unused option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b85dfb6a565ad0a643fa8343c1e4ce771ea1952",
+        "description": "pan/bi: Remove unused pointer from bi_instr",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59951b6f244b1689ab27abb2b848601f544d168a",
+        "description": "zink: use dynamic line stipple",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b61c96b69243e5bcaba02e17d7bde00501e34446",
+        "description": "ci: add another zink job with timelines disabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64785df389ebbd6add3303bcdeacf571d5b0bed8",
+        "description": "zink: add env var to disable timelines",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "627371fe014fd2d1654592be07da498f3af3b08c",
+        "description": "zink: export PIPE_CAP_TGSI_BALLOT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "410d4dc529a0ce9e18b9d49bbaacde41324bf0c3",
+        "description": "zink: remove VK_EXT_shader_subgroup_ballot from device info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a05693d332fb9e945e262f4bf0676a0f55fb0535",
+        "description": "zink: implement compiler handling for subgroup ballot builtins/intrinsics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "252165d92543fb225bf0db415b127d95dae430f5",
+        "description": "zink: lower subgroup ballot instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4bd6a0299b00a1e34cf1910409ceeef2dfa976ad",
+        "description": "zink: change descriptor flushing to assert",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ba44103b31d90b0c7531d66aa74254412485c85",
+        "description": "etnaviv: fix gbm_bo_get_handle_for_plane for multiplanar images",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "788f6dc85781c58b37c0d762085090d2d5d8d3d5"
+    },
+    {
+        "sha": "f1cd56cdc11bcc348043d56dc74305b7aa71d44f",
+        "description": "virgl: Enable caching for sampler views and render targets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8cb795b4772f882024b20c4d4b051b2411dd1a8c",
+        "description": "Revert \"Revert \"virgl: Cache depth and stencil buffers\"\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a8e75bb73c6f8ce94c4f598a2f4763b12188991c"
+    },
+    {
+        "sha": "a425c5df789f2b28fdf9e61f108418b6b01e10a9",
+        "description": "virgl: Add more meta data to cached resources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d104a387adb9fc69f8fbcec37dbf63ce71b7124",
+        "description": "pan/va: Integrate the tests into meson test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2046750c4a7f6d5ef4a50e4765f382a0e74aa0d",
+        "description": "pan/va: Add disassembler test harness",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f917fb63e7a86cbffeb33085bc8d841d45061ca1",
+        "description": "pan/va: Add assembler test harness",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "372879cf6c8802a2b3474e451eb6854776fe4e07",
+        "description": "pan/va: Add negative test cases for the assembler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "70430d322fcc9f0cfea1255ef0a24dbfadd24e76",
+        "description": "pan/va: Add dis/assembler test cases",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "688827f3c5280961ab096c342ea5834ccef8463e",
+        "description": "pan/va: Add disassembler generator",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "227547db483864557c40191092872b9908e484d4",
+        "description": "pan/va: Check for FAU conflicts in the assembler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "508dfba9137347baa34c99ea6a58c05eb0dc27d9",
+        "description": "pan/va: Add Valhall assembler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c43327c049612a8a0e91032479d7a6847074d86c",
+        "description": "pan/va: Assert no instructions are duplicated",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02e378b628f8f76e5688f134569d333ebd9180dd",
+        "description": "pan/va: Add ISA.xml parser and support code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "316486dd9f6bbd03e7e13655674f1fa91e533b9a",
+        "description": "pan/va: Add initial ISA.xml for Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "44aa7e25dd4168d12f6fbe9a3ef6d5dde662ff1e",
+        "description": "llvmpipe: correct the debug information printed with GALLIVM_PERF=nopt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ff30a0499bd872d77b0f377414bbc03463b9f87",
+        "description": "gallium: Reset {d,r}Priv in dri_unbind_context",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "49908c602ffd2d84063effa7ddd0ee842be41a89",
         "description": "anv/android: Rework our handling of AHardwareBuffer imports",
         "nominated": false,
