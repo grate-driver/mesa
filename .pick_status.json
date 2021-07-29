@@ -985,7 +985,7 @@
         "description": "Revert \"Revert \"virgl: Cache depth and stencil buffers\"\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "a8e75bb73c6f8ce94c4f598a2f4763b12188991c"
     },
