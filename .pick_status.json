@@ -1,5 +1,302 @@
 [
     {
+        "sha": "b8e29e89366a5264391dc7c10e778330b7add66a",
+        "description": "anv: fix submission batching with perf queries",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "0a7224f3ff7542f1560f06759dbdc375e298e853"
+    },
+    {
+        "sha": "b077301a223ae05058c5a21d72acc8f91af9022c",
+        "description": "i965: Explicitly abort instead of exiting on batch failure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9375f62a54c9e2e5ec79e544116dc1117113019d",
+        "description": "i965: Write a custom allocator for the intel memobj struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f0964d6b672abe5ea8e11ec0f7533e937f0d394",
+        "description": "i965: Take into account the offset when marking a valid data region",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0cfd1da8b37a9144d13a67ca217862d2c39fe9e7",
+        "description": "lavapipe: do not mark unsupported tests as crashing",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "2e29857bb6574b0f3505233b82adae1b3eeb8ff7"
+    },
+    {
+        "sha": "fe9d2d204614bcd706e629fe4ee10a9727661e42",
+        "description": "broadcom: remove v3dv3 from neon library",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "d198e26a1ebc32c43e5bef10dcf0f8cc3234301d"
+    },
+    {
+        "sha": "86111fdc9c87d0736a7b7be7e390be2080b0d5db",
+        "description": "spirv: set medium precision with RelaxedPrecision decorator",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "476dc3c050dfb34e5fbc534db8eede88cf5e2c7c",
+        "description": "vulkan: add vk_spec_info_to_nir_spirv util method",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fec1a04c53df17a8a55a2a66cf4958be0748c407",
+        "description": "microsoft/compiler: Correctly flag when using raw buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1295c5cb334cd09c393674609ef103034dd57f74",
+        "description": "microsoft/compiler: Add support for arrays to image_store",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "16ef26ffcb1a7f9f5aa1f51b8aaf67d2464129c6",
+        "description": "nir_lower_readonly_images_to_tex: Fix typeo on image arrays",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "486e236c338c2f811900614e141635e4a6855c06",
+        "description": "glsl/standalone: Lower COMPUTE shader precision",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "09d9b8cf9a306cc448cebc1059d6db76db4b8296",
+        "description": "features: mark off timelines for lavapipe",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94a4982805164f87ec5ad7cb22251315c0577d71",
+        "description": "lavapipe: implement timeline semaphores",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "326253786e0b96940b90243bc732f10e49871a42",
+        "description": "lavapipe: use consistent semaphore variable naming",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "032d4a0e7d5f43c7cbdd5e11af0ebdce4de85ae6",
+        "description": "lavapipe: rework queue to use u_queue",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "461662bf3c9dd7a6214650ac661dbc9b32fa6508",
+        "description": "zink: simplify some dumb code in invalidate_buffer (v2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2668489cf95b0762441fa7402c516f754b620352",
+        "description": "Revert \"zink: simplify some dumb code in invalidate_buffer\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "6bda555cc0e0b8c511b77989069402d6019452d2"
+    },
+    {
+        "sha": "d413fd02190d21524eaa543a4f97b203980c6a2b",
+        "description": "gallivm: Always take the per-pixel LOD path for cubemaps.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "371cf5d06aff136124a56180d93a1fab9a00243b",
+        "description": "gallivm: Default brilinear filtering to off.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e3bad0f8ec1eb9b1bd5d3b2089d45c0717be4c8",
+        "description": "nir/lower_shader_calls: adding missing stack offset alignment",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "8dfb240b1f063307aa5e53fb1bd0865105eef986"
+    },
+    {
+        "sha": "a94192f69d1d9388ad2e27ccbdc92dccc660ee6a",
+        "description": "venus: print warnings when stuck in busy waits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d0fe5863f2f39c93752d330603be24569e4479e",
+        "description": "zink: force threadsafe mapping for query results when necessary",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d972326c458b388d8b23f14dcf75ded6285cc007",
+        "description": "pan/bi: Teach meson about format pack tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a6c214b6a55b4ca538b2b33f1258b474fd70595",
+        "description": "pan/bi: Teach meson about Bifrost packing test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9bb731012efd1d92cd1ee1fc1e3e53a6efdaf706",
+        "description": "pan/bi: Teach meson about scheduler predicate test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca36943466b3422c66964467d27f8f1e6994a382",
+        "description": "pan/bi: Add BIT_ASSERT helper for unit testing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9358d1fca671e002fd781dd2d29e89a80714ea86",
+        "description": "pan/bi: Expose unit tested scheduler predicates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d08ce287bfd42fd34e99a427e1bd6976b3bc5be",
+        "description": "pan/bi: Remove dated ASSERTED properties",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "526ae8979e7c380c41611aebf0dcde1862901063",
+        "description": "pan/bi: Inline away bi_must_last",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "097cf3952bff22e7132ab4eb804f4ea14d61a8d4",
+        "description": "freedreno/ir3: Add build id to the disassembler test",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "1462b00391711ff86350e802c1a3e5075a3a1632"
+    },
+    {
+        "sha": "5ff0f4a901cb091021a1395b20e805bb03b463ff",
+        "description": "zink: never use staging buffer for unsynchronized buffer maps",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "6bfbce0447b1391a4cb44316f2bfec493a12d256"
+    },
+    {
+        "sha": "3d64a97cf694a8f36d2a285a83b30c2558aac334",
+        "description": "mesa/main: Check for fbo attachments when importing EGL images to textures",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "dff0d9911d176802b54890c796e19f56c50f24e1",
         "description": "iris: Split iris_upload_shader in two",
         "nominated": false,
