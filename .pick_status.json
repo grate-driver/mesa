@@ -220,7 +220,7 @@
         "description": "drm-shim: implement stat/fstat when xstat variants are not there",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "027095065dfb79c05f08e8da2052c407c4d66aaa"
     },
