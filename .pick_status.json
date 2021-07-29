@@ -193,7 +193,7 @@
         "description": "intel/compiler: make sure swizzle is applied to if condition",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1edf67fc3f6b944935506146de02348afa1003ff"
     },
