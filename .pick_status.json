@@ -5386,7 +5386,7 @@
         "description": "nir/lower_bit_size: Support add_sat and sub_sat",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "090e28240795ce83ef63f2da768a80ca65b03ec7"
     },
