@@ -364,7 +364,7 @@
         "description": "zink: make codegen compatible with python 3.5",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f1432fd3e2d915f09a295f1ffb878471ce4e4d73"
     },
