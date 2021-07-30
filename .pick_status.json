@@ -1,5 +1,329 @@
 [
     {
+        "sha": "87b0962fef4e447a2ea9c76a611aa20b109a259d",
+        "description": "radv: do not use radeon_set_context_reg_seq() for only one register",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f693b94d2fac4590475a4ff95deab3c639cc14b4",
+        "description": "radv: reduce number of emitted DWORDS for contiguous context registers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4374e7fb4598dcf09a6a8c137db854fc4f5ab328",
+        "description": "vulkan/overlay: Fix violation of VUID-VkMappedMemoryRange-size-01389",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "175bc33da7a722969d17ae377e019c4e40725fc6",
+        "description": "gallivm: let nir_lower_tex handle projectors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3914bd457b6e91c805a6ed9977ed984205f8acae",
+        "description": "amd/registers: fix fields conflict detection",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "e6184b089240b76942650e847b8a4879821caaa6"
+    },
+    {
+        "sha": "2ea88d7cea070c3288c252064cae9236bd462646",
+        "description": "gallium/va: don't use key=NULL in hash tables",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f376597d00d732778c446179b13033695ebec079",
+        "description": "freedreno/ci: Move rules for restricted jobs to test-source-dep.yml",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "92f9141f009f9ffe98bea42ba002a8c4bd7a74bd"
+    },
+    {
+        "sha": "c8783001c7350960a63bff0dc93a4e744c22b911",
+        "description": "intel/fs: restrict max push length on older GPUs to a smaller amount",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d9a4a0aebd7bef166b5a89ce398e91a371dd0d0d",
+        "description": "tu: Handle multisample vkCmdCopyColorImage()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1e29f57b3ac4ec6560d0d355576be3cd784cf131",
+        "description": "pan/bi: Validate the live set starts empty",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d60a8881d7d37812d532db5b5a91fcc8d3eb9aa",
+        "description": "pan/bi: Stub 64-bit in count_write_registers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "502ffe6fbf3e96a72fd3533e41aea26f3b6f570b",
+        "description": "pan/bi: Handle asymmetric staging in bi_count_read_registers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3f14b9850e4452742aab7e08f725a4b8858904a",
+        "description": "pan/bi: Add bi_entry_block helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4f8b52e064b393765615ef1d79697604a354925",
+        "description": "pan/bi: Lower fragment output with <4 components",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9b0a4cc8936e0663865cc313d8f041373eef9694",
+        "description": "ir3: Delete old packed struct encoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fc0c0e9d459344218933e68e416baf575612548a",
+        "description": "tu: Use NIR for clear/blit shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df338fe7d1ebe3caa7a6ad2168a103835577c4c6",
+        "description": "anv: Don't copy the lineStipple values if lineStipple is not enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6be4f85e3c443f4ec46e60e25054601e8af979a",
+        "description": "pan/bi: Use getopt for bifrost_compiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c5f1ef3cad5fe351bb8024d6733b22984d23a69",
+        "description": "microsoft/clc: Add a test for compiling a kernel with a read-write image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6126dd29a40655c323c30687034d6307e5853e79",
+        "description": "microsoft/compiler: Implement texture loads from UAVs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7bcb22363935431f1c8886608d9a77b3503fc5b4",
+        "description": "v3d, vc4: Fix dmabuf import for non-scanout buffers",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b3e1f45cfb9b43142bb8b6103d3b7d22a8be79e2",
+        "description": "nir_to_tgsi: Add support for nir_intrinsic_load_sample_pos.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0253ff6d55be09eb36a54654d242e7f37d3ebf7c",
+        "description": "nir_to_tgsi: Declare buffers for all of num_ssbos.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "846a4512e9167e1e14fd2f3de6d2aa7141a38d3d",
+        "description": "nir_to_tgsi: Add support for HW atomics.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be7d964ff03d1c08ab3aac1452d7377a590f91e3",
+        "description": "pan/bi: Remove incorrect errata workaround",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67b9b73f9f16643fc511f6a3dbc8286fb1291584",
+        "description": "pan/bi: Test restrictions on same-cycle temporaries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2cdf95703a816f9dfe4a2bc282caee21ddd94970",
+        "description": "pan/bi: Restrict swizzles on same cycle temporaries",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47f000c170ccb824b308e02db8c2c955a8c00217",
+        "description": "lima: fail in get_handle(TYPE_KMS) without a scanout resource",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c092947df308f20e288bb5baf50bff181e5d3fa",
+        "description": "panfrost: fail in get_handle(TYPE_KMS) without a scanout resource",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "465eb7864bf0328aa2d497f0c2a2de72fafeced6",
+        "description": "freedreno: fail in get_handle(TYPE_KMS) without a scanout resource",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9da901d2b2e7ab5d5f21a0004fc294810f69f04a",
+        "description": "etnaviv: fail in get_handle(TYPE_KMS) without a scanout resource",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b3cd5128672ab2dd2541b1789a40a4dd2652cc1",
+        "description": "etnaviv: fix renderonly check in etna_resource_alloc",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "71a5bcb8658491dd62b9e620a9ce7f3bf7c8952b",
+        "description": "nine: Fix assert in tx_src_param",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "5974401a4adba2373232fc72940db96c32bbb4b6"
+    },
+    {
+        "sha": "390a3fcdc45ef73739a1827102af387007b7582e",
+        "description": "nir_to_tgsi: Add support for TXP.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ffd00bcf13396c616debb5eec12e872614bccfc",
+        "description": "nir_to_tgsi: Pack our tex coords into vec4 nir_tex_src_backend[12].",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f5f79e042ab3e1a564450fe5f8503fa0e28a025",
+        "description": "i915g: Add support for shader-db.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "b8e29e89366a5264391dc7c10e778330b7add66a",
         "description": "anv: fix submission batching with perf queries",
         "nominated": true,
