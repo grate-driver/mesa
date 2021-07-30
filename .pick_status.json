@@ -373,7 +373,7 @@
         "description": "radeonsi: don't create an infinite number of variants",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b7501184b90a20015885b3f2276a7a5ceaef31a7"
     },
