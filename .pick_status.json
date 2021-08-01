@@ -13,7 +13,7 @@
         "description": "intel/genxml: fix raster operation field in blt genxml",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4d80ec8fcfaad3f8e29aeb1f2e07042333ebcb6b"
     },
