@@ -1183,7 +1183,7 @@
         "description": "svga: fix bitwise/logical and mixup",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ba37d408da30d87b6848d76242d9d797dbef80a0"
     },
