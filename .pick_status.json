@@ -22,7 +22,7 @@
         "description": "crocus/gen45: fix mapping compressed textures",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5bf6ec31ccf6c24a407df9443a534f8036d26861"
     },
