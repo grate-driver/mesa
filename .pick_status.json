@@ -1,5 +1,383 @@
 [
     {
+        "sha": "842b8c8965327615f4692384a905dd63f1fba63d",
+        "description": "crocus: add support for set alpha to one with blt.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f3630548f1da904ec6c63b43ece7e68afdb8867e"
+    },
+    {
+        "sha": "de625dddeea4c134a713a96efa4fd8d19fdee823",
+        "description": "intel/genxml: fix raster operation field in blt genxml",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "4d80ec8fcfaad3f8e29aeb1f2e07042333ebcb6b"
+    },
+    {
+        "sha": "c12444ab8894e7d755401eb26523bb0e2ae63697",
+        "description": "crocus/gen45: fix mapping compressed textures",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "5bf6ec31ccf6c24a407df9443a534f8036d26861"
+    },
+    {
+        "sha": "48980b7b7a9f03da5ce33ac4c4de9fd33c7cfced",
+        "description": "lavapipe: Fix 32bits windows build",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "94a4982805164f87ec5ad7cb22251315c0577d71"
+    },
+    {
+        "sha": "c2a614375598953906c7ea9c9658314d939cf1ae",
+        "description": "turnip: Fix assertions on checking mutable combined samplers support.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "ee3495e46504d93c019bb3406a89deaee8a4c774"
+    },
+    {
+        "sha": "ea7a42775bd6e4d02d5e7c99c03ed5b08da98b1b",
+        "description": "turnip: reduce maxComputeWorkGroupSize",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e08960482a1330f93d6c6c7b0654b08bc29537f0",
+        "description": "venus: cache ahb backed buffer memory type bits requirement",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ed5d08141a49486344b3d79d85d1770631b3b6d",
+        "description": "genxml/gen125: Update debug register fields according to HW",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "910d5f19730103130c17612bdcfe42695b367554",
+        "description": "genxml/gen12: Update debug register fields according to HW",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ff53359cb580d7a63af9a2c67e122b84a328778",
+        "description": "radeonsi: add expected tests results for Navi10 GPU",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1c8f23cf9365d5c9b1c74b98ba82bed1dd441346",
+        "description": "radeonsi: add a script to run piglit/glcts/deqp tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6110f3c3aad6e73523040bb71f60c1b4a3209ee",
+        "description": "ac/nir: Remove unhelpful nir_opt_cse from ac_nir_lower_ngg_nogs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da9f4b2e6780525846ee7c7aa376583fcaa4021a",
+        "description": "nir, aco: Remove vertex and primitive count overwrite intrinsic.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b540aef2cf837f1f6e31bf96f09f7b3f7df7f3d",
+        "description": "ac/nir: Don't count vertices and primitives in wave after culling.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2d02c0c11009a7018e9760ed44d38131ccfd195",
+        "description": "ac/nir: Use gs_accepted variable after culling.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8159868699c1b64ed7f3935b57c890908b66e897",
+        "description": "ac/nir: Use es_accepted variable after culling.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1bbea90f50947f208d20a725e8043a73ce7494c2",
+        "description": "aco, nir, ac: Simplify sequence of getting initial NGG VS edge flags.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b157a5d0d68ee8a1b4cb862a56b97bd881841413",
+        "description": "tu: Implement non-aligned multisample GMEM STORE_OP_STORE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7948c4b0b43a2a0c15c834f1e066c1e5262146b8",
+        "description": "tu: Make tile stores use a dedicated CS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1815a76e3d7dd1b05da360f177a22e36f202748b",
+        "description": "v3dv: handle IMAGE_DRM_FORMAT_MODIFIER_EXPLICIT_CREATE_INFO_EXT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98044fd7e3111fef3ccb225b01c857268c4a7aa5",
+        "description": "v3dv: fill in drmFormatModifierTilingFeatures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0460f01fdc0c13deebf0d9bb8ee2a6ec5a74ffec",
+        "description": "ac/llvm: implement v2f16 fsat",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b83da28863cf427e329c4799ed39f1588affcca3",
+        "description": "dlist: implement vertices deduplication",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e012b34e610f2ef64ebf97227e6c16339ef14136",
+        "description": "dlist: upload vertices in compile_vertex_list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f86faee9f4925c0c90ef27518c570a4282b46d4c",
+        "description": "drm-shim: implement stat/fstat when xstat variants are not there",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "027095065dfb79c05f08e8da2052c407c4d66aaa"
+    },
+    {
+        "sha": "5cee8434fd281ddae949883738e58e83cd577bfc",
+        "description": "mesa: Fix tiny race condition in _mesa_debug_get_id",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ffbee84a4b9ccfb9ba1cb7d054590cf4030353d",
+        "description": "intel/compiler: Add id parameter to shader_perf_log callback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "043c5bf966a276c02c536846f44a1335e082789c",
+        "description": "intel/compiler: Add id parameter to shader_debug_log callback",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "42c34e1ac8da3a000087c02cfd9f6fcb83e84fbc"
+    },
+    {
+        "sha": "80160a67ab1700aabfcc0aa2c58b0fc73fdbd925",
+        "description": "meson: dont use missing dumpbin path",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2b37e95926f52b597dd0cf440092bd296efa434",
+        "description": "pan/mdg: Analyze helper termination after scheduling",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "9a7f0e268b7baeb92d8d7d2989beb43550262406"
+    },
+    {
+        "sha": "e79a78a16ff0cdc7bc9d3d5c9e42cc530588bc46",
+        "description": "intel/decode: add gfx4 vertex shader decode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0dec873f2a6f6107de4f5ffc47d337e8a5f2c842",
+        "description": "intel/decode: add gfx4 constant buffer decode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "490d09f1a4971cae64ba393a27fc3ce52794a686",
+        "description": "pan/bi: Fix infinite loop parsing arguments for bifrost_compiler",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "c6be4f85e3c443f4ec46e60e25054601e8af979a"
+    },
+    {
+        "sha": "1acc3394c434891233cb67fd587f6cbbf2677514",
+        "description": "pan/bi: Use padding bytes for checking whether to stop disassembly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8574ca4491815647e69ff529d8c81391080de4c1",
+        "description": "pan/bi: Print the clause of branch targets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5b9d16823a72a4e6bd1cd594f2e8b7729f750bf",
+        "description": "zink: add locking for zink_shader::programs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c8673d67fd9fb9bf8b4bc8392aea7337c17bc69",
+        "description": "docs: update calendar and link releases notes for 21.1.6",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ffb95954bf39c27e6398b5d887d6ef5e9d754c28",
+        "description": "docs: add release notes for 21.1.6",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dfccbdff98116778f3ae429729e2d974230ff8af",
+        "description": "ci: update to VK-GL-CTS 1.2.7.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6336df3a6266a30101ec81aa5b8af58de85dc156",
+        "description": "ci: Re-enable piglit trace for virgl",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86250c7251b5652acc794a8b0efe2ad98cfec840",
+        "description": "zink: make codegen compatible with python 3.5",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f1432fd3e2d915f09a295f1ffb878471ce4e4d73"
+    },
+    {
+        "sha": "57ff4caf7f02691ab9fc9d8e88cacbfbd1919c29",
+        "description": "radv: init radv_image::l2_coherent when creating the layout",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "87b0962fef4e447a2ea9c76a611aa20b109a259d",
         "description": "radv: do not use radeon_set_context_reg_seq() for only one register",
         "nominated": false,
