@@ -1,5 +1,509 @@
 [
     {
+        "sha": "97be8e42e42f3b739c3de808553094f86ad8879f",
+        "description": "intel/disasm: fix missing oword index decoding",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "daba2894ffc3000b76ff5f3d8c767119d6a8eeae"
+    },
+    {
+        "sha": "b4e5bf0637e10d0f7c191d4772f06d0432d87415",
+        "description": "clover/nir: Set constant buffer pointer size to host",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "7c6f1d3bf9903fe403b31a995c4dfce726fd3a27"
+    },
+    {
+        "sha": "54dcccd535cd8c2ba35ab2a68a9b784f3eca7a1f",
+        "description": "clover/api: Interleave details in dispatch table",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6c26a6ad94d16ad044c3b64d72ff9daf863b3be",
+        "description": "clover/spirv: Properly size 3-component vector args",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "2147386505015e3089d51e3e5bf58489ab912aa6"
+    },
+    {
+        "sha": "f69d1c1c56138093ccba2490b3c2b4fb359d43ec",
+        "description": "clover/spirv: Increase max amount of function args",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ffe059fd2c373734c91e85bc809a6cc32ba8f3d",
+        "description": "clover: Local memory needs to be aligned.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8061dfef6bf6f524712d13bba9adfd4dcbc73eb5",
+        "description": "clover: Do not advertise OpenCL x.y when unsupported",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd79351f02af898b0b01997f0b8b77007ed88135",
+        "description": "d3d12: split up root parameter update and set",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "12082905582fe291da939f024661f2c505111dc2"
+    },
+    {
+        "sha": "06edc6adc88bfa5a5df7cd2756225671471fef37",
+        "description": "ci: Use crosvm to run dEQP tests for virgl",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "481e7508becf1ac639e942cf2a56eb28b8f46b3b",
+        "description": "ci: Increase crosvm version",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0da2ebff274ba9e4c34da3ec3af5ee9e80bdb5f2",
+        "description": "ci: Increase the default Rust toolchain version",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33d9954bc120e6122b8f2417b5aaa34359b269b1",
+        "description": "ci: Disable llvmpipe optimizations when running virgl CI",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10541d1fade07e57441b591a36b0bf02f5eca299",
+        "description": "gallium/hud: initialize query",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c91cf7d7d2c8cc377945c79be87799c31ce9ae59"
+    },
+    {
+        "sha": "ad83c06a5f880a1d836e17ef76e7382eb9b6222b",
+        "description": "radv: fix missing cache flushes when clearing HTILE levels on GFX10+",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebea075feb820fb4e2118690da8258aa830ba3a3",
+        "description": "radv: fix selecting the first active CU when profiling with SQTT",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "d26bcc0f5cba8e578ba0e1f052e76abf61919ea8"
+    },
+    {
+        "sha": "f395057a82801b252d9455f89d2c8e6d8e9d7ed6",
+        "description": "gallivm: remove pointless no_filter_hacks flag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f56ded36263bf18545627764d5af63194bb8ec8",
+        "description": "ci: Stop disabling filter hacks for llvmpipe.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34423391e02a148518a4e9f640d61c609957282d",
+        "description": "gallivm: make rho-approximation opt-in instead of opt-out",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6538b3e56614914dd47ee7822586ba1b91d785f2",
+        "description": "nir: add heuristic for instructions in loops with GCM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7f2e683ded4387febd8529bb0a3fa8c691fcce4",
+        "description": "nir: move nir_block_ends_in_break() to nir.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9ed4538abf1247b82adce5cfff9f2bde0b76a05",
+        "description": "nir: add indirect loop unrolling to compiler options",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a654e39f1559edc06eb12bdd6f2372694dcd8911",
+        "description": "intel/compiler: make sure swizzle is applied to if condition",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "1edf67fc3f6b944935506146de02348afa1003ff"
+    },
+    {
+        "sha": "4f7043fc0ce158a5f555b6c0ec7f9818a60b8ce4",
+        "description": "v3d/simulator: implement performance counters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "685281278ebd39114c3007e76443eaaa66cf8335",
+        "description": "v3d: implement performance counter queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e928aece5087e8d70bef5ad7d21bf264f52e4d47",
+        "description": "v3d: add fence wait function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c59d8a179831fa9fe867c3547839e95f41774b8f",
+        "description": "v3d: move queries to pipe queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9969703547244b4b3aee4f940c434bca9d6e4c36",
+        "description": "v3d: attach performance monitor to jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b9fcb01930c80436bb492f2f0b37ba65405a1ea",
+        "description": "v3d: check if device supports performance monitors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca13868098ebadb4c65c01e122f3ff4dde726186",
+        "description": "drm-uapi: add v3d performance counters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a49b397041244e5fdbd04c5c9576feaf75682ab8",
+        "description": "ac/surface: implement CmaskAddrFromCoord in NIR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eedc0b59b710c9e7c284e3ceaae5a43e2f19bcb0",
+        "description": "ac/surface: copy the CMASK equation to radeon_surf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f12c3ccc1db533485a020af1891d1ecd65ad12b",
+        "description": "ac/surface: store CMASK pitch and height to radeon_surf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "132b2055662d3c1b1f1e1afde5173cbbc4eda641",
+        "description": "ac/surface: add tests for CmaskAddrFromCoord prototype outside of addrlib",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "96e12644f3a8e7bd594ba9177630810420e7c36c",
+        "description": "amd/addrlib: expose CMASK address equations to drivers on GFX9",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "501db877793f848d3cedafdd44717c09cba3e99e",
+        "description": "ac: introduce a structure to store DCC address equations for GFX9",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b705114d9cde511b7fba140fda0a78d69ccda57f",
+        "description": "iris: mark the workaround_bo as asynchronous",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b9129496a295f3aef7d96540556eced25961f66a",
+        "description": "freedreno: Unleash the dragon!",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8813dfab8306dc63cbe0b71eb7513964fc0ba02d",
+        "description": "freedreno: Support per-device driconf overrides",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7094cc78a442eacabd68b22e9ca8468c1437075e",
+        "description": "driconf: Add force_gl_renderer override",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6edf0d8e9022e0072c0ed5c3ce78fdca528c4cb4",
+        "description": "driconfig: Add support for device specific config",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b080aa94664e23b4be4f565e442eac0292fd3e9d",
+        "description": "gallium/driconf: Allow the driver to parse the driconf options.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fdf9ebf317da2607f9d4315998439f4713cad0cb",
+        "description": "gallium/dri2: Make dri_init_options just init DRI options.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23a9339985d37db8c94fc71fe5ee6a11d368a1b9",
+        "description": "v3dv: Implement VK_EXT_custom_border_color",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a464f2e076b1ec54add863d7c5a3d7fc39b4ff8",
+        "description": "v3dv: Add is_unorm, is_snorm and is_float format functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a753f50668e9b97351f30ac985202bcfcd10fb7f",
+        "description": "venus: break up vn_device.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22cb100ea0a26ca8083c3e30bab4268750ffba4d",
+        "description": "venus: break up vn_device.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b364ab4bcd70c821c6830e1a4858a2a7ce143da",
+        "description": "venus: update venus-protocol headers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4214adefc3ab5eb5e6bc456413cb2449d98a444",
+        "description": "iris, crocus: add idep_genxml to per_hw target dependencies",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "521651d1064a42feb9d21fc1799479619ce50729",
+        "description": "st/mesa: remove st_vertex_program::input_to_index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b5c9a695b95b159ed63b8315266ecc2e2e6afdf3",
+        "description": "st/mesa: remove st_vertex_program::index_to_input",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "77c2b022a0c52d84b289bc836f30ce186a374d0d",
+        "description": "st/mesa: remove lowering of 64-bit vertex attribs to 32 bits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8b6fd3f786d3cf1d9b1ee1dc5be1c8cb885ed77a",
+        "description": "gallium: lower raw 64-bit vertex formats in cso/vbuf instead of st/mesa",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b23b7c88e5de2a542cfaa2d99c40aa1a2547c5c",
+        "description": "gallium: add pipe_vertex_element::dual_slot to move lowering to CSO creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a713c568bbf1bbd82d59900007bc71f0f9d5c10",
+        "description": "gallium: add multi-component 64-bit UINT formats for raw double vertex attribs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e002f5a086c7fc8314d3c28a603875f5ec5e5cef",
+        "description": "gallium: change pipe_vertex_element::src_format to uint8_t",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df5a2bbb41552cb030000ca4421fd1a4036ca974",
+        "description": "shader_enums,mesa: move VERT_ATTRIB_EDGEFLAG to slot 31 for st/mesa",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "842b8c8965327615f4692384a905dd63f1fba63d",
         "description": "crocus: add support for set alpha to one with blt.",
         "nominated": true,
