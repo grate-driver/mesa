@@ -301,7 +301,7 @@
         "description": "intel/fs: sel.cond writes the flags on Gfx4 and Gfx5",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "df1aec763eb972c69bc5127be102a9f281ce94f6"
     },
