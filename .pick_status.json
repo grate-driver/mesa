@@ -4,7 +4,7 @@
         "description": "intel/disasm: fix missing oword index decoding",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "daba2894ffc3000b76ff5f3d8c767119d6a8eeae"
     },
