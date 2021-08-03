@@ -67,7 +67,7 @@
         "description": "d3d12: split up root parameter update and set",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "12082905582fe291da939f024661f2c505111dc2"
     },
