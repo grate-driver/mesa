@@ -112,7 +112,7 @@
         "description": "gallium/hud: initialize query",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c91cf7d7d2c8cc377945c79be87799c31ce9ae59"
     },
