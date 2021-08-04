@@ -625,7 +625,7 @@
         "description": "util/fossilize_db: Update parsed_offset correctly.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2ec1bff0f3a4450a9739d59421dc9c9fe72c94c6"
     },
