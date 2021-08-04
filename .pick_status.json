@@ -121,7 +121,7 @@
         "description": "bin/gen_release_notes: Add basic tests for parsing issues",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
