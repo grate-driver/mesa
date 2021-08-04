@@ -598,7 +598,7 @@
         "description": "util/fossilize_db: Be conservative about header length check for locking.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4f0f8133a35ec2fec8d99936cd7425e40d092169"
     },
