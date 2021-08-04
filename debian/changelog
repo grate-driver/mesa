@@ -2,6 +2,7 @@ mesa (21.2.0~rc3-1) UNRELEASED; urgency=medium
 
   * New upstream release candidate.
   * iris-avoid-abort-if-enomem.diff: Dropped, upstream.
+  * control: Bump libdrm-dev build-dependency to 2.4.107.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 03 Aug 2021 13:17:27 +0300
 
