@@ -1492,7 +1492,7 @@ namespace {
                   st, reg_dependency_id(devinfo, brw_acc_reg(8), j));
          }
 
-         if (inst->writes_flag())
+         if (inst->writes_flag(devinfo))
             stall_on_dependency(st, dependency_id_flag0);
       }
 
@@ -1530,7 +1530,7 @@ namespace {
                                   reg_dependency_id(devinfo, brw_acc_reg(8), j));
       }
 
-      if (inst->writes_flag())
+      if (inst->writes_flag(devinfo))
          mark_write_dependency(st, perf, dependency_id_flag0);
    }
 
