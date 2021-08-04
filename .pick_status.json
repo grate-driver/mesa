@@ -184,7 +184,7 @@
         "description": "zink: sum available memory heaps instead of assigning",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "73f6bff07f1f3a5aa31e906cd69eeef58d95104c"
     },
