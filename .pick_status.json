@@ -1,5 +1,203 @@
 [
     {
+        "sha": "8918a809ced3551f822abb45d751d31b54ad67da",
+        "description": "ac: Remove deprecated use_late_alloc field as nobody uses it anymore.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d911259c3a47fd35a7afdaa45182ba87e9b501b2",
+        "description": "radv: Use ac_compute_late_alloc in radv_pipeline.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "61eb3debcfc6a7f3fa2adbb2133dc502ea7d9b6b",
+        "description": "radv: Don't toggle PC oversubscription for NGG culling.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "448592b9aeb471772bd696fd44e4f952b8f492b6",
+        "description": "aco: Use Navi 10 empty NGG output workaround on NGG culling shaders.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "566970f273be5e37c6f8e38ec061232efff32155",
+        "description": "aco: use image_dim and image_array intrinsic indices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39db5a569b9213c84bf8b3e7f092a8d3a19e5b2b",
+        "description": "radv: set image_dim and image_array intrinsic indices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "513f9b5dc967a62a2f4041ec6f81c0eb3f359673",
+        "description": "ci: bump to latest virglrenderer for anisotropic support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2116a4f5cc3a570a30a1378d03dbe5bd9c1ae50c",
+        "description": "virgl: add support for anisotropic texture filtering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e831c4a537cc4118ba6d5581dfc121a9fe47110a",
+        "description": "virgl: disable anisotropic filtering.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a8987b88ff1db4ac00720a9b56c4bc3aeb666537"
+    },
+    {
+        "sha": "d16b9b27b0f2fdc3416b4c50c16711c5eec063b2",
+        "description": "iris: Fix Null pointer dereferences",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6751d832c5a3fd437216361a1a55f1fa1d0aed9b",
+        "description": "aux/draw: Check for preferred IR to take nir-to-tgsi path in draw module",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ddac113f87ff12c6d251a2cc39e39a3ae784583",
+        "description": "nir: Removing uses of SSA defs destroys SSA liveness",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9dfe7fbc6bbdb0e173e3abe099c2e4ffff23451b",
+        "description": "isl: Use CLAMP macro instead of MIN of MAX",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "72259a870f6047c83b3f95ac205aca7ed5bdc049",
+        "description": "util: Add and use functions to calculate min and max int for a size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "08d636159145fd9bc8b592f30aa26d11a8b78945",
+        "description": "ci: Update piglit to 4545a28cd8fea03fbab0e5f90bfbd812c32f3be1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f04f8ac692ea584eadeac8b5a95605c0e8823edf",
+        "description": "ci/zink: Use deqp-runner suite support to reduce the CI job count.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55bd5825988ddea7a2198121da3df56b5efa9d3d",
+        "description": "ci/virgl: Use deqp-runner suite support to reduce CI job count.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd3b6689b2ef6018ad3bb635eb91d08836f10cc1",
+        "description": "ci: Save dEQP results on all tests.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad2995d1e1db41187b3bf5c1b067a3f04e26590c",
+        "description": "ci/i915g: Merge the two dEQP runs together.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f7a921c99bed5f01b7742b41f6b1ac7820e5f18",
+        "description": "ci/llvmpipe: Use the deqp-runner suite support to consolidate jobs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4658a9a4798c97e39aa65a94751d75fc52e8030c",
+        "description": "ci: Uprev deqp-runner and use \"suite\" support to merge softpipe runs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1bdab45594f5596f45b0149f73df41a48a5a7782",
+        "description": "ci/i915: Update deqp expectations for another test passing.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "97be8e42e42f3b739c3de808553094f86ad8879f",
         "description": "intel/disasm: fix missing oword index decoding",
         "nominated": true,
