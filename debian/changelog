@@ -1,6 +1,6 @@
-mesa (21.2.0~rc3-1) UNRELEASED; urgency=medium
+mesa (21.2.0-1) UNRELEASED; urgency=medium
 
-  * New upstream release candidate.
+  * New upstream release. (LP: #1937988)
   * iris-avoid-abort-if-enomem.diff: Dropped, upstream.
   * control: Bump libdrm-dev build-dependency to 2.4.107.
 
