@@ -1,5 +1,230 @@
 [
     {
+        "sha": "6ccf11ac2b951963407601b5b1109b45a972e48e",
+        "description": "ci: Drop \"success\" job",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "4c41d1900e58cb09501cbf113568645e70634aff"
+    },
+    {
+        "sha": "5a536eca9ca763f53bf3e4c8b75752b527f8fc01",
+        "description": "aco: calculate correct register demand for branch instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "87a8349411bc944b4d6c71b3f35dd580d04afe3d",
+        "description": "ci/v3dv: update expected results",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d762a01e184d5005b2b9c50c3354a27c83354650",
+        "description": "microsoft/compiler: harmonize num_psv_inputs with outputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "63dae1bd8b02ac6bc9e9a6bd4af118ca07c14317",
+        "description": "microsoft/compiler: fix psv-output calculation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "50e849fb944f49ef2247704778a55654449ff284",
+        "description": "freedreno/ci: Add a manual job for tracking performance",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "518b94e8e1a4c9f2772bc4ab7a7b9cd140afbf46",
+        "description": "clover/llvm: turn off optional CL 3 features.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "16793c8efae35b2a80589f014fe6d0d4861fda5d",
+        "description": "ac/surface: implement CmaskAddrFromCoord in NIR on GFX10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d67fa4d7310f9bb14dfe80ef23abdac03dc0327",
+        "description": "ac/surface: add tests for CmaskAddrFromCoord on GFX10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0926b268fc9a73d0eb48a47a8604acde8ca811ef",
+        "description": "amd/addrlib: expose CMASK address equations to drivers on GFX10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19670129c58bc779630e7f5d0b031d9ed78bc0c7",
+        "description": "ci: Update canvas_text trace",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da00a11bf28f9b9898efa1e6184fa27ea8277a94",
+        "description": "bin/gen_release_notes: Fix commits with multiple Closes:",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "30f7b55e475965d31585bbfb0bd03f234cda16b0",
+        "description": "bin/gen_release_notes: Don't consider issues for other projects",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9dc3672b00f4f04c57b46a6fa675ecd2c03bad07",
+        "description": "bin/gen_release_notes: Add basic tests for parsing issues",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7055282231cdad23e7b23fb49a2f953a99797f8a",
+        "description": "docs: Add calendar entries for 21.2 release.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c2a241faa90bca6715ad4b0540b6ca5f7984e027",
+        "description": "docs: update calendar and link releases notes for 21.2.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98f0db53214630f9eb40616c2b6ec2b372136f19",
+        "description": "docs: update calendar for 21.2.0-rc3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac428b53058abbf81635f6fcb0aa20165c157a08",
+        "description": "docs: update calendar for 21.2.0-rc2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "04adf1834c1a05041287f70e8fc4ae24c8f8693b",
+        "description": "docs: add release notes for 21.2.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c886ce2991a5b6fec054810d0c891d599986593c",
+        "description": "zink: simplify else clause for mem info gathering",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "73f6bff07f1f3a5aa31e906cd69eeef58d95104c"
+    },
+    {
+        "sha": "42442a0d4e3125db00922c4d0a2c4d0f4d415205",
+        "description": "zink: sum available memory heaps instead of assigning",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "73f6bff07f1f3a5aa31e906cd69eeef58d95104c"
+    },
+    {
+        "sha": "8cfa6b4d7520af63417b5752ce81b998f3985148",
+        "description": "ci/freedreno: Mark border_color as passing on a5xx.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f66fcf5a6df73fc9b9f0642fe6c27cb67363be5",
+        "description": "freedreno/a5xx: Don't try to emit FS images in binning command streams.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c20287f8e4d66814cde89a771f843066ad4ead20",
+        "description": "freedreno/a5xx: Disable TF when pausing or transitioning to non-TF.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f89ea419d87f04b7c3ba0e839857109c84f6022",
+        "description": "ci/freedreno: Clear out TF API errors xfails.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "8918a809ced3551f822abb45d751d31b54ad67da",
         "description": "ac: Remove deprecated use_late_alloc field as nobody uses it anymore.",
         "nominated": false,
