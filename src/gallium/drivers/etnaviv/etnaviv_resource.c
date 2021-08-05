@@ -272,7 +272,7 @@ etna_resource_alloc(struct pipe_screen *pscreen, unsigned layout,
 
    size = setup_miptree(rsc, paddingX, paddingY, msaa_xscale, msaa_yscale);
 
-   if (unlikely(templat->bind & PIPE_BIND_SCANOUT) && screen->ro->kms_fd >= 0) {
+   if (unlikely(templat->bind & PIPE_BIND_SCANOUT) && screen->ro) {
       struct pipe_resource scanout_templat = *templat;
       struct winsys_handle handle;
 
@@ -580,9 +580,23 @@ etna_resource_get_handle(struct pipe_screen *pscreen,
                          struct pipe_resource *prsc,
                          struct winsys_handle *handle, unsigned usage)
 {
+   struct etna_screen *screen = etna_screen(pscreen);
    struct etna_resource *rsc = etna_resource(prsc);
+   struct renderonly_scanout *scanout;
+
+   if (handle->plane) {
+      struct pipe_resource *cur = prsc;
+
+      for (int i = 0; i < handle->plane; i++) {
+         cur = cur->next;
+         if (!cur)
+            return false;
+      }
+      rsc = etna_resource(cur);
+   }
+
    /* Scanout is always attached to the base resource */
-   struct renderonly_scanout *scanout = rsc->scanout;
+   scanout = rsc->scanout;
 
    handle->stride = rsc->levels[0].stride;
    handle->offset = rsc->levels[0].offset;
@@ -594,8 +608,8 @@ etna_resource_get_handle(struct pipe_screen *pscreen,
    if (handle->type == WINSYS_HANDLE_TYPE_SHARED) {
       return etna_bo_get_name(rsc->bo, &handle->handle) == 0;
    } else if (handle->type == WINSYS_HANDLE_TYPE_KMS) {
-      if (renderonly_get_handle(scanout, handle)) {
-         return true;
+      if (screen->ro) {
+         return renderonly_get_handle(scanout, handle);
       } else {
          handle->handle = etna_bo_handle(rsc->bo);
          return true;
@@ -604,6 +618,27 @@ etna_resource_get_handle(struct pipe_screen *pscreen,
       handle->handle = etna_bo_dmabuf(rsc->bo);
       return true;
    } else {
+      return false;
+   }
+}
+
+static bool
+etna_resource_get_param(struct pipe_screen *pscreen,
+                        struct pipe_context *pctx, struct pipe_resource *prsc,
+                        unsigned plane, unsigned layer, unsigned level,
+                        enum pipe_resource_param param,
+                        unsigned usage, uint64_t *value)
+{
+   switch (param) {
+   case PIPE_RESOURCE_PARAM_NPLANES: {
+      unsigned count = 0;
+
+      for (struct pipe_resource *cur = prsc; cur; cur = cur->next)
+         count++;
+      *value = count;
+      return true;
+   }
+   default:
       return false;
    }
 }
@@ -707,6 +742,7 @@ etna_resource_screen_init(struct pipe_screen *pscreen)
    pscreen->resource_create_with_modifiers = etna_resource_create_modifiers;
    pscreen->resource_from_handle = etna_resource_from_handle;
    pscreen->resource_get_handle = etna_resource_get_handle;
+   pscreen->resource_get_param = etna_resource_get_param;
    pscreen->resource_changed = etna_resource_changed;
    pscreen->resource_destroy = etna_resource_destroy;
 }
