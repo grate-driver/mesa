@@ -202,7 +202,7 @@
         "description": "Revert \"nir/algebraic: Convert some f2u to f2i\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ad059202583e8c86bbccf0d65c5ce35bc4ab20f1"
     },
