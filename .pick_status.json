@@ -1,5 +1,257 @@
 [
     {
+        "sha": "0165fde82c41f94c5d6f432f9f444871405a7d49",
+        "description": "tu: Raise maxDescriptorSetUpdateAfterBindUniformBuffersDynamic to 16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "799710be8895747f53361378605d151cf0e0eab8",
+        "description": "mesa: Add EXT_texture_mirror_clamp_to_edge to extension table",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "757bc6d37a69bafd31f1f240f4f490d51288ba1e",
+        "description": "mesa: Add support for EXT_clear_texture",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "028a83d9ad9e2b73b07875c792cda6ad9f706fc4",
+        "description": "lavapipe: remove duplicate xfail with typo",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "dfccbdff98116778f3ae429729e2d974230ff8af"
+    },
+    {
+        "sha": "201d46b894b0e2d06e46ebfd583a83b4c00e9f03",
+        "description": "nine: set CSO_NO_USER_VERTEX_BUFFERS for main cso context",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d20b0c87bca0a871683fc69c7dc9e05c3c022f20",
+        "description": "nine: don't memset sampler state during conversion",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e9d2d3ae17771af3e399030b1e9615715ca1aae7",
+        "description": "ir3: Document RA-related register flags better",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7ee7112eccc1aff741c9ec87495da59c379f430",
+        "description": "gbm: add GBM_FORMAT_R16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74181ffcc5ebed79916d3374455ccfa9e4efa05c",
+        "description": "radv: Write RSRC2_GS for NGGC when pipeline is dirty but not emitted.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "9a95f5487f5ab83fa44bea12afa30cf1a25fc9db"
+    },
+    {
+        "sha": "41e093fc98c269279a100c3dd25ed911a7eeec58",
+        "description": "st/pbo: add a fast pbo download code-path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2845cfcc4d3c2163e4ac35a144d994ded0bf300",
+        "description": "st/pbo: set nir_tex_instr::is_array field",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a01ad3110a92e88f815242b59ad1da6d2623decc"
+    },
+    {
+        "sha": "ff7e339f1fa48b080c82c24a23cf3fc39e29e1c0",
+        "description": "st/pbo: only use x coord when reading a PIPE_TEXTURE_1D",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a01ad3110a92e88f815242b59ad1da6d2623decc"
+    },
+    {
+        "sha": "78b4e417d44016cdb5df7dbfc3b1ea28219e6fd4",
+        "description": "gallivm: handle fisfinite/fisnormal",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad92c2b253d8e122d0f01ab72ccbdfa37efde538",
+        "description": "nir: add fisnormal lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "330e28155f79b533a72fc3376fb54ffbf245b458",
+        "description": "nir: add 32-bit bool of fisfinite",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf39c3e1e3bef8e209187a8d75d46a722033fcdc",
+        "description": "vtn: add support for atomic flag test/set/clear",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd265a9868e5694cf162873a33afcac2acad093e",
+        "description": "nir/libclc: handle null callee name when lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cc8a1229070898997fd165e4e60a3a2c8bd7f40a",
+        "description": "microsoft/compiler: Add support for local_invocation_index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9f3713c84a464f897cda16845d33b9bca82e350",
+        "description": "microsoft/spirv_to_dxil: Enable support for shared memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c00cf7d61683bbe0cf7ded5a6d66b202282b64d4",
+        "description": "ci/a5xx: Skip some piglit stress tests that destabilize CI.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92b0cf8e77369a8789dc181a915170db87027e3a",
+        "description": "spirv_to_dxil: expose version number",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc3c71b87ae0b8e053f45c26c1179560e462db04",
+        "description": "anv: don't try to access Android swapchains",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0869703300eef8e2e7b3219f0e5632373a111adb",
+        "description": "lavapipe: remove stale xfails",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "dfccbdff98116778f3ae429729e2d974230ff8af"
+    },
+    {
+        "sha": "08a12feb6ed08691a3630b1d319e21b579c04a97",
+        "description": "gallivm: use lp_build_log2_safe for pow",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2e2e6865b40c459a101653ae26f2d0b0da2b0614",
+        "description": "tu, freedreno/a6xx: Fix setting PC_XS_OUT_CNTL::PRIMITVE_ID",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8115cde3ba61711302b969a359ca8d36e3f54780",
+        "description": "tu, freedreno/a6xx, ir3: Rewrite tess PrimID handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd687c4e3bfda846a23fd404f4c7177634112dc3",
+        "description": "freedreno: Rename and document tess primid-related sysvals",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97b0981ed9599365d760ee866adfc49628b95145",
+        "description": "tu: disable gmem in primary cmdbuffer if secondary has it disabled",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "20547a110edb7913fc1176b9605498a58e691cb5"
+    },
+    {
         "sha": "6ccf11ac2b951963407601b5b1109b45a972e48e",
         "description": "ci: Drop \"success\" job",
         "nominated": true,
