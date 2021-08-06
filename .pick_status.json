@@ -130,7 +130,7 @@
         "description": "aux/cso: try harder to keep cso state in sync on cso context unbind",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a73cb106a6771173a138f99ec063808257cd12bf"
     },
