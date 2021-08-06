@@ -94,7 +94,7 @@
         "description": "nir/builder: invalidate metadata per function",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a62098fff202f5e6c689aa6e78ace67c50f17c8e"
     },
