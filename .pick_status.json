@@ -544,7 +544,7 @@
         "description": "gallium/util: add half texel offset param to util_compute_blit",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c5088b497290ba1207085899ec635ef851635267"
     },
