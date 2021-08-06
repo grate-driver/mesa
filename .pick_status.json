@@ -1057,7 +1057,7 @@
         "description": "zink: add better handling for CUBE_COMPATIBLE bit",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "71494c4874c6d8eba93309faeed01e1444eb49b5"
     },
