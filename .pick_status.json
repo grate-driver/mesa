@@ -148,7 +148,7 @@
         "description": "panfrost: Only allow colour blit shaders to be killed",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d0344619214b43db8bc5a928dd09d1fcf8f725fc"
     },
