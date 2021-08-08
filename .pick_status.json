@@ -454,7 +454,7 @@
         "description": "radv: Use correct signedness in misalign test.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4c99d6ff54b2614b46d7e2252aa6c71c46045c16"
     },
