@@ -427,7 +427,7 @@
         "description": "d3d12: Fix Linux fence wait return value",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0b60d6a24d405066c4077154095a76204c103cc1"
     },
