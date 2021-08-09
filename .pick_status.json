@@ -139,7 +139,7 @@
         "description": "nir: Initialize evaluate_cube_face_index_amd dst.x.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a1a2a8dfda7b9cac7e36bf8853d984a6009fc27e"
     },
