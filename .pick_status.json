@@ -148,7 +148,7 @@
         "description": "meson: Remove duplicate xvmc in build summary.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d30ce03bc07562d2f694dbe94cbf9c1875a25c4d"
     },
