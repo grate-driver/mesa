@@ -157,7 +157,7 @@
         "description": "util: Fix translate from block compressed to rgba",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2b5178ee4820d69386dfa0ecb28fe9fe7c4f0964"
     },
