@@ -1,5 +1,320 @@
 [
     {
+        "sha": "0dd0a92b243487e83d8d96532873f319719248e5",
+        "description": "u_driconf: Use a macro to avoid repeating option names",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b3f9b347f975414770b98964a06dedc4012955c8",
+        "description": "wgl: Add a driver name for driconf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35ec7e8b8ea7edbcb79ff53abeef5809f90f72f8",
+        "description": "wgl: Parse driconf options",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68ff6f8be54f82c170ad7a1526891c63d43ac951",
+        "description": "xmlconfig: Use static inline for regex fallback to prevent -O0 issues",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7939094d656cdb1d75e0420c599b019499fab9be",
+        "description": "gallium/dri: Move driConf -> st option processing to aux/util",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "380d4904ea6402f2829f9c0cf801c9d0996e61b8",
+        "description": "tu: Read some input attachments directly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "11ac7d9e0254d7b6cf564df89867d6973830b6ff",
+        "description": "intel/eu: Set scope to TILE for TGM flushes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "96403c1ec4ab14f65cdbda30adb4b6caa1071db0",
+        "description": "radv: allow fast clears for concurrent images if comp-to-single is supported",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bdae3c366e1b8bda26702fdbdf9e6d8fab446cb2",
+        "description": "glsl: evaluate switch expression once",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3f2c54a27ff014587afe20a97086f5a729aa7d80",
+        "description": "broadcom/compiler: rewrite partial update liveness tracking",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c335c03ae21dc438f116afab54e0689a37fb5fa0",
+        "description": "broadcom/compiler: make spills of conditional writes also conditional",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "314eb97dcb9e1c90d1404e3d8a06b812592d083f",
+        "description": "broadcom/compiler: Flags are per-thread state in V3D 4.2+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b727eaac3cab870bb1a8922f0e0de01665bda8cf",
+        "description": "broadcom/compiler: add a vir_get_cond helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ccecf20964667596105447c1ce77b8c9bbac770",
+        "description": "radv: enable DCC fast-clears with comp-to-single on GFX10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aafe73561eeb1c1624f7636c5770c918c9238903",
+        "description": "radv: skip FCE for images that are fast-cleared using comp-to-single",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7451eb1d6112aed578ab89ba21830dc4eaef14ff",
+        "description": "radv: implement DCC fast clears with comp-to-single",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "782e0d05b0ac08a1baa6011d22cb966fb46c6434",
+        "description": "radv: determine if an image support fast clears using comp-to-single",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c336c4b0cb93cc8e2ad9087caaa126ff9f13fb79",
+        "description": "radv: add RADV_DCC_CLEAR_SINGLE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b1afe33b24a011b2bd01f1346b25ebc357e6e00",
+        "description": "radv: pass an image view to vi_get_fast_clear_parameters()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "139d34d657d257fe2334fe4c6aa11b761db4f9dc",
+        "description": "radv: use more explicit DCC clear codes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b88de733842ab698ebf1ea3ddce89f91b1e1c4e",
+        "description": "virgl/ci: Set NIR_VALIDATE=0 on the host",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9f9e488f8a2558a6a2e56dc19f7a0f46b77ac79",
+        "description": "virgl/ci: Wait a bit before shutting the VM down",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "716ba29056e073125d0627d20b010d155ff22020",
+        "description": "virgl/ci: Rebalance concurrency",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e933c0438315a279d391dae8b3a5608fc7caf8c9",
+        "description": "virgl/ci: Have LLVMPipe use more threads for rendering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "deecc7d10942a71c47b6f3afa51c4e5507fac884",
+        "description": "radv: fix reported sample counts for VRS 1x1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a7eb424b0cd4a459aa4a0c99babe483759399c2",
+        "description": "radv: bump maxFragmentShadingRateCoverageSamples to 32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d605bb8e067937860ea353dbfdbd6e36863b2c7",
+        "description": "radv: disable fragmentShadingRateWithCustomSampleLocations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7e8704611f997aa86de3c68b8cd386ac96fbbb1",
+        "description": "radv: bump maxFragmentSizeAspectRatio to 2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36936adad75c1c2b8d325b24b666627906d43d4f",
+        "description": "ci/vc4: update piglit expected results",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d22c1701d003857cbc3cab9ca4c493b8aacaf95",
+        "description": "docs: flag VK_KHR_multiview as implemented for v3dv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "826f95778a4edf7ed912fb5f90a05febfbd3e037",
+        "description": "etnaviv: always try to create KMS side handles for imported resources",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1bc22a2eabe9e9d7fd013f188e3e532fb797ea89",
+        "description": "renderonly: don't complain when GPU import fails",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "353e6323936b812884fa677c25bdba91554881b7",
+        "description": "clover: add kernel attributes support for SPIR-V",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "773f0461031085d80f0c220ddec99cc03000fd3c",
+        "description": "clover: return CL_INVALID_PLATFORM properly.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3106a340a01cf4a760d828e38d560ed6044e100a",
+        "description": "clover: fix api zero sized enqueue",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "7ae3881a4bf989436b602b30b9a91602435e47a6",
         "description": "radv: flush caches before performing separate depth/stencil aspect init",
         "nominated": true,
