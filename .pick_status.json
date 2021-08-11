@@ -1,5 +1,329 @@
 [
     {
+        "sha": "01b0935d315347cfd06bb5d8bb1a6b59913f94cc",
+        "description": "nir/lower_shader_calls: remove empty phis",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "8dfb240b1f063307aa5e53fb1bd0865105eef986"
+    },
+    {
+        "sha": "a1b7a5fad6c6773f7ee71844eb92d000f098e797",
+        "description": "zink: use nir_shader_instructions_pass in nir_lower_dynamic_bo_access",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "50cb70d38a11d85366e85744b5a4e6040e561c46",
+        "description": "zink: use nir_shader_instructions_pass in lower_discard_if",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65f9234f96a6adf169d4da1d9145382fa9a7fc91",
+        "description": "microsoft/compiler: use nir_shader_instructions_pass in dxil_nir_lower_double_math",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8de41902e354c81779e633fcdaa780dabba56a7",
+        "description": "microsoft/compiler: use nir_shader_instructions_pass in dxil_nir_split_clip_cull_distance",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9aafb91f0e50be5e5347304deca8206c51617cbd",
+        "description": "microsoft/compiler: preserve all metadata when upcast_phi doesn't make progress",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "17a61ec541bd8e0c390507f3adcb710820af53d8",
+        "description": "microsoft/clc: use nir_shader_instructions_pass in clc_nir_dedupe_const_samplers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "70723f278f9e2c8e2bfbbf104c52f26017fd8318",
+        "description": "microsoft/clc: preserve only valid metadata in clc_lower_printf_base",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4d8122610264674ae568ffe1f44e52a89fa64cc6",
+        "description": "d3d12: use nir_metadata_none instead of its value",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7810ca596c94107fb3355ad3a7d8ffa866950526",
+        "description": "intel/compiler: use nir_shader_instructions_pass in brw_nir_apply_attribute_workarounds",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1b325f58730d8fd82829c538c9e83aa193c4eba",
+        "description": "nir/builder: invalidate metadata per function",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a62098fff202f5e6c689aa6e78ace67c50f17c8e"
+    },
+    {
+        "sha": "a57bcc4394d07b7f85db7fa33e2e2fd540055bee",
+        "description": "freedreno/decode: print estimated crash location without colored output",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7684d57a051fdeb7f4ecfc970fd51f0c3bb9dfad",
+        "description": "nir: add a pass to optimize \"gl_FragDepth = gl_FragCoord.z\" away",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6176881a64909715e5c9ea3a1eac063656472f6",
+        "description": "iris: Drop dead drm_ioctl prototype",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0707a1d8423538b1a2e04b20e7dfd2ee7ad5a8c4",
+        "description": "iris: Improve the memory layout of iris_bo by fixing pahole issues",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2616e15c015de53f53ad2e4c6f540a90d10164c2",
+        "description": "iris: Rename bo->gtt_offset to bo->address",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c964e5f099b8020b0006ab114210b8c13e551f84",
+        "description": "v3d,v3dv: add options to force 32-bit or 16-bit TMU precision",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff669ea93bc5e7d3065d876c8514667f5e740d96",
+        "description": "anv/android: fix build error due refactoring",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "e08370dc37ecd6bb81edf897bf52a6abc938e9cc"
+    },
+    {
+        "sha": "c16f7e2a193f85aa26735fac49eafbd3d1c91888",
+        "description": "docs: add llvmpipe host memory extensions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c198adf718192674a8200f25b97665e48e777a0c",
+        "description": "lavapipe: add host ptr support.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a57dceeb760a1d4f7d9d1666bec0844ee41852e",
+        "description": "llvmpipe: add support for user memory pointers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee2bb57f1ed2f19024adaf4f178a893354c680ae",
+        "description": "pan/bi: Use the computed scale for fexp NaN propagation",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "499397700c10f260e806921ba59103eab0998de8"
+    },
+    {
+        "sha": "84d2e537890acea01da2795e5dd3bac1319635f5",
+        "description": "Revert \"nir/algebraic: Convert some f2u to f2i\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "ad059202583e8c86bbccf0d65c5ce35bc4ab20f1"
+    },
+    {
+        "sha": "3ba66ebbc8207a24282b3aab57a2d691d10199f9",
+        "description": "nir/opcodes: Use u_intN_(min|max)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fb9e78d09af1ae3bb6fa3c805ca99e1108cd80f",
+        "description": "clover: only return CLC version as 1.2 (even for 3.0)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e78d5bb8e2bb87d53dce4fe61e1f21a933aae922",
+        "description": "clover/nir: don't convert to NIR on library link",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6cc1568ff5cffa4c4ac1cd40d3ea5afede99e505",
+        "description": "clover: fix compilation with clang + llvm 12.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4128acdee32eadfef1fb8c3c3ce2e512a267cdf4",
+        "description": "pick-ui: show commit date",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ec42b5edafcce3f160e6c564bfc5ac616d82ad7",
+        "description": "pick-ui: show nomination type in the UI",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db14f2a9326a3dfefd2abbf937641f7ab92024a2",
+        "description": "pick-ui: drop assert that optional argument is passed",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a79ac1bee14d6600cde2788bf136aa59b69a786f",
+        "description": "freedreno: Use correct key for binning pass shader",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "1dd24bf27b2b1da65cf66f58481ec2331179b4e0"
+    },
+    {
+        "sha": "9b57a81815c54b3eb01b711761bc3856d722995d",
+        "description": "nir/lower_mediump: Fix metadata in all passes",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "fb29cef8ddabdd05aeddc5220017bb28a83bb19c"
+    },
+    {
+        "sha": "03c18f7efc4398f3a2ef1630bb40c6820aedd0dd",
+        "description": "nir/lower_mediump_io: Don't remap base unless needed",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "fb29cef8ddabdd05aeddc5220017bb28a83bb19c"
+    },
+    {
+        "sha": "4f9ac2f7374500619ac1b36c71bb162f1a5bb98b",
+        "description": "tu: add \"flushall\" and \"syncdraw\" debug options",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03ddffd19f1555f4c775ea567c607d7d46ed4ff3",
+        "description": "nine: init more draw info members",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c361658670c272587eec98f50581b6ccd82a3352",
+        "description": "nine: init take_index_buffer_ownership for draws",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "0dd0a92b243487e83d8d96532873f319719248e5",
         "description": "u_driconf: Use a macro to avoid repeating option names",
         "nominated": false,
