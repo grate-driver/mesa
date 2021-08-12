@@ -1,5 +1,536 @@
 [
     {
+        "sha": "688d11e4e821ec3934abe571de9899390beceb54",
+        "description": "ci: skip minio login if PIGLIT_REPLAY_UPLOAD_TO_MINIO is not set",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a86d519607d94b21b9cb87263e2f3f98ef14774",
+        "description": "broadcom/compiler: set current block on incrementing unifa",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0df911269234badb814460e23079274c3198b356",
+        "description": "v3dv: add API entry points for sampler Ycbcr conversions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ede320fa9029b44b11ea5fcc970ec4eaab00d136",
+        "description": "v3dv: don't try to access pColorBlendState if rasterization is disabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "777de86eb1d93f19165662d8442b32a182761c89",
+        "description": "radeonsi/test: add Sienna Cichlid expected results",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a92367209fb67729c5ba955afdea36af1fd98ace",
+        "description": "radeonsi/test: prettier output",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "66709f1a40624407c5dc2ad64fc130f79e6ecc08",
+        "description": "radeonsi/test: allow to pass a filename as a test filter value",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55a40acd617eab57c7fe539633cabf56257c30ef",
+        "description": "radeonsi/test: format radeonsi-run-test.py with black",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac321c6fcf67043188dd5cf0b612533de4ba09c3",
+        "description": "radeonsi/test: fix test script args handling",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "20055a307df5aa579e4213c76f394ec77293ff31"
+    },
+    {
+        "sha": "fd62e0b7996afde22447fd929a55b0cc89e9ab36",
+        "description": "tu: enable VK_EXT_extended_dynamic_state2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9586cacdcb3491f80602bf6b76f6ab9867557f04",
+        "description": "tu: implement dynamic rasterizer discard enable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f0a7dbdeaf4c5cdcc088394cfb81af5bfeb3398",
+        "description": "tu: implement dynamic primitive restart enable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b8ed9b55c7fcdc1464019084ef099d5468667f6",
+        "description": "tu: implement dynamic depth bias enable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "804f1b56648932abc7033bc7de927a64804603da",
+        "description": "tu: declare VK_EXT_extended_dynamic_state2 but leave it disabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "513fb5438b4466254af9219f4cd3ede5063394c6",
+        "description": "aux/cso: try harder to keep cso state in sync on cso context unbind",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a73cb106a6771173a138f99ec063808257cd12bf"
+    },
+    {
+        "sha": "4b8f4bae01360a69e05889c66764231b92aa7495",
+        "description": "tu: allow dynamic primitive topology with tessellation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0bbc3afb9ae169d50237017bd0db1fd4db03dd63",
+        "description": "ci: Build ANV on Android",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f3aabe068c45883af598daf3018be4d7754a7af7",
+        "description": "anv/android: Drop unused device variables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "16a9cf69151ace3a36e10ff8db33b07fa7484d5e",
+        "description": "anv/android: Pass the correct pointer type to vk_errorf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "279fe1ae6db724ac500a49da532dce56d4b8baf2",
+        "description": "intel/perf: Use a char array for OA perf query data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c858d3083302784abbd9efa89a39105df287d86a",
+        "description": "intel/vec4: Don't override emit_urb_write_opcode for SNB GS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a4d1ae7017aa3d5c0b8d85150fdb17edc5a56ca6",
+        "description": "meson/glsl: Only run GLSL tests if can_run_host_binaries()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd88fb33fe3224ed8903b1dc8026991baaa4a864",
+        "description": "meson: Intel drivers don't require expat on Android",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce1a66fe3e10c0467b52cc656660a9e466e92fb9",
+        "description": "meson/intel: Don't build genxml tests on Android",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fdc5138256aa68dde9ea068f7137023708bbceac",
+        "description": "st/mesa: fix pbo download store image type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03d17461f382ad7de8e6ebf42fb841e68ea58d3e",
+        "description": "iris: use add_bo_to_batch() when adding batch->bo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "155a7a9b0f80f59e6406ab5db5e956b5f871e666",
+        "description": "iris: add the workaround_bo directly to the batch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d07fa0ef60ee3ffda5864d0cbadabe8e62e9037c",
+        "description": "iris: extract the code that adds BOs to the batch lists",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "805c5dcd590699240953358797290646addaaf3e",
+        "description": "iris: assign bo->index to the aux map BOs too",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7102bed69dd46e51ca9bf6e5630ba46ad8b6716",
+        "description": "iris: don't bump the seqno for the workaround_bo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89c22ef230b16338f20a19a1e064e0eb61abd97f",
+        "description": "docs: update calendar and link releases notes for 21.1.7",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d6cfc971566f55a9ffa9707d008efccf25e4ace1",
+        "description": "docs: add release notes for 21.1.7",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a81d14271a66869ed7beded3fdf01a20e12dfce",
+        "description": "intel/vec4: sel.cond writes the flags on Gfx4 and Gfx5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38807ceeaeb8d31c03f412726e72bee55bd21e32",
+        "description": "intel/fs: sel.cond writes the flags on Gfx4 and Gfx5",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "df1aec763eb972c69bc5127be102a9f281ce94f6"
+    },
+    {
+        "sha": "593ad9294bee4a735b5ad5bccd4537c23b9eb738",
+        "description": "crocus: align staging resource pitch on gen4/5 to allow BLT usage.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f3630548f1da904ec6c63b43ece7e68afdb8867e"
+    },
+    {
+        "sha": "58e95f99bd5dde83eb2a7ab6d1ee2735eed432d9",
+        "description": "crocus/blt: add pitch/offset checks to fix blt corruption",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f3630548f1da904ec6c63b43ece7e68afdb8867e"
+    },
+    {
+        "sha": "cb2e712b9e42bcbd4b91ec598f3b286c6a00a4a8",
+        "description": "pan/bi: Unit test DISCARD+FCMP fusing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d74ab1e4d9c6cbfa7683f06cba947f60fec308d5",
+        "description": "pan/bi: Fuse DISCARD with conditions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f347e96b82d2c149f2edcbb0bf5c6badabb520f",
+        "description": "pan/bi: Add fclamp unit tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac636f5adb57704696c781a17f11609fad9035ec",
+        "description": "pan/bi: Use FCLAMP pseudo op for clamp prop",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a98790fa963919514398f76a912ed9c228b25ae3",
+        "description": "pan/bi: Add optimizer unit tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89e452883a5d39f85a88ed5abe73544d4849ad9e",
+        "description": "pan/bi: Use FABSNEG pseudo ops for modifier prop",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2b0dca4ce1498e2a5db1b31c9f2bc22c6bae1b0",
+        "description": "pan/bi: Add shader equality helper for unit tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f3d8ec148428ddb927e57217e8ca026301f12364",
+        "description": "pan/bi: Fuse abs/neg more on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c27af4ad36a30330d128d00e7164a28b15799587",
+        "description": "pan/bi: Simplify bi_compose_clamp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cfd73b4542dc60230ca85b217b35013e15fc092b",
+        "description": "pan/bi: Unit test new constant folding patterns",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec76119dfb9c7c6b1f136e9e7575c135268f54d6",
+        "description": "pan/bi: Constant fold texturing lowerings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6fa14794792d78e24a98df4ad912f44db5a188c8",
+        "description": "pan/va: Document IEEE 754 conformance of clamps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cdfb5d37883beae48b5d38179700091a5707db0d",
+        "description": "panfrost: Test src*dst + dst*src blending",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0228ccf8579cd999eaa185df6945a349c01c6aa1",
+        "description": "panfrost: Leverage Bifrost's 2*src blend factor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95e306dc84c4964bb5ef84ff4099ae20a7ac53f1",
+        "description": "panfrost: Add basic fixed-function blending tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95187c03f1f4db910dba0bb79cb80d2bb9823472",
+        "description": "panfrost: Simplify blend_factor_constant_mask",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "01a1b253b43b18d81dba14d7601119b7acdde97e",
+        "description": "panfrost: Fix is_opaque when blend_enable=false",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7af56f2ad10c137e6425f4e36b920aec210bc68",
+        "description": "panfrost: Add blend helper packing the equation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7eb2559198d730e78b8e73e9af224e98f93cd4f3",
+        "description": "panfrost: Use _PU for non-dithered formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07607c84432eb81a2f3401f3df45e38ead063fc5",
+        "description": "panfrost: Remove unused #defines",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ec5e2b6a7082a277035e8a9dc58f03b23fe9280",
+        "description": "panfrost: Add LINEAR debug option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3958f00215c53c29aa6681f2af72cca7ec84b9bf",
+        "description": "pan/bi: Add a noopt debug option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff03f096bfac526914c22ffc4c653de38ecf2cc3",
+        "description": "pan/bi: Make bi_opt_push_ubo optional",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "01b0935d315347cfd06bb5d8bb1a6b59913f94cc",
         "description": "nir/lower_shader_calls: remove empty phis",
         "nominated": true,
