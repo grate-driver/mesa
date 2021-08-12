@@ -1237,7 +1237,7 @@
         "description": "panfrost: Move bo->label assignment into the lock",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3fa1f93dace64d9f71869e08f3665f3e48b07286"
     },
