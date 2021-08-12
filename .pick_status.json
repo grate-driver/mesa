@@ -247,7 +247,7 @@
         "description": "mesa: don't return errors for gl_* GetFragData* queries",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "59012c31337f104aedfe69ca6d3cf784581df544"
     },
