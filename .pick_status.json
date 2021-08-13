@@ -130,7 +130,7 @@
         "description": "glsl/opt_algebraic: disable invalid optimization",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "34ec1a24d61f8b2f6ed58efa9fe7ea8cec917612"
     },
