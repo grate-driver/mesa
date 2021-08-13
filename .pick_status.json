@@ -1,5 +1,293 @@
 [
     {
+        "sha": "04bd2a12451160609b6f163e1a86437948a48fcd",
+        "description": "nir: remove src/compiler/nir/nir_control_flow",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "673cc9323ac1214dbfa759946c2ffa869ca68962",
+        "description": "nir: Move phi src setup to a helper.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "636f51c6d1585a9e43a088399bb31c5270669b15",
+        "description": "ci/v3dv: update flakes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa1bb477031f56ad0131b2122a8362d667711922",
+        "description": "frontends/va: Reallocate p010 buffer for AV1 10 bits decode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef0bfe2459a7aab77f978feb310acf3ae8337694",
+        "description": "radeon/vcn: Enable the AV1 decode p010 mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ea47f258d799b35fc95481829f302261f45b170",
+        "description": "frontends/va: Add AV1 profile main to the config",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ce61002154bb3ed8351a19705763313a037d1f2",
+        "description": "frontends/va: Place AV1 picture and slice parameter buffers functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9cc4c1d8f819d0868a1c51ef91cf6f0242d1ec91",
+        "description": "frontends/va: Add AV1 parameter buffers functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a421ff9a4d93d8d576acf943cb0ed7a698d4c76",
+        "description": "frontends/va: Add AV1 picture description",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "608949f199f29a455cd2e4ce8e6b3a50f4f3af1c",
+        "description": "virgl/ci: switch glmark2 traces from .rdc to .trace",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4c0a34bfe4c9cc45eba06363bce43fbce5b2813",
+        "description": "radv: fix build with mingw",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "277ac9c30fa4c481f7f8149397b65ed74b94c3f6",
+        "description": "freedreno, tu: Set GRAS_LRZ_PS_INPUT_CNTL::SAMPLEID",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "70e620437c4c43554c904e974543ac02338ed275",
+        "description": "freedreno, tu: Stop asking for foveation quality",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2b134a8c0ce6c92978e49005fb66d357643a3a1a",
+        "description": "freedreno/a6xx: Add new register fields",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19b7bbba7300c013dca67f931cad3e55dfc3722b",
+        "description": "anv/android: handle image bindings from gralloc buffers",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "bc3c71b87ae0b8e053f45c26c1179560e462db04"
+    },
+    {
+        "sha": "8d679f4f4e8d33402f11ab3da93ff815e4c44538",
+        "description": "nir: Initialize evaluate_cube_face_index_amd dst.x.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a1a2a8dfda7b9cac7e36bf8853d984a6009fc27e"
+    },
+    {
+        "sha": "c0fc745b78bc84b07f43b0114e2fac54938eca63",
+        "description": "meson: Remove duplicate xvmc in build summary.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "d30ce03bc07562d2f694dbe94cbf9c1875a25c4d"
+    },
+    {
+        "sha": "6a0e703512d7e22cbd3fddf3ae20ba46f53dd199",
+        "description": "util: Fix translate from block compressed to rgba",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "2b5178ee4820d69386dfa0ecb28fe9fe7c4f0964"
+    },
+    {
+        "sha": "cca51207725e9edb0410d57ff6d0c437238c0648",
+        "description": "iris: Stop using SET_DOMAIN on discrete GPUs altogether",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8fe5152b725eefe17254b63577576276c8ea7e65",
+        "description": "iris: Allow SET_DOMAIN to fail when allocating new GEM objects",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "468c3c83b4a5a2a4ff6b6a29e81522a11672d427",
+        "description": "iris: Use the new I915_USERPTR_PROBE API",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8e2214ee5755c5c3667e559027d6d7bdc3a30f7",
+        "description": "anv: Use I915_USERPTR_PROBE when available",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9feb57a85eb226533e2f08db7c26dae58bb818be",
+        "description": "iris: Use I915_MMAP_OFFSET_FIXED for LMEM platforms",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "188cddfb3897da004b98d0136790df5c10ac8353",
+        "description": "iris: Add a new IRIS_MMAP_NONE map type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e83da2d8e3b1129d6857bb18cb212fdd08cbc69b",
+        "description": "iris: Don't try to CPU read imported clear color BOs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "373f0d6accd197812a9de00e388e5b86a5ddd7ff",
+        "description": "iris: Add an assert to iris_bo_gem_mmap_legacy()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24031700a7f6f38826d3a2ff4c5aa4b7c773c919",
+        "description": "iris: Use a tiny table to map mmap modes to offsets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c49041c9d7a923fc0306f5b0c313f62706dcb12a",
+        "description": "iris: SMEM buffers on discrete platforms are coherent",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "512fa2f4dab79588e8423b67ced3d5c67e0ae173",
+        "description": "anv: Use I915_MMAP_OFFSET_FIXED for LMEM platforms",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "54e4a36c3a25b6bb4cae0577ffa3b00f902e7542",
+        "description": "include/drm-uapi: Bump headers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "96643a8ba07bc412c4032026008fd4b93bede188",
+        "description": "docs/panfrost: Update llvm option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c14a85e75688763b56dfaceda899090200398f9e",
+        "description": "radv: enable DCC with signedness reinterpretation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "688d11e4e821ec3934abe571de9899390beceb54",
         "description": "ci: skip minio login if PIGLIT_REPLAY_UPLOAD_TO_MINIO is not set",
         "nominated": false,
