@@ -103,7 +103,7 @@
         "description": "lima: Implement lima_resource_get_param() callback",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "47f000c170ccb824b308e02db8c2c955a8c00217"
     },
