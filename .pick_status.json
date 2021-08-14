@@ -40,7 +40,7 @@
         "description": "vc4: implement resource_get_param",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7bcb22363935431f1c8886608d9a77b3503fc5b4"
     },
