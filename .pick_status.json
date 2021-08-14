@@ -58,7 +58,7 @@
         "description": "etnaviv: add stride, offset and modifier to resource_get_param",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9da901d2b2e7ab5d5f21a0004fc294810f69f04a"
     },
