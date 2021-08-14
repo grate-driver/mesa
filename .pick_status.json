@@ -49,7 +49,7 @@
         "description": "panfrost: implement resource_get_param",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4c092947df308f20e288bb5baf50bff181e5d3fa"
     },
