@@ -2623,7 +2623,7 @@
         "description": "main: allow all external textures for BindImageTexture",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ed43dd62acc045e71d73dc28b74b6a9a9d52286f"
     },
