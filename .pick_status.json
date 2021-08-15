@@ -1813,7 +1813,7 @@
         "description": "pps: Avoid duplicate elements in with_datasources array.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "92180a4376345a23a69e63ecdb679f49134f30f5"
     },
