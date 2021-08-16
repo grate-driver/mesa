@@ -1,5 +1,563 @@
 [
     {
+        "sha": "441e490f5a13d96255810f38260445437033be63",
+        "description": "v3dv: initialize CL submission structure",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "ca13868098ebadb4c65c01e122f3ff4dde726186"
+    },
+    {
+        "sha": "795f3b73185ca2d080c799de4b2d527391bbeacd",
+        "description": "ci: update trace hashes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cfc4433015d9b5d8081036419b7fcdcc39f7c312",
+        "description": "nir,glsl_to_nir: use nir_fdot()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f6f9000f84db84370262472282065a8d17ed2b36",
+        "description": "spirv: create ffma more often",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28acc4120f77278d50a784076585ed7157a04694",
+        "description": "nir: lower fdot to ffma if lower_ffma=false",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "174a4f36f9c4c6a9d180bbc5e9da1bfc92c97b4d",
+        "description": "nir: create ffma from builders more often",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ed70b256cea526dd233bc21a9749ad2bb14e48d9",
+        "description": "nir: add ffma creation helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ec4d862c2a17ef7ae79ceb23cd7f0942a13d64b",
+        "description": "nir/algebraic: add is_used_once to dot product reassociation optimization",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f95a16be722a1ec3f101263af99d9408e6265f57",
+        "description": "nir/algebraic: reassociate add chains for more MAD/FMA-friendly code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "110bcb49193fdd4c2d86c0407bea761a4e2c0bb7",
+        "description": "nir/algebraic: add various ffma optimizations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b0238191ca268e6299fcc3665234df0a6307d903",
+        "description": "spirv: swap fadd operands in build_asin() and matrix_multiply()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "82d0600ba21f6bf308af019a9868d1a1ae51fb56",
+        "description": "nir: swap fadd operands in nir_atan()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d42e53c77a2657ce9794b448800a1e38b80a1d97",
+        "description": "panfrost: Unit test clear colour packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8dfbbee05461c581ec4cba46ec4e74de49df80f9",
+        "description": "panfrost: Mark R5G6B5 as blendable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "62e902101b1ae146276353fde9824e5b891ae219",
+        "description": "panvk: Use pan_pack_color",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b9c095cc2c6874625a50805b7914cca74b8742bb",
+        "description": "panfrost: Rewrite the clear colour packing code",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0624346a20604eeabd5aa1c88811449ef9473ed4",
+        "description": "panfrost: Only allow colour blit shaders to be killed",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "d0344619214b43db8bc5a928dd09d1fcf8f725fc"
+    },
+    {
+        "sha": "76377de99bf685ada1fbaf9fe38fb80d88d33aeb",
+        "description": "panfrost: Fix leak of render node fd",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dab97fe227739781652564504a27ff6ea08fb98e",
+        "description": "panfrost: Add nocache debug flag for disabling the BO cache",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8b97dcdb24a8b5f8fa961d4be71235526321a98",
+        "description": "panfrost: Fill tiler job padding again",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "3d0f6592b2aee1d4c0102f6ca79f39eb20818f96"
+    },
+    {
+        "sha": "191824ec8e475fb70d889b7f617da0d427eaf849",
+        "description": "pan/mdg: Reduce size of tex_opcode_props",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10a344a857a7b15a570b324aa34b6b20d0c337f4",
+        "description": "panfrost: Free NIR when deleting shader state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d349448717dd92a04e23bba85644f85740a88e55",
+        "description": "panfrost: Free TGSI tokens",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98165aa9f2f2cd4c3689c353113a39f9e501646c",
+        "description": "panfrost: Fix memory leaks for compute state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9ab168e16e04dfe3c26c3cf7992e6392ef6877e",
+        "description": "pan/bi,pan/mdg: Fix memory leak of hash tables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b85ff566960312252f0525d51d1515d8914151ca",
+        "description": "panfrost: Call primconvert and u_transfer_helper destroy functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f378799d9dd94a46c301d714cadb9eadf1c5a758",
+        "description": "CI: Update Windows quick_gl baseline for mysterious new passes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1564ff72a0149ca5e1f5603cacbdd13afb0cadb4",
+        "description": "tu: Fix xfb when there is a hole at the end",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86196eff98a428ef9ea1ff2a7712ea2b4dac6555",
+        "description": "AOSP: Add panfrost vulkan library suffix",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21de785562b05ec08252b0e16634a125646faa63",
+        "description": "AOSP: Update timestamps of target binaries",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "8621bd8d5e67173281c6a6dd64054d4b0366f023"
+    },
+    {
+        "sha": "c3775ac50740161b28bd04cb0c07d739d8db3a2f",
+        "description": "AOSP: Upgrade libLLVM dependency to v12",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a70ff21efbb48f851c5cdd10c43c4c8a3d49b071",
+        "description": "AOSP: Extract version from libdrm instead of hardcoding it.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "8621bd8d5e67173281c6a6dd64054d4b0366f023"
+    },
+    {
+        "sha": "71595a189a0c372efd520ad51866ca57aa83298c",
+        "description": "tu: Fix feedback loops in sysmem mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "351c6b8bfe67c69caa55d0f604df6a8714057ff9",
+        "description": "freedreno/a6xx: Document GRAS_SC_CNTL::SINGLE_PRIM_MODE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d18f1022752902e72bc9b97b521e85bc5cb4e195",
+        "description": "vulkan/wsi/wayland: add helper function find_format()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb3b4609c1ac067bd066a01286fa19ce029804a0",
+        "description": "vulkan/wsi/wayland: always initialize format vector",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "151b65b211907d92f3012997aba12b7dbe004e61",
+        "description": "vulkan/wsi/wayland: generalize modifier handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7383827acc83f9a42684424c82bc7fd1a485b058",
+        "description": "vulkan/wsi/wayland: fold wsi_wl_display_swrast and wsi_wl_display_dmabuf into parent",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1c9299eaded4f5dc760c0094230a908de1672912",
+        "description": "vulkan/wsi/wayland: fix crash when force_bgra8_unorm_first is true",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db2635020f97d3bdd9bf62bf8c3bb08c791647d0",
+        "description": "vulkan/wsi/wayland: do not perform roundtrip when not querying formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4bf011a7688f8f081814fb50a29aa2b45f616e3f",
+        "description": "vulkan/wsi/wayland: check directly if we got globals successfully",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e0903165702073ebaa6d6ae38541220b1c90e19f",
+        "description": "vulkan/wsi/wayland: drop support for wl_drm",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9990a351e8e70631115d2fe35b504133892776c5",
+        "description": "vulkan/wsi/wayland: use drm_fourcc.h for formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d27a0dd7df3f6b653153264acb487eece236efda",
+        "description": "i915g: Add support for FXT1.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12b248755eb9b47933bbea4dc1fdf73bf5db72fa",
+        "description": "i915g: Fix up the format mapping for DXT1_*RGB",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22ec89b66b6e93ffceecad9af6199a3c08fe480e",
+        "description": "i915g: Add missing support for sRGB S3TC.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f46850d3b30ae4f99b807f6ef1e1982184d14e76",
+        "description": "i915g: Add support for blitting compressed textures.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a088aead52edb344674a70321d63c83325a21f5",
+        "description": "i915g: Make the 1D workaround keep TXP's .w channel in the right spot.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "390a3fcdc45ef73739a1827102af387007b7582e"
+    },
+    {
+        "sha": "4d9acfa5331be6140e84badff7a232dbf07b69b4",
+        "description": "python: drop explicit output_encoding='utf-8' in mako templates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3f99ff8a0edb2d1bd79d89a141b79b8810e5ba54",
+        "description": "glsl/tests: remove some dead code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "773a70f9cb1c53b55f629fab812abb0c47db42fb",
+        "description": "isl: drop left-over comment",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "cf9ff082b48779c52fa6b82dc4bb163303287772"
+    },
+    {
+        "sha": "e8937757ce6a2b8b4914ad7dd37f574d6579b227",
+        "description": "isl: drop comment about \"python 2 vs 3\" as it doesn't apply anymore",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "93cb3aca0347bf4a9ed31226627672b178841cfb",
+        "description": "Revert \"python: Explicitly add the 'L' suffix on Python 3\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "ad363913e6766280f53838126d67370f9e97aa12"
+    },
+    {
+        "sha": "f1eae2f8bbe1225f17594e4b1e5221555a0e5f96",
+        "description": "python: drop python2 support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dac09a3119881edb32046a55b87d5ceea0128a82",
+        "description": "gitlab-ci: stop installing python-is-python3 package",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f854145d20501d783c1cb9325ace79eaa238991",
+        "description": "python: explicitly require python3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0092edfec0895533260a52c84cb4ce098f6b6bea",
+        "description": "nir/dead_cf: Do not remove loops with loads that can't be reordered",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38f39cc1e21569c1bc0ffa56d402d042761be16c",
+        "description": "drm-shim: Support kernels with >4k pages",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f2dbd45f20b0c676d7140101c493351c121c728",
+        "description": "gallium: Remove \"optimize\" parameter from pipe_screen::finalize_nir",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f62307232877e9558cb9a7ecbe8b48b85d2842b0",
+        "description": "v3dv: implement VK_EXT_color_write_enable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa8179e33f8b1fce5dd0a1df3cc265cc3e3d9cbd",
+        "description": "nir/inline_functions: Handle halting functions.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa6cd6e00daace43b70800edf2499a7d7a779aa8",
+        "description": "nir/lower_scratch: Ensure we don't lower vars with unsupported usage.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "04bd2a12451160609b6f163e1a86437948a48fcd",
         "description": "nir: remove src/compiler/nir/nir_control_flow",
         "nominated": false,
