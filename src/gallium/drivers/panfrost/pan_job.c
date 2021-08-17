@@ -935,7 +935,6 @@ panfrost_flush_writer(struct panfrost_context *ctx,
 {
         if (rsrc->track.writer) {
                 panfrost_batch_submit(rsrc->track.writer, ctx->syncobj, ctx->syncobj);
-                rsrc->track.writer = NULL;
         }
 }
 
@@ -952,8 +951,6 @@ panfrost_flush_batches_accessing_rsrc(struct panfrost_context *ctx,
 
                 panfrost_batch_submit(batch, ctx->syncobj, ctx->syncobj);
         }
-
-        rsrc->track.writer = NULL;
 }
 
 void
