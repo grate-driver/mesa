@@ -76,7 +76,7 @@
         "description": "gallium/nir/tgsi: fixup indentation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "42b5cfdbd26cf1540f12d8193dd70d7bd01a9ccc"
     },
