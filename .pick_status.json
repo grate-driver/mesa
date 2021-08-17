@@ -121,7 +121,7 @@
         "description": "gallivm: fix texture-mapping with 16-bit result",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "00ff60f799c3e8a2d0c4d7933b60b3f8f69f092c"
     },
