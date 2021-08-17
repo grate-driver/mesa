@@ -291,12 +291,16 @@ panfrost_batch_update_access(struct panfrost_batch *batch,
         /* Flush users if required */
         if (writes || ((writer != NULL) && (writer != batch))) {
                 unsigned i;
-                BITSET_FOREACH_SET(i, rsrc->track.users, PAN_MAX_BATCHES) {
+                foreach_batch(ctx, i) {
+                        struct panfrost_batch *batch = &ctx->batches.slots[i];
+
                         /* Skip the entry if this our batch. */
                         if (i == batch_idx)
                                 continue;
 
-                        panfrost_batch_submit(&ctx->batches.slots[i], 0, 0);
+                        /* Submit if it's a user */
+                        if (_mesa_set_search(batch->resources, rsrc))
+                                panfrost_batch_submit(batch, 0, 0);
                 }
         }
 
@@ -943,9 +947,13 @@ panfrost_flush_batches_accessing_rsrc(struct panfrost_context *ctx,
                                       struct panfrost_resource *rsrc)
 {
         unsigned i;
-        BITSET_FOREACH_SET(i, rsrc->track.users, PAN_MAX_BATCHES) {
-                panfrost_batch_submit(&ctx->batches.slots[i],
-                                      ctx->syncobj, ctx->syncobj);
+        foreach_batch(ctx, i) {
+                struct panfrost_batch *batch = &ctx->batches.slots[i];
+
+                if (!_mesa_set_search(batch->resources, rsrc))
+                        continue;
+
+                panfrost_batch_submit(batch, ctx->syncobj, ctx->syncobj);
         }
 
         assert(!BITSET_COUNT(rsrc->track.users));
