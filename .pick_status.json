@@ -1,5 +1,347 @@
 [
     {
+        "sha": "726fdf3385428b52b773e9049ce6033d02c631c1",
+        "description": "st/mesa: correct point_tri_clip for gles2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "48b1b159ffe1f7864641b2a52d7f07e80149fd62",
+        "description": "llvmpipe: take intersection with bbox for non-legacy points",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f530e72ea05f7fadf139df558f10d7ad9d38cc46"
+    },
+    {
+        "sha": "782f75cb526e44f24a5fb38278167c4c4e00675a",
+        "description": "intel/isl: Use uint64_t for computed byte offsets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb7c28bf24366ae3c30c3a03cbe69747cde49b28",
+        "description": "intel/isl: Add a missing assert in isl_tiling_get_intratile_offset_sa",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a4dafe1faddb569424c7d60fb8da96d0542cedca"
+    },
+    {
+        "sha": "7d521bc1044a883fbf3ad9c8d5bb438df6707d2c",
+        "description": "intel/isl: Better document isl_tiling_get_intratile_offset_*",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ab2f7d489db67323bb0f7daf7062d23061a30a6",
+        "description": "intel/isl: Add units to view dimensions in isl_surf_get_uncompressed_surf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "370240615421055be24c2c30e345d0454043d5e1",
+        "description": "intel/isl: Explicitly set offset_B = 0 in get_uncomp_surf for arrays",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "9946120d2b4e898b58f5d255558a27affc78e928"
+    },
+    {
+        "sha": "40fdb3212c3ded2150faf952dc2b669991bfbf94",
+        "description": "zink: add a suballocator",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5df677e996bb8cdbefbe4a789872734cbd174023",
+        "description": "lima: CI: Enable GL_R8 and GL_RG8 texture formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "574bff908778b31726921ce9e517728e236ce39c",
+        "description": "ci: enable CI for lima again",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46d0126deb82b46c2d7bdadb228e1721b4f485f7",
+        "description": "radv: improve rounding of zmin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ec6b6e9bbf607935cf864e63c9b555621fca590",
+        "description": "lima: Implement lima_resource_get_param() callback",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "47f000c170ccb824b308e02db8c2c955a8c00217"
+    },
+    {
+        "sha": "221871fb6da0a16bf47847040257bdb677042306",
+        "description": "meson: Search for python3 before python for bin/meson_get_version.py",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "f1eae2f8bbe1225f17594e4b1e5221555a0e5f96"
+    },
+    {
+        "sha": "adfd3f8cd41ccbbc1dfb7185ef8776bb77da5643",
+        "description": "v3d/ci: add piglit flake",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89bc8ff4083029187f099af531e4db0e223c62ca",
+        "description": "glsl/opt_algebraic: disable invalid optimization",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "34ec1a24d61f8b2f6ed58efa9fe7ea8cec917612"
+    },
+    {
+        "sha": "f9e3ae6a019dd8c8fece3f699ae9a66201d1f19d",
+        "description": "intel/error-decode: printout INSTDONE_GEOM register for Gfx12.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f4f3b10728516a01fb743be8bf3db4a8951503d",
+        "description": "genxml: add INSTDONE_GEOM register for Gfx12.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c8ff8a66cf814834c650323b8e292baf67cbc646",
+        "description": "intel/error-decode: printout more registers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bee7bff48e2a1b3969edd425e1ff3ec20eb13290",
+        "description": "genxml: add more INSTDONE registers for Gfx12.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "123590b88c007cd753c5c22515057f72e295c344",
+        "description": "v3dv: Implement VK_EXT_provoking_vertex",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "80e5e059fa3c90904a3e5fe960c98c2ebe1d11ae",
+        "description": "radv: fix pre-computing viewport xform when setting new viewports",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "a2ef92d7a58ee07d6b44131712b6b85700503e38"
+    },
+    {
+        "sha": "edfcc4f0227322fd8f2d72fcf68c96e23b52ba01",
+        "description": "nir: fix GCM when GVN enabled",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "6538b3e56614914dd47ee7822586ba1b91d785f2"
+    },
+    {
+        "sha": "104aa6b5d1d31bc7627d7769a5b010e7dd1b7106",
+        "description": "nv50/ir: Add FlatteningPass constructor.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac1ddfba35c6451f86152a5a8e86d9ff2c5b4467",
+        "description": "zink: Remove unnecessary null checks.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6d996f8ff2e365b96de3e521275764ada317249",
+        "description": "radeonsi: improve rounding of zmin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9e6f414766b7af5652718d85dc28b28b4ea61926",
+        "description": "llvmpipe: init renderer string once to avoid races.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff99270923536701317339db1722283b228f0b74",
+        "description": "gallivm: fix non-32 bit popcounts.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9922ea7e669f0df13eff1594cd1799038d9c95ab",
+        "description": "gallivm: fix idiv/irem for 8/16/64-bit and 32-bit INT_MIN/-1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff2d838c7ad5ff7c48468bcde2950025eeebe7f4",
+        "description": "llvmpipe/cl: limit kernel input size.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3bede9c96e80b45397f893e5960ebf2de76159a",
+        "description": "gallivm: don't lower local invocation index in frontend",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "baf800b236f2ed677106be91ebdcb5d8832de6f0",
+        "description": "i915g: Implement cube/3d texture_subdata() as a series of per-layer maps.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9b51204d8f2e1bb1ce0d66d17be7d2ddd1906493",
+        "description": "i915g: Fix 3D texture layouts for width != height.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dad0c1678270f10a838596af40910c3bc64b8f28",
+        "description": "v3dv: Implement VK_EXT_pipeline_creation_cache_control",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f72268fc91549a2de805218e01702c753b22b89",
+        "description": "llvmpipe: enable GL compatibility profiles",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5b9ca78f4710b04b262a1660b22efc73164e62b6",
+        "description": "draw: add vertex color clamping to gs/tes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ae55f05c0b1542a77c82c7e8c38279211b8ac51",
+        "description": "draw/tess: add clipvertex support for compatibility",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f48fed8e915afe29f8aca3e878550cb30c23d62d",
+        "description": "draw/gs: add clipvertex support for compatibility",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b1b1af6942e7d38cd35d4d47c2e37c3cce2b32f",
+        "description": "draw: handle primitive ID for quads/quad strips.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "441e490f5a13d96255810f38260445437033be63",
         "description": "v3dv: initialize CL submission structure",
         "nominated": false,
