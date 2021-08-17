@@ -1183,7 +1183,7 @@
         "description": "panfrost: Cache number of users of a resource",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
