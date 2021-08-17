@@ -112,7 +112,7 @@
         "description": "nir/lower_vectorize_tess_levels: set num_components for vectorized loads",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f5adf27fb926a330a13af716f0a03da1a224656d"
     },
