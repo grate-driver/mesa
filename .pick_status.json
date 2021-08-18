@@ -1687,7 +1687,7 @@
         "description": "panfrost: Handle non-dithered clear colours",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b9c095cc2c6874625a50805b7914cca74b8742bb"
     },

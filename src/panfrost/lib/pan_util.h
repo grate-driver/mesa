@@ -58,6 +58,7 @@ panfrost_format_to_bifrost_blend(const struct panfrost_device *dev,
                                  enum pipe_format format);
 
 void
-pan_pack_color(uint32_t *packed, const union pipe_color_union *color, enum pipe_format format);
+pan_pack_color(uint32_t *packed, const union pipe_color_union *color,
+               enum pipe_format format, bool dithered);
 
 #endif /* PAN_UTIL_H */
