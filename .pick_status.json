@@ -1,5 +1,599 @@
 [
     {
+        "sha": "35c3f5f08b7b11f3896412fb5778f127be329615",
+        "description": "radeon/vcn: check frame size change for vp9 header flags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b6f8588a2b6ce9577e1230a2cdc421a3ec9f8a6",
+        "description": "radeon/vcn: track width and height of the last frame",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "912d78d4f2976ce3d218e2ca00aee86810071fd2",
+        "description": "radeon/vcn: initilize num_temporal_layers for hevc",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "51935d594ed97fac8f798e7686b8b9c8809b1380"
+    },
+    {
+        "sha": "7faad66ab076b499f197d665da6311d9ed18318a",
+        "description": "intel/pci-ids: Re-enable DG1 and add SG1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "57bfd7122f711db4db9100254432e27e877fad09",
+        "description": "anv: Fix VK_EXT_memory_budget to consider VRAM if available",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "758662759dcf31c64fd62d5b3d280e2c7791ce63",
+        "description": "anv: compute available memory in anv_init_meminfo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c79c545e3ccdb2879d1c605bfdf377f4d18e648",
+        "description": "anv: Rework init_meminfo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be216ae9d9e900147a69b90a2ffd8a3ee24dcb32",
+        "description": "anv: Move compute_heap_size lower in the file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e0bd2fae8b0532d7fadcd6f75918b4957c66cb86",
+        "description": "softpipe: fix ci rule ordering to avoid unnecessarily running jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "09c1792d1f362af6d08c73a145699c1b739f0c14",
+        "description": "anv: warn if system memory is used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e610f4b5f23a738b6eff299e1728bda851c88be2",
+        "description": "anv: Allocate workaround buffer in local memory if present",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0afda06441633c6bdcd3a7b4232c1da95b3538d6",
+        "description": "anv: Use local memory for block pool BO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "649251ad4e031609dafd4034b802d292fea6131c",
+        "description": "nir/lower_vectorize_tess_levels: set num_components for vectorized loads",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f5adf27fb926a330a13af716f0a03da1a224656d"
+    },
+    {
+        "sha": "45a61f1782561da9a7905bf584cd188d7b108c98",
+        "description": "gallivm: fix texture-mapping with 16-bit result",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "00ff60f799c3e8a2d0c4d7933b60b3f8f69f092c"
+    },
+    {
+        "sha": "fae1e99a15d12b82f65c77c90425335fec7562f1",
+        "description": "iris: declare padding for iris_vue_prog_key",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b16f3261a71c6fa22e300ba2b65d7e4128d8d05a",
+        "description": "radv: fix fast clearing depth images with mips on GFX10+",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c94ff7dd811ad9739b4df92f1cb1ff068ddfdd25",
+        "description": "freedreno/a5xx: Reduce packet emits for SSBO state.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f10c7c4a5d403ebcecf8e2364f671c8e43dc50ef",
+        "description": "freedreno/a5xx: Use ST4_ constants for SSBO/image state types.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5b5dcbfe8942c15ecf2c8cd2d0d15ada61d7000d",
+        "description": "freedreno/a6xx: Skip setting up image dims constants.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "994793c50067172da9a2302f8ee0377bd2b73fc6",
+        "description": "freedreno/ir3: Move a6xx's get_ssbo_size shl to NIR.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "547a2aa051a513caa3d382e2db1a4550ea732834",
+        "description": "freedreno/ir3: Use the resinfo path for ssbo sizes on GL, too.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "513920ba827e64c95ddb684da6ec285786cf0853",
+        "description": "freedreno/ir3: Only lower cube image sizes once.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "a48fc88571f9fbaaf82390187bc748fed0dfa02a"
+    },
+    {
+        "sha": "89ab2a7b6f5f78cac5b34a9c66da2a8b13f8eee7",
+        "description": "freedreno: Add a680 support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf23fbb040f15e0b035e8d5ba90761a7d5418e68",
+        "description": "meson: Check that bin/meson_get_version.py ran without an error",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56ea259b42e20d5136dd3842c1264f5ab1775960",
+        "description": "panfrost: drm-shim support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8b810e545f10e5d454665fe91be18845ed4cae97",
+        "description": "zink: ci updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c1d342e986414a6e4227773a531bb1a0cca30f00",
+        "description": "zink: enable compat contexts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ed4ddf076359518462a32cc4325a9a4d1802aa1",
+        "description": "anv,vulkan: Add a vk_image::wsi_legacy_scanout bit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "def2cb9808272e96481f6f93317af06a3a2652b0",
+        "description": "anv,vulkan: Move drm_format_mod to vk_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f2afa0abc7f8fadab9df21f0f0837b8ccbb974a",
+        "description": "anv,vulkan: Move ANV image layout helpers to common code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ea410173d68bc2f9848c123f089117f4947c1ab3",
+        "description": "anv: Make anv_image_view derive from vk_image_view",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9cc004b3d0c0acb7057f408b9e954607fb18c69c",
+        "description": "vulkan: Add a vk_image_view struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "48e8efd00e7ac7a57e889e3fb9ad4f0c78369db0",
+        "description": "vulkan,radv: Move vk_format_depth/stencil_only to common code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7878d516c67a8b64607bc38e1f42fe584fcf021e",
+        "description": "radv: Add asserts to vk_format_depth/stencil_only",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b006961178bdb6579219226edd10635779082be",
+        "description": "radv: Check format before calling depth_only/stencil_only.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c36ff60a52d69b93b6cc6653aa0ff004604c59e0",
+        "description": "vulkan: Refactor and better document vk_image_expand_aspect_mask",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "83b4d4f17d87ec8c271b004730d8951f66720027",
+        "description": "anv,vulkan: Move VkImageSubresource* helpers from ANV",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e45e4e3ba1505d68f2bb2c6ac825095a28427e7a",
+        "description": "anv,vulkan: Move anv_image_expand_aspects to common code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25d4cffabf2e1ad7a143ef6366cabcfb2b9914cd",
+        "description": "anv: Make anv_image derive from vk_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e6c320a7d6fdad498a31fe2215d138948905254",
+        "description": "vulkan: Add a vk_image struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fc5a6eedbc0fbee9f7d8e7f2ae20257425fafab9",
+        "description": "anv: Delete anv_image::format",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "951635dfe7c90cb0c7d91fcc379d336d46ba2ae6",
+        "description": "anv/image: Use planes[i]->primary_surface.isl.format in check_drm_format_mod",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "403acd299f80c36f48f38bfffe079d21b2c61417",
+        "description": "zink: handle map failures more effectively",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "afa867b973c03f5d516ecdb91a4fbf17ecc87e56",
+        "description": "zink: break out transfer map destroy",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97545a0a1fe9abf048999e4c4efb5a40ab46e2ea",
+        "description": "zink: remove unused variable from image map",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5a6ebc60529b998c85679b51aaef30e15a87deb",
+        "description": "zink: split buffer and image map functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b19bff17f401698e89b5a975b68fafa52f838ccb",
+        "description": "zink: split out zink_transfer allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9e6916fb00c2123de7e6c16e468680c8698efed9",
+        "description": "zink: remove duplicated zink_resource_object::mem member",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67239cf7540b2c38d70352f1722f3e79a4d8b1bd",
+        "description": "zink: collapse 'dedicated' allocation into zink_bo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "defeecb816f96ab8e0be5165057f8cb131056b4e",
+        "description": "zink: flake out some tests for now",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a48fc88571f9fbaaf82390187bc748fed0dfa02a",
+        "description": "freedreno/a6xx: Apply the cube image size lowering to GL, too.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "09942227f63d2112c730799b600b75f8d3d02d5c",
+        "description": "ci/freedreno: Move freedreno's deqp testing to suite support.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "57b041574db6609fce62f9d8789bf1be91de58f2",
+        "description": "ci/turnip: Add a new flake from running more of the CTS.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97d04c2bc54ab3f712edb12a3fba6140a9662f91",
+        "description": "zink: rejigger PIPE_MAP_ONCE for internal qbo reads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d39ef49bd751463f90a0d269812554ab3c1636e",
+        "description": "zink: remove PIPE_MAP_ONCE from subdata",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "daff597940a7114f7c30d50723d2f3f1dc40579b",
+        "description": "zink: make map_count useful for dedicated image allocations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89e2591e8d0c2af0f3861c9f44f8782fe696e0e6",
+        "description": "zink: split mem unmap logic for images and buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6001ebc1b6745fff2f3276f4272e8904d51298c7",
+        "description": "zink: split transfer_unmap for images and buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5fedce7bfb97863064ffedff877e8ce6b952a0bd",
+        "description": "zink: stop zeroing structs during resource allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2857267b888e28c9679558e559f0e5af168671c1",
+        "description": "zink: repack zink_resource_object struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4d7f759e434da834810ed400f8f7c417ef72bc62",
+        "description": "turnip: provide dummy CmdSetLogicOpEXT and CmdSetPatchControlPointsEXT",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "fd62e0b7996afde22447fd929a55b0cc89e9ab36"
+    },
+    {
+        "sha": "2df5387e385bd332c24ad7376c8363db21897610",
+        "description": "tu: Consider depth/stencil for implicit dependencies",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "09e0b29bb63f60231b26b4c8f02eadb68e51b623",
+        "description": "tu: Fix logic errors with subpass implicit dependencies",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dcf1d8d7a4fe5657a24d4a6799532a39aa117977",
+        "description": "util: Replace recursive DFS with iterative implementation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9261a020280ea597d1862288bf81771672c10f75",
+        "description": "util: Add unit tests for dag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d9c90eee8b8fa4aa9d397605d43d726139ad5429",
+        "description": "freedreno: Decode a650+ CP_START_BIN/CP_END_BIN packets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "726fdf3385428b52b773e9049ce6033d02c631c1",
         "description": "st/mesa: correct point_tri_clip for gles2",
         "nominated": false,
