@@ -949,7 +949,7 @@
         "description": "glsl: fix variable scope for instructions inside case statements",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "665d75cc5a23f8024034d0c4176fb281f94a30e9"
     },
