@@ -1615,7 +1615,7 @@
         "description": "radeonsi: strengthen the VGT_FLUSH condition in begin_new_gfx_cs",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
