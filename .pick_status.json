@@ -832,7 +832,7 @@
         "description": "glsl: fix explicit-location ifc matching in presence of array types",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c4545676d7f4e5f898bdc54d5574cd56ca7b9aad"
     },
