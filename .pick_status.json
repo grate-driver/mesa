@@ -463,7 +463,7 @@
         "description": "vulkan/wsi/sw: wait for image fence before submitting to queue",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8004fa9c9501d91669ac51d32c9a9143286ca7ea"
     },
