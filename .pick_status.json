@@ -274,7 +274,7 @@
         "description": "panfrost: Zero initialize blend_shaders",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a124c47b9f90c3f18032928c24a06d157a0334c1"
     },
