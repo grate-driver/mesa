@@ -238,7 +238,7 @@
         "description": "panfrost: Fix NULL dereference in allowlist code",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "88dc4db6be7e21dee525ce1dd4e411664ebc33d6"
     },
