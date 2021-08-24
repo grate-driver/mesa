@@ -4939,7 +4939,7 @@ emit_surface_state(struct crocus_batch *batch,
                    struct crocus_resource *res,
                    const struct isl_surf *in_surf,
                    bool adjust_surf,
-                   struct isl_view *view,
+                   struct isl_view *in_view,
                    bool writeable,
                    enum isl_aux_usage aux_usage,
                    bool blend_enable,
@@ -4956,23 +4956,24 @@ emit_surface_state(struct crocus_batch *batch,
       reloc |= RELOC_WRITE;
 
    struct isl_surf surf = *in_surf;
+   struct isl_view view = *in_view;
    if (adjust_surf) {
-      if (res->base.b.target == PIPE_TEXTURE_3D && view->array_len == 1) {
+      if (res->base.b.target == PIPE_TEXTURE_3D && view.array_len == 1) {
          isl_surf_get_image_surf(isl_dev, in_surf,
-                                 view->base_level, 0,
-                                 view->base_array_layer,
+                                 view.base_level, 0,
+                                 view.base_array_layer,
                                  &surf, &offset,
                                  &tile_x_sa, &tile_y_sa);
-         view->base_array_layer = 0;
-         view->base_level = 0;
+         view.base_array_layer = 0;
+         view.base_level = 0;
       } else if (res->base.b.target == PIPE_TEXTURE_CUBE && devinfo->ver == 4) {
          isl_surf_get_image_surf(isl_dev, in_surf,
-                                 view->base_level, view->base_array_layer,
+                                 view.base_level, view.base_array_layer,
                                  0,
                                  &surf, &offset,
                                  &tile_x_sa, &tile_y_sa);
-         view->base_array_layer = 0;
-         view->base_level = 0;
+         view.base_array_layer = 0;
+         view.base_level = 0;
       } else if (res->base.b.target == PIPE_TEXTURE_1D_ARRAY)
          surf.dim = ISL_SURF_DIM_2D;
    }
@@ -4991,7 +4992,7 @@ emit_surface_state(struct crocus_batch *batch,
 
    isl_surf_fill_state(isl_dev, surf_state,
                        .surf = &surf,
-                       .view = view,
+                       .view = &view,
                        .address = crocus_state_reloc(batch,
                                                      addr_offset + isl_dev->ss.addr_offset,
                                                      res->bo, offset, reloc),
