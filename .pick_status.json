@@ -454,7 +454,7 @@
         "description": "nir: fix shadowed variable in nir_lower_bit_size.c",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6d792989924ce79363f181462904fa46692a99b5"
     },
