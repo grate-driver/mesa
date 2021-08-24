@@ -220,7 +220,7 @@
         "description": "glsl: handle scope correctly when inlining loop expression",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5c02e2e2de75b9d18ca25b4f1cba38c4a89c5bd0"
     },
