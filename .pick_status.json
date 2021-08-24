@@ -2335,7 +2335,7 @@
         "description": "radeonsi: fix a memory leak in si_get_shader_binary_size",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bf8a1ca90246b0c987444de28ecd907942126de6"
     },
