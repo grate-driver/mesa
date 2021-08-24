@@ -2083,7 +2083,7 @@
         "description": "radeonsi: disable DCC stores on Navi12-14 for displayable DCC to fix corruption",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1d64a1045ea205ee0297d2f741a824811570fc6d"
     },
