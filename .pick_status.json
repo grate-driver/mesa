@@ -22,7 +22,7 @@
         "description": "nir: Fix local_invocation_index upper bound for non-compute-like stages.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8af6766062044167fb3b61950ddbc7d67e4c3e48"
     },
