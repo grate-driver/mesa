@@ -40,7 +40,7 @@
         "description": "aco: Unset 16 and 24-bit flags from operands in apply_extract.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "54292e99c7844500314bfd623469c65adef954c5"
     },
