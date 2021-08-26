@@ -1903,7 +1903,7 @@
         "description": "util/format: NEON is not available with the soft-float ABI",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "80923e8d58cc6bdcceb8e1b2910737fc76fdc0d3"
     },
