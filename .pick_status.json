@@ -1,5 +1,536 @@
 [
     {
+        "sha": "9bc61108d73db4e614dda2a27750ff80165eedbb",
+        "description": "zink: remove extra program ref from cached descriptor updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c3db42d1d3acd57c9e77c8974f5f9442df013c4",
+        "description": "zink: avoid pulling in unused push descriptors for cached ubo0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9e314a682244ce610693e05a58470390db23d848",
+        "description": "iris/ci: Correctly set freq governors to max",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f1dc495319057951bcece7973ea58add21eab0a",
+        "description": "freedreno/ci: Correctly set freq governors to max",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a4fcb42f768ff9d82aa90f1cbdef80852c5137c",
+        "description": "panvk: Fix panvk_copy_fb_desc()",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "792a0ab0b1460e7b0b85e6fd9b74291bd8b78173"
+    },
+    {
+        "sha": "d84dedc48f3bbfb9ab0d7a307c7ab55e10a771b4",
+        "description": "panvk: Make the per-arch static lib depend on panvk_entrypoints.h",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "792a0ab0b1460e7b0b85e6fd9b74291bd8b78173"
+    },
+    {
+        "sha": "3990f9582229bf110bbefe8f43f34c3d91d44b97",
+        "description": "zink: more effectively utilize batch_usage for query destruction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f40ac286b978184b49dd69606ada992586f538c",
+        "description": "zink: don't try to sync previous timestamp query qbo values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4421180fe353457933a9d1dd8f1c743ceb064481",
+        "description": "zink: move time query ending out to zink_end_query",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68c1b1b0e344eecf7a66213d55223486e6e75a82",
+        "description": "zink: improve threadsafe qbo access",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a5dfabb125256551896108a22e1617c1e9bf9d0",
+        "description": "zink: make zink_gfx_pipeline_state::vertices_per_patch a bitfield",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b3dfea6c187530f8d7137c9dfe33e981cdf00c0",
+        "description": "zink: repack zink_gfx_pipeline_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c5a2ab6a9d8ffe61178a0f0850deacafb2ff155",
+        "description": "zink: convert rasterizer pipeline components to bitfield",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c73adf8c9018be65f197a6efdb8dd02e05079bdb",
+        "description": "zink: steal a bit from rast_samples in pipeline state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9260b8690519cc20dc7a2c18bdaa06753486dc07",
+        "description": "zink: add clip_halfz to rasterizer hw state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e5ba2a508a4238eab18943390609ad29f6bd085",
+        "description": "zink: repack zink_rasterizer_hw_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "827fcb7e32a0b78362da1d749c997247f487da4a",
+        "description": "zink: zero viewport and scissor count in pipeline with dynamic state1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cab68281ba7d5b7c1029e067f2c817de17c9a3ac",
+        "description": "zink: move viewport count into dynamic state1 part of pipeline hash",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94e9091ba2b5891c2f59ba38d732a6e18a4f84e4",
+        "description": "zink: move dynamic state1 pipeline members into substruct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19e29960e92fdf68d647528f0b2f0740376e31b8",
+        "description": "panfrost: v7 does not support RGB32_UNORM textures",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c6bdd976e6110fbf4ec1add9c11d0382e38236d3"
+    },
+    {
+        "sha": "b9452627730066872af6cf11a3fc390ca29ca242",
+        "description": "iris: fix layer calculation for TEXTURE_3D ReadPixels() on mip-level>0",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "3c979b0e6d9e4d7a880cebcee514238ecb6baf61"
+    },
+    {
+        "sha": "d90a8c79dff0b3149956e46785f314685a701a49",
+        "description": "radv: remove unecessary radv_finishme() for invalid color formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df90bb3f8856f21357119700d541e3caadd55166",
+        "description": "radv: remove useless check about number of samples in the HW resolve path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b05c2023cc4136c1225b7f9513ea92790a0cadd9",
+        "description": "radv: remove outdated radv_finishme() in the HW resolve path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aab95f1bdf1f11738d985718558bb352e95fb68d",
+        "description": "zink: set primitive restart with extended dynamic state2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c2fe8e621f03dd06a229f1e5c8ba9eaf9d6afa2",
+        "description": "zink: bump dynamic pipeline state count",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "53da55ac872615aa72c4a2de5bda0403fa0fa547",
+        "description": "zink: template for VK_EXT_extended_dynamic_state2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7811037de53ef618302fe7902348a45d011fe439",
+        "description": "zink: hook up VK_EXT_extended_dynamic_state2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5b5201f0fd779e8401255cbe482d4792482905a7",
+        "description": "zink: no-op prim changes for pipeline recalc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0cec4d581c30d650b78e05496b0de51ee977fe24",
+        "description": "zink: consolidate pipeline hash tables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "305966ca75b0141202a854a36e5623fce64a2586",
+        "description": "zink: use dynamic prim type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3674839d11055627eacf4ccaa7c6a4c47ba87d6c",
+        "description": "zink: batch mem barrier hooks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "115935cc53a688785c47b71524668b5e447de882",
+        "description": "zink: slim down streamout component of mem barrier hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c095a32026904101ae8f04534803003be8992d7c",
+        "description": "zink: remove query flush from memory barrier hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce873004120c9c43e3bdf5ec9c78be927abc6c95",
+        "description": "zink: use ctx gfx prim mode for draw comparisons",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95a9ea54f39c61c7477cdb820293c6815d0354fe",
+        "description": "zink: init ctx->gfx_prim_mode to nonzero value to trigger pipeline changes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b06ef86020d35607010e5d032afd04069378009f",
+        "description": "zink: reorder gfx program/pipeline/descriptor binds if dynamic state is present",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c2aa47a708cf414efd3d7b9c24e44476ba4bdc39",
+        "description": "zink: remove extra unsetting of ctx->vertex_state_changed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a4681aea58668533d069e866c86ef3469d5ecde",
+        "description": "zink: pass current program's shader array, not ctx array",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab08dcd8956d2db4534243ad8424691fdc360182",
+        "description": "zink: remove attachment count from pipeline hash",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1bb9704bce95211dd7842f7e3a3e73d798d76742",
+        "description": "zink: declare ctx var during blend state bind",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "960e776f24cdd336b16d938448e5b5a4ffc1f781",
+        "description": "zink: assert precise queries are occlusion queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d9e197d742edc448eba78dd8f4eaaa1a4630b17",
+        "description": "zink: require occlusionQueryPrecise for occlusion queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "336dea90f09c5cefc46de5240da28950fdca0723",
+        "description": "zink: always init bordercolor value for sampler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b192b9c88a0c436ceed3c278ad292a2e677fb477",
+        "description": "zink: implement PIPE_QUERY_GPU_FINISHED",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1e921e509868208b868d428f96ce96155cc5ba49",
+        "description": "v3dv: Implement VK_EXT_pipeline_creation_feedback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c8581d0fae47aa42f5062aba95b5a4468391e7de",
+        "description": "microsoft/compiler: trivial fixes to error-handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e0f3133447b082b844ae06bb2abba209ee4aa1a7",
+        "description": "microsoft/compiler: return errors from get_n_src",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c166a27fc0aa5b5fe843a4e00f4df26cdfd0c7d",
+        "description": "microsoft/compiler: remove needless error-returns",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46f3582c6fe607fa30d7ac24d3abd92128855c98",
+        "description": "nir: fix ifind_msb_rev by using appropriate type",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a5747f8ab357ff00c630b937b221e5fb59d90289"
+    },
+    {
+        "sha": "9083e9a483696672514c18cec0a91ffd480f0591",
+        "description": "nir: fix shadowed variable in nir_lower_bit_size.c",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "6d792989924ce79363f181462904fa46692a99b5"
+    },
+    {
+        "sha": "3538b5af6dedbff09913a3a959d1a869415e310b",
+        "description": "venus: conditionally enable async descriptor set allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "288ce1b033faf1123b76688d9a02323484f21810",
+        "description": "venus: check descriptor allocations against pool resource",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "70b03e96f9c7b5a8cbe6478917d239b32602147a",
+        "description": "venus: descriptor set to track descriptor count of last binding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1e91b1163c84b79a0dde87cb7286d5a96ed1866",
+        "description": "venus: descriptor pool to track pool state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2b1a7c2bb324a8ccf7390da4166488aa1077866",
+        "description": "venus: layout to track variable descriptor count binding info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d8e89b4e3304d601a516bbecb94af83ff03e70eb",
+        "description": "venus: descriptor layout to track more binding infos",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad934eb680abc952670dfef1d52f717a1de9e5e7",
+        "description": "venus: add vn_descriptor_set_layout_init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4878636fe77f3866ee7ca1f2364f83c91c9cd1c",
+        "description": "venus: refactor failure path for sets allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "71e748ad2443c373bb090fa1da2626da367b1d20",
         "description": "dri2: Fix Null pointer dereferences",
         "nominated": false,
