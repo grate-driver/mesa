@@ -238,7 +238,7 @@
         "description": "svga/drm: use pb_usage_flags instead of pipe_map_flags in vmw_svga_winsys_buffer_map",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "00c30dad78b0eb0a7e45caf38eda4e636a454ff6"
     },
