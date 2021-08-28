@@ -1984,7 +1984,7 @@
         "description": "zink: fix -Warray-bounds warning",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9c5a2ab6a9d8ffe61178a0f0850deacafb2ff155"
     },
