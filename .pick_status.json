@@ -1,5 +1,527 @@
 [
     {
+        "sha": "a6a89aaa2f2943532d99d9bc7b80106a1740f237",
+        "description": "ci: Fix a minor issue in prepare-artifacts.sh script",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9df9fe7dfaee84a7152e3d0c0e7bc62db1e5d889",
+        "description": "aco: include utility in isel",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c1d11bb92c95e0fc56a1280acc15893623769ff9"
+    },
+    {
+        "sha": "548b383310da7e5e29e7c24525a816a45afc26b8",
+        "description": "nir: Fix local_invocation_index upper bound for non-compute-like stages.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "8af6766062044167fb3b61950ddbc7d67e4c3e48"
+    },
+    {
+        "sha": "a25fd1787a8004ae3ef29b08f2f848103c68c370",
+        "description": "nir: Add unsigned upper bound for extract opcodes.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "76b9dd6266f4b170e94ee47a6881c3d528c25969",
+        "description": "aco: Unset 16 and 24-bit flags from operands in apply_extract.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "54292e99c7844500314bfd623469c65adef954c5"
+    },
+    {
+        "sha": "849033e6d8ba7befeb560278bb9b24c2469de498",
+        "description": "zink: implement PIPE_RESOURCE_FLAG_DONT_MAP_DIRECTLY when resizable bar not present",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a8960de53ab21592510056bb9681991565564c8",
+        "description": "zink: determine whether the gpu has a resizable BAR at startup",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1c9b0b853e681c0803cc8bec0b7ceeb039a91247",
+        "description": "panvk/ci: Build-test panvk",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23ef0fb277636ebe9e91e76add5ea985d5e05fa7",
+        "description": "radv: do not allocate a clear value for images that support comp-to-single",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df688e6941bc89ae1ba9cdc53fc464cc36652551",
+        "description": "radv: do not load/store the clear value for comp-to-single images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c550a5fe69271cb01026a3f05d1c918e6552b04",
+        "description": "radv: disable DCC image stores on Navi12-14 for displayable DCC corruption",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a069b4e9b9a138b4d1e7a76ab76c2db29526bebf",
+        "description": "vulkan/wsi/sw: add mit-shm support for pixmap allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f55f9a97a5827e557ba4e8bddc8c3e6549edc89",
+        "description": "vulkan/wsi/sw: add support for using host_ptr for shm pixmaps.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b5c390c113d3f23af49f8bf5a601474620ae4eb1",
+        "description": "vulkan/wsi: add support for detecting mit-shm pixmaps.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eacf50c27b7fda237ab3bc0339d2fb91626c462a",
+        "description": "freedreno/ci: Take fd farm offline for moving day",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f784c8fed45af818a2916da7c3c97abd21078d2",
+        "description": "freedreno/ci: Add a status variable for CI farm",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b34f9740cacb2c6567a24297fd8674e3977a851a",
+        "description": "spirv: Implement non-Multiview parts of SPV_NV_mesh_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10a03e30cf75e267c78cf41104829be8ff003f45",
+        "description": "nir: Allow Task/Mesh to lower compute system values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f52681a2ddeb9983f68df827bf92f09f6b71f9e",
+        "description": "nir: Don't lower Task/Mesh I/O to temporaries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27697d5eb8d68d0f81619d9be5e09f14aacaf20f",
+        "description": "nir/divergence_analysis: Handle Task/Mesh shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf5f6add01cc9ec19d6ccb10d9435f448277a829",
+        "description": "nir/lower_io: Identify Mesh output as arrayed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9631d24c3f65269dc8cdfdcddd6a1cd896d70a9d",
+        "description": "compiler: Add Task/Mesh to shader_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "813d41829da42a99e59586473ca440ffac261f93",
+        "description": "compiler: Add new non-Multiview Task/Mesh builtins",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd394017c85efeff15893e30388567c4b4a0d280",
+        "description": "nir: Add per-primitive I/O intrinsics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f95daad3a2c5b04aff0141ee8a7de0036f4ffa6f",
+        "description": "nir: Add a way to identify per-primitive variables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "927584fa67be1b644321961f32472a6f52b619f3",
+        "description": "nir: Update documentation for location to mention Task/Mesh",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c3b75a2b7e27f9cb6f52fe734368b1758f49308",
+        "description": "isl/docs/tiling: Add Tile4 docs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cfb0d931f27438c1f7c94defa078f2f9454c5a54",
+        "description": "aco: Emit zero for the derivatives of uniforms.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1454955e5d5130bc0bba4e2d5ef41ceb71346729",
+        "description": "zink: only update inlinable constants when they change",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2eeaaabb8eceb51758cddad62108dae4de10d8a7",
+        "description": "aco/optimizer: combine v_pk_mul_u16 + v_pk_add_u16 -> v_pk_mad_u16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be16ebc5cafb2864228bf4ad29935cf0187e7f4d",
+        "description": "aco/optimizer: fuse v_mul_f64 + v_add_f64 -> v_fma_f64",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e27ca9953eb55e643eaff7d8afb982d61cb985b",
+        "description": "aco/optimizer: combine v_mul_lo_u16 + v_add_u16 -> v_mad_u16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23d5865f422f1e382d6786c75976f2788865dd59",
+        "description": "aco: refactor nir_op_imul selection",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d8eef134d8480a3afcd1759734808389d6fad632",
+        "description": "aco: only apply extract if not used more than 4 times",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8c26e89fe86b4f931687a8b7251924eb42a59c7",
+        "description": "freedreno: ci updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c6938dbfd408bebf6c2297f6441ad11b18cc939",
+        "description": "freedreno: remove primconvert",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "744ef862b8d30d2037b8826153d2d2366e99844b",
+        "description": "freedreno: export supported primtypes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "80b5f4ff088d878378c1907a8703659ac838d97b",
+        "description": "Fix building AMD MM/GL with EL7",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b8f2b99e852986551661f166d16f8eccfe9e560",
+        "description": "zink: avoid generating nonsensical code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a00fccce0c68ab64158c371fcdfcce2846f2648d",
+        "description": "zink: reduce scope of version-struct hack",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2b82f2b78b151b90e1e713b29693e845325493ae",
+        "description": "zink: clean up const-value handling for get_ssbo_size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e22fc27af95e80e13b06c389bf843d7315b6996",
+        "description": "zink: remove incorrect ASSERTED macro",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a3092bc71965d0756b1dd7660b73ed84a422b3bc",
+        "description": "zink: remove needless scope",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f417a4c1ba3b0fd3860a5ecbb8b5b8d25f2fae9e",
+        "description": "zink: give each major intrinsic it's own emit function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55e8857a80edacb86b139f0c2a7d3b7165bcf502",
+        "description": "zink: avoid checking if src is const twice",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "75b5f12407ec606ae8e83acbc170585ad6e360c1",
+        "description": "zink: avoid memcmping null pointers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d3a795b5284f6514844f3c62412f81a5d3b2b733",
+        "description": "zink: remove needless NULL-check",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "077a9c74789977e7a8ca551bef1dfdb5ebb8b51e",
+        "description": "zink: return false on failure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "40f704f2f301bcfebcbd2a04600cc14293a51da7",
+        "description": "zink: pctx can't be null here",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4cc3554d85b1852debea21ee87c31bb7ffb8e203",
+        "description": "zink: do not dereference null-pointer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3fde1c42422a814bdd9ca15e02ef57888f53f378",
+        "description": "zink: do not try to dereference null-key",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3239dff05cef15190dfe34337693b58aa14fb99",
+        "description": "zink: avoid overflow when calculating size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c96afa9fc8d4c1e8ed9fe0c44b0f14a817924b8f",
+        "description": "zink: initialize pQueueFamilyIndices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64c558ab8302cfc7f21c6283cb88b9c214d893e9",
+        "description": "zink: do not warn about rare features until used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28b3563a95ab1d760e0998dd5de82e467ebf5f27",
+        "description": "Revert \"zink: always init bordercolor value for sampler\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "336dea90f09c5cefc46de5240da28950fdca0723"
+    },
+    {
+        "sha": "bcd9db327d637884fc47c0ac79985208df8811ef",
+        "description": "i965: Enable RGBX8888_SRGB format.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "589ccf3d777663402d105762e4f25109650ed148",
+        "description": "aco: Consider maximum number of workgroups per CU/WGP on Navi.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c8698199a1134f1ac3849b4cb88cfa1250f6316a",
+        "description": "aco: Consider LDS usage by PS inputs in MaxWaves calculation.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "9bc61108d73db4e614dda2a27750ff80165eedbb",
         "description": "zink: remove extra program ref from cached descriptor updates",
         "nominated": false,
