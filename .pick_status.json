@@ -13,7 +13,7 @@
         "description": "aco: include utility in isel",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c1d11bb92c95e0fc56a1280acc15893623769ff9"
     },
