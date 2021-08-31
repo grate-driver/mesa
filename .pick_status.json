@@ -1,5 +1,257 @@
 [
     {
+        "sha": "f4b61e90617f19ca1b8a3cfe046bac5801081057",
+        "description": "radeon/vcn: add a handling of error for incorrect reference lists",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a0cadd8ec7725cf09efc4d76c3f60a5729000eb",
+        "description": "radeon/vcn: reuse the dpb buffers when with the same size.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2bdc0bb324d60546257b250d9a78af1ee61539b8",
+        "description": "gallium: fix surface->destroy use-after-free",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "838c0e5eefd444df701b6d9cbcef1b06eb5eb207",
+        "description": "intel/fs: fix framebuffer reads",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "451e97028ee2de8fb39ea3014df0d1d4019d3c50",
+        "description": "meson: add crocus to default group of drivers for x86/x86_64",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "640f15edd73f934b45e90c6453c52805398ed997",
+        "description": "radv/llvm: fix invalid IR when converting triangle strips to indices",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "72b6b02e0974b3cee442209325a8450ba7568f5e",
+        "description": "ac/llvm: fix huge alignment when loading from shared memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e72c2e36e096f6912ca958ee25470af2cb1ae8ce",
+        "description": "ac/llvm: adjust assertion for nir_intrinsic_terminate",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ef97ea0ab607c4807e7157b25fe32acbf7bdac4",
+        "description": "meson: fix regression finding shm dep",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "b5c390c113d3f23af49f8bf5a601474620ae4eb1"
+    },
+    {
+        "sha": "213548251b9ea17f2997531a700e3c95f5c363f6",
+        "description": "zink: explicitly end renderpass before running dispatch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f05270ed7fea93a0c9eea05d209bca8ec0f2fa36",
+        "description": "freedreno/ci: Bring fd farm back online after move",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6270f8cb7c37ff04e49cc1bd2782565007718788",
+        "description": "zink: use VK_WHOLE_SIZE for full-sized bufferviews",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "441018a173fbeca0eeb5fe532af8c84965331c73",
+        "description": "zink: free local shader nirs on program free",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "61f2667cf5da6fd1a6d957761c8e244c1bc0da35"
+    },
+    {
+        "sha": "a8d0c0af86c62fdf51dc06e00c9ace5d864c096c",
+        "description": "intel/fs: Remove type-based restriction for cmod propagation to saturated operations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ad88fd499673d2a87dca8cbea5b0f20dd52d561",
+        "description": "intel/fs: Remove after parameter from test_saturate_prop",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6373923a764e11b6462de6abea985061ed394ba",
+        "description": "intel/fs: Remove condition-based restriction for cmod propagation to saturated operations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47f0cdc44996224c63256d2991bf4497be3b38b9",
+        "description": "intel/fs: cmod propagate from MOV with any condition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9120eccff07e7581b582460cec1d6655a286fff",
+        "description": "intel/compiler: Move type_is_unsigned_int to brw_reg_type.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b23432c540b1274904d80b90eb67d1798b11d2c8",
+        "description": "intel/fs: Fix a cmod prop bug when the source type of a mov doesn't match the dest type of scan_inst",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0797388dc2598d38700c8b4cc84d437fe6000c61",
+        "description": "intel/fs: Add many cmod propagation tests involving MOV instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f6c5da02516553150911cf2049d25a80f45c9df",
+        "description": "intel/fs: Remove redundant inst->opcode checks in cmod prop",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3afefb0818da96b06c07d0cf18142962e61be75c",
+        "description": "intel/fs: Refactor some cmod propagation tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "66fa676e8dbe4d4ed65f0e72c1201cfedb867605",
+        "description": "radv: ignore dynamic line stipple if line stipple isn't enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90a0556c27c40e3520d645f2512d4596a109c55c",
+        "description": "radv: use pool stride when copying single query results",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "906f7f4296dee343fc86f725eca71cda25054642",
+        "description": "radv: advertise VK_EXT_primitive_topology_list_restart",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d465095fc0135ae8fd17046a5d3d6e5c7292a6d6",
+        "description": "vulkan: Update the XML and headers to 1.2.190",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98fded8a393a944c562cf3d9b103c42022cb821b",
+        "description": "svga/drm: use pb_usage_flags instead of pipe_map_flags in vmw_svga_winsys_buffer_map",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "00c30dad78b0eb0a7e45caf38eda4e636a454ff6"
+    },
+    {
+        "sha": "2d1b85fe22b91eea185fa5066f7334c76549ba0a",
+        "description": "radv: add support for clearing multi layers with normal gfx clear path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "a6a89aaa2f2943532d99d9bc7b80106a1740f237",
         "description": "ci: Fix a minor issue in prepare-artifacts.sh script",
         "nominated": false,
