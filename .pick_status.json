@@ -2263,7 +2263,7 @@
         "description": "zink: destroy shader modules on program free to avoid leaking",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a92442225ca8d9ba1a2f5be06b9715b3679ecaa8"
     },
