@@ -1975,7 +1975,7 @@
         "description": "aco: Fix invalid usage of std::fill with std::array.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0e4747d3fb7ec15f8c1d6b971b1352249e7d95c6"
     },
