@@ -688,7 +688,7 @@
         "description": "turnip: re-emit vertex params after they are invalidated",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "815a85dd7c44f4be4cbf5b351836c921a7a923fd"
     },
