@@ -535,7 +535,7 @@
         "description": "winsys/radeonsi: Set vce_encode = true when VCE found",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "43c04ab2b436ae330a2ad634a4881e53bb9ae49b"
     },
