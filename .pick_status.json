@@ -1381,7 +1381,7 @@
         "description": "aco: fix p_insert lowering with 16bit sources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2f94353735b5ddfe2a72499e7bf6c7bbc80b9a00"
     },
