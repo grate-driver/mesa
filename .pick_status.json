@@ -832,7 +832,7 @@
         "description": "nir: Exclude non-generic patch variables from get_variable_io_mask.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cf5f8f55c3e25508fb975b263d6430a93442247a"
     },
