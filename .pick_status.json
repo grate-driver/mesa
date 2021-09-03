@@ -328,7 +328,7 @@
         "description": "llvmpipe: Fix leak of CS local memory with 0 threads.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bde08ce4d7bf2e59054ea1c522e82037c9dd147b"
     },
