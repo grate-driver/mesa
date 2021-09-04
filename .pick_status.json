@@ -2128,7 +2128,7 @@
         "description": "nir: Avoid visiting instructions multiple times in nir_instr_free_and_dce.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "525154857235fe576a568871d562a98359e2fac2"
     },
