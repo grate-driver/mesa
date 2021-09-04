@@ -868,7 +868,7 @@
         "description": "util/fossilize_db: Don't corrupt keys during entry read.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d2d642cc014af75f0396e04528b29f9a61f91043"
     },
