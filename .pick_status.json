@@ -832,7 +832,7 @@
         "description": "freedreno: use OUT_WFI for emit_marker",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8651cfbbf05516fb901a766ca562a5101c835f7d"
     },
