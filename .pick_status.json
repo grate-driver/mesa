@@ -553,7 +553,7 @@
         "description": "radv: don't require a GS copy shader to use the cache with NGG VS+GS",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7e664a538355018a16ef60ecf8aaef304a25aa59"
     },
