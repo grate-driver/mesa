@@ -238,7 +238,7 @@
         "description": "mesa: fix mesa_problem() call in _mesa_program_state_flags()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b4f3497786ef4c4923844b56133955a2f48bfe59"
     },
