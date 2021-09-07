@@ -85,7 +85,7 @@
         "description": "glx: Prevent crashes when an extension isn't found",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2c8a85b712e03c0033f200ed9fe3dc780ab7834d"
     },
