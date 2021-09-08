@@ -274,7 +274,7 @@
         "description": "nir: fix serialization of loop/if control",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e76ae39ae22ee21f83c41e80737979e9bc78cc15"
     },
