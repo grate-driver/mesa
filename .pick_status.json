@@ -1,5 +1,509 @@
 [
     {
+        "sha": "b58d6eaf1174aab296c4230e3895c65cba4bd9e3",
+        "description": "mesa: fix default texture buffer format",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a08baaff9764372c29d89886bc1331343d4273bf",
+        "description": "vbo/dlist: fix indentation in vbo_save_api.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cc57156dce0f4abf7ee4c1e741ac03d6864a14b4",
+        "description": "vbo/dlist: rework vertex_store management",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9863fe5a023043c3941106f6e2a34cfaf04383f7",
+        "description": "vbo/dlist: rework primitive store handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3253594268028efdca17cb9d2b2e423b353c8aa5",
+        "description": "vbo/dlist: rework buffer sizes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "031cb085cdf6e6ada85dc72f47b1998425c56773",
+        "description": "vbo/dlist: remove unused functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e281a053a08c9c1c6a90c93b78c28d1e92f13d7",
+        "description": "vbo/dlist: add documentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd55d9f2b3e7e857e90bf3d054d3793274ddae0f",
+        "description": "vbo/dlist: remove vbo_save_context::vert_count",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2671b9c90fd71bf66b6c90b98c32315c2bccb17d",
+        "description": "vbo/dlist: remove vbo_save_copied_vtx",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b8dcdec9d2700ccef2a5ed58bf94fd849dc1140",
+        "description": "vbo/dlist: fix max_index_count value",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fc2030b8f30303358156be9abe95e27dbf476826",
+        "description": "vbo/dlist: rework out of memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "831f5d1fe01579d9c330291d1d4c4b452d3c5560",
+        "description": "vbo/dlist: don't force list compilation if out of vertex space",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94a2063987c31fd8c84ad0a049221b7c84787ba8",
+        "description": "vbo/dlist: limit allocation sizes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ea99d1c74830c1f2c7a20a6eab9f383859212298",
+        "description": "vbo/dlist: remove vbo_save_context::max_vert",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "93867fad5588d3c457dfb988b07ade4b20b9eee9",
+        "description": "vbo/dlist: realloc vertex stores",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "776445468be6867f8a5f2074db9a47acbc7b3e77",
+        "description": "vbo/dlist: remove vbo_save_context::buffer_map",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a63a4a14f71815474921360bcd24269a90fb494",
+        "description": "vbo/dlist: reset vertex_store::used in reset_counters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ab1ddd5c1540c1b896f546291c608bd1132da7f",
+        "description": "vbo/dlist: remove vbo_save_context::buffer_ptr",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b511b65123303c2adae7dab3129f8193d7161695",
+        "description": "vbo/dlist: don't force list compilation if out of prim space",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69615d92a0e026deacd9b8b3a7d134be8bd4fc29",
+        "description": "vbo/dlist: realloc prims array instead of free/malloc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22f666622af26d67f5eb498bf3031096efe62d15",
+        "description": "vbo/dlist: use prim_store directly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c6e8bab1bb4831cc76d711ce623c143878f4394",
+        "description": "vbo/dlist: don't store prim_store",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5aa98579adedf35440774dc60620967af874f65",
+        "description": "vbo/dlist: remove vbo_save_vertex_store::bufferobj",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9d12bf50e9c09a5896d9419f82d9f510982bc5d",
+        "description": "vbo/dlist: use a single buffer object",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "edd77338267a64aae82e18cf5e5203fd73d596f4",
+        "description": "vbo/dlist: use buffer_in_ram_size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b0853d0ada06da840bf8c9fd3a69545dbcadb96a",
+        "description": "vbo/dlist: move VAO update at the end",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c01851bcf690305190c290f2a6cec4e50005b0ea",
+        "description": "vbo/dlist: apply start_offset after indices construction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d3b73813d2708f72ce2aba0a6cb3b401247a4d1",
+        "description": "vbo/dlist: simplify add_vertex function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e188f8f2e95c39c0c9252f539cb43fc163c732d",
+        "description": "freedreno/a6xx: Fix VS primid with tess + GS.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "8115cde3ba61711302b969a359ca8d36e3f54780"
+    },
+    {
+        "sha": "f254686b13d6624b6fce142748decea31d0cd83c",
+        "description": "tu: Fix VS primid with tess + GS",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "8115cde3ba61711302b969a359ca8d36e3f54780"
+    },
+    {
+        "sha": "c1f724b2b93cf28f72b7695edfabc1d2557faa48",
+        "description": "nir: fix serialization of loop/if control",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "e76ae39ae22ee21f83c41e80737979e9bc78cc15"
+    },
+    {
+        "sha": "30f457e119e25c3bc44a93bf7cbe82cf0483f43a",
+        "description": "ci: Use FDO_DISTRIBUTION_TAG where possible",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d33eeb2634b5869f5d435b590115a37fb66ae8ff",
+        "description": "radeonsi: enable nir option pack_varying_options",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7054c1b7fd7b826e6a2577834b26b4d1ef4d34fc",
+        "description": "nir/linker: pack varyings with different interpolation qualifier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a24aed1ac1b6718c1670f5a243a2be20629d6b0",
+        "description": "nir/lower_io_to_vector: check centroid & sample when merge variable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1fd3cf990eb610da300374687ef146f92f0ebef5",
+        "description": "mesa: fix glthread deadlock when EGL multi thread shared context",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be4f5f1c92668e8ac39f7101e51dc7f303867971",
+        "description": "mesa: add ValidateEGLImage driver callback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "414553267177a2ac25f5c40c0ad26f6848ef45b5",
+        "description": "gallium/api: add validate_egl_image interface",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d45d749e8b371e4faef382570e5d9f1996e587a4",
+        "description": "gallium/dri: add dri_screen egl image validate hooks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27d91fec0440df1cf92460b88592a454230b3f9c",
+        "description": "gbm/dri: implement image lookup extension version 2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dcf38724c74f0784dce919e48dff0f53938e5560",
+        "description": "egl/dri2: seperate EGLImage validate and lookup",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d74c33aaaf4b219add063e3302af9cfbeb762d4",
+        "description": "docs: update calendar and link releases notes for 21.1.8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "996e50a60aa3c4ee66428276b3ba3580bc81895b",
+        "description": "docs: add release notes for 21.1.8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "44b9e11ddbb5f693e299fae034163e7687043862",
+        "description": "gl.h: Remove dllimport",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ab27ad01e330a8331a0247aeca861a9efe553ad",
+        "description": "aux/trace: dump more pipe_vertex_element members",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4cbc47b3c8ee4cfb94b0a725968c953dddb34d6",
+        "description": "mesa/st: use uint for instance_divisor instead of int",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e38c58c808fbfd634a9e38c798bd646bc0e3687c",
+        "description": "venus: raise the ring buffer size to 64KB",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "79b8498c050c421ba144fdb1b0d3e7b1639b8274",
+        "description": "venus: update venus-protocol headers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9eedba75dcd7a8d2c3fc81d9aff728ef2cc1001",
+        "description": "venus: make ring buffer size configurable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb88c8e1d451b2ff6eac2feba9e49cdbe4f4272c",
+        "description": "venus: rework vn_instance_submission",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "862244ccc6db5bf0dac4e6742ff1bac6baf6d2a6",
+        "description": "venus: add and use VN_CS_ENCODER_INITIALIZER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0641a230a0cd2aa7696814fb42cb89412f19e572",
+        "description": "venus: init experimental features before the ring",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e5a005dd0c517fbe58c2949647d14c2fdd1b65f8",
+        "description": "venus: support reply shmem without ring",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68eb682a238c8b583d3660f78685eab756dabc80",
+        "description": "venus: add vn_renderer_submit_simple_sync",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2996c707cfbb47131907fa6dbd98543bf4a9b5f8",
+        "description": "venus: init roundtrip fields in vn_instance later",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3bba38ab71ff56893166f82878f94f9fed0d04d9",
+        "description": "venus: reorder version fields in vn_instance",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "076c8f041a63c74c31d9f541684860628a8b9979",
         "description": "docs: Update Windows llvmpipe doc for driver split",
         "nominated": false,
