@@ -238,7 +238,7 @@
         "description": "nir/lower_gs_intrinsics: Return progress if append_set_vertex_and_primitive_count makes progress",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "542d40d698a698dc656c7a64ddcea07060707555"
     },
