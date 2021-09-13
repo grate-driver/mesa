@@ -112,7 +112,7 @@
         "description": "radv/llvm: fix using Wave32",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "94a1f45e15a5186bfd3aa3bc4089ad7a0902949f"
     },
