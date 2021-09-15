@@ -15,7 +15,7 @@ DEB_HOST_ARCH_CPU  ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_CPU)
 # for finding the correct llvm-config when meson doesn't know about it yet
 export PATH:=/usr/lib/llvm-12/bin/:$(PATH)
 
-ifeq (,$(filter $(DEB_HOST_ARCH), armhf sh3 sh4))
+ifeq (,$(filter $(DEB_HOST_ARCH), armhf ppc64el sh3 sh4))
 buildflags = \
 	$(shell DEB_CFLAGS_MAINT_APPEND=-Wall DEB_CXXFLAGS_MAINT_APPEND=-Wall dpkg-buildflags --export=configure)
 else
@@ -24,9 +24,15 @@ else
   buildflags = \
 	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -fno-optimize-sibling-calls" DEB_CXXFLAGS_MAINT_APPEND="-Wall -fno-optimize-sibling-calls" dpkg-buildflags --export=configure)
   else
-  # Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=83143
-  buildflags = \
+    ifneq (,$(filter $(DEB_HOST_ARCH), ppc64el))
+    # Workaround for https://gitlab.freedesktop.org/mesa/mesa/-/issues/5315
+    buildflags = \
+	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -O2" DEB_CXXFLAGS_MAINT_APPEND="-Wall -O2" dpkg-buildflags --export=configure)
+    else
+    # Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=83143
+    buildflags = \
 	$(shell DEB_CFLAGS_MAINT_APPEND="-Wall -O1" DEB_CXXFLAGS_MAINT_APPEND="-Wall -O1" dpkg-buildflags --export=configure)
+    endif
   endif
 endif
 
