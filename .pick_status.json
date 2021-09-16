@@ -220,7 +220,7 @@
         "description": "radv: Handle copying zero queries.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8475a14302eaf0ff3c6a6c37dd87471a8ab73d84"
     },
