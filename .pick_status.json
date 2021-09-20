@@ -1039,7 +1039,7 @@
         "description": "panfrost: RGB332_UNORM is not a valid texture format on v6+",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c6bdd976e6110fbf4ec1add9c11d0382e38236d3"
     },
