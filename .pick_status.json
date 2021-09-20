@@ -2263,7 +2263,7 @@
         "description": "intel/compiler: Don't predicate a WHILE if there is a CONT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d13bcdb3a9f9b43010fe8cbb4efbfe7eec0b705b"
     },
