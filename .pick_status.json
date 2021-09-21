@@ -15358,7 +15358,7 @@
         "description": "freedreno: Use correct key for binning pass shader",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "main_sha": null,
         "because_sha": "1dd24bf27b2b1da65cf66f58481ec2331179b4e0"
     },
