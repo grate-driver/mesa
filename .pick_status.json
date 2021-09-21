@@ -6241,7 +6241,7 @@
         "description": "aco/optimize_postRA: Use iterators instead of operator[] of std::array.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 3,
         "main_sha": null,
         "because_sha": null
     },
