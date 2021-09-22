@@ -3910,7 +3910,7 @@
         "description": "zink: initialize zink_descriptor_layout_key::use_count on create",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "95fe2f7b82953f6f010b75ee8d6ff1d38fb49c24"
     },
