@@ -17,7 +17,6 @@ Build-Depends:
  libexpat1-dev,
  libsensors-dev [!hurd-any],
  libxfixes-dev,
- libxdamage-dev,
  libxext-dev,
  libva-dev (>= 1.6.0) [linux-any kfreebsd-any] <!pkg.mesa.nolibva>,
  libvdpau-dev (>= 1.1.1) [linux-any kfreebsd-any],
