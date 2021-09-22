@@ -7195,7 +7195,7 @@
         "description": "ir3/a6xx,freedreno: account for resinfo return size dependency on IBO_0_FMT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "ce1a381e57d2803246c8a27f52f3dea2d2bfbfb1"
     },
