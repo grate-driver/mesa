@@ -1,5 +1,527 @@
 [
     {
+        "sha": "400da4900e2d72ee807cc3eedac9ace1dfd5dfba",
+        "description": "zink: fix ci skips",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c2f7a16bf700751dcacd9e1a4fd768f3783a76f",
+        "description": "pan/mdg: Remove use of global variables in disassembler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d47a8789f90ac8e9892ab95c616032cf705cf123",
+        "description": "pan/decode: Fix DCD size in Pre frame decoding",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "de13fdc251faf27ca028942ca04e1a1e09be6680"
+    },
+    {
+        "sha": "d4174f5f052f614a10df2ebc905aec8c4897b057",
+        "description": "iris: Disable I915_FORMAT_MOD_Y_TILED_GEN12* on adl-p/display 13",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "e435511b580287d1fab1b1028b2d36acce80dac9"
+    },
+    {
+        "sha": "c746bf4c5c811d7d5614ca13504e6412ac13e911",
+        "description": "intel/dev: Add display_ver and set adl-p to 13",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "e435511b580287d1fab1b1028b2d36acce80dac9"
+    },
+    {
+        "sha": "039ed2de94d027cce6f7ac6e6af8090937eeb929",
+        "description": "zink: always use type size for query result copy stride",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13384b962620ad189ca83f853c949131f59afbac",
+        "description": "mesa: Prioritize checking for GLES2's uniform transpose error.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a39938b0004de36ac556b646071425fbe6a504c",
+        "description": "mesa: Throw an error for compressed glGenerateMipmap on GLES2 contexts.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a3e94c61922cc5360df5a64caec6ce8360b61c4",
+        "description": "turnip: Move physical device 1.2 properties to a helper function.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0c5c0d557940703d9577287bd3e5f0ed764888d",
+        "description": "tu: Support VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_PROPERTIES.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa5cc38f5b18c9c870047f54a607169537bb996c",
+        "description": "tu: Move VK 1.1 core properties to a helper function and use macros for exts.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24a539e94c7368400fd827ffca5495df1b708e7a",
+        "description": "tu: Add GetPhysicalDeviceFeatures2() support for more VK 1.2 core features.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab5e77d85476cf063b9d5cbb2bac20497e33523e",
+        "description": "tu: Deduplicate extension/core feature flags.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "14eb5ca3cd95a0a9b8d22dbddb9657f08912c5b5",
+        "description": "tu: Move core features definitions to a helper function.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "895cfca64139e985d044092a989182d637ff161e",
+        "description": "spirv: Identify non-temporal memory access",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47f7b262e1d0703197669ecfc3c9592852d79126",
+        "description": "anv: Refactor subgroup_size_type rules into a single function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9add809e7fb2a7c96c5a1d7658b908baa39700cc",
+        "description": "anv: Simplify subgroup_size_type rules for compute shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca0f892191b3ad83928ac13b8aed8457029ea2fd",
+        "description": "compiler/isaspec: add alignment support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eae96d0c4c4874b49962220c07c67281f6cc9f8c",
+        "description": "compiler/isaspec: keep track of written data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f0104a6c72336fac573201925d0884d36a241b58",
+        "description": "compiler/isaspec: add print(..) helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc2e806b0f16c3a4a079803d01f1617adefd4dbf",
+        "description": "freedreno/isa: move isaspec to a new home",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6801c300a8e95bb14cf65946e905c8b3ee91462c",
+        "description": "freedreno/isa: add shbang and make executable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b63becc4302c7cd9114d20a558e8d1c4756db9ee",
+        "description": "freedreno/isa: update documentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dbb9d3d0e3ac1e665d5d9ceb91f3ef216eb64920",
+        "description": "freedreno/isa: encode: switch bitmask_t to BITSET_WORD's",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9dc2ef72001b02c3e1fa85bc022868829bee0b05",
+        "description": "freedreno/isa: decode: switch bitmask_t to BITSET_WORD's",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "430dc087550a847427b7752eab1b11e98df3a371",
+        "description": "freedreno/isa: add split_bits(..) methods",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a8048954dcdc4257bff1cc9b6d6bc9b6b1cce1b",
+        "description": "freedreno/isa: generate marcos used for printf(..)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6b82d1c8c40a9aea5f3ae93327c0d72b78fb661",
+        "description": "freedreno/isa: add store_instruction(..)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5bbd087755571cbf42edfc50db4316c2f6b14fa",
+        "description": "freedreno/isa: add BITMASK_WORDS define",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ea42a3bee55642537b98651c4c3129bc630f3400",
+        "description": "freedreno/isa: add bitmask to/from uint64_t helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35877cd7b8ce9777e7b6a6c7a9c53e7ca41f6f6a",
+        "description": "freedreno/isa: add bitmask_t to encode.py",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c634e956bcd45b06e806efdeb31e22dac8d3dbb",
+        "description": "freedreno/isa: generate isaspec-decode.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59e6258e4f34038705ff69dc41a3901b225a18e4",
+        "description": "freedreno/isa: generate ir3-isa.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d6a3b3c7c7eda691d34f5dc6e101bb3d14f80c8",
+        "description": "freedreno/isa: store max size for needed bitset",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d29a6e2db55cf020cc2d0647a741111decaa4821",
+        "description": "freedreno/isa: add defines for fprintf(..) usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6c3befdd7017bfec7034a03e931913200fa1fc51",
+        "description": "freedreno/isa: add next_instruction(..)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3b14ade55aa3fd24012bcd009005f64af352b5a",
+        "description": "freedreno/isa: simplify custom_target",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b52d64474b4edd8ce223ca15cb18db2d4cae56c",
+        "description": "freedreno/isa: add leading zero's",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "54ea23da510328c1eabd5604b3e9d1f29ebdc8c8",
+        "description": "util/tests: add set bit range test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b3b03e33c9f11adb0c4d84311a651ea6016a0885",
+        "description": "util/bitset: add BITSET_SET_RANGE(..)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d65cea6ee56c2192d333632bf28460d2857af0a",
+        "description": "util/bitset: s/BITSET_SET_RANGE/BITSET_SET_RANGE_INSIDE_WORD",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d3a4b9b01cd9baa316308c2bb38a3775c35eceb",
+        "description": "util/tests: add bitset SHL tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6171bc22436ef3958fd21d1126db55fea4a7e14b",
+        "description": "util/bitset: add left shift",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c243b3f9800951da8c78faa8529d0c8d2341858",
+        "description": "util/tests: add bitset SHR tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b62fb45588030920b853526dd9f45953dae27e5",
+        "description": "util/bitset: add right shift",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "79067c4744be6d9afd3e11053e48aaf35503278b",
+        "description": "util/tests: add bitwise AND, OR and NOT tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cfa8828c62b55dbefdd5f29bdd60007582d0ddac",
+        "description": "util/bitset: add bitwise AND, OR and NOT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8ea9fa0f8238cdd3ac3dcc0f32e0305aac6ad9c",
+        "description": "util/tests: rename bitset test names",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e39929663bb3b86ccf26009c79a61862999cf9f4",
+        "description": "docs/panfrost: Add web chat link",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5506b380326d67ae2a59c873c99a4e5357a3a8cf",
+        "description": "docs/panfrost: We're conformant now!",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35ac184de087c3fd73fc7e55e9b96289677550bc",
+        "description": "intel/fs: Handle required subgroup sizes specified in the SPIR-V",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "518693c3eca19531b0caefbcd6bded4b059ab782",
+        "description": "spirv: Handle the SubgroupSize execution mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e5dc900226f2017e3e706b311e93285b3ce922a4",
+        "description": "svga: fix render target views leak",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c1d479b9adfc5c99688961bb4ca3fec8539763a1",
+        "description": "docs: update calendar and link releases notes for 21.2.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "773f2fbf6bec2b211eff37319e80882201cc8236",
+        "description": "docs/relnotes/21.2.2: Add SHA256 sum",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0689f57dd98e4e10cebaa0e92bcf6e82cb1232ab",
+        "description": "docs: add release notes for 21.2.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "590ac4789db02e742f78aab4793f96619724d1e2",
+        "description": "freedreno/a5xx+: Set the IJ_LINEAR_* request bits if we need the regs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3f9991643367cf18fc683059e49271e7469fb838",
+        "description": "freedreno/a5xx+: Rename GRAS_CNTL/RB_RENDER_CONTROL0 IJ_LINEAR_* bits.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "d3511e8af21ac11b8e7f5305942624d1ae29a73a",
         "description": "panvk: Implement vkCmdUpdateBuffer()",
         "nominated": false,
