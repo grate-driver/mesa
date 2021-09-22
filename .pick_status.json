@@ -3811,7 +3811,7 @@
         "description": "zink: use bind_stages for pipeline barrier generation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "be4088652153269940408d9330e2ea142cf15127"
     },
