@@ -1,4 +1,4 @@
-mesa (21.2.2-1) UNRELEASED; urgency=medium
+mesa (21.2.2-1) unstable; urgency=medium
 
   * New upstream release.
   * control: Add riscv64 to mesa-opencl-icd archs. (LP: #1942764)
@@ -7,7 +7,7 @@ mesa (21.2.2-1) UNRELEASED; urgency=medium
     Dropped, upstream.
   * control: Bump libdrm-dev build-dep.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 08 Sep 2021 08:50:42 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 22 Sep 2021 14:33:55 +0300
 
 mesa (21.2.1-2) unstable; urgency=medium
 
