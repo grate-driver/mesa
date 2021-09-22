@@ -5,6 +5,7 @@ mesa (21.2.2-1) UNRELEASED; urgency=medium
   * control: Drop libxdamage-dev from build-depends. (Closes: #979515)
   * 0001-util-format-NEON-is-not-available-with-the-soft-floa.patch:
     Dropped, upstream.
+  * control: Bump libdrm-dev build-dep.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 08 Sep 2021 08:50:42 +0300
 
