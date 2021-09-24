@@ -1,5 +1,455 @@
 [
     {
+        "sha": "dc354b8fda928861b7dfff3f8f53159e0053f9f5",
+        "description": "anv: Switch to new debug message helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d55d1fcda2f5f1cd20dcc240fd75ade66f8177f7",
+        "description": "vulkan: Add convenience debug message helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2db5536a461734a818caf4f519e3286accb0818f",
+        "description": "vulkan: Add vk_asprintf and vk_vasprintf helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98d22acca29df3df2c8d3e28f72929aa8500f69b",
+        "description": "vulkan/enum_to_str: Add generator for VkObjectType to Vulkan Handle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b361b234ac49f41a94a9bcf94fb68d5407b4b83",
+        "description": "vulkan: Implement VK_EXT_debug_utils",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "879defa3bee866b002395da9f26ac71690ad1350",
+        "description": "gallium/format: move two vertex formats into the proper place.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "e002f5a086c7fc8314d3c28a603875f5ec5e5cef"
+    },
+    {
+        "sha": "ec2007d47ede79d60dd96bd14df6d8d8766ac6d1",
+        "description": "radv: Use the shared now-in-core feature/prop extension helper functions.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "263072ddaaadbb88af15dc08951393ad87c4d504",
+        "description": "anv: Use the shared now-in-core feature/prop extension helper functions.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2fb68f74c4ff0a6c879ba8be65adef9995808dfc",
+        "description": "turnip: Use the shared now-in-core feature/prop extension helper functions.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a54903a482731aeeda4647337b5e0067dc84182",
+        "description": "vulkan: Support PHYSICAL_DEVICE_1_n_ features/properties in the helpers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19ff5019b7551ef401db26da48d0199c1c88c1ca",
+        "description": "vulkan: Add helpers for filling exts for core features and properties.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d40877f72b0cb3fe233918d1da72c021a67e6cb",
+        "description": "lavapipe: Use a common vk_queue structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9dbd3c06ec084f73e7c6342ade1a45ef8ce778b",
+        "description": "v3dv: Use a common vk_queue structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37d32dcce398d3026989f9b7ac27e43a94947c36",
+        "description": "turnip: Use a common vk_queue structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e2b59e340873841b8b0d5ebc3ba2917f1a4938c1",
+        "description": "radv: Use a common vk_queue structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b085ff03aa01786dfc7e94d1fce325c1809fad9",
+        "description": "anv: Use a common vk_queue structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cff01303b5c804d3651e98035a31ba4915a6b029",
+        "description": "vulkan: Add a common vk_queue structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8bf94337eba6d0af7d300af0786c6cd84ac07d54",
+        "description": "lavapipe: Use a common vk_command_buffer structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "14f0e3c2d321d39c00eff620657bccffca85b294",
+        "description": "v3dv: Use a common vk_command_buffer structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d2a4abf0102408323d0759c9650b1ea2f2597d2",
+        "description": "turnip: Use a common vk_command_buffer structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c05434cd6dff49d48df283d4a99523e0bbda0fbb",
+        "description": "radv: Use a common vk_command_buffer structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9189f4813534b9525babdee09e95f53f025608a",
+        "description": "anv: Use a common vk_command_buffer structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef9c371f6026bad85d7053f636a4cb53b8a6c2d6",
+        "description": "vulkan: Add a common vk_command_buffer structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "611d583e64d405a93537749106c6b23603504d70",
+        "description": "radv/llvm: Don't read edge flags anymore.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7f2faea46c719ad78550ad3ccaf6e60f88af244",
+        "description": "ac/nir: Emit edge flag instructions conditionally.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb05c85abd90a4456b72497738307d9d42e56225",
+        "description": "radv: Disable HW generated edge flags for NGG shaders.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7aa060ec3800c3f6956eb319f7dc7930b473d060",
+        "description": "microsoft/clc: Add a test for specializing via SPIRV-Tools",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "068c6b5a37a96106da817447e3cef706fc8e90d0",
+        "description": "microsoft/clc: Add API to independently specialize SPIR-V",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c50bbf1f2891099c2cec7329b5c5c0334a9536d8",
+        "description": "microsoft/clc: Support passing specialization consts to spirv_to_nir",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a699844ffba20fb0bfe7103eb70938bac604748e",
+        "description": "microsoft/clc: Parse SPIR-V specialization consts into metadata",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4755a7c32e66c2fb477a850d614bce847dcd8d3",
+        "description": "microsoft/clc: Support SPIR intermediates in the compilation APIs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "91e08312d87dd303f7306d2eaa0f48ed008b8844",
+        "description": "microsoft/clc: Split clc_object and rename entrypoints",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3666eec7ead3d19082215a9ec51e6719ed6dc8a",
+        "description": "microsoft/clc: Stop heap-allocating tiny fixed-size transparent structs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27467700e9b82eb7e8fb0471a4f31ff642051bc8",
+        "description": "microsoft/clc: Clean up clc_context",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24b096035fb95cc478c6c7cdd9a01815518e3f8f",
+        "description": "microsoft/clc: Rename compiler DLL to clon12compiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "876cb75599e2e1a669bd957192471f05a2e78dd0",
+        "description": "zink: check for pending memory barrier before trying to flush it",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dcdb000a7ce61629fb01cae95603ce6b18a235c6",
+        "description": "zink: clean up texture_barrier hook a little",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "205b684725a12166dcfb0a9daf7c5444ef046724",
+        "description": "mesa: GL_ARB_ES3_2_compatibility GL compat profile support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8564a4c58483b5ca2703a97d0c8729ff18292fd2",
+        "description": "radv: Push box traversal results onto stack in correct order",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "641a12aa2938fa44c4bef4cc947d50c33318d866",
+        "description": "intel: Finish off the last scraps of bacon",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7bfba59830a9dadbab0538dccf926816cb43880",
+        "description": "lavapipe: don't access pColorBlendState when not legal",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "578190c0fedd6cb0e348f3512ef1fab365713214"
+    },
+    {
+        "sha": "6413b2b6a2585d98333554f38e80453e0f26ee4e",
+        "description": "lavapipe: fix vertex attributes/descriptor binding",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "5951d2abacd3b42e5d9f5694ea5ae3f3c545aa96"
+    },
+    {
+        "sha": "cd64535aff7d0c220819cc25a54dd41c7628bd9e",
+        "description": "radv: remove useless shader variant key copies for VS+TCS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "978a5ec5d287edcf345131bef5de7b81051696cc",
+        "description": "turnip: Move to common DEFINE_HANDLE_CASTS casting macro",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a33dca3aeb102860341da93eea5dbf4a3a43ef5",
+        "description": "virgl: Add an option to disable coherent",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c1e2dfb365593f2e2b87522289ae63e0e8f48ef4",
+        "description": "venus: amend supported extensions list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "363ffdaf796d03810598b30ddcc3fa4f53c22bad",
+        "description": "zink: don't use legacy scanout with modifiers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "30a9bbe8f641a1616fcef99fb6963986adf4085d",
+        "description": "ci/vc4,i915g: Add links to VK-GL-CTS issues for some of our xfails.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e470d9fae5d98d66c754bae6c3e5d199f8ce1fdb",
+        "description": "mesa: Fix missing CopyTexImage formats for OES_required_internalformat.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "705b62d559ade9145305b9c6d57c5475c3516d0d",
+        "description": "docs: update vn extension list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "400da4900e2d72ee807cc3eedac9ace1dfd5dfba",
         "description": "zink: fix ci skips",
         "nominated": false,
