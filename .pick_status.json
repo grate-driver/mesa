@@ -742,7 +742,7 @@
         "description": "gallium/dri: Make YUV formats we're going to emulate external-only.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4e3a7dcf6ee4946c46ae8b35e7883a49859ef6fb"
     },
