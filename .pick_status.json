@@ -535,7 +535,7 @@
         "description": "ac/nir/nggc: Don't reuse uniform values from divergent control flow.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0bb543bb60f93bea5b1c0ed6382ced49e659273e"
     },
