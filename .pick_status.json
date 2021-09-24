@@ -337,7 +337,7 @@
         "description": "isl: only bump the min row pitch for display when not specified",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a3a4517f4147a0a7c1b34a4bcd42de45d552df5f"
     },
