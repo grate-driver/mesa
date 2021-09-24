@@ -544,7 +544,7 @@
         "description": "ac/nir/nggc: Refactor save_reusable_variables.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0bb543bb60f93bea5b1c0ed6382ced49e659273e"
     },
