@@ -1,5 +1,140 @@
 [
     {
+        "sha": "b653164973bbd3053d3b9ed37c4362af96346900",
+        "description": "radv: Fix gs_vgpr_comp_cnt for NGG culling in vertex shaders.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "7ad69e2f7ee10c0e7afc302b9324e7a320424dcb"
+    },
+    {
+        "sha": "240e60ba76e22d3c76e470acae6180e73294a9f6",
+        "description": "nir/lower_io_to_vector: Allow Task/Mesh to load from outputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "069f2e27f0ecbc9f8cf64a7dd82b425a4d197e8f",
+        "description": "radv/llvm: stop using vs_common_out.as_ngg_passthrough",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c0bced1fb7ae2e6440fbf6d030c401971b8bf00",
+        "description": "radv: remove useless as_ngg_passthrough init when lowering NGG in NIR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1c92d355c692c5a266ec7b506f00a8e9abbfed7e",
+        "description": "clc: use the defined version for the parser",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dce8870f642d99ac41c6b70c2448826105ff22b6",
+        "description": "microsoft/clc: small compile fix on Linux",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d03e5a8632c56028ba32e6d669d68bdcd2657ea",
+        "description": "radv: stop using the shader keys for as_ls/as_es/as_ngg when possible",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f100551beeaead307f4bfe6c53727c93f3e1803a",
+        "description": "panfrost: Fix incorrect test condition",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "d42e53c77a2657ce9794b448800a1e38b80a1d97"
+    },
+    {
+        "sha": "8cf37fc8a83612292bef99b28d55a60740f0916c",
+        "description": "aco/tests: add idep_amdgfxregs_h",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "9bf30c4a5cba7e148da7ccb042906eff8a8ad96a"
+    },
+    {
+        "sha": "525dd54717c2d4a8807802bcf211622ff07872c0",
+        "description": "radv: remove unused radv_tcs_variant_key:primitive_mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9e41c42ed4928f7bdd219ef7743cc38fb670427e",
+        "description": "broadcom/compiler: remove qpu_acc helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "193898c8b0976a548b7f698381b71ce425753737",
+        "description": "broadcom/compiler: remove commented out vir_LOAD_IMM methods",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ad69e2f7ee10c0e7afc302b9324e7a320424dcb",
+        "description": "radv: stop loading invocation ID for NGG vertex shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "babc0b07483fd134ade0d741a75ce928050cdc22",
+        "description": "radv: Remove dead min waves code.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "52acefc011f83d3b54e9c55338dd4737e655d63a",
+        "description": "lavapipe/ci: drop some fails I fixed recently",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "dc354b8fda928861b7dfff3f8f53159e0053f9f5",
         "description": "anv: Switch to new debug message helpers",
         "nominated": false,
