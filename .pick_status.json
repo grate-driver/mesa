@@ -229,7 +229,7 @@
         "description": "radeonsi: fix a depth texturing performance regression on gfx6-7",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0580d4c1a25b75616d1b8732624bf63a27a929a9"
     },
