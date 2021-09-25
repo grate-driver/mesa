@@ -589,7 +589,7 @@
         "description": "v3d: add R10G10B10X2_UNORM to format table",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
