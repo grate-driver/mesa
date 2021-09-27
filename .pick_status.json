@@ -643,7 +643,7 @@
         "description": "panfrost: Fix off-by-one in varying count assert",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2c2cf0ecfe68cd43f386306e00dda4342cb6543f"
     },
