@@ -22,7 +22,7 @@
         "description": "Revert \"iris: add tile cache flush to iris_copy_region\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "27534a49cf3872646cb8ef9371707d74a81b1986"
     },
