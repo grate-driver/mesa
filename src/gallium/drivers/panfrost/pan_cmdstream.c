@@ -1367,6 +1367,12 @@ panfrost_emit_texture_descriptors(struct panfrost_batch *batch,
 
         for (int i = 0; i < ctx->sampler_view_count[stage]; ++i) {
                 struct panfrost_sampler_view *view = ctx->sampler_views[stage][i];
+
+                if (!view) {
+                        memset(&out[i], 0, sizeof(out[i]));
+                        continue;
+                }
+
                 struct pipe_sampler_view *pview = &view->base;
                 struct panfrost_resource *rsrc = pan_resource(pview->texture);
 
@@ -1379,10 +1385,13 @@ panfrost_emit_texture_descriptors(struct panfrost_batch *batch,
 
         return T.gpu;
 #else
-        uint64_t trampolines[PIPE_MAX_SHADER_SAMPLER_VIEWS];
+        uint64_t trampolines[PIPE_MAX_SHADER_SAMPLER_VIEWS] = { 0 };
 
         for (int i = 0; i < ctx->sampler_view_count[stage]; ++i) {
                 struct panfrost_sampler_view *view = ctx->sampler_views[stage][i];
+
+                if (!view)
+                        continue;
 
                 panfrost_update_sampler_view(view, &ctx->base);
 
