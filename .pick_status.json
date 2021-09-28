@@ -247,7 +247,7 @@
         "description": "nir: fix opt_memcpy src/dst mixup",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f6667cb0ce828a8e4bc57e182ab1526fdd7a5e35"
     },
