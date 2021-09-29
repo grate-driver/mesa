@@ -229,7 +229,7 @@
         "description": "anv: enable UBO indexing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b704d03efd47678613248fce3d63954f1fae61f8"
     },
