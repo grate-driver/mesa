@@ -1165,7 +1165,7 @@
         "description": "aco: Fix small primitive precision.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "182d9b1e6072bec190cf0a52e9d93dbbdbaa850d"
     },
