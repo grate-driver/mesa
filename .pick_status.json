@@ -1057,7 +1057,7 @@
         "description": "lima: split_load_input: don't split unaligned vec2",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6dd0ad66dedc4cbd79574053f0b5023172935657"
     },
