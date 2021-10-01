@@ -409,7 +409,7 @@
         "description": "iris: Fix parameters to iris_copy_region in reallocate_resource_inplace",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b8ef3271c870a4e8c0d641cbe4114f827015b75b"
     },
