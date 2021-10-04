@@ -535,7 +535,7 @@
         "description": "util/set: Respect found in search_or_add_pre_hashed",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "491e7decad0f46b6d5f2e517cc0ea18193cf2f33"
     },
