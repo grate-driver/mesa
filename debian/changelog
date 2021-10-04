@@ -1,4 +1,4 @@
-mesa (21.2.3-1) UNRELEASED; urgency=medium
+mesa (21.2.3-1) unstable; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release.
@@ -8,7 +8,7 @@ mesa (21.2.3-1) UNRELEASED; urgency=medium
   [ Aurelien Jarno ]
   * Disable LLVM support on riscv64, it doesn't have JIT. (Closes: #995618)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 15 Sep 2021 18:29:13 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 04 Oct 2021 15:18:27 +0300
 
 mesa (21.2.2-1) unstable; urgency=medium
 
