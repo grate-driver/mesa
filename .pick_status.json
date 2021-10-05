@@ -2326,7 +2326,7 @@
         "description": "gallivm/format: clamp SINT conversion rather than truncate.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "13e5f331db77b8c353981469a95e5557e3e2073a"
     },
