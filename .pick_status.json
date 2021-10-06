@@ -130,7 +130,7 @@
         "description": "ir3: Use source in ir3_output_conv_src_type()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d3e08327cf85ef0b07c8e4920c168329cf66ec41"
     },
