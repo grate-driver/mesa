@@ -13,7 +13,7 @@
         "description": "tegra: Use private reference count for sampler views",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ef5d427413274f5a6ccb7d2f729eb78b5af9d947"
     },
