@@ -4,7 +4,7 @@
         "description": "tegra: Use private reference count for resources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7688b8ae980223f094be9c70fe695e2122caf3e3"
     },
