@@ -949,7 +949,7 @@
         "description": "mesa: signal driver when buffer is bound to different texture format",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f0ecd36ef8e10c087738c92cf62bad3815366963"
     },
