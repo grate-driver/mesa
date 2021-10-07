@@ -1048,7 +1048,7 @@
         "description": "tu: fix workaround for depth bounds test without depth test",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bb4db22ff43a708bf80a8f72913ee493313393d1"
     },
