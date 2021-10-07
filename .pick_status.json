@@ -508,7 +508,7 @@
         "description": "freedreno/drm: Move pipe unref after fence removal",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7dabd62464982e545a094f22d9ca23a77730c536"
     },
