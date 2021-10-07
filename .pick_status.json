@@ -652,7 +652,7 @@
         "description": "crocus: Honor scanout requirement from DRI",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f3630548f1da904ec6c63b43ece7e68afdb8867e"
     },
