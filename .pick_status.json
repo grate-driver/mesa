@@ -571,7 +571,7 @@
         "description": "radeonsi: add back a workaround for DCC MSAA on gfx9 due to conformance issues",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8b95f51ef139b9995da020c19340410340f959db"
     },
