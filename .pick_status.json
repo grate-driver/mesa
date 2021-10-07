@@ -499,7 +499,7 @@
         "description": "aco: fix load_barycentric_at_{offset,sample}",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
