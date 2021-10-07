@@ -1,5 +1,338 @@
 [
     {
+        "sha": "3a18963b0876af2aa0d60dd9917e69d409ce4d6e",
+        "description": "nir/print: pad 64-bit constants with zeroes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1dea665d023df0f0d240a32a5c7df259c3db92c",
+        "description": "radeonsi: make the DRI_PRIME dGPU -> iGPU copy async",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22a1b7c5b3a9cdbf05a0fd97fb193763a525b732",
+        "description": "gallium: add a is_dri_blit_image bool to pipe_blit_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f895dc04a50b5e27193445436ba0ac1e8c243dea",
+        "description": "radeonsi: add an async compute context",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46c95047bd77f6e824e4edccad590da8a1823fb4",
+        "description": "radeonsi: implement si_sdma_copy_image for gfx7+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "954602b1f86a77f623084df27c143d95bc568abc",
+        "description": "radv: Add VK_FORMAT_R16G16B16A16_UNORM for accel. structures.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d590515112c08684f7e76855a0ddb81eda2f9b5c",
+        "description": "ir3: support source modes for resinfo.b",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e86fec17975fcf31df5da8830f1b354faabe838e",
+        "description": "ci/freedreno: try to fix the a630 cubearray flake's regex.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4efb166873c7ffac513682825b709492a8562aa",
+        "description": "ci/freedreno: Move the other a530 test jobs to test-manual-mr.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d95681ea68acfc58524caab94fd0fbc4c2dee84",
+        "description": "r300: avoid searching for temp variable twice",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "822fd2b0413c0f25255d4f819b1f7d49a8e73a08",
+        "description": "features: be explicit about EXT_color_buffer_half_float support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "57610e14f645c7e89970d8a08e21edc28dfa2549",
+        "description": "build: also remove wayland wsi flags from c++ build",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "127352457cd5bfecf6d9f4e42dddc04c5334c4d1",
+        "description": "turnip: do nothing on dispatch with zero total workgroups",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1288000dc29ad215c5b3ca7c9e8a59afc543cc2d",
+        "description": "CODEOWNERS: add @jenatali for Microsoft & D3D12",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7dfc281b0d8e6d789fe261b8a3b0efd5a50fc6c2",
+        "description": "CODEOWNERS: add @bbrezillon for src/panfrost/vulkan/",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22e09c92a086c984315f3d62d53f9fb99fed2276",
+        "description": "CODEOWNERS: add @alyssa for Asahi and Panfrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5af09ac85774030dcc2c9b533eabdac9734ba102",
+        "description": "CODEOWNERS: add android build system",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c2a00fb9f9ddaa036a5318ca6bb2281a545deb86",
+        "description": "CODEOWNERS: add intel group",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e26062dc5054b74763e2eeed9d82cdc9432898d5",
+        "description": "CODEOWNERS: add SWR maintainers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3047fd4783a961a631b77798f938341f089bd50c",
+        "description": "gitlab: convert old REVIEWERS into GitLab's CODEOWNERS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fa6d3fc95f6e4be3bc3bf9778d6c234174c805d",
+        "description": "egl/wayland: Support RGBA ordered formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f389f963ee7d0b6f4f374b2b61653db316c811dc",
+        "description": "lavapipe: fix fence handling around wsi submission",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "028591954a2d7e1c3cf8ecec04f1555564dd8076"
+    },
+    {
+        "sha": "b1f15b4f4d5007998990f1c977b577e7ab9f3fa0",
+        "description": "Revert \"lvp/fence: quick fix to previous commit.\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "028591954a2d7e1c3cf8ecec04f1555564dd8076"
+    },
+    {
+        "sha": "b996fa8efaa42558bda2c52377561d7eb3c4127e",
+        "description": "anv: implement VK_KHR_synchronization2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dff90980597dd58d17269030c94c62035c0b43ef",
+        "description": "anv: improve readability of pipelined states",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d9102bde26fa1785abb343f41615617d4ff7c97",
+        "description": "anv: make semaphore helper work on a single object",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad9d95eee4065be9e54fba7da21f7df4583ddb8a",
+        "description": "anv: add missing transition handling bits",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "36ee2fd61c8f943be1d1e2b0354f7a121ffef28f"
+    },
+    {
+        "sha": "97f0a4494b97d89146cf66dfa0c9b1946bf3fc22",
+        "description": "vulkan: implement legacy entrypoints on top of VK_KHR_synchronization2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9af750637050662c771868465ae96c618c87d216",
+        "description": "vulkan/util: generate define for a selected few enums",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dbf4cfeff559891a62acb6e9212b6ce0bad56fca",
+        "description": "vulkan: remove unused VkCommand",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59e98694beadcc19590956bdac941cf3d7a23e96",
+        "description": "vulkan: handle new VK_KHR_synchronization2 image layouts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ff3fd4773d0ed6708a205add14a5cc5ecf45d34",
+        "description": "vulkan: put generated defines into their own header",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d388c8d096569d1ce28bf1c8318a0f374debe8d",
+        "description": "wsi/x11: cleanup properly after mit shm paths are used.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "a069b4e9b9a138b4d1e7a76ab76c2db29526bebf"
+    },
+    {
+        "sha": "2414001bdd439f2c949eb09cdb5d2ad0b7bea706",
+        "description": "docs: mark off missing lavapipe exts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "591afd1d52b37c8ec29c86e3e7900c11610bb64e",
+        "description": "turnip: Free disk cache on pdev init failure.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36d761f2a596e2033be89d74f49c4a1df17cbc79",
+        "description": "turnip: Fix allocation failure handling around device->name.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "5116388e0ba98f080de91e37249e195421e78c0b"
+    },
+    {
+        "sha": "23cad1b5668d3f3973d2c9c0a5391214097aa6df",
+        "description": "turnip: Plug the vendor/device ID into the pipeline cache fields, too.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "7e471541e0d18a1385e6b7d777ac0cd9c24fee55"
+    },
+    {
         "sha": "729991e09cd28550001ae63710ab929d95b115bc",
         "description": "ir3: remove obsolete assert for intrinsic_store_output in tess",
         "nominated": false,
