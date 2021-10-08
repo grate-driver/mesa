@@ -319,7 +319,7 @@
         "description": "microsoft/spirv_to_dxil: turn sysvals into input varyings",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b47090c5b33c89e5c29dd4f95230863ec018e2bc"
     },
