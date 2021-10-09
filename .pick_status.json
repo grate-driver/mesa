@@ -859,7 +859,7 @@
         "description": "meson: drop duplicate addition of surfaceless & drm to the list of platforms",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "47946855f19cc7d082fd59e090bb83f5d3930871"
     },
