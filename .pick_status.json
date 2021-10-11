@@ -4,7 +4,7 @@
         "description": "ac/nir/cull: Accept NaN and +/- Inf in face culling.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "651a3da1b59446a6e392321d1dbbc1891a0544a8"
     },
