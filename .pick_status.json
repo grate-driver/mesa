@@ -418,7 +418,7 @@
         "description": "radeonsi: Fix leak of screen->perfcounters.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "380ac288911d65cca402fd51d524f47658c13b63"
     },
