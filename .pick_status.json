@@ -7555,7 +7555,7 @@
         "description": "v3dv/pipeline: don't clone the nir shader at pipeline_state_create_binning",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
