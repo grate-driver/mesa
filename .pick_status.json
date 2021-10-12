@@ -1,5 +1,365 @@
 [
     {
+        "sha": "783f8f728ce8e77885adbc7b2c12c39c3e3e5198",
+        "description": "ac/nir/cull: Accept NaN and +/- Inf in face culling.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "651a3da1b59446a6e392321d1dbbc1891a0544a8"
+    },
+    {
+        "sha": "33065149c149d0650e8848db6b65f81f32e9cf22",
+        "description": "amd/common: Add fallback for misreported clocks for RGP.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8e9a503224e8ba12288da5c0b90e13c538d4759",
+        "description": "ir3: Fold ldc src immediates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "470bf75ff86cd8d001633c9d51eb444f5ab9f61d",
+        "description": "ir3: Fix handling cat6 immediates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf3c8e37051758b544fa3f3ba53430b201f1bff3",
+        "description": "ir3: Fix check for immediate range",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f0a1f3de27831d1ccb8a51fc0c99d63f25fd6e2a"
+    },
+    {
+        "sha": "6dc56f18bcf6014b9af1bf8660f4f2df978feee3",
+        "description": "ir3/legalize: handle WAR for special regs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ed9a2f50cca91f3a7756d23972aee7a8ca98f93",
+        "description": "ir3: Handle special regs in regmask",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a37f9602b7a4c2b3830fa0a75b57169bdb7e988e",
+        "description": "ir3: Remove separate regmask.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "548377bcf3ba879fca54cfb8ce1a9c4fa9d8f4ed",
+        "description": "ir3: Always create barycentrics in the input block",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38a84723f16eb50601f49adecda98894a1fdf80a",
+        "description": "ir3: Make ir3_create_collect() take a block",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8fb99b58dfbf104176826a677a7244221b71b6c1",
+        "description": "ir3: Fix printing branch type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b516208a5594bf4a7773e96eba8fff5dccb8d0fb",
+        "description": "nir/lower_ubo_vec4: Fix align_mul=8 special case",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "751f425c378afbe831149f60ed9c5262d6c59f45",
+        "description": "ir3/cp: Fix inlining 32->16 const into meta instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab0a665615a006d421a280231d1bc12f74ce4043",
+        "description": "ir3/cp: Add missing const promotion check",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d9bd8b2623cbc8dc8dc09ffabe5fed96157ef8b",
+        "description": "radv: Do early and late tests for fast clears",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "49c3a88fadd03af0954986a0bafde66b01940ed4",
+        "description": "radv: implement VK_KHR_format_feature_flags2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5dee0d9da961b9a027910ce7e8e16a2f849d9b8d",
+        "description": "radv: switch to VK_FORMAT_FEATURE_2_XXX/VkFormatProperties3KHR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd4a52b52c62db8e3f693fdb23f02d76cab0579b",
+        "description": "radv: remove duplicated code about NGG passthrough determination",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6bfe65d1dc167d5b70ae5bce7bc9b91638e7fe04",
+        "description": "radv: do not initialize is_ngg_passthrough for geometry shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b3269444fd6c67c5fd33836149b3f46bfc12ae85",
+        "description": "aco: cleanup setup_vs_output_info()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "849832bc8927e15c4b88d888db608e5540f7dc8b",
+        "description": "radv: stop gathering output GS info for vertex shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "595b16013a227984a0bb49a3f0a663e6c36dd7ed",
+        "description": "radv: rename needs_multiview_view_index to uses_view_index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "960d7bf2d3c07634765d864ae99abe5ae87d9b35",
+        "description": "radv: remove no-op about the view index in the shader info pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "61a3e7524219a824fd2223a5de69959e3f5a680e",
+        "description": "radv,aco: remove nir_intrinsic_load_layer_id",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad0bd2a7d27e864d59dff159f8284110ccebb8bd",
+        "description": "radv: Handle copying zero queries.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "8475a14302eaf0ff3c6a6c37dd87471a8ab73d84"
+    },
+    {
+        "sha": "1c3ee13a7f038def6f9de2750d5d82b21c5e9044",
+        "description": "docs/panfrost: Fix link to use rst syntax",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "e39929663bb3b86ccf26009c79a61862999cf9f4"
+    },
+    {
+        "sha": "c30fb8ee4dfb1e6d632716cebcdf8dddd1a120c0",
+        "description": "freedreno: Add valgrind dependency.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b75b8865148e08e3ffda3e9bf1f0fded02aa647",
+        "description": "vulkan: Generate defines for aliases of promoted enums",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1c2cd8bc16394823b185582970839ac8c050cebf",
+        "description": "vulkan: fix handling of aliases in enum members",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4b5d2a0204f8c09a2e8c4dc022f0f05adafa50b",
+        "description": "ir3/ra: Use killed sources in register eviction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "214febdc5d1b1b7ef5d20deb85340227c6274ae2",
+        "description": "ir3/ra: Don't reset round-robin start for each block",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "decbced48f0dfcc2d4a4a2e3a8b39be2e90f4962",
+        "description": "ir3: Initialize local size earlier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce3dd1375fe474d8f2e74dc8d10f21a4543022ae",
+        "description": "anv: implement VK_KHR_format_feature_flags2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "01d1ec292aebd7a70b79a826165b9833531449e3",
+        "description": "anv: start computing KHR_format_features2 flags for storage images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0093c466850d51a80f209cc7a0d742ac4fc64bb",
+        "description": "anv: Flip around the way we reason about storage image lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa251cf111dffd4a3e4d903623c24eb69575bf9a",
+        "description": "intel/nir: allow unknown format in lowering of storage images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f8efc2b08690d7343a50ebdd6149c72391b3c57",
+        "description": "anv: switch to use VkFormatFeatureFlags2KHR internally",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35315c68a574505a5b2cecaa64612fb8cffa8515",
+        "description": "anv: Use the common wrapper for GetPhysicalDeviceFormatProperties",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d4d71057bf96630faf21256d7afa3617943886e",
+        "description": "vulkan: Generate #defines with every bit in a given bitfield",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2741762ca90f80e44256858bf1d4281cadfcbba4",
+        "description": "vulkan: Generate flag #defines based on bitwidth",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "ced950e42f4a95ef410e63c2d26a2119e0c3c40b",
         "description": "radv: store the post-processed shader binary config to the cache",
         "nominated": false,
