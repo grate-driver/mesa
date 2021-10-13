@@ -1201,7 +1201,7 @@
         "description": "intel: fix INTEL_DEBUG environment variable on 32-bit systems",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
