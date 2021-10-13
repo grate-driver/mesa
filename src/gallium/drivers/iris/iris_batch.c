@@ -212,10 +212,10 @@ iris_init_batch(struct iris_context *ice,
          batch->other_batches[j++] = &ice->batches[i];
    }
 
-   if (INTEL_DEBUG) {
+   if (INTEL_DEBUG(DEBUG_ANY)) {
       const unsigned decode_flags =
          INTEL_BATCH_DECODE_FULL |
-         ((INTEL_DEBUG & DEBUG_COLOR) ? INTEL_BATCH_DECODE_IN_COLOR : 0) |
+         (INTEL_DEBUG(DEBUG_COLOR) ? INTEL_BATCH_DECODE_IN_COLOR : 0) |
          INTEL_BATCH_DECODE_OFFSETS |
          INTEL_BATCH_DECODE_FLOATS;
 
@@ -452,7 +452,7 @@ iris_batch_free(struct iris_batch *batch)
 
    _mesa_hash_table_destroy(batch->cache.render, NULL);
 
-   if (INTEL_DEBUG)
+   if (INTEL_DEBUG(DEBUG_ANY))
       intel_batch_decode_ctx_finish(&batch->decoder);
 }
 
@@ -710,7 +710,7 @@ _iris_batch_flush(struct iris_batch *batch, const char *file, int line)
 
    iris_finish_batch(batch);
 
-   if (INTEL_DEBUG & (DEBUG_BATCH | DEBUG_SUBMIT | DEBUG_PIPE_CONTROL)) {
+   if (INTEL_DEBUG(DEBUG_BATCH | DEBUG_SUBMIT | DEBUG_PIPE_CONTROL)) {
       const char *basefile = strstr(file, "iris/");
       if (basefile)
          file = basefile + 5;
@@ -723,12 +723,12 @@ _iris_batch_flush(struct iris_batch *batch, const char *file, int line)
               batch->exec_count,
               (float) batch->aperture_space / (1024 * 1024));
 
-      if (INTEL_DEBUG & (DEBUG_BATCH | DEBUG_SUBMIT)) {
+      if (INTEL_DEBUG(DEBUG_BATCH | DEBUG_SUBMIT)) {
          dump_fence_list(batch);
          dump_validation_list(batch);
       }
 
-      if (INTEL_DEBUG & DEBUG_BATCH) {
+      if (INTEL_DEBUG(DEBUG_BATCH)) {
          decode_batch(batch);
       }
    }
@@ -744,7 +744,7 @@ _iris_batch_flush(struct iris_batch *batch, const char *file, int line)
 
    util_dynarray_clear(&batch->exec_fences);
 
-   if (INTEL_DEBUG & DEBUG_SYNC) {
+   if (INTEL_DEBUG(DEBUG_SYNC)) {
       dbg_printf("waiting for idle\n");
       iris_bo_wait_rendering(batch->bo); /* if execbuf failed; this is a nop */
    }
@@ -769,7 +769,7 @@ _iris_batch_flush(struct iris_batch *batch, const char *file, int line)
 
    if (ret < 0) {
 #ifdef DEBUG
-      const bool color = INTEL_DEBUG & DEBUG_COLOR;
+      const bool color = INTEL_DEBUG(DEBUG_COLOR);
       fprintf(stderr, "%siris: Failed to submit batchbuffer: %-80s%s\n",
               color ? "\e[1;41m" : "", strerror(-ret), color ? "\e[0m" : "");
 #endif
