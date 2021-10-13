@@ -1795,7 +1795,7 @@
         "description": "radv: Fix modifier property query.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5dee0d9da961b9a027910ce7e8e16a2f849d9b8d"
     },
