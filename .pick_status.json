@@ -1669,7 +1669,7 @@
         "description": "i965: Emit a NULL surface for buffer textures with no buffer",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
