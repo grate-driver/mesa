@@ -1777,7 +1777,7 @@
         "description": "vulkan/log: Tweak our handling of a couple error enums",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0cad3beb2a0dda7a8f6c6a1e8c9d253b9c988a9f"
     },
