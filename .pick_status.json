@@ -85,7 +85,7 @@
         "description": "vulkan: Fix weak symbol emulation when compiling with MSVC",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "98c622a96e28020640517cb5499a1d7bd56553b0"
     },
