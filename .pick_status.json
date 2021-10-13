@@ -2029,7 +2029,7 @@
         "description": "zink: add an early return for zink_descriptors_update_lazy_masked()",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
