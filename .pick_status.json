@@ -2038,7 +2038,7 @@
         "description": "zink: move push descriptor updating into lazy-only codepath",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
