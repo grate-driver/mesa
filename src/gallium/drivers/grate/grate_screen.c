@@ -89,6 +89,12 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_MAX_TEXTURE_CUBE_LEVELS:
       return 16; /* ??? */
 
+   case PIPE_CAP_SUPPORTED_PRIM_MODES_WITH_RESTART:
+      return 0;
+
+   case PIPE_CAP_SUPPORTED_PRIM_MODES:
+      return BITFIELD_BIT(PIPE_PRIM_TRIANGLES);
+
    case PIPE_CAP_TEXTURE_MIRROR_CLAMP:
       return 0;
 
@@ -290,7 +296,6 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_FRAMEBUFFER_NO_ATTACHMENT: /* not sure */
    case PIPE_CAP_ROBUST_BUFFER_ACCESS_BEHAVIOR: /* probably not */
    case PIPE_CAP_CULL_DISTANCE: /* don't know */
-   case PIPE_CAP_PRIMITIVE_RESTART_FOR_PATCHES:
    case PIPE_CAP_TGSI_VOTE:
    case PIPE_CAP_MAX_WINDOW_RECTANGLES:
       return 0;

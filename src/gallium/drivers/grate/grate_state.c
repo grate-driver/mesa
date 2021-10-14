@@ -192,10 +192,29 @@ grate_set_blend_color(struct pipe_context *pctx,
 {
 }
 
+static void
+grate_set_stencil_ref(struct pipe_context *pctx,
+                      const struct pipe_stencil_ref stencil_ref)
+{
+}
+
+static void
+grate_fp_state_bind(struct pipe_context *pctx, void *hwcso)
+{
+}
+
+static void
+grate_vp_state_bind(struct pipe_context *pctx, void *hwcso)
+{
+}
+
 void
 grate_context_state_init(struct pipe_context *pcontext)
 {
    pcontext->set_blend_color = grate_set_blend_color;
+   pcontext->set_stencil_ref = grate_set_stencil_ref;
+   pcontext->bind_fs_state = grate_fp_state_bind;
+   pcontext->bind_vs_state = grate_vp_state_bind;
    pcontext->set_sample_mask = grate_set_sample_mask;
    pcontext->set_constant_buffer = grate_set_constant_buffer;
    pcontext->set_framebuffer_state = grate_set_framebuffer_state;
