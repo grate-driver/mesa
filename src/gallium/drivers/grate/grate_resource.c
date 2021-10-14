@@ -28,11 +28,18 @@
 
 static bool
 grate_resource_get_handle(struct pipe_screen *pscreen,
+                          struct pipe_context *context,
                           struct pipe_resource *presource,
-                          struct winsys_handle *handle)
+                          struct winsys_handle *handle,
+                          unsigned usage)
 {
-   struct grate_resource *resource = grate_resource(presource);
+   struct grate_resource *resource;
    int err;
+
+   if (presource->target == PIPE_BUFFER)
+      return false;
+
+   resource = grate_resource(presource);
 
    if (handle->type == WINSYS_HANDLE_TYPE_SHARED) {
       err = drm_tegra_bo_get_name(resource->bo, &handle->handle);
@@ -123,14 +130,6 @@ grate_resource_transfer_unmap(struct pipe_context *pcontext,
    slab_free(&context->transfer_pool, transfer);
 }
 
-static const struct u_resource_vtbl grate_resource_vtbl = {
-   .resource_get_handle = grate_resource_get_handle,
-   .resource_destroy = grate_resource_destroy,
-   .transfer_map = grate_resource_transfer_map,
-   .transfer_flush_region = grate_resource_transfer_flush_region,
-   .transfer_unmap = grate_resource_transfer_unmap,
-};
-
 int
 grate_pixel_format(enum pipe_format format)
 {
@@ -174,11 +173,10 @@ grate_screen_resource_create(struct pipe_screen *pscreen,
    if (!resource)
       return NULL;
 
-   resource->base.b = *template;
+   resource->b = *template;
 
-   pipe_reference_init(&resource->base.b.reference, 1);
-   resource->base.vtbl = &grate_resource_vtbl;
-   resource->base.b.screen = pscreen;
+   pipe_reference_init(&resource->b.reference, 1);
+   resource->b.screen = pscreen;
 
    resource->pitch = template->width0 * util_format_get_blocksize(template->format);
    height = template->height0;
@@ -209,7 +207,7 @@ grate_screen_resource_create(struct pipe_screen *pscreen,
       return NULL;
    }
 
-   return &resource->base.b;
+   return &resource->b;
 }
 
 static struct pipe_resource *
@@ -226,11 +224,10 @@ grate_screen_resource_from_handle(struct pipe_screen *pscreen,
    if (!resource)
       return NULL;
 
-   resource->base.b = *template;
+   resource->b = *template;
 
-   pipe_reference_init(&resource->base.b.reference, 1);
-   resource->base.vtbl = &grate_resource_vtbl;
-   resource->base.b.screen = pscreen;
+   pipe_reference_init(&resource->b.reference, 1);
+   resource->b.screen = pscreen;
 
    err = drm_tegra_bo_from_name(&resource->bo, screen->drm,
                                 handle->handle, 0);
@@ -246,7 +243,7 @@ grate_screen_resource_from_handle(struct pipe_screen *pscreen,
    assert(format >= 0);
    resource->format = format;
 
-   return &resource->base.b;
+   return &resource->b;
 }
 
 void
@@ -254,8 +251,8 @@ grate_screen_resource_init(struct pipe_screen *pscreen)
 {
    pscreen->resource_create = grate_screen_resource_create;
    pscreen->resource_from_handle = grate_screen_resource_from_handle;
-   pscreen->resource_get_handle = u_resource_get_handle_vtbl;
-   pscreen->resource_destroy = u_resource_destroy_vtbl;
+   pscreen->resource_get_handle = grate_resource_get_handle;
+   pscreen->resource_destroy = grate_resource_destroy;
 }
 
 static void
@@ -302,7 +299,7 @@ grate_blit(struct pipe_context *pcontext, const struct pipe_blit_info *info)
     */
 
    value = 1 << 20;
-   switch (util_format_get_blocksize(dst->base.b.format)) {
+   switch (util_format_get_blocksize(dst->b.format)) {
    case 1:
       value |= 0 << 16;
       break;
@@ -499,9 +496,11 @@ grate_flush_resource(struct pipe_context *ctx, struct pipe_resource *resource)
 void
 grate_context_resource_init(struct pipe_context *pcontext)
 {
-   pcontext->transfer_map = u_transfer_map_vtbl;
-   pcontext->transfer_flush_region = u_transfer_flush_region_vtbl;
-   pcontext->transfer_unmap = u_transfer_unmap_vtbl;
+   pcontext->buffer_map = grate_resource_transfer_map;
+   pcontext->texture_map = grate_resource_transfer_map;
+   pcontext->transfer_flush_region = grate_resource_transfer_flush_region;
+   pcontext->buffer_unmap = grate_resource_transfer_unmap;
+   pcontext->texture_unmap = grate_resource_transfer_unmap;
    pcontext->buffer_subdata = u_default_buffer_subdata;
    pcontext->texture_subdata = u_default_texture_subdata;
 
