@@ -5,7 +5,7 @@
 #include "util/u_transfer.h"
 
 struct grate_resource {
-   struct u_resource base;
+   struct pipe_resource b;
    struct drm_tegra_bo *bo;
    unsigned int pitch;
    unsigned int tiled : 1;
