@@ -607,7 +607,7 @@
         "description": "st: Fix 64-bit vertex attrib index for TGSI path",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "77c2b022a0c52d84b289bc836f30ce186a374d0d"
     },
