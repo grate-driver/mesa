@@ -13,7 +13,7 @@
         "description": "panfrost: Don't initialise the trampolines array",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "53ef20f08d4340c1bad0b45a2501f4daba7fb479"
     },
