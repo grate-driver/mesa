@@ -3,6 +3,7 @@
 
 #include "pipe/p_state.h"
 #include "util/u_bitcast.h"
+#include "util/u_draw.h"
 #include "util/u_helpers.h"
 #include "util/u_prim.h"
 #include "indices/u_primconvert.h"
@@ -282,8 +283,9 @@ grate_init_state(struct grate_context *context)
 static void
 grate_draw_vbo(struct pipe_context *pcontext,
                const struct pipe_draw_info *info,
+               unsigned drawid_offset,
                const struct pipe_draw_indirect_info *indirect,
-               const struct pipe_draw_start_count *draws,
+               const struct pipe_draw_start_count_bias *draws,
                unsigned num_draws)
 {
    int err;
@@ -294,13 +296,7 @@ grate_draw_vbo(struct pipe_context *pcontext,
    unsigned int index_size;
 
    if (num_draws > 1) {
-      struct pipe_draw_info tmp_info = *info;
-
-      for (unsigned i = 0; i < num_draws; i++) {
-         grate_draw_vbo(pcontext, &tmp_info, indirect, &draws[i], 1);
-         if (tmp_info.increment_draw_id)
-            tmp_info.drawid++;
-      }
+      util_draw_multi(pcontext, info, drawid_offset, indirect, draws, num_draws);
       return;
    }
 
@@ -313,7 +309,7 @@ grate_draw_vbo(struct pipe_context *pcontext,
          return;
 
       util_primconvert_save_rasterizer_state(context->primconvert, &context->rast->base);
-      util_primconvert_draw_vbo(context->primconvert, info, indirect, draws, num_draws);
+      util_primconvert_draw_vbo(context->primconvert, info, drawid_offset, indirect, draws, num_draws);
       return;
    }
 
