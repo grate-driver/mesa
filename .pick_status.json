@@ -1,5 +1,410 @@
 [
     {
+        "sha": "d43f89f17a8259c842016fa559fa33c1c6279105",
+        "description": "ir3: Images are always nir_var_mem_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9601556079d8592ca6c149d83335e7ab0405485c",
+        "description": "microsoft/clc: Images use nir_var_mem_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26d603da0710b67d93b8d163cc37f109af7416b8",
+        "description": "nir/gl_nir_lower_images: Require nir_var_mem_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6cce80976d701003ed5650a14211e73183a6a3a",
+        "description": "intel/fs: Stop emitting TGM fences for nir_var_mem_ssbo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ab40f517fa5620e9b44f1f352e3e66b0e5b7b34",
+        "description": "aco: Split var_mem_image barrier handling from global/ssbo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c5a88d73536207db045d92871d01f28778c1c22",
+        "description": "nir: Validate image variable modes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97a7c0ab1b57f04681f422226fe834efa3485f0f",
+        "description": "st/pbo: Use nir_var_mem_image for images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "458b4d2095795ded0d46a6851adc2de8392a7372",
+        "description": "radv: Use nir_var_mem_image in meta shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f51fda92cd42620c080b23c7a57996a249dc477",
+        "description": "ttn: Use nir_var_mem_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8ee37472d3e271fa666d82910588497435a86b7",
+        "description": "glsl: Use nir_var_mem_image for images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cfdc7ee066ea86c87d128e68c43ce7103da3ef5a",
+        "description": "spirv: Use nir_var_mem_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "219ac26ea3361d3ae185d9e98a753656fd33a534",
+        "description": "spirv: Assert that OpTypeForwardPointer only points to structs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e87dbfd3e8a5cf69c3ddc89fce17a0388f872806",
+        "description": "ir3: Check for nir_var_mem_image in shared_barrier handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ae58894ee79925088c9745d909c5631b211aea7b",
+        "description": "zink: Images can live in nir_var_mem_image now",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d68bedbb456dee93b55d36017078d798378eb041",
+        "description": "clover: Use nir_foreach_image_variable for images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aefa22ddb52bce625d562ce5528cd1e21ac347e4",
+        "description": "clover: Insert dummy uniform variables for images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6818811fc4046b347d1d9ad7b39b7c2193674981",
+        "description": "nir/lower_readonly_images_to_tex: Also rewrite variable modes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "225caf537aa844ed78537f4cda239c4379cf2f7c",
+        "description": "llvmpipe: Support image variables living in nir_var_mem_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d84fd86af1a392d1aa56e5e3b27ad0300fc8a8c2",
+        "description": "ntt: Separate image and sampler handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12b3ffe4000b367270e00433e7ccaee7af871851",
+        "description": "st/nir: Assign uniform locations to nir_var_mem_image vars",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b1385f3c87f7ff844cdcd5f9c21e94bd1a5454e7",
+        "description": "nir/gl_nir_lower_images: Support nir_var_mem_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7bdae87b93953a1323677729ff92be77860313e6",
+        "description": "nir/gl_nir_lower_samplers_as_deref: Support nir_var_mem_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0d8dc13e0974a45d1211fb4525ade3a4836fffd",
+        "description": "glsl/nir_linker: nir_var_mem_image is also a GL uniform",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94b9f25883a1e2e06c93b8a02d156f197108aed0",
+        "description": "aco: Add support for nir_var_mem_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd49706cb1ab3e808887ed2b384afb873fbb2598",
+        "description": "amd/llvm/nir: Add support for nir_var_mem_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26582db077500a4461ae6ef944a0a8977a03bb92",
+        "description": "anv: Use nir_foreach_image_variable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff39916ce71b3842f825202c11a82461bd39e459",
+        "description": "i965/uniforms: Handle images as a separate pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d7065ef0430e729cac7fffbdd7af2004745f5b0",
+        "description": "intel/fs: Consider nir_var_mem_image for TGM fences",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a53c33fbe3004856f5c4b2d12e711aaec5f520f",
+        "description": "nir: Add a nir_foreach_image_variable() iterator",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "de3705edb0368c376abe7fc2f660f9c5a5a5dcbf",
+        "description": "nir: Add nir_var_mem_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "872750bb96f692b525be0d169af1525072a12c82",
+        "description": "nir/schedule: Handle nir_intrisic_scoped_barrier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73d6e153eb984ba72233a6e5f66e5467857fe9a5",
+        "description": "freedreno: Fix for large epilogues",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ee060b614cf61b4e75cca5b6d74b364596961b2",
+        "description": "v3dv: enable VK_KHR_swapchain_mutable_format",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aac4e1f8229e7978310ca81312f0ff925e3485b7",
+        "description": "aco: do not return an empty string when disassembly is not supported",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5387522bd00147f298e5799db41db94f9a4a37e3",
+        "description": "iris: fix scratch address patching for TESS_EVAL stage",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "4256f7ed5847505c30e903b6674dac88c5d03315"
+    },
+    {
+        "sha": "7681500ead4f085d75b0b2f39b48d1f9dc637dc9",
+        "description": "crocus: Delete the MI_COPY_MEM_MEM resource_copy_region implementation.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "796c9ab3fd6b897ae3b3c069568182178c7661d4",
+        "description": "egl: set TSD as NULL after deinit",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "835b98e101fa6aeb6fb8a47059d66f8e48260bac",
+        "description": "v3dv: implement VK_EXT_host_query_reset",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "393fda2d341f65cba6e160d4704983370ae041f9",
+        "description": "i965: Emit a NULL surface for buffer textures with no buffer",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4d777631b595075169830a63b4281e9f0cbb45be",
+        "description": "zink: Do not access just freed zink_batch_state",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2ef7e6d6b697c883efd8debaf3cb0a88bcf043b",
+        "description": "anv: don't advertise vk conformance on GPUs that aren't conformant",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d47f3640ffc8f8ca9a76bdd6920edc2c2428b3c",
+        "description": "docs: update calendar and link releases notes for 21.2.4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "57755cad55af61ea31ae84021236570521b993bb",
+        "description": "docs: add sha256 sum for 21.2.4 release",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8236a7741d666a3bdca459cd8ca02e8c2fbb2ff3",
+        "description": "docs: add release notes for 21.2.4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "70df31f5e04c73e9fd6290fad505f0187501ac80",
+        "description": "docs: update calendar for 21.3.0-rc1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "1c0eb7aa78bac4494dbff0c502a8c09e23a4c123",
         "description": "ir3/freedreno: account for component in build_tessfactor_base",
         "nominated": false,
