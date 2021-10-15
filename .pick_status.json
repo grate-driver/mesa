@@ -886,7 +886,7 @@
         "description": "radv: fix removing PSIZ when it's not emitted by the last VGT stage",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "92e1981a8005c0ca7f48f38ddf8ff2b99ce95e7e"
     },
