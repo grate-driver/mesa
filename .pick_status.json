@@ -238,7 +238,7 @@
         "description": "util/hash_table: Clear special 0/1 entries for u64 hash table too",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e532a47f76cc8d763e2534c61b27dce0f5bc86a0"
     },
