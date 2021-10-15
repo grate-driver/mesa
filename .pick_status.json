@@ -814,7 +814,7 @@
         "description": "radv: re-emit prolog inputs when the nontrivial divisors state changed",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d9c7a175424308b4da7673ea885fd8a8b3edf862"
     },
