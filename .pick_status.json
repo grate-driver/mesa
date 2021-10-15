@@ -1183,7 +1183,7 @@
         "description": "aux/pb: more correctly check number of reclaims",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3d6c8829f54e52ae39b91b18d49acccf47755320"
     },
