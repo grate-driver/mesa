@@ -670,7 +670,7 @@
         "description": "panfrost: Fix gl_FragColor lowering",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "28ac4d1e00553b38691966b4b9b95fee826c97d4"
     },
