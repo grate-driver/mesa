@@ -877,7 +877,7 @@
         "description": "anv: Fix assertion.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "35315c68a574505a5b2cecaa64612fb8cffa8515"
     },
