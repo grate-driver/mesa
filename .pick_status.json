@@ -202,7 +202,7 @@
         "description": "mesa: fix crashes in the no_error path of glUniform",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bd2662bfa1c8746dc29a7bad32a1647379f78532"
     },
