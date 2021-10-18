@@ -778,7 +778,7 @@
         "description": "Revert \"gallium: add a is_dri_blit_image bool to pipe_blit_info\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "22a1b7c5b3a9cdbf05a0fd97fb193763a525b732"
     },
