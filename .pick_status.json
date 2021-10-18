@@ -1345,7 +1345,7 @@
         "description": "radv: Fix memory leak on error path.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "80841196b2dc921db38d9f3403e67d57749bc1d8"
     },
