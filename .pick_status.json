@@ -1273,7 +1273,7 @@
         "description": "radv: use MAJOR_IN_SYSMACROS for sysmacros.h include",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7aaa54feb53a9d0cf3277bef31547312ee56b277"
     },
