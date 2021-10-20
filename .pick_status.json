@@ -598,7 +598,7 @@
         "description": "radv: fix build errors with Android",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "49c3a88fadd03af0954986a0bafde66b01940ed4"
     },
