@@ -1282,7 +1282,7 @@
         "description": "util: fix util_cpu_detect_once() build on OpenBSD",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5623c75e40b38017873df09954b5f65dc84dcde5"
     },
