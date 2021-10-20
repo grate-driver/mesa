@@ -1,5 +1,662 @@
 [
     {
+        "sha": "39f25945311e1385a54ddd17f71f9f6023d97256",
+        "description": "anv: Implement VK_EXT_global_priority_query",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7599f09a149347b74bf0913cdd86d64e0ae9d20",
+        "description": "ir3: Use stp/ldp base offset for {load,store}_scratch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7deb0d296d83286b1f83dd0baeb4e355e717a615",
+        "description": "ir3/cse: Support mov instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd3f0683cd2a29bf0c2672b68a89c28a9e7dba21",
+        "description": "aco: simplify emit_stream_output()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d50be41f8f69be043e4e3b3da3f93bc71e904444",
+        "description": "broadcom/compiler: remove unused macro and function definition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9bc0fc89c8909fd5cc9c591aa98038f927a01e0e",
+        "description": "aco: disable mul(cndmask(0, 1, b), a) optimization sometimes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86b3d8c66ce17ddcaefa5bdea68882cc03a57f15",
+        "description": "zink: rescue surfaces/bufferviews for cache hits during deletion",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "80d5e40fd1392af9401db3d0bbcbcc6b7276675c",
+        "description": "freedreno/afuc: Disable the disassembler on 32-bit builds.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5afce85f2b605b7384da02aa6654ab3a00eee2bc",
+        "description": "Revert \"iris: add tile cache flush to iris_copy_region\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "27534a49cf3872646cb8ef9371707d74a81b1986"
+    },
+    {
+        "sha": "0523607ebb108d8c90bbda9c6564b66a0a6250e6",
+        "description": "iris: Add missed tile flush flag",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c85ea824bcab971dc2d9052b5dc937ee4b139cf5"
+    },
+    {
+        "sha": "8633ce06af4a489fa0fd0b4478fe3325a12a3bb3",
+        "description": "zink: stop leaking descriptor pool references",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fb8e0b9fb4707c473079f832c5bc2e9eacf6dba",
+        "description": "zink: don't clear descriptor pool cache on context destroy",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a852e4e06943b429382ac938c8b8fb94e834e06",
+        "description": "zink: always invalidate descriptor sets on pool free",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94fc6b08751d784b19f414acae1c479ced26ebd9",
+        "description": "zink: unref descriptor pools in hybrid mode when they explode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d06529443422fc511cd98ba2c55c9c3f196bd61e",
+        "description": "zink: remove descriptor pools from hash table on deletion",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d937298818220294be740cc6b3341807951acf6",
+        "description": "zink: fix descriptor interface param for program_deinit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a9e0e4fc021d91ccd44e1975a63128640237683",
+        "description": "zink: use ctx params for program ref/destroy functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d29e507adcd826dbd4e47c9a9bcbef3bf5162c06",
+        "description": "radeonsi: don't set inline_uniforms for viewperf because it's enabled by default",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5f39acb33e3eaf2b9eaa79b068fb3b6b40025cf",
+        "description": "winsys/amdgpu: set max_ib_size and max_check_space_size later in cs_check_space",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6129db68bf81ac72e72e3e39e574fe8f227d0f0b",
+        "description": "winsys/amdgpu: remove force_chaining parameter from cs_check_space",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d852a4695263ece8f8fbd5edf79edc272b1f41e",
+        "description": "radeonsi: properly destroy buffers on failure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d2dc06761fd0f5636cf88f06f5dec554d0f7fdb",
+        "description": "radeonsi: don't sync before clear_buffer and copy_buffer if the buffer is idle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4cf4b3cee94770f1b09b24839b4abd6a02f9661",
+        "description": "radeonsi: don't update bind_history for internal buffer clears and copies",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "61ebdcfc299efd306e7faa959d1eb100a634b2ec",
+        "description": "radeonsi: don't sync PS or CS before (clear|copy)_buffer based on bind history",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4bc8c2590e5a8f29e7dfa3bc8afb07463745166c",
+        "description": "radeonsi: rebind a buffer only in shader stages where it's been bound",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13b1424e96f87e0136551d8a19131d2d38f32e34",
+        "description": "radeonsi: change bind_history to track usage in each shader stage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f2a97e9df7453807ae74d825bdd1a7eac6da8dc",
+        "description": "radeonsi: add an option to use CPU storage uploads for threaded context",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "745ea994846b64a16a3368a87a74862910cf9b42",
+        "description": "radeonsi: add SI_MAX_VRAM_MAP_SIZE definition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03186773a6bfcba3dce19ea3cc5d66afbeae0501",
+        "description": "mesa: fix crashes in the no_error path of glUniform",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "bd2662bfa1c8746dc29a7bad32a1647379f78532"
+    },
+    {
+        "sha": "5948ff4826864b1e1573030b16cc2b3b1a13819a",
+        "description": "freedreno/computerator: Fix mergedregs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22a203aa4c7aa2ae51e9cabe537ad20c191bfa5f",
+        "description": "freedreno/isa: Fix ldg/stg \"halfness\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "834e8066c19d5e1dd13d063c75b34bed78a2239e",
+        "description": "freedreno/ir3/tests: Add some 8/16b ldg/stg tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8657e201d00ab3bc05810840e50c297bba94219a",
+        "description": "freedreno/ir3/tests: Don't skip encode test if decode fails",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "572a902566471b882267d0193784d2afd05ca4ba",
+        "description": "aco: fix emitting stream outputs when the first component isn't zero",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3cbb0eb6a7b998f33d5175274fd3a4bf4fd5973",
+        "description": "aco: fix invalid IR generated for b2f64 when the dest is a VGPR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3df9d8ed807a6693d5fc8cbda4faec28af081ff3",
+        "description": "gallium/u_threaded: implement pipelined partial buffer uploads using CPU storage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cc2f3a0168d11d74022b87b48f20c03ddeee6f53",
+        "description": "gallium,vbo: add PIPE_BIND_VERTEX_STATE for display lists",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ee2965283eb47f2cfd81d026a975565be6054cf",
+        "description": "ac/llvm: accept primitives whose face culling determinant is Inf or NaN",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "efaab0ec500473bea07c626b7c99ed253865ab8d",
+        "description": "ac/llvm: add helper ac_build_is_inf_or_nan",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e8f76b713a80c144383a96835727778b04365fd",
+        "description": "ac/llvm: use fmac instead of mul+sub in face culling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19c91a120d49ec5233c271f351495e662795223d",
+        "description": "radv: do not remove PSIZ for streamout shaders",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "92e1981a8005c0ca7f48f38ddf8ff2b99ce95e7e"
+    },
+    {
+        "sha": "60b7c3a0f49241f95e5b6f8da5d60eaa7bbeaabb",
+        "description": "meson: disable -Werror=thread-safety on FreeBSD",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "0d5fe24c9b7de15241727922e18c3ea08d11ef08"
+    },
+    {
+        "sha": "37d6ce4ebb43b9876683e1a7a38ab97634c65879",
+        "description": "llvmpipe: swizzle image stores for CL BGRA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86b24fba05b940ccae9b15aa89a7361a9ea92a30",
+        "description": "zink: align pipe_resource and sampler_view allocations to cachelines",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89ed9ed40053695c4c54980996713c11ab7d4b00",
+        "description": "zink: don't ralloc zink_resource structs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4cad3da409e703ad4fb828c9fe176f3ae6146535",
+        "description": "lavapipe: clamp attachment clear rect sizes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67dd6b9f0f1d41f08181c0277ff35ac24235c5d9",
+        "description": "lavapipe: pull layer count from render state during resolve",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f25a98318bfe79bbe66443e1cb86400de4ddfc4e",
+        "description": "lavapipe: remove lvp_subpass::has_color_att",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7e9500dc27df9c2d910a749532a53e33f92bf52",
+        "description": "lavapipe: simplify some attachment derefs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d914df72ab7a40eeb2414ea78708eea34413c24d",
+        "description": "lavapipe: store subpass directly to rendering_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0c81efcf449ce894bf67553784194e5e5e7c9e7",
+        "description": "lavapipe: remove last VK_ATTACHMENT_UNUSED check",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58e18a2be9a601581196bb19b31d63f105c8ec06",
+        "description": "lavapipe: remove lvp_subpass_attachment and use lvp_render_pass_attachment refs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e3bc8b18d8fe95aa175497ae2d4fad19a24c088",
+        "description": "lavapipe: remove lvp_subpass::max_sample_count",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e3d84e30ac48ac323eb1e4a385e69edbdb65947",
+        "description": "lavapipe: add attachment index to lvp_render_pass_attachment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5cf568ce09347b7423f8bea0fa14cd2b2cfaa60b",
+        "description": "lavapipe: remove lvp_subpass_attachment::layout",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eaa82252f974e831a295a5d26f70387038d26b78",
+        "description": "lavapipe: remove lvp_subpass_attachment::in_render_loop",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "afd8820d66569a04fe4f5cffa1b3adec83753be4",
+        "description": "lavapipe: use framebuffer attachment_count member instead of renderpass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd70ff3b8c45ed0905d163da676116366eab8234",
+        "description": "lavapipe: remove some unused struct members",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d103d5bb5dc9e72489de227fa573e049034b6272",
+        "description": "lavapipe: stop reading renderpass during pipeline creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cae1ef0a11a6846d3caafd7fcafeadd6fa7ca6d2",
+        "description": "clover: use max shader sampler view/images queries for clover.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dfd0f5dbfd494cab04c9f436d3fcbfc804459c1d",
+        "description": "zink: move last of lazy descriptor state updating back to lazy-only code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "140d3ea8c6776f4650abe5156bd32734d57604e3",
+        "description": "zink: add an early return for zink_descriptors_update_lazy_masked()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7c840f510321c841518e26befd9c56c7d5a38beb",
+        "description": "zink: move push descriptor updating into lazy-only codepath",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b140d58b1f93c0a2dc900c8147f438294f3ccd6e",
+        "description": "zink: don't update lazy descriptor states in hybrid mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "75e51138b1dadabf043708d4947d911705ccffc5",
+        "description": "zink: assert compute descriptor key is valid before hashing it",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "497ce3c38a498d0f0aada7303d258bee4c0fd05b",
+        "description": "zink: clear descriptor refs on buffer replacement",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e66558985a9e85393ff844f8a16e85b4cf812f0e",
+        "description": "zink: fully zero surface creation struct",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2789fde0c7a8aa5436560692633838079e2e848",
+        "description": "zink: add a read barrier for indirect dispatch",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "11dd9e4ee4a5241ee18cfe68d8bee2ee3da55dc7",
+        "description": "zink: use static array for detecting VK_TIME_DOMAIN_DEVICE_EXT",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "039078fe9720797f5eaa109a7e9d27841eb6bc73"
+    },
+    {
+        "sha": "061610a7dd843483924fea6528519d8098d5fd87",
+        "description": "st: Fix comments in commit be6d584de43966e",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "753f595e3d075be35547c4a01d9a1fd254c6df62",
+        "description": "clover/api: fix clGetMemObjectInfo for images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4f9b15dd0e7cf1a5fd10f3b9c4ac0a4bfa5c804",
+        "description": "clover/formats: pass in cl_mem_flags for better format checking",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f09e6c1c5fcdfa0e16d09b30cc5deb1a4fedd728",
+        "description": "clover/format: Full rework on how we declare supported images.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "be6d584de43966ee58bf1fcac156ebf8040081d1",
         "description": "st: Fix 64-bit vertex attrib index for TGSI path",
         "nominated": false,
