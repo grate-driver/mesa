@@ -1426,7 +1426,7 @@
         "description": "iris: Fix MOCS for buffer copies",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c5b22441f1c3a77027af4306f09ea6d1f20d00ab"
     },
