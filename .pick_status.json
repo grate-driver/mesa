@@ -733,7 +733,7 @@
         "description": "st/mesa: don't crash when draw indirect buffer has no storage",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "22f6624ed318e8131681ec1f2e7b3a59449df412"
     },
