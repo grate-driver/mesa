@@ -841,7 +841,7 @@
         "description": "broadcom/compiler: fix assert that current instruction must be in current block",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "265515fa62664eac006dcff278ed549c75863b79"
     },
