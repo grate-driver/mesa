@@ -427,7 +427,7 @@
         "description": "intel/fs: Fix a cmod prop bug when cmod is set to inst that doesn't support it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "32b7ba66b0156d9fd40b059f20da79a74451f7fd"
     },
