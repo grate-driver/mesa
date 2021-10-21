@@ -805,7 +805,7 @@
         "description": "iris: clear bos_written when resetting a batch",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e4c3d3efc7a2fa9f975b1f9211f7d61aa7d31d94"
     },
