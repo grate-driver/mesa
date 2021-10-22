@@ -76,7 +76,7 @@
         "description": "radv: Add bufferDeviceAddressMultiDevice support.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2e5718c957415b93da6be5e1ff61d09e5e9933a2"
     },
