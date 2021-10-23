@@ -1309,7 +1309,7 @@
         "description": "panfrost: Fix Secondary Shader field",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "73e80994d501c2a422a969cdb2fbb321969099b2"
     },
