@@ -4324,7 +4324,7 @@
         "description": "panfrost: Flush resources when shadowing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cecb889481db23dc2b945dc3904f58f41a45fdfc"
     },
