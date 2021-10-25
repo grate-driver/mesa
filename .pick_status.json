@@ -3964,7 +3964,7 @@
         "description": "ci/deqp-runner: Rename the deqp-drivername-*.txt files to drivername-*.txt",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
