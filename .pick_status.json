@@ -868,7 +868,7 @@
         "description": "iris: Mark a dirty update when vs_needs_sgvs_element value changed",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
