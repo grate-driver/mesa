@@ -580,7 +580,7 @@
         "description": "vulkan: Fix entrypoint generation when compiling for x86 with MSVC",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6d44b21d4fdea89673541de265f69258747c5499"
     },
