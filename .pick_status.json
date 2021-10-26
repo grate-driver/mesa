@@ -157,7 +157,7 @@
         "description": "anv: Also disallow CCS_E for multi-LOD images",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e3101c96bb64dd5c8246654a9c4865fa99a060b0"
     },
