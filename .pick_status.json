@@ -328,7 +328,7 @@
         "description": "anv: fix push constant lowering with bindless shaders",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9fa1cdfe7ffd9e7ebd83055e2008f3e4b8ada549"
     },
