@@ -670,7 +670,7 @@
         "description": "Revert \"iris: Disable I915_FORMAT_MOD_Y_TILED_GEN12* on adl-p/display 13\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d4174f5f052f614a10df2ebc905aec8c4897b057"
     },
