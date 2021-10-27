@@ -1750,7 +1750,7 @@
         "description": "radeonsi: treat nir_intrinsic_load_constant as a VMEM operation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8288882965bf1c5f0ca5d9f29c1b759bee2bc718"
     },
