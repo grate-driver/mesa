@@ -22,7 +22,7 @@
         "description": "anv: don't forget to add scratch buffer to BO list",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "eeeea5cb873b40418c738e25e4032fb1fd9b7ac9"
     },
