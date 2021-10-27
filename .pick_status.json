@@ -4198,7 +4198,7 @@
         "description": "intel/nir: preserve access value when duping intrinsic",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6339aba775ecdcaf74136479d02e3622bc1d4c0a"
     },
