@@ -1138,7 +1138,7 @@
         "description": "aco: Fix how p_is_helper interacts with optimizations.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
