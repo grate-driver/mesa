@@ -796,7 +796,7 @@
         "description": "zink: be more permissive for injecting LOD into texture() instructions",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3ad06b69490fa990c473e16f78ce658b0eb43b47"
     },
