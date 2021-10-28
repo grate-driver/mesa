@@ -1732,7 +1732,7 @@
         "description": "radeonsi/sdma: fix bogus assert",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "46c95047bd77f6e824e4edccad590da8a1823fb4"
     },
