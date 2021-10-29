@@ -3802,7 +3802,7 @@
         "description": "nir: Properly handle various exceptional values in frexp",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "23d30f4099fac0e1fcbd7adf315a186f553e48d2"
     },
