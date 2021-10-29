@@ -3829,7 +3829,7 @@
         "description": "spriv: Produce correct result for GLSLstd450Step with NaN",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1feeee9cf476010f72cb973480f67de0764e6a90"
     },
