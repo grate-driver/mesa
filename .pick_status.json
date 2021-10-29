@@ -76,7 +76,7 @@
         "description": "nir: Produce correct results for atan with NaN",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2098ae16c8b4e64d0694a28f74a461b69b98a336"
     },
