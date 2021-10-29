@@ -3820,7 +3820,7 @@
         "description": "spirv: Produce correct result for GLSLstd450Modf with Inf",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f92a35d831cf54f2244d5510932fd17c97b02ce4"
     },
