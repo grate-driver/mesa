@@ -1687,7 +1687,7 @@
         "description": "v3d: Update prim_counts when prims generated query in flight without TF",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a1b7c0844ddcbdc5ab773cbe2f6312f34111bdd9"
     },
