@@ -877,7 +877,7 @@
         "description": "zink: always add VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT for 3D images",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
