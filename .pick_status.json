@@ -1480,7 +1480,7 @@
         "description": "radeonsi: fix 2 issues with depth_cleared_level_mask",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ff8a930cf7de6aa77c350ac9b010719d40f18e4d"
     },
