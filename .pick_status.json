@@ -94,7 +94,7 @@
         "description": "spirv: Produce correct result for GLSLstd450Tanh with NaN",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9f9432d56c055b9704a76cad44da88d5e12f825c"
     },
