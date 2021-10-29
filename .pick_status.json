@@ -3838,7 +3838,7 @@
         "description": "intel/fs: Don't optimize out 1.0*x and -1.0*x",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f5dd6dfe012666123bb59b9a4f8e9afb46d67414"
     },
