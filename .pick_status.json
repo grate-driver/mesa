@@ -1696,7 +1696,7 @@
         "description": "virgl: Allocate qdws after virgl_init_context to avoid leak.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9a7d6a110e2a407ead13d0eb2f1aedbdb54e696b"
     },
