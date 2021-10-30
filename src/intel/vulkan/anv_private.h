@@ -1816,6 +1816,9 @@ struct anv_device_memory {
    VkDeviceSize                                 map_size;
    void *                                       map;
 
+   /* The map, from the user PoV is map + map_delta */
+   uint32_t                                     map_delta;
+
    /* If set, we are holding reference to AHardwareBuffer
     * which we must release when memory is freed.
     */
