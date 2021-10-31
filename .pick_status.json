@@ -634,7 +634,7 @@
         "description": "lavapipe: drop EXT_acquire_xlib_display",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1d574d4860300633ad2a77de203b74f261fb6969"
     },
