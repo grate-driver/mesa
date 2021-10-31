@@ -400,7 +400,7 @@
         "description": "vulkan/wsi: set correct bits for host allocations/exports for images.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "895d3399f7fb5cf58aa857fb2b98f23fe89071ba"
     },
