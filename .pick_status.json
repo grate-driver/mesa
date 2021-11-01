@@ -1,5 +1,266 @@
 [
     {
+        "sha": "79f57f68930ce4fcf59bdca82357e19b4f3d62e6",
+        "description": "lavapipe: Don't wrap errors returned from vk_device_init in vk_error",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "47adb11143767b6e66945197a70dc91383406665"
+    },
+    {
+        "sha": "73af67883ddf6faec9c0e76f8c174fb450817179",
+        "description": "zink: force float dest types on some alu results",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c73f5a00826201f6e76854145aa823cec4f389d2",
+        "description": "zink: add more int/float types to cast switching in ntv",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69501ff458108c536f36198c8c8d3b560ecb4c82",
+        "description": "zink: explicitly enable VK_EXT_shader_subgroup_ballot",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ccfe36fffabbbc25cdd0fc0f7bf6bf30de0e1268",
+        "description": "zink: clamp max buffer sizes to smallest buffer heap size",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd2b47281f1b63312a58c2f7e77ee39f0858ba95",
+        "description": "zink: error when trying to allocate a bo larger than heap size",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa5e544644431e9d4462b6f46208a3c028a1a13d",
+        "description": "zink: don't clamp 2D_ARRAY surfaces to 2D",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d2280f533faf5e372d604cf35b355b898423375",
+        "description": "zink: don't clamp cube array surfacess to cubes",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ab915960c5d2e9cbb81ccf151cfdf17bfbd3366",
+        "description": "zink: be more spec-compliant for unnormalizedCoordinates samplers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "75dc3023404210494ede4ddf6ea8c94c35b85497",
+        "description": "lavapipe: drop EXT_acquire_xlib_display",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "1d574d4860300633ad2a77de203b74f261fb6969"
+    },
+    {
+        "sha": "7e998783db80a153978bea165132e349896792d8",
+        "description": "freedreno/ir3: xfb fix for duplicate outputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f6f760a98db511a0d3e712efa937d372a1910a67",
+        "description": "freedreno/ir3/print: Show end's outidxs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6239adebbc5cabe3466477ac5f96dfdaaf2303a1",
+        "description": "zink: flag renderpass change when toggling fbfetch",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d041d5f1e9a731da3bfaec21494d90f4b560bbb",
+        "description": "Revert \"iris: Disable I915_FORMAT_MOD_Y_TILED_GEN12* on adl-p/display 13\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "d4174f5f052f614a10df2ebc905aec8c4897b057"
+    },
+    {
+        "sha": "68a62226e4dba17fb56c968a53fe1539fff70214",
+        "description": "ir3: Don't emit barriers for make_available/make_visible",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4108fda4268943a52cffc6627b598638763b88c9",
+        "description": "vulkan: Move all the common object code to runtime/",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4af0c038cfe38e144e4d83e03c0d3a9372767886",
+        "description": "vulkan: Move trampoline code-gen to its own file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d53f20ff4d89ac13fd6a08253ae1a2c53a791ab0",
+        "description": "vulkan: Break entrypoint parsing into its own file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f9e0c2816fb3a06dcba101730410f15b82fb19f",
+        "description": "vulkan/dispatch_table: EntrypointBase doesn't need to derive from object",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3fd7cc9d42e14a6e80dfb03782401060b9e6187a",
+        "description": "vulkan: Drop unnecessary [en]coding comments from python generators",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a208b849f337a60f87216575bc148d8de20517b6",
+        "description": "vulkan: Rework mako error handling in python generators",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "006633c0438e652b4704d4636e712d566dce4fdc",
+        "description": "lavapipe: Use vk_instance_get_proc_addr_unchecked for WSI",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ccba1576da2b2a32444c8328bc9b3a0427bb0b1",
+        "description": "v3dv: Use vk_instance_get_proc_addr_unchecked for WSI",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "837a142f2da1cb4fc70fa7ad284b13969e36ee91",
+        "description": "vulkan/vk_extensions_gen: Stop including vk_object.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "741262ee01f0cd21dd97547adb701ea202416e89",
+        "description": "vulkan/vk_extensions_gen: Drop support for extra includes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "20620af1e4c9f203aabb9950a9de0536e25db1dd",
+        "description": "clover: Add constructor for image_rd_argument.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8f18385e05db6d14ae6807a529c5d69c38d6091",
+        "description": "zink: inject LOD for sampler version of OpImageQuerySize",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "87fbb0eab03c8348f74ca1f4b3489e89e89f691f",
+        "description": "zink: be more permissive for injecting LOD into texture() instructions",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "3ad06b69490fa990c473e16f78ce658b0eb43b47"
+    },
+    {
+        "sha": "8d0b508d91e8f873ff7974e1aad8fb6c9b8f20cf",
+        "description": "ir3: Emit barriers for images again",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "e87dbfd3e8a5cf69c3ddc89fce17a0388f872806"
+    },
+    {
         "sha": "8bfa146b8056d5dded6fdd2c4d8524aa0c438058",
         "description": "radeonsi: print the border color error message only once",
         "nominated": true,
