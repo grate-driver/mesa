@@ -283,7 +283,7 @@
         "description": "aux/primconvert: handle singular incomplete restarts",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "583070748cb103560b173b5789998302d517b587"
     },
