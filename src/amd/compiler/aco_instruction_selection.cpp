@@ -3038,7 +3038,7 @@ visit_alu_instr(isel_context* ctx, nir_alu_instr* instr)
          bld.sop2(aco_opcode::s_cselect_b64, Definition(dst), Operand::c32(0x3f800000u),
                   Operand::zero(), bld.scc(src));
       } else if (dst.regClass() == v2) {
-         Temp one = bld.copy(bld.def(v2), Operand::c32(0x3FF00000u));
+         Temp one = bld.copy(bld.def(v1), Operand::c32(0x3FF00000u));
          Temp upper =
             bld.vop2_e64(aco_opcode::v_cndmask_b32, bld.def(v1), Operand::zero(), one, src);
          bld.pseudo(aco_opcode::p_create_vector, Definition(dst), Operand::zero(), upper);
@@ -5284,16 +5284,22 @@ visit_load_input(isel_context* ctx, nir_intrinsic_instr* instr)
          }
       }
 
-      if (instr->dest.ssa.num_components == 1) {
+      if (instr->dest.ssa.num_components == 1 &&
+          instr->dest.ssa.bit_size != 64) {
          bld.vintrp(aco_opcode::v_interp_mov_f32, Definition(dst), Operand::c32(vertex_id),
                     bld.m0(prim_mask), idx, component);
       } else {
+         unsigned num_components = instr->dest.ssa.num_components;
+         if (instr->dest.ssa.bit_size == 64)
+            num_components *= 2;
          aco_ptr<Pseudo_instruction> vec{create_instruction<Pseudo_instruction>(
-            aco_opcode::p_create_vector, Format::PSEUDO, instr->dest.ssa.num_components, 1)};
-         for (unsigned i = 0; i < instr->dest.ssa.num_components; i++) {
+            aco_opcode::p_create_vector, Format::PSEUDO, num_components, 1)};
+         for (unsigned i = 0; i < num_components; i++) {
+            unsigned chan_component = (component + i) % 4;
+            unsigned chan_idx = idx + (component + i) / 4;
             vec->operands[i] = bld.vintrp(
                aco_opcode::v_interp_mov_f32, bld.def(instr->dest.ssa.bit_size == 16 ? v2b : v1),
-               Operand::c32(vertex_id), bld.m0(prim_mask), idx, component + i);
+               Operand::c32(vertex_id), bld.m0(prim_mask), chan_idx, chan_component);
          }
          vec->definitions[0] = Definition(dst);
          bld.insert(std::move(vec));
@@ -11172,7 +11178,7 @@ emit_stream_output(isel_context* ctx, Temp const* so_buffers, Temp const* so_wri
          aco_opcode::p_create_vector, Format::PSEUDO, count, 1)};
       for (int i = 0; i < count; ++i)
          vec->operands[i] =
-            (ctx->outputs.mask[loc] & 1 << (start + i)) ? Operand(out[start + i]) : Operand::zero();
+            (ctx->outputs.mask[loc] & 1 << (start + first_comp + i)) ? Operand(out[start + i]) : Operand::zero();
       vec->definitions[0] = Definition(write_data);
       ctx->block->instructions.emplace_back(std::move(vec));
 
@@ -11212,17 +11218,6 @@ emit_streamout(isel_context* ctx, unsigned stream)
 {
    Builder bld(ctx->program, ctx->block);
 
-   Temp so_buffers[4];
-   Temp buf_ptr = convert_pointer_to_64_bit(ctx, get_arg(ctx, ctx->args->streamout_buffers));
-   for (unsigned i = 0; i < 4; i++) {
-      unsigned stride = ctx->program->info->so.strides[i];
-      if (!stride)
-         continue;
-
-      Operand off = bld.copy(bld.def(s1), Operand::c32(i * 16u));
-      so_buffers[i] = bld.smem(aco_opcode::s_load_dwordx4, bld.def(s4), buf_ptr, off);
-   }
-
    Temp so_vtx_count =
       bld.sop2(aco_opcode::s_bfe_u32, bld.def(s1), bld.def(s1, scc),
                get_arg(ctx, ctx->args->ac.streamout_config), Operand::c32(0x70010u));
@@ -11239,12 +11234,17 @@ emit_streamout(isel_context* ctx, unsigned stream)
    Temp so_write_index =
       bld.vadd32(bld.def(v1), get_arg(ctx, ctx->args->ac.streamout_write_index), tid);
 
+   Temp so_buffers[4];
    Temp so_write_offset[4];
+   Temp buf_ptr = convert_pointer_to_64_bit(ctx, get_arg(ctx, ctx->args->streamout_buffers));
 
    for (unsigned i = 0; i < 4; i++) {
       unsigned stride = ctx->program->info->so.strides[i];
       if (!stride)
          continue;
+
+      so_buffers[i] = bld.smem(aco_opcode::s_load_dwordx4, bld.def(s4), buf_ptr,
+                               bld.copy(bld.def(s1), Operand::c32(i * 16u)));
 
       if (stride == 1) {
          Temp offset = bld.sop2(aco_opcode::s_add_i32, bld.def(s1), bld.def(s1, scc),

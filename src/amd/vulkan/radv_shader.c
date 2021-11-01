@@ -1975,6 +1975,9 @@ radv_create_vs_prolog(struct radv_device *device, const struct radv_vs_prolog_ke
    struct radv_prolog_binary *binary = NULL;
    aco_compile_vs_prolog(key, &binary, &args);
    struct radv_shader_prolog *prolog = upload_vs_prolog(device, binary, info.wave_size);
+   if (prolog) {
+      prolog->nontrivial_divisors = key->state->nontrivial_divisors;
+   }
    free(binary);
 
    return prolog;

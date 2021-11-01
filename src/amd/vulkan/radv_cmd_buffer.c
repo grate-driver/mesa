@@ -2837,6 +2837,7 @@ lookup_vs_prolog(struct radv_cmd_buffer *cmd_buffer, struct radv_shader_variant 
       prolog = radv_create_vs_prolog(device, &key);
       uint32_t *key2 = malloc(key_size * 4);
       if (!prolog || !key2) {
+         radv_prolog_destroy(device, prolog);
          free(key2);
          u_rwlock_wrunlock(&device->vs_prologs_lock);
          return NULL;
@@ -2908,7 +2909,8 @@ emit_prolog_inputs(struct radv_cmd_buffer *cmd_buffer, struct radv_shader_varian
                    uint32_t nontrivial_divisors, bool pipeline_is_dirty)
 {
    /* no need to re-emit anything in this case */
-   if (!nontrivial_divisors && !pipeline_is_dirty)
+   if (!nontrivial_divisors && !pipeline_is_dirty && cmd_buffer->state.emitted_vs_prolog &&
+       !cmd_buffer->state.emitted_vs_prolog->nontrivial_divisors)
       return;
 
    struct radv_vs_input_state *state = &cmd_buffer->state.dynamic_vs_input;
