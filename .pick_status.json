@@ -409,7 +409,7 @@
         "description": "radv: Disable coherent L2 optimization on cards with noncoherent L2.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "fd8210f27ede11583e3a5d55066cb61d9988357b"
     },
