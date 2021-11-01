@@ -553,7 +553,7 @@
         "description": "lavapipe: Don't wrap errors returned from vk_device_init in vk_error",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "47adb11143767b6e66945197a70dc91383406665"
     },
