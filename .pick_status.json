@@ -94,7 +94,7 @@
         "description": "mesa: always call _mesa_update_pixel",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "10c75ae41c4e914a0160f9d93bbe1e65b5e14517"
     },
