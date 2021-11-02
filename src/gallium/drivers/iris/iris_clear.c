@@ -74,7 +74,7 @@ can_fast_clear_color(struct iris_context *ice,
 {
    struct iris_resource *res = (void *) p_res;
 
-   if (INTEL_DEBUG & DEBUG_NO_FAST_CLEAR)
+   if (INTEL_DEBUG(DEBUG_NO_FAST_CLEAR))
       return false;
 
    if (!isl_aux_usage_has_fast_clears(res->aux.usage))
@@ -417,7 +417,7 @@ can_fast_clear_depth(struct iris_context *ice,
    struct iris_screen *screen = (void *) ctx->screen;
    const struct intel_device_info *devinfo = &screen->devinfo;
 
-   if (INTEL_DEBUG & DEBUG_NO_FAST_CLEAR)
+   if (INTEL_DEBUG(DEBUG_NO_FAST_CLEAR))
       return false;
 
    /* Check for partial clears */
@@ -494,13 +494,28 @@ fast_clear_depth(struct iris_context *ice,
                           ISL_AUX_OP_FULL_RESOLVE, false);
             iris_resource_set_aux_state(ice, res, res_level, layer, 1,
                                         ISL_AUX_STATE_RESOLVED);
-            iris_emit_pipe_control_flush(batch, "hiz op: post depth resolve",
-                                         PIPE_CONTROL_TILE_CACHE_FLUSH);
          }
       }
       const union isl_color_value clear_value = { .f32 = {depth, } };
       iris_resource_set_clear_color(ice, res, clear_value);
       update_clear_depth = true;
+   }
+
+   if (res->aux.usage == ISL_AUX_USAGE_HIZ_CCS_WT) {
+      /* From Bspec 47010 (Depth Buffer Clear):
+       *
+       *    Since the fast clear cycles to CCS are not cached in TileCache,
+       *    any previous depth buffer writes to overlapping pixels must be
+       *    flushed out of TileCache before a succeeding Depth Buffer Clear.
+       *    This restriction only applies to Depth Buffer with write-thru
+       *    enabled, since fast clears to CCS only occur for write-thru mode.
+       *
+       * There may have been a write to this depth buffer. Flush it from the
+       * tile cache just in case.
+       */
+      iris_emit_pipe_control_flush(batch, "hiz_ccs_wt: before fast clear",
+                                   PIPE_CONTROL_DEPTH_CACHE_FLUSH |
+                                   PIPE_CONTROL_TILE_CACHE_FLUSH);
    }
 
    for (unsigned l = 0; l < box->depth; l++) {
@@ -610,8 +625,7 @@ clear_depth_stencil(struct iris_context *ice,
    blorp_batch_finish(&blorp_batch);
    iris_batch_sync_region_end(batch);
 
-   iris_flush_and_dirty_for_history(ice, batch, res,
-                                    PIPE_CONTROL_TILE_CACHE_FLUSH,
+   iris_flush_and_dirty_for_history(ice, batch, res, 0,
                                     "cache history: post slow ZS clear");
 
    if (clear_depth && z_res) {

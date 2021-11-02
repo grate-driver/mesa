@@ -4384,17 +4384,8 @@ iris_store_tes_state(const struct intel_device_info *devinfo,
    struct brw_vue_prog_data *vue_prog_data = (void *) prog_data;
    struct brw_tes_prog_data *tes_prog_data = (void *) prog_data;
 
-   uint32_t *te_state = (void *) shader->derived_data;
-   uint32_t *ds_state = te_state + GENX(3DSTATE_TE_length);
-
-   iris_pack_command(GENX(3DSTATE_TE), te_state, te) {
-      te.Partitioning = tes_prog_data->partitioning;
-      te.OutputTopology = tes_prog_data->output_topology;
-      te.TEDomain = tes_prog_data->domain;
-      te.TEEnable = true;
-      te.MaximumTessellationFactorOdd = 63.0;
-      te.MaximumTessellationFactorNotOdd = 64.0;
-   }
+   uint32_t *ds_state = (void *) shader->derived_data;
+   uint32_t *te_state = ds_state + GENX(3DSTATE_DS_length);
 
    iris_pack_command(GENX(3DSTATE_DS), ds_state, ds) {
       INIT_THREAD_DISPATCH_FIELDS(ds, Patch, MESA_SHADER_TESS_EVAL);
@@ -4408,6 +4399,14 @@ iris_store_tes_state(const struct intel_device_info *devinfo,
          vue_prog_data->cull_distance_mask;
    }
 
+   iris_pack_command(GENX(3DSTATE_TE), te_state, te) {
+      te.Partitioning = tes_prog_data->partitioning;
+      te.OutputTopology = tes_prog_data->output_topology;
+      te.TEDomain = tes_prog_data->domain;
+      te.TEEnable = true;
+      te.MaximumTessellationFactorOdd = 63.0;
+      te.MaximumTessellationFactorNotOdd = 64.0;
+   }
 }
 
 /**
@@ -7696,7 +7695,7 @@ iris_emit_raw_pipe_control(struct iris_batch *batch,
 
    /* Emit --------------------------------------------------------------- */
 
-   if (INTEL_DEBUG & DEBUG_PIPE_CONTROL) {
+   if (INTEL_DEBUG(DEBUG_PIPE_CONTROL)) {
       fprintf(stderr,
               "  PC [%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%"PRIx64"]: %s\n",
               (flags & PIPE_CONTROL_FLUSH_ENABLE) ? "PipeCon " : "",
