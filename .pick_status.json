@@ -274,7 +274,7 @@
         "description": "vulkan/util: Include stdlib.h",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f695171e383efb6774cbe475c8f4e68e66fe2906"
     },
