@@ -1408,7 +1408,7 @@
         "description": "freedreno/a6xx: Don't try to generate mipmaps for SNORM with our blitter.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },

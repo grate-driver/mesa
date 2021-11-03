@@ -1167,6 +1167,10 @@ handle_snorm_copy_blit(struct fd_context *ctx,
                        const struct pipe_blit_info *info)
    assert_dt
 {
+   /* If we're interpolating the pixels, we can't just treat the values as unorm. */
+   if (info->filter == PIPE_TEX_FILTER_LINEAR)
+      return false;
+
    struct pipe_blit_info blit = *info;
 
    blit.src.format = blit.dst.format = snorm_copy_format(info->src.format);

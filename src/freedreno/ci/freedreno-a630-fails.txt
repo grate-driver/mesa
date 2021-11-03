@@ -268,7 +268,6 @@ spec@arb_texture_rg@texwrap formats-int bordercolor-swizzled@GL_RG8UI- swizzled-
 # segfault on fd6_emit_image_tex() of null image resource
 spec@arb_texture_view@bug-layers-image,Crash
 
-spec@arb_texture_view@mipgen,Fail
 spec@arb_texture_view@rendering-layers-image,Fail
 spec@arb_texture_view@rendering-layers-image@layers rendering of image1DArray,Fail
 spec@arb_timer_query@timestamp-get,Fail
