@@ -139,7 +139,7 @@
         "description": "zink: reject all storage multisampling if the feature is unsupported",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -148,7 +148,7 @@
         "description": "zink: add SpvCapabilityStorageImageMultisample for multisampled storage images",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -211,7 +211,7 @@
         "description": "zink: stop double printing validation messages",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -580,7 +580,7 @@
         "description": "zink: explicitly enable VK_EXT_shader_subgroup_ballot",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -589,7 +589,7 @@
         "description": "zink: clamp max buffer sizes to smallest buffer heap size",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -598,7 +598,7 @@
         "description": "zink: error when trying to allocate a bo larger than heap size",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -661,7 +661,7 @@
         "description": "zink: flag renderpass change when toggling fbfetch",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -1750,7 +1750,7 @@
         "description": "zink: set aspectMask for renderpass2 VkAttachmentReference2 structs",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -1759,7 +1759,7 @@
         "description": "zink: use align64 for allocation sizes",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -2182,7 +2182,7 @@
         "description": "zink: more accurately update samplemask for fs shader keys",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -2317,7 +2317,7 @@
         "description": "zink: don't add dynamic vertex pipeline states if no attribs are used",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -2362,7 +2362,7 @@
         "description": "zink: stop exporting PIPE_SHADER_CAP_FP16_DERIVATIVES",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -2398,7 +2398,7 @@
         "description": "zink: don't check rebind count outside of buffer/image rebind function",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -2407,7 +2407,7 @@
         "description": "zink: only reset zink_resource::so_valid on buffer rebind",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -2425,7 +2425,7 @@
         "description": "zink: detect prim type more accurately for tess/gs lines",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -3586,7 +3586,7 @@
         "description": "zink: rescue surfaces/bufferviews for cache hits during deletion",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -4135,7 +4135,7 @@
         "description": "zink: add a read barrier for indirect dispatch",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
@@ -4144,7 +4144,7 @@
         "description": "zink: use static array for detecting VK_TIME_DOMAIN_DEVICE_EXT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "039078fe9720797f5eaa109a7e9d27841eb6bc73"
     },
@@ -5260,7 +5260,7 @@
         "description": "zink: Do not access just freed zink_batch_state",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": null
     },
