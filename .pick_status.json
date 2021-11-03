@@ -130,7 +130,7 @@
         "description": "tu: fix rast state allocation size on a6xx gen4",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4e05338d99abbf2858a0d8444ffc53028fe23051"
     },
