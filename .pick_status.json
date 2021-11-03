@@ -1804,7 +1804,7 @@
         "description": "freedreno/a6xx: Fix partial z/s clears with sysmem.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
