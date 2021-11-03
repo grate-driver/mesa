@@ -1,5 +1,554 @@
 [
     {
+        "sha": "c356f3cfce9459dc1341b6a2a0fd5336a9bdcc3c",
+        "description": "freedreno/a6xx: Use the fdl buffer view setup for img/ssbo descriptors.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3050e202833ab3c3ee5e91ee82ee823d8efac563",
+        "description": "freedreno/fdl6: Add support for texture swizzles of A/L/I/LA/RGBx.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "669caded514b041ae66e9288824c8e7a3883dc79",
+        "description": "turnip: Remove buffer-view cross-check code.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef1fb25787eff6bd931a855cf3d263d9c334071c",
+        "description": "turnip: Use the new shared buffer-view descriptor creation function.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa3074e5be4dc3fff51e1359fb21e00cf26031b7",
+        "description": "freedreno/fdl6: Add an interface for setting up buffer descriptors.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b578c12497cfea2249467951e270993462ff4a9",
+        "description": "freedreno/a6xx: Emit a null descriptor for unoccupied IBO slots.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "29093bc42d20e95288cd306757e7efc928fdb366",
+        "description": "freedreno: Fix gmem invalidating the depth or stencil of packed d/s.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "858424bd2e0742542cd072ccd4efcfee0ea828b3",
+        "description": "intel/compiler: Use gl_shader_stage_uses_workgroup() helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4355d3f24535c7d061992f86c21d990232014fd",
+        "description": "intel/compiler: Make brw_nir_populate_wm_prog_data() static",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "732cfa525f431b6f5b47e2623645cf14716b4bdf",
+        "description": "anv: Include viewport size in scissor rectangle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "71022a53e415fa8c16567884c414eb361dee1214",
+        "description": "anv: Process FS last when compiling graphics pipeline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0109a3754c4211a855579eb4909de0b170d1215",
+        "description": "anv: Make shaders array in anv_graphics_pipeline fit Task/Mesh",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb430aa9e7fdc99a5f984bc2fb5193f5c02d88ad",
+        "description": "anv: Get rid of \"may be used initialized\" warning in anv_QueueSubmit2KHR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3afdc3ab2c776d95909d597f4ada0335ccf462dc",
+        "description": "freedreno/computerator: Support A660 gpu",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "79fcd63bd60ac46249c6dfcfa0eeef296ea3d04a",
+        "description": "tu: fix rast state allocation size on a6xx gen4",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "4e05338d99abbf2858a0d8444ffc53028fe23051"
+    },
+    {
+        "sha": "675519f1d0eb26ecb5712a8bdbb82d7a92c07ed7",
+        "description": "zink: reject all storage multisampling if the feature is unsupported",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aacdc6eb44cfcfe28e8a3bef90350f514219ac38",
+        "description": "zink: add SpvCapabilityStorageImageMultisample for multisampled storage images",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a794bdf95313f7b9a69b142712a1e198b5447e36",
+        "description": "broadcom/compiler: check that sig packing is valid when pipelining ldvary",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6e2c802c412c9d4b0f183cc17a5add2212b07ce",
+        "description": "glsl/nir: mark samplers inside a block as bindless",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3a51a408fbe6dae7d9a6d15944de2833742462e",
+        "description": "mesa: don't reset SamplersValidated if nothing changed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e15e3a8e8636c38def3e8a4fb93cfed90b8faf1b",
+        "description": "radv: optimize subpass barrier flushes for imageless framebuffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f13d486ee77c2ca8a2d27a3f42981171cd73f102",
+        "description": "intel/compiler: Initialize SIMDSelectionTest member error.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "7558340ebb688a9607f0cbc05f8bad56d77b19fe"
+    },
+    {
+        "sha": "d863e62b32bc155ae663fc90bae0139fa524a4e0",
+        "description": "intel/compiler: Change selected_simd return type to int.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "7dda0cf2b8e7d13a6dce7b2fc48e95e260717aee"
+    },
+    {
+        "sha": "ac2af149f1099bcd910de6d625374cb545d66ff8",
+        "description": "zink: stop double printing validation messages",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e28962800f477219854d8fcfa6b44e37a00a5d6",
+        "description": "ci: Uprev VK-GL-CTS to 1.2.7.2, and pull in piglit while I'm here.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d3a3e7a00b02d3420e15f4793982c3cd5c72a53",
+        "description": "microsoft/compiler: Use textures for SRVs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ffd4157b1caa69345468bbbe914e2bb64a4ddbaa",
+        "description": "util/hash_table: Clear special 0/1 entries for u64 hash table too",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "e532a47f76cc8d763e2534c61b27dce0f5bc86a0"
+    },
+    {
+        "sha": "c047fc9de306530741e00002be19c21d06c8adbb",
+        "description": "docs: update radv extensions in features.txt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b9bd3f038d19df34bd5dd5c7adb70395ea994a6",
+        "description": "broadcom/compiler: make opt passes set current block",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27cb4166b5923997a5566281477a8de326215669",
+        "description": "freedreno/ci: Test Turnip on Adreno 618",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "83a0bb007fd88c75d8a05896af06bf20b9f3ccd2",
+        "description": "ci: Let manual LAVA jobs have a longer timeout than others",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dedc1493071550a35b7dae7091fbaf6ad93304c9",
+        "description": "ci: Add support for lazor Chromebooks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "634e2353a0edc0b336191d7267d567d7341b1b51",
+        "description": "virgl: Add driconf tweak to force-enable reading back R8_SRGB textures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1311eddd5265b46d7c13adf14ea97072e80f54a5",
+        "description": "iris: fix off-by-one error when clearing stale syncobjs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db7ad0c1700e2f012730898e02bc0cebf1b04304",
+        "description": "radv: only enable VK_EXT_display_control for vrcompositor (SteamVR)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c862923219bb4bcb53dd53575a38ab5801bf07f",
+        "description": "v3dv: Implement VK_KHR_create_renderpass2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1813c709436b4d7bb918e69678e83c697d387518",
+        "description": "panfrost/ci: update piglit tests expectations on G52",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d96cf4eaa98b3e0b1f6e7e693e3475969c4ce5f",
+        "description": "ci/freedreno: Add maxcpus=2 to the kernel cmdline on a530",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "38c62646d0a3d07150c9cd672cde980f4570a7f1",
+        "description": "iris/ci: Fix traces for amly and deqp list for whl",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fea3c6f14e96de7d611a154db601f9a6dc0df79",
+        "description": "ci: Update linux kernel to v5.15",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4098607870125dacc40ea484c879035cc9a173be",
+        "description": "xmlconfig_test: add unit test for executable_regexp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7f481c615d24846b4d8da48506a4d4a9a9ea7a0",
+        "description": "drirc: add Mari application workaround",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a24de9aa743808c6c7cc2670f1e8d9753b9430e",
+        "description": "driconf: add executable_regexp application attribute",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "308bd1f00c9cfcd37ebcd15390d513441011d1af",
+        "description": "zink: Remove duplicate variable unsized.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "f79a25653b9b18617d6a317bc8bd94973a2a0674"
+    },
+    {
+        "sha": "a8725ec3dc2aa23598071d2505131253c433b8c6",
+        "description": "vulkan/wsi: set correct bits for host allocations/exports for images.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "895d3399f7fb5cf58aa857fb2b98f23fe89071ba"
+    },
+    {
+        "sha": "d66514aacccec28fa66afd58bc19580008e8078e",
+        "description": "radv: Disable coherent L2 optimization on cards with noncoherent L2.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "fd8210f27ede11583e3a5d55066cb61d9988357b"
+    },
+    {
+        "sha": "65afcddbf1892a74397cb8ba0d29618544fb507a",
+        "description": "frontends/va: Return error in vaRenderPicture if decoder is NULL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2dbb66997e2e2ab0a07a84a40df70d8d75fe2524",
+        "description": "intel/fs: Fix a cmod prop bug when cmod is set to inst that doesn't support it",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "32b7ba66b0156d9fd40b059f20da79a74451f7fd"
+    },
+    {
+        "sha": "085e83895910ff32711bf48cc527cca61c792a7d",
+        "description": "i915g: Improve the explanation for the 1D Y swizzle.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fa4fd67f7824727d92e52c816543b0233eacd932",
+        "description": "i915g: Make sure we consider negates/swizzles on bias/shadow coords.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebe5626de695d8055c64a278d7ec7e369fcd9823",
+        "description": "i915g: Check for negate/swizzle on TGSI_OPCODE_KILL_IF's src.yzw.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba48b27a11a9b340a66121542ebe159731d8db84",
+        "description": "etnaviv: Switch to the NIR compiler by default.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9b80f4d5f20bca6e127de62c7f4183f64e91cff1",
+        "description": "radv: rename radv_shader_variant to radv_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eeb034f2cc29595c89a874f102131ee9ae9f0442",
+        "description": "docs: document RADV_THREAD_TRACE_* envvars",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3839f3a48630db843e414dfb979b03644bf5826b",
+        "description": "radv: stop reporting SQTT/RGP support as experimental",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74e625f057df9cb416cf5be9e66c853384002fcf",
+        "description": "radv: enable SQTT instruction timing by default",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fd414ec84e9055cd4682ec80ce766df6ee2756a",
+        "description": "radv: remove useless checks about GFX7 for SQTT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b35fd1bff6d8813411d9ca7f8c221c47ed5cf8fe",
+        "description": "radv: move freeing the trigger SQTT file at a better place",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5a1df095c3eee0da4747a67b12c8ca352116178",
+        "description": "ci/etnaviv: add manual piglit testing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2440b27e5ed28397b572802817a652943c2a0b2",
+        "description": "ci/etnaviv: Add some more deqp flakes I've seen in recent runs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7355694e11bd2292e0f193573726a90d12848c80",
+        "description": "ci/etnaviv: Fix the dependency for the build artifacts.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "79f57f68930ce4fcf59bdca82357e19b4f3d62e6",
         "description": "lavapipe: Don't wrap errors returned from vk_device_init in vk_error",
         "nominated": false,
