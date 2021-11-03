@@ -146,6 +146,7 @@ struct zink_program_descriptor_data {
    bool bindless;
    VkDescriptorPoolSize sizes[6]; //zink_descriptor_size_index
    struct zink_descriptor_layout_key *layout_key[ZINK_DESCRIPTOR_TYPES]; //push set doesn't need one
+   bool fbfetch;
    uint8_t binding_usage;
    struct zink_descriptor_layout *layouts[ZINK_DESCRIPTOR_TYPES + 1];
    VkDescriptorUpdateTemplateKHR push_template;
@@ -299,6 +300,8 @@ void
 zink_descriptor_set_update_lazy(struct zink_context *ctx, struct zink_program *pg, enum zink_descriptor_type type, VkDescriptorSet set);
 void
 zink_descriptors_update_lazy_masked(struct zink_context *ctx, bool is_compute, uint8_t changed_sets, uint8_t bind_sets);
+void
+zink_descriptors_update_lazy_push(struct zink_context *ctx);
 #ifdef __cplusplus
 }
 #endif
