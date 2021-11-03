@@ -1111,7 +1111,7 @@
         "description": "util/u_trace: Replace Flag with IntEnum to support python3.5",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cefaa73909718e570b36c5f8463e4b534e96201a"
     },
