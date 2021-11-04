@@ -1264,7 +1264,7 @@
         "description": "zink: rework cached fbfetch descriptor fallback",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "417477f60ede0fab0a5a601c872731fc9c612da1"
     },
