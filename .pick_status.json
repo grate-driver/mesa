@@ -949,7 +949,7 @@
         "description": "radeonsi/sqtt: fix shader stage values",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c276bde34ae3c1ba823873d29774165664cdf129"
     },
