@@ -1075,7 +1075,7 @@
         "description": "aux/trace: fix vertex state tracing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e8cad57aa7ab0b7cc1e86e85915b6ad413cdd865"
     },
