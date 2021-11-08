@@ -1,5 +1,221 @@
 [
     {
+        "sha": "09bb4dbe60b1bb233c5c0102446ffbc142a29246",
+        "description": "release-calendar: fix date for next 21.3 rc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "984091531e70bec85d736ed083148a1dd87dab4d",
+        "description": "radv: remove unused parameter in radv_emit_subpass_barrier()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "75161e6f3d8909a5804f0d1490549c146d5cceeb",
+        "description": "util: Change blob_test to use macro from mesa-gtest-extras.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "015383d1d78435edde87bf07bb8bb8aabd3c22fd",
+        "description": "gtest: Add mesa-gtest-extras.h with array ASSERT/EXPECT macros",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5358d8a11096efcc5f49d9153e74e5898a6e91d4",
+        "description": "radeonsi/sqtt: reserve a vmid when sqtt is enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e26dd92957df80fc31627eff5fc9c9453cf3021d",
+        "description": "radeonsi/sqtt: fix FINISH_DONE / BUSY usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3de072aaecf3a99699f539d33c5f374070334078",
+        "description": "radeonsi/sqtt: fix shader stage values",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c276bde34ae3c1ba823873d29774165664cdf129"
+    },
+    {
+        "sha": "c572adceaa493ab2f7b6cad6d6bd100c6d93ff4d",
+        "description": "intel/dev: also test crocus & i915 pci-ids",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "361b3fee3c5ee38821d96660d68ebec2e31e5f47",
+        "description": "intel: move away from booleans to identify platforms",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b1a5b8f2ba15dfec24b80fcb3f005084c03289e",
+        "description": "intel: remove 2 preproduction pci-id for ADLS",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "d399c3e861a7c459501413e8d675db8ca1a40712"
+    },
+    {
+        "sha": "f32dcb6fe17bdfb92ada00c28afc9d2b581ec1ca",
+        "description": "nir: assert that variables in optimize_atomic are initialized",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fbd61d2b0204e3875155cf5a9a6a8b7947fd3f7e",
+        "description": "zink: set new point/line caps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8bbebc7e9f1b35b18373903842dcc501b571f528",
+        "description": "st/mesa: use new point and line CAPs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "78337728d1d53214e05a0733bc8745587b2a5d3c",
+        "description": "radeonsi: set correct point and line limits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf9afc7b0cf6a729f90b2b208e201527e00b6002",
+        "description": "gallium: add missing point and line CAPs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b80dca86c33c6a487ebeb2fe41163c369d53fd94",
+        "description": "gallium: rename PIPE_CAPF_MAX_POINT_WIDTH -> MAX_POINT_SIZE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10ee261c38cbb0c7f0637a039ac2ec3a1ca64c5b",
+        "description": "driconf: disallow 10-bit pbuffers for viewperf2020/maya due to X errors",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8ea4c9e1dfa24fb38214c4ff47e74790a47f573",
+        "description": "Revert \"CI: Disable Windows jobs\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "7b44e7d7bb77051913ce24ea177d06820c40304c"
+    },
+    {
+        "sha": "7b44e7d7bb77051913ce24ea177d06820c40304c",
+        "description": "CI: Disable Windows jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4d904101c0d5ab76e8cef6469f2fe8ebf3c980b",
+        "description": "aux/trace: add pipe_context::render_condition_mem",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f57940109998ac92656e7d5509516a44b21b08fc",
+        "description": "aux/trace: fix vertex state tracing",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "e8cad57aa7ab0b7cc1e86e85915b6ad413cdd865"
+    },
+    {
+        "sha": "810305fbed8bc4a3d729e108a89abb8060679a77",
+        "description": "aux/trace: trace pipe_screen::is_format_supported better",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2f3aba5f0e0c25901cf7bcc636944a91bc106a2",
+        "description": "aux/trace: support pipe_context::get_query_result_resource",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58ba18474ba19c1306f0841805af41ae007f8f66",
+        "description": "aux/trace: fix PIPE_QUERY_PIPELINE_STATISTICS_SINGLE tracing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "78b613db23c10dc257247d99d8b2b1ef6c96bebb",
         "description": "util/u_trace: Replace Flag with IntEnum to support python3.5",
         "nominated": false,
