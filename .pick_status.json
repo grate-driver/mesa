@@ -1804,7 +1804,7 @@
         "description": "util/ra: Fix deserialization of register sets",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "95d41a3525d97986b4925153a36828b1a6e65523"
     },
