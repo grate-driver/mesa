@@ -382,7 +382,7 @@
         "description": "intel/genxml: Fix MI_FLUSH_DW to actually specify the length properly",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "569afd37f15cfc51750a71fd695f4496b0358fbb"
     },
