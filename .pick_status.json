@@ -2164,7 +2164,7 @@
         "description": "glx/dri3: fix glXQueryContext does not return GLX_RENDER_TYPE value",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
