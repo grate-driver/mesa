@@ -1111,7 +1111,7 @@
         "description": "mesa: fix buffer overrun in SavedObj texture obj array",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3be42f9ca19d593d374d309f47ebd80abb001a24"
     },
