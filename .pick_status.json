@@ -715,7 +715,7 @@
         "description": "radv: Fix memory corruption loading RT pipeline cache entries.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ca2d96db51e5a47044ee02f8613bc463605c2bf8"
     },
