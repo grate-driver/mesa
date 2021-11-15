@@ -2065,7 +2065,7 @@
         "description": "ir3/ra: Consider reg file size when swapping killed sources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d4b5d2a0204f8c09a2e8c4dc022f0f05adafa50b"
     },
