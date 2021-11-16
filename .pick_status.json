@@ -2848,7 +2848,7 @@
         "description": "iris: Make a helper function for cross-batch dependency flushing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b21e916a6280f9aee5353c0dd4c6bcebb947496d"
     },
