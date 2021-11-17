@@ -1732,7 +1732,7 @@
         "description": "glsl/nir: Don't build soft float64 when it cannot be used",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "82d9a37a59c94ba3678b33acb9f2749cbbd7bfcc"
     },
