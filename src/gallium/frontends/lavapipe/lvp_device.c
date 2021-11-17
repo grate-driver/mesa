@@ -77,9 +77,6 @@ static const struct vk_instance_extension_table lvp_instance_extensions_supporte
 #ifdef VK_USE_PLATFORM_XLIB_KHR
    .KHR_xlib_surface                         = true,
 #endif
-#ifdef VK_USE_PLATFORM_XLIB_XRANDR_EXT
-   .EXT_acquire_xlib_display                 = true,
-#endif
 };
 
 static const struct vk_device_extension_table lvp_device_extensions_supported = {
@@ -1431,7 +1428,7 @@ VKAPI_ATTR VkResult VKAPI_CALL lvp_CreateDevice(
                                     pAllocator);
    if (result != VK_SUCCESS) {
       vk_free(&device->vk.alloc, device);
-      return vk_error(instance, result);
+      return result;
    }
 
    device->instance = (struct lvp_instance *)physical_device->vk.instance;

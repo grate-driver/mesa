@@ -373,7 +373,7 @@ static const struct intel_device_info intel_device_info_hsw_gt2 = {
 static const struct intel_device_info intel_device_info_hsw_gt3 = {
    HSW_FEATURES, .gt = 3,
    .num_slices = 2,
-   .num_subslices = { 2, },
+   .num_subslices = { 2, 2, },
    .num_eu_per_subslice = 10,
    .num_thread_per_eu = 7,
    .l3_banks = 8,
@@ -1016,57 +1016,6 @@ static const struct intel_device_info intel_device_info_sg1 = {
 };
 
 static void
-intel_device_info_set_eu_mask(struct intel_device_info *devinfo,
-                            unsigned slice,
-                            unsigned subslice,
-                            unsigned eu_mask)
-{
-   unsigned subslice_offset = slice * devinfo->eu_slice_stride +
-      subslice * devinfo->eu_subslice_stride;
-
-   for (unsigned b_eu = 0; b_eu < devinfo->eu_subslice_stride; b_eu++) {
-      devinfo->eu_masks[subslice_offset + b_eu] =
-         (((1U << devinfo->num_eu_per_subslice) - 1) >> (b_eu * 8)) & 0xff;
-   }
-}
-
-/* Generate slice/subslice/eu masks from number of
- * slices/subslices/eu_per_subslices in the per generation/gt intel_device_info
- * structure.
- *
- * These can be overridden with values reported by the kernel either from
- * getparam SLICE_MASK/SUBSLICE_MASK values or from the kernel version 4.17+
- * through the i915 query uapi.
- */
-static void
-fill_masks(struct intel_device_info *devinfo)
-{
-   devinfo->slice_masks = (1U << devinfo->num_slices) - 1;
-
-   /* Subslice masks */
-   unsigned max_subslices = 0;
-   for (int s = 0; s < devinfo->num_slices; s++)
-      max_subslices = MAX2(devinfo->num_subslices[s], max_subslices);
-   devinfo->subslice_slice_stride = DIV_ROUND_UP(max_subslices, 8);
-
-   for (int s = 0; s < devinfo->num_slices; s++) {
-      devinfo->subslice_masks[s * devinfo->subslice_slice_stride] =
-         (1U << devinfo->num_subslices[s]) - 1;
-   }
-
-   /* EU masks */
-   devinfo->eu_subslice_stride = DIV_ROUND_UP(devinfo->num_eu_per_subslice, 8);
-   devinfo->eu_slice_stride = max_subslices * devinfo->eu_subslice_stride;
-
-   for (int s = 0; s < devinfo->num_slices; s++) {
-      for (int ss = 0; ss < devinfo->num_subslices[s]; ss++) {
-         intel_device_info_set_eu_mask(devinfo, s, ss,
-                                     (1U << devinfo->num_eu_per_subslice) - 1);
-      }
-   }
-}
-
-static void
 reset_masks(struct intel_device_info *devinfo)
 {
    devinfo->subslice_slice_stride = 0;
@@ -1089,6 +1038,10 @@ update_from_topology(struct intel_device_info *devinfo,
 {
    reset_masks(devinfo);
 
+   assert(topology->max_slices > 0);
+   assert(topology->max_subslices > 0);
+   assert(topology->max_eus_per_subslice > 0);
+
    devinfo->subslice_slice_stride = topology->subslice_stride;
 
    devinfo->eu_subslice_stride = DIV_ROUND_UP(topology->max_eus_per_subslice, 8);
@@ -1097,6 +1050,9 @@ update_from_topology(struct intel_device_info *devinfo,
    assert(sizeof(devinfo->slice_masks) >= DIV_ROUND_UP(topology->max_slices, 8));
    memcpy(&devinfo->slice_masks, topology->data, DIV_ROUND_UP(topology->max_slices, 8));
    devinfo->num_slices = __builtin_popcount(devinfo->slice_masks);
+   devinfo->max_slices = topology->max_slices;
+   devinfo->max_subslices_per_slice = topology->max_subslices;
+   devinfo->max_eu_per_subslice = topology->max_eus_per_subslice;
 
    uint32_t subslice_mask_len =
       topology->max_slices * topology->subslice_stride;
@@ -1159,6 +1115,9 @@ update_from_topology(struct intel_device_info *devinfo,
    devinfo->num_eu_per_subslice = DIV_ROUND_UP(n_eus, n_subslices);
 }
 
+/* Generate detailed mask from the I915_PARAM_SLICE_MASK,
+ * I915_PARAM_SUBSLICE_MASK & I915_PARAM_EU_TOTAL getparam.
+ */
 static bool
 update_from_masks(struct intel_device_info *devinfo, uint32_t slice_mask,
                   uint32_t subslice_mask, uint32_t n_eus)
@@ -1184,8 +1143,9 @@ update_from_masks(struct intel_device_info *devinfo, uint32_t slice_mask,
    uint32_t num_eu_per_subslice = DIV_ROUND_UP(n_eus, n_subslices);
    uint32_t eu_mask = (1U << num_eu_per_subslice) - 1;
 
+   topology->max_eus_per_subslice = num_eu_per_subslice;
    topology->eu_offset = topology->subslice_offset +
-      DIV_ROUND_UP(topology->max_subslices, 8);
+      topology->max_slices * DIV_ROUND_UP(topology->max_subslices, 8);
    topology->eu_stride = DIV_ROUND_UP(num_eu_per_subslice, 8);
 
    /* Set slice mask in topology */
@@ -1217,6 +1177,23 @@ update_from_masks(struct intel_device_info *devinfo, uint32_t slice_mask,
    free(topology);
 
    return true;
+}
+
+/* Generate mask from the device data. */
+static void
+fill_masks(struct intel_device_info *devinfo)
+{
+   /* All of our internal device descriptions assign the same number of
+    * subslices for each slice. Just verify that this is true.
+    */
+   for (int s = 1; s < devinfo->num_slices; s++)
+      assert(devinfo->num_subslices[0] == devinfo->num_subslices[s]);
+
+   update_from_masks(devinfo,
+                     (1U << devinfo->num_slices) - 1,
+                     (1U << devinfo->num_subslices[0]) - 1,
+                     devinfo->num_slices * devinfo->num_subslices[0] *
+                     devinfo->num_eu_per_subslice);
 }
 
 static bool
@@ -1649,7 +1626,7 @@ intel_get_device_info_from_fd(int fd, struct intel_device_info *devinfo)
    devinfo->has_tiling_uapi = has_get_tiling(fd);
 
    devinfo->subslice_total = 0;
-   for (uint32_t i = 0; i < devinfo->num_slices; i++)
+   for (uint32_t i = 0; i < devinfo->max_slices; i++)
       devinfo->subslice_total += __builtin_popcount(devinfo->subslice_masks[i]);
 
    /* Gfx7 and older do not support EU/Subslice info */

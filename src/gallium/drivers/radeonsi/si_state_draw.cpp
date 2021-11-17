@@ -2210,6 +2210,7 @@ static void si_draw(struct pipe_context *ctx,
             si_resource(indirect->indirect_draw_count)->TC_L2_dirty = false;
          }
       }
+      total_direct_count = INT_MAX; /* just set something other than 0 to enable shader culling */
    } else {
       total_direct_count = min_direct_count = draws[0].count;
 
@@ -2481,7 +2482,7 @@ static void si_draw(struct pipe_context *ctx,
          sctx->num_prim_restart_calls += num_draws;
    }
 
-   if (!sctx->blitter_running && sctx->framebuffer.state.zsbuf) {
+   if (sctx->framebuffer.state.zsbuf) {
       struct si_texture *zstex = (struct si_texture *)sctx->framebuffer.state.zsbuf->texture;
       zstex->depth_cleared_level_mask &= ~BITFIELD_BIT(sctx->framebuffer.state.zsbuf->u.tex.level);
    }

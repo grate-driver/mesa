@@ -167,6 +167,7 @@ update_shader_modules(struct zink_context *ctx,
    u_foreach_bit(pstage, mask) {
       assert(prog->shaders[pstage]);
       struct zink_shader_module *zm = get_shader_module_for_stage(ctx, screen, prog->shaders[pstage], prog, state);
+      state->modules[pstage] = zm->shader;
       if (prog->modules[pstage] == zm)
          continue;
       if (prog->modules[pstage])
@@ -175,13 +176,9 @@ update_shader_modules(struct zink_context *ctx,
       default_variants &= zm->default_variant;
       prog->modules[pstage] = zm;
       variant_hash ^= prog->modules[pstage]->hash;
-      state->modules[pstage] = zm->shader;
    }
 
    if (hash_changed && state) {
-      if (!first && likely(state->pipeline)) //avoid on first hash
-         state->final_hash ^= prog->last_variant_hash;
-
       if (default_variants && !first)
          prog->last_variant_hash = prog->default_variant_hash;
       else {
@@ -192,7 +189,6 @@ update_shader_modules(struct zink_context *ctx,
          }
       }
 
-      state->final_hash ^= prog->last_variant_hash;
       state->modules_changed = true;
    }
 }

@@ -1211,11 +1211,22 @@ if host_machine.system() == 'windows'
     endif
   else
     add_project_link_arguments(
-      '-Wl,--nxcompat',
-      '-Wl,--dynamicbase',
-      '-static-libgcc',
-      '-static-libstdc++',
-      language : ['c', 'cpp'],
+      cc.get_supported_arguments(
+        '-Wl,--nxcompat',
+        '-Wl,--dynamicbase',
+        '-static-libgcc',
+        '-static-libstdc++',
+      ),
+      language : ['c'],
+    )
+    add_project_link_arguments(
+      cpp.get_supported_arguments(
+        '-Wl,--nxcompat',
+        '-Wl,--dynamicbase',
+        '-static-libgcc',
+        '-static-libstdc++',
+      ),
+      language : ['cpp'],
     )
   endif
 endif
@@ -2253,10 +2264,6 @@ if with_egl
   lines += 'EGL drivers:     ' + ' '.join(egl_drivers)
 endif
 if with_egl or with_any_vk
-  _platforms += 'surfaceless'
-  if with_gbm and not with_platform_android
-    _platforms += 'drm'
-  endif
   lines += 'EGL/Vulkan/VL platforms:   ' + ' '.join(_platforms)
 endif
 lines += 'GBM:             ' + (with_gbm ? 'yes' : 'no')

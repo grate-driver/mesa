@@ -40,6 +40,8 @@ struct ntv_context {
     */
    bool spirv_1_4_interfaces;
 
+   bool explicit_lod; //whether to set lod=0 for texture()
+
    struct spirv_builder builder;
 
    struct hash_table *glsl_types;
@@ -1214,10 +1216,18 @@ store_dest(struct ntv_context *ctx, nir_dest *dest, SpvId result, nir_alu_type t
          break;
 
       case nir_type_uint:
+      case nir_type_uint8:
+      case nir_type_uint16:
+      case nir_type_uint64:
          break; /* nothing to do! */
 
       case nir_type_int:
+      case nir_type_int8:
+      case nir_type_int16:
+      case nir_type_int64:
       case nir_type_float:
+      case nir_type_float16:
+      case nir_type_float64:
          result = bitcast_to_uvec(ctx, result, bit_size, num_components);
          break;
 
@@ -1556,11 +1566,11 @@ get_alu_src(struct ntv_context *ctx, nir_alu_instr *alu, unsigned src)
 }
 
 static SpvId
-store_alu_result(struct ntv_context *ctx, nir_alu_instr *alu, SpvId result)
+store_alu_result(struct ntv_context *ctx, nir_alu_instr *alu, SpvId result, bool force_float)
 {
    assert(!alu->dest.saturate);
    return store_dest(ctx, &alu->dest.dest, result,
-                     nir_op_infos[alu->op].output_type);
+                     force_float ? nir_type_float : nir_op_infos[alu->op].output_type);
 }
 
 static SpvId
@@ -1577,12 +1587,20 @@ get_dest_type(struct ntv_context *ctx, nir_dest *dest, nir_alu_type type)
       unreachable("bool should have bit-size 1");
 
    case nir_type_int:
+   case nir_type_int8:
+   case nir_type_int16:
+   case nir_type_int64:
       return get_ivec_type(ctx, bit_size, num_components);
 
    case nir_type_uint:
+   case nir_type_uint8:
+   case nir_type_uint16:
+   case nir_type_uint64:
       return get_uvec_type(ctx, bit_size, num_components);
 
    case nir_type_float:
+   case nir_type_float16:
+   case nir_type_float64:
       return get_fvec_type(ctx, bit_size, num_components);
 
    default:
@@ -1614,6 +1632,7 @@ emit_alu(struct ntv_context *ctx, nir_alu_instr *alu)
 
    SpvId dest_type = get_dest_type(ctx, &alu->dest.dest,
                                    nir_op_infos[alu->op].output_type);
+   bool force_float = false;
    unsigned bit_size = nir_dest_bit_size(alu->dest.dest);
    unsigned num_components = nir_dest_num_components(alu->dest.dest);
 
@@ -1698,6 +1717,13 @@ emit_alu(struct ntv_context *ctx, nir_alu_instr *alu)
       result = emit_builtin_unop(ctx, spirv_op, dest_type, src[0]); \
       break;
 
+#define BUILTIN_UNOPF(nir_op, spirv_op) \
+   case nir_op: \
+      assert(nir_op_infos[alu->op].num_inputs == 1); \
+      result = emit_builtin_unop(ctx, spirv_op, get_dest_type(ctx, &alu->dest.dest, nir_type_float), src[0]); \
+      force_float = true; \
+      break;
+
    BUILTIN_UNOP(nir_op_iabs, GLSLstd450SAbs)
    BUILTIN_UNOP(nir_op_fabs, GLSLstd450FAbs)
    BUILTIN_UNOP(nir_op_fsqrt, GLSLstd450Sqrt)
@@ -1716,10 +1742,11 @@ emit_alu(struct ntv_context *ctx, nir_alu_instr *alu)
    BUILTIN_UNOP(nir_op_ufind_msb, GLSLstd450FindUMsb)
    BUILTIN_UNOP(nir_op_find_lsb, GLSLstd450FindILsb)
    BUILTIN_UNOP(nir_op_ifind_msb, GLSLstd450FindSMsb)
-   BUILTIN_UNOP(nir_op_pack_half_2x16, GLSLstd450PackHalf2x16)
-   BUILTIN_UNOP(nir_op_unpack_half_2x16, GLSLstd450UnpackHalf2x16)
-   BUILTIN_UNOP(nir_op_pack_64_2x32, GLSLstd450PackDouble2x32)
+   BUILTIN_UNOPF(nir_op_pack_half_2x16, GLSLstd450PackHalf2x16)
+   BUILTIN_UNOPF(nir_op_unpack_half_2x16, GLSLstd450UnpackHalf2x16)
+   BUILTIN_UNOPF(nir_op_pack_64_2x32, GLSLstd450PackDouble2x32)
 #undef BUILTIN_UNOP
+#undef BUILTIN_UNOPF
 
    case nir_op_frcp:
       assert(nir_op_infos[alu->op].num_inputs == 1);
@@ -1871,7 +1898,7 @@ emit_alu(struct ntv_context *ctx, nir_alu_instr *alu)
    if (alu->exact)
       spirv_builder_emit_decoration(&ctx->builder, result, SpvDecorationNoContraction);
 
-   store_alu_result(ctx, alu, result);
+   store_alu_result(ctx, alu, result, force_float);
 }
 
 static void
@@ -3217,8 +3244,19 @@ emit_tex(struct ntv_context *ctx, nir_tex_instr *tex)
 
    if (!tex_instr_is_lod_allowed(tex))
       lod = 0;
+   else if (ctx->stage != MESA_SHADER_FRAGMENT &&
+            tex->op == nir_texop_tex && ctx->explicit_lod && !lod)
+      lod = emit_float_const(ctx, 32, 0.0);
    if (tex->op == nir_texop_txs) {
       SpvId image = spirv_builder_emit_image(&ctx->builder, image_type, load);
+      /* Additionally, if its Dim is 1D, 2D, 3D, or Cube,
+       * it must also have either an MS of 1 or a Sampled of 0 or 2.
+       * - OpImageQuerySize specification
+       *
+       * all spirv samplers use these types
+       */
+      if (tex->sampler_dim != GLSL_SAMPLER_DIM_MS && !lod)
+         lod = emit_uint_const(ctx, 32, 0);
       SpvId result = spirv_builder_emit_image_query_size(&ctx->builder,
                                                          dest_type, image,
                                                          lod);
@@ -3860,6 +3898,7 @@ nir_to_spirv(struct nir_shader *s, const struct zink_so_info *so_info, uint32_t 
    ctx.stage = s->info.stage;
    ctx.so_info = so_info;
    ctx.GLSL_std_450 = spirv_builder_import(&ctx.builder, "GLSL.std.450");
+   ctx.explicit_lod = true;
    spirv_builder_emit_source(&ctx.builder, SpvSourceLanguageUnknown, 0);
 
    if (s->info.stage == MESA_SHADER_COMPUTE) {
