@@ -2659,7 +2659,7 @@
         "description": "intel/nir: also allow unknown format for getting the size of a storage image",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "fa251cf111dffd4a3e4d903623c24eb69575bf9a"
     },
