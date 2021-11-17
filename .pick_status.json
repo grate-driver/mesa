@@ -2596,7 +2596,7 @@
         "description": "zink: fix memory availability reporting",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ff4ba3d4a77320d1522c3a807661511b4cc075ab"
     },
