@@ -2623,7 +2623,7 @@
         "description": "gbm: Don't pass default usage flags on ABIs < 1",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ad50b47a14e94751cd59ad5892ad795d508557f0"
     },
