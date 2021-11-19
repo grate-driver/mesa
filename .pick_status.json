@@ -3766,7 +3766,7 @@
         "description": "panfrost: Don't shadow Mesa's fui()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "688827f3c5280961ab096c342ea5834ccef8463e"
     },
