@@ -985,7 +985,7 @@
         "description": "util/u_trace: refcount payloads",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0565c993f9eff9e91ac7d9aea53d4865c44795b8"
     },
