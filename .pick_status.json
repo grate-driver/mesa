@@ -10678,7 +10678,7 @@
         "description": "microsoft/compiler: Fix dxil_nir_create_bare_samplers()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "46bc7cf6783f184073a123add854c82cc7140d27"
     },
