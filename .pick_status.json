@@ -1309,7 +1309,7 @@
         "description": "intel/fs: OpImageQueryLod does not support arrayed images as an operand",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "231337a13af03f5579f5401cff16aa96ec796746"
     },
