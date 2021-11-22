@@ -265,7 +265,7 @@
         "description": "android.mk: Add missing variables to the make target",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8621bd8d5e67173281c6a6dd64054d4b0366f023"
     },
