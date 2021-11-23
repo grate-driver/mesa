@@ -1030,7 +1030,7 @@
         "description": "spirv: run nir_copy_prop before nir_rematerialize_derefs_in_use_blocks_impl",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "14a12b771d0a380defacafe5825362af77ff21bd"
     },
