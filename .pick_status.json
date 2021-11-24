@@ -76,7 +76,7 @@
         "description": "ir3/spill: Fix simplify_phi_nodes with multiple loop nesting",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "613eaac7b53bfbfcd6ef536412be6c9c63cdea4f"
     },
