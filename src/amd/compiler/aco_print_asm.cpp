@@ -24,6 +24,9 @@
 
 #include "aco_ir.h"
 
+#if defined(_MSC_VER) && defined(restrict)
+#undef restrict
+#endif
 #include "llvm/ac_llvm_util.h"
 
 #include "llvm-c/Disassembler.h"

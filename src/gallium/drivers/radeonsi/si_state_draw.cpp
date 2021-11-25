@@ -2245,7 +2245,7 @@ static void si_draw_vbo(struct pipe_context *ctx,
          sctx->num_prim_restart_calls++;
    }
 
-   if (!sctx->blitter_running && sctx->framebuffer.state.zsbuf) {
+   if (sctx->framebuffer.state.zsbuf) {
       struct si_texture *zstex = (struct si_texture *)sctx->framebuffer.state.zsbuf->texture;
       zstex->depth_cleared_level_mask &= ~BITFIELD_BIT(sctx->framebuffer.state.zsbuf->u.tex.level);
    }
