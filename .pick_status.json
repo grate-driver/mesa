@@ -265,7 +265,7 @@
         "description": "meson: correctly detect linker arguments",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "22673a980f30cf71ea1d7e3d4feb161c549d48a4"
     },
