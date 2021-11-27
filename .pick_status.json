@@ -247,7 +247,7 @@
         "description": "lima: disasm: use last argument as a filename",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9660427ab7b3fd18a250189667b826086529160e"
     },
