@@ -130,7 +130,7 @@
         "description": "nir: All set-on-comparison opcodes can take all float types",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4195a9450bde927256063da47488aafbd86bfffe"
     },
