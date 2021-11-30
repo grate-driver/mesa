@@ -2758,7 +2758,7 @@
         "description": "intel/fs/xehp: Teach SWSB pass about the exec pipeline of FS_OPCODE_PACK_HALF_2x16_SPLIT.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d4537770bbf6c78d49dc71abe2f79099448339eb"
     },
