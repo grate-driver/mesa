@@ -1129,7 +1129,7 @@
         "description": "freedreno/ir3: Handle instr->address when cloning",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9af795d9b984055042ef4ed33c6d3f2021be778a"
     },
