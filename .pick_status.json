@@ -2281,7 +2281,7 @@
         "description": "v3dv: Fix dEQP-VK.info#instance_extensions test",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f884c2e3be363903a59dbee01868c7ad0bf0f346"
     },
