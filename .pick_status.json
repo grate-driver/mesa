@@ -1120,7 +1120,7 @@
         "description": "freedreno/computerator: Fix @buf header",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ba1c989348de066b35678fb1e6151dccd26831eb"
     },
