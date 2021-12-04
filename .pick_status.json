@@ -3442,7 +3442,7 @@
         "description": "glapi: should not add alias function to static_data.py",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "757bc6d37a69bafd31f1f240f4f490d51288ba1e"
     },
