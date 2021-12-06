@@ -4549,7 +4549,7 @@
         "description": "r300: Ensure that immediates have matching negate flags too.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
