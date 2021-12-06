@@ -364,7 +364,7 @@
         "description": "iris: Fix and refactor check for clear color being fully zero",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e83da2d8e3b1129d6857bb18cb212fdd08cbc69b"
     },
