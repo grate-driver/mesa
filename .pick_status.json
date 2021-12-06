@@ -5269,7 +5269,7 @@
         "description": "r300: Fix mis-optimization turning -1 - x into 1 - x.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
