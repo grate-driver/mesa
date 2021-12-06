@@ -2290,7 +2290,7 @@
         "description": "ir3: Fix copy-paste mistakes in ir3_block_remove_physical_predecessor()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2768a35e416ed8914989474d320de3227a5ecd84"
     },
