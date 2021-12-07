@@ -2335,7 +2335,7 @@
         "description": "glsl/glcpp: make sure to expand new token after concatenation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "28842c2331e6df2cbe18c0be3487ece93680075d"
     },
