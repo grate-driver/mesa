@@ -1390,7 +1390,7 @@
         "description": "iris: Free the local cache bucket in bufmgr_destroy",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "55be94dcab4eebd10ae11c3f982c4c91b67fb3a7"
     },
