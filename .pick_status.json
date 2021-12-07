@@ -4567,7 +4567,7 @@
         "description": "r300: Move the instruction filter for r500_transform_IF() to the top.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
