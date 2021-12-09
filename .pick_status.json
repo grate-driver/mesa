@@ -229,7 +229,7 @@
         "description": "intel/stub: Silence \"initialized field overwritten\" warning",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0f4f1d70bfe96fc9e218ef5c2196bb677aaa251b"
     },
