@@ -612,7 +612,7 @@
         "description": "pan/mdg: Use MAX2 to set min_alignment",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "1798f6bfc33d1d77dae1112591dce18bf7fdbc4a"
     },
     {
