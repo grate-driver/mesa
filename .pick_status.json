@@ -2110,7 +2110,7 @@
         "description": "turnip: Fix operator precedence in address calculation macros for queries",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "937dd76426b2b372a18be35e1416eed291524af7"
     },
