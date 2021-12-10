@@ -1606,7 +1606,7 @@
         "description": "v3dv: Fix V3DV_HAS_SURFACE preprocessor condition",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "79e445143054a8001cf28ccb6803148a67f1bb55"
     },
