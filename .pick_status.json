@@ -3748,7 +3748,7 @@
         "description": "microsoft/compiler: Implement inot",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cb2836164251c9813469345c79a71c222a54f233"
     },
