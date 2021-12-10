@@ -679,7 +679,7 @@
         "description": "pan/mdg: Fix mask usage when filling before a spill",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "31d26ebf1b9d0f819c894aec10c29a44052a995a"
     },
