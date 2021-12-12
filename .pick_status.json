@@ -85,7 +85,7 @@
         "description": "radv: Skip wait timeline ioctl with 0 handles.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "55d8022878fd11093c861a6386734f88454f21b1"
     },
