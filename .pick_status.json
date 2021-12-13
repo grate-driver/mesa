@@ -1363,7 +1363,7 @@
         "description": "pan/indirect_draw: Don't upload garbage UBO",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2e6d94c198e4d10c82ed3ffd59e85f460bd58950"
     },
