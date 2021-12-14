@@ -1048,7 +1048,7 @@
         "description": "intel/fs: Add physical fall-through CFG edge for unconditional BREAK instruction.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4d1959e69328cf0d59f0ec7aeea5a2b704ef0c5f"
     },
