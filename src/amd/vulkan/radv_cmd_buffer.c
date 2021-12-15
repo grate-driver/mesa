@@ -2968,7 +2968,7 @@ emit_prolog_inputs(struct radv_cmd_buffer *cmd_buffer, struct radv_shader_varian
 }
 
 static void
-radv_emit_vertex_state(struct radv_cmd_buffer *cmd_buffer, bool pipeline_is_dirty)
+radv_emit_vertex_input(struct radv_cmd_buffer *cmd_buffer, bool pipeline_is_dirty)
 {
    struct radv_pipeline *pipeline = cmd_buffer->state.pipeline;
    struct radv_shader_variant *vs_shader = radv_get_shader(pipeline, MESA_SHADER_VERTEX);
@@ -3059,8 +3059,8 @@ radv_cmd_buffer_flush_dynamic_state(struct radv_cmd_buffer *cmd_buffer, bool pip
    if (states & RADV_CMD_DIRTY_DYNAMIC_COLOR_WRITE_ENABLE)
       radv_emit_color_write_enable(cmd_buffer);
 
-   if (states & RADV_CMD_DIRTY_VERTEX_STATE)
-      radv_emit_vertex_state(cmd_buffer, pipeline_is_dirty);
+   if (states & RADV_CMD_DIRTY_DYNAMIC_VERTEX_INPUT)
+      radv_emit_vertex_input(cmd_buffer, pipeline_is_dirty);
 
    cmd_buffer->state.dirty &= ~states;
 }
@@ -4497,7 +4497,8 @@ radv_CmdBindVertexBuffers2EXT(VkCommandBuffer commandBuffer, uint32_t firstBindi
       return;
    }
 
-   cmd_buffer->state.dirty |= RADV_CMD_DIRTY_VERTEX_STATE;
+   cmd_buffer->state.dirty |= RADV_CMD_DIRTY_VERTEX_BUFFER |
+                              RADV_CMD_DIRTY_DYNAMIC_VERTEX_INPUT;
 }
 
 static uint32_t
@@ -5466,14 +5467,7 @@ radv_CmdSetVertexInputEXT(VkCommandBuffer commandBuffer, uint32_t vertexBindingD
 
    cmd_buffer->state.vbo_misaligned_mask = 0;
 
-   state->attribute_mask = 0;
-   state->misaligned_mask = 0;
-   state->possibly_misaligned_mask = 0;
-   state->instance_rate_inputs = 0;
-   state->nontrivial_divisors = 0;
-   state->post_shuffle = 0;
-   state->alpha_adjust_lo = 0;
-   state->alpha_adjust_hi = 0;
+   memset(state, 0, sizeof(*state));
 
    enum chip_class chip = cmd_buffer->device->physical_device->rad_info.chip_class;
    for (unsigned i = 0; i < vertexAttributeDescriptionCount; i++) {
@@ -5529,7 +5523,8 @@ radv_CmdSetVertexInputEXT(VkCommandBuffer commandBuffer, uint32_t vertexBindingD
          state->post_shuffle |= 1u << loc;
    }
 
-   cmd_buffer->state.dirty |= RADV_CMD_DIRTY_VERTEX_STATE;
+   cmd_buffer->state.dirty |= RADV_CMD_DIRTY_VERTEX_BUFFER |
+                              RADV_CMD_DIRTY_DYNAMIC_VERTEX_INPUT;
 }
 
 void
@@ -6326,8 +6321,9 @@ radv_need_late_scissor_emission(struct radv_cmd_buffer *cmd_buffer,
    /* Index, vertex and streamout buffers don't change context regs, and
     * pipeline is already handled.
     */
-   used_states &= ~(RADV_CMD_DIRTY_INDEX_BUFFER | RADV_CMD_DIRTY_VERTEX_STATE |
-                    RADV_CMD_DIRTY_STREAMOUT_BUFFER | RADV_CMD_DIRTY_PIPELINE);
+   used_states &= ~(RADV_CMD_DIRTY_INDEX_BUFFER | RADV_CMD_DIRTY_VERTEX_BUFFER |
+                    RADV_CMD_DIRTY_DYNAMIC_VERTEX_INPUT | RADV_CMD_DIRTY_STREAMOUT_BUFFER |
+                    RADV_CMD_DIRTY_PIPELINE);
 
    if (cmd_buffer->state.dirty & used_states)
       return true;
