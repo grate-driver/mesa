@@ -211,7 +211,7 @@
         "description": "vulkan: fix missing handling of WSI memory signal",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b996fa8efaa42558bda2c52377561d7eb3c4127e"
     },
