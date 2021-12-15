@@ -2,6 +2,8 @@ mesa (21.3.1-1) UNRELEASED; urgency=medium
 
   * New upstream release.
   * rules: Enable turnip, freedreno vulkan driver.
+  * freedreno-afuc-Disable-the-disassembler-on-32-bit-bu.diff: Fix ftbfs
+    on armhf.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 15 Dec 2021 17:23:30 +0200
 
