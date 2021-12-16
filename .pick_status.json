@@ -850,7 +850,7 @@
         "description": "glsl: fix invariant qualifer usage and matching rule for GLSL 4.20",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f9f462936ad903f93829404ce99a2580ea21b725"
     },
