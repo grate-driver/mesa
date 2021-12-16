@@ -1831,7 +1831,7 @@
         "description": "vbo/dlist: fix loopback crash",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3253594268028efdca17cb9d2b2e423b353c8aa5"
     },
