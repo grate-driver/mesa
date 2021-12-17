@@ -94,7 +94,7 @@
         "description": "radv: Use correct buffer size for query pool result copies.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "90a0556c27c40e3520d645f2512d4596a109c55c"
     },
