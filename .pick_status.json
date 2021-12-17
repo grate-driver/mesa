@@ -94,7 +94,7 @@
         "description": "radeonsi/nir: Check for VARYING_SLOT_PRIMITIVE_ID not SYSTEM_VALUE",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b59bb9c07ae47f9f59bd7fcad6af77c591bb3611"
     },
