@@ -2317,7 +2317,7 @@
         "description": "i915g: Turn off FP16 in the vertex shaders.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f814a2449e2c08a811a54fdada7e256945e68953"
     },
