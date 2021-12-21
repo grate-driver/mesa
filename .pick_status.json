@@ -895,7 +895,7 @@
         "description": "aco/optimizer_postRA: Fix applying VCC to branches.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a93092d0edc92eea8e8e96709ad9857f05c45cef"
     },
