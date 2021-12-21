@@ -3550,7 +3550,7 @@
         "description": "r300: fix handling swizzle in transform_source_conflicts",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1c2c4ddbd1e97bfd13430521e5c09cb5ce8e36e6"
     },
