@@ -1588,7 +1588,7 @@
         "description": "Revert \"intel/fs: Do cmod prop again after scheduling\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "ba2fa1ceaf4ccb905e1d841b45f88505449db44e"
     },
