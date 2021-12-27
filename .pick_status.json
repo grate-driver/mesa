@@ -346,7 +346,7 @@
         "description": "iris: Don't fast clear with the view format",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "230952c21017b184a9bfbfaa2c56489d55b71d30"
     },
