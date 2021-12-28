@@ -751,7 +751,7 @@
         "description": "nir_to_tgsi: Fix a bug in TXP detection after backend lowering.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "390a3fcdc45ef73739a1827102af387007b7582e"
     },
