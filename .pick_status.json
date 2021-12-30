@@ -3199,7 +3199,7 @@
         "description": "intel/compiler/test: Fix build with GCC 7",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c847bfaaf5cf4ef2550bb90e6f9db81db1870ee0"
     },
