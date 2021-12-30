@@ -3001,7 +3001,7 @@
         "description": "radv: add drirc radv_disable_htile_layers and enable it for F1 2021",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
