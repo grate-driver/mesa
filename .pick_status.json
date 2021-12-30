@@ -3496,7 +3496,7 @@
         "description": "intel/genxml/gen4-5: fix more Raster Operation in BLT to be a uint",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "de625dddeea4c134a713a96efa4fd8d19fdee823"
     },
