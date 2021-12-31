@@ -580,7 +580,7 @@
         "description": "panfrost: Fix ubo_mask calculation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c246af0dd805033b743dfe0be96c1077f35e0934"
     },
