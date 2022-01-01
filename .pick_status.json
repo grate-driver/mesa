@@ -15862,7 +15862,7 @@
         "description": "radv: Fix to honor the spec to get stencil layout.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "3ef89b245e3e1ac4e67fea9c1b13ebeda75769d0"
     },
