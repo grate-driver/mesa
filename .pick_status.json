@@ -15871,7 +15871,7 @@
         "description": "anv: Fix to honor the spec to get stencil layout.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "28207669d03a7e4829169790dde332e90b6e0209"
     },
