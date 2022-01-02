@@ -2641,7 +2641,7 @@
         "description": "pan/bi: Fix load_const of 1-bit booleans",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "646e03c451980c7082a139ba4a6c7eb370822cc7"
     },
