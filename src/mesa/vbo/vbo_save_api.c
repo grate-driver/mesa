@@ -117,6 +117,7 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "util/bitscan.h"
 #include "util/u_memory.h"
 #include "util/hash_table.h"
+#include "util/u_prim.h"
 
 #include "gallium/include/pipe/p_state.h"
 
@@ -607,9 +608,7 @@ compile_vertex_list(struct gl_context *ctx)
    node->cold->max_index = end - 1;
 
    int max_index_count = total_vert_count * 2;
-
-   int size = max_index_count * sizeof(uint32_t);
-   uint32_t* indices = (uint32_t*) malloc(size);
+   uint32_t* indices = (uint32_t*) malloc(max_index_count * sizeof(uint32_t));
    struct _mesa_prim *merged_prims = NULL;
 
    int idx = 0;
@@ -635,6 +634,12 @@ compile_vertex_list(struct gl_context *ctx)
       int vertex_count = original_prims[i].count;
       if (!vertex_count) {
          continue;
+      }
+
+      /* Increase indices storage if the original estimation was too small. */
+      if (idx + 3 * vertex_count > max_index_count) {
+         max_index_count = max_index_count + 3 * vertex_count;
+         indices = (uint32_t*) realloc(indices, max_index_count * sizeof(uint32_t));
       }
 
       /* Line strips may get converted to lines */
@@ -699,6 +704,14 @@ compile_vertex_list(struct gl_context *ctx)
             indices[idx++] = add_vertex(save, vertex_to_index, original_prims[i].start + j,
                                         temp_vertices_buffer, &max_index);
          }
+      }
+
+      /* Duplicate the last vertex for incomplete primitives */
+      unsigned min_vert = u_prim_vertex_count(mode)->min;
+      for (unsigned j = vertex_count; j < min_vert; j++) {
+         indices[idx++] = add_vertex(save, vertex_to_index,
+                                     original_prims[i].start + vertex_count - 1,
+                                     temp_vertices_buffer, &max_index);
       }
 
       if (merge_prims) {

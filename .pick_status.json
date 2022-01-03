@@ -1822,7 +1822,7 @@
         "description": "vbo/dlist: add vertices to incomplete primitives",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ac3d4c7635beab92cadada63f8c09fd12a2f7069"
     },
