@@ -5197,7 +5197,7 @@
         "description": "Revert \"zink: when performing an implicit reset, sync qbos\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "79790e276f61f23217badd80c51add755dfe18ac"
     },
