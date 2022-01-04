@@ -193,7 +193,7 @@
         "description": "zink: use device-local heap for sparse backing allocations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "40fdb3212c3ded2150faf952dc2b669991bfbf94"
     },
