@@ -1066,7 +1066,7 @@
         "description": "iris: unref syncobjs and free r/w dependencies array for slab entries",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ce2e2296ab61558f02ea2d05ae0cf4a922df84a7"
     },
