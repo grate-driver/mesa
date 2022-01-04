@@ -5206,7 +5206,7 @@
         "description": "zink: skip readback of qbos with no results",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "93190be1b990d61df329ca0cbce9bd0fb31c7607"
     },
