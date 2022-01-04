@@ -1,11 +1,11 @@
-mesa (21.3.3-1) UNRELEASED; urgency=medium
+mesa (21.3.3-1) unstable; urgency=medium
 
   * New upstream release.
   * rules: Enable turnip, freedreno vulkan driver.
   * freedreno-afuc-Disable-the-disassembler-on-32-bit-bu.diff: Fix ftbfs
     on armhf.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 15 Dec 2021 17:23:30 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 04 Jan 2022 10:30:13 +0200
 
 mesa (21.3.0-1) experimental; urgency=medium
 
