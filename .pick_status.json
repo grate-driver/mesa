@@ -2272,7 +2272,7 @@
         "description": "ir3/cp: ir3: Prevent propagating shared regs out of loops harder",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "590efd180be05817163d1b70990273b535a82afe"
     },
