@@ -5188,7 +5188,7 @@
         "description": "zink: use even more accurate stride values for query result copies",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "039ed2de94d027cce6f7ac6e6af8090937eeb929"
     },
