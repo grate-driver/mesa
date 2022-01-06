@@ -1255,7 +1255,7 @@
         "description": "ir3: Bump type mismatch penalty to 3",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "890de1a43603c98b5788f9867ff0793f117b5f4b"
     },
