@@ -1795,7 +1795,7 @@
         "description": "radv: fix xfb query copy param ordering",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "afff9dd0f04d7f4a3a5616b80363f9228ed2f33d"
     },
