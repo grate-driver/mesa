@@ -1102,7 +1102,7 @@
         "description": "venus: subtract appended header size in vn_CreatePipelineCache",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "723f0bf74a3a2d650fcbe190cc8778a169e2ff8a"
     },
