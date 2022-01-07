@@ -3721,7 +3721,7 @@
         "description": "nir: fix nir_tex_instr hash not count is_sparse field",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3a7972f72a530ebb1b8c1b1eb660f2506d841ae4"
     },
