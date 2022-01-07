@@ -1,3 +1,9 @@
+mesa (21.3.3-2) UNRELEASED; urgency=medium
+
+  * control: Switch to libglvnd-core-dev build-dep. (Closes: #1003264)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 07 Jan 2022 10:37:14 +0200
+
 mesa (21.3.3-1) unstable; urgency=medium
 
   * New upstream release.
