@@ -823,7 +823,7 @@
         "description": "aco: remove pack_half_2x16(a, 0) optimization",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2f125908b358c2423aa34d2673ec04aa546b971a"
     },
