@@ -4810,7 +4810,7 @@
         "description": "aux/trace: copy over stream_output_target_offset method from context",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
