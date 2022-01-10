@@ -499,7 +499,7 @@
         "description": "mesa: free idalloc storage for display lists",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b703d7c15f47fed9f22de55f21cfd8d9d5ff241e"
     },
