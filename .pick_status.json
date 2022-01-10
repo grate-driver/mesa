@@ -490,7 +490,7 @@
         "description": "mesa: free vbo_save_vertex_list store prims",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "69615d92a0e026deacd9b8b3a7d134be8bd4fc29"
     },
