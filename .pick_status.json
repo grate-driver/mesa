@@ -4684,7 +4684,7 @@
         "description": "util/vbuf: fix buffer translation sizing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3c5b7dca30edc7365839944447476e0b8b56bf1f"
     },
