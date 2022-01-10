@@ -832,7 +832,7 @@
         "description": "util/bitset: Fix off-by-one in __bitset_set_range",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b3b03e33c9f11adb0c4d84311a651ea6016a0885"
     },
