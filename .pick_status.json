@@ -346,7 +346,7 @@
         "description": "intel/dev: fixup chv workaround",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c24ba6cecbacf2d81345c1112f083006f22b65ea"
     },
