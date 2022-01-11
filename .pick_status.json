@@ -2542,7 +2542,7 @@
         "description": "iris: implement inter-context busy-tracking",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "89a34cb8450a6fdaceb0e537613871fa86d93132"
     },

@@ -717,6 +717,12 @@ update_bo_syncobjs(struct iris_batch *batch, struct iris_bo *bo, bool write)
       move_syncobj_to_batch(batch, &deps->write_syncobjs[other_batch_idx],
                             I915_EXEC_FENCE_WAIT);
 
+   /* If it's being written by our screen, wait on it too. This is relevant
+    * when there are multiple contexts on the same screen. */
+   if (deps->write_syncobjs[batch_idx])
+      move_syncobj_to_batch(batch, &deps->write_syncobjs[batch_idx],
+                            I915_EXEC_FENCE_WAIT);
+
    struct iris_syncobj *batch_syncobj = iris_batch_get_signal_syncobj(batch);
 
    if (write) {
@@ -728,6 +734,8 @@ update_bo_syncobjs(struct iris_batch *batch, struct iris_bo *bo, bool write)
                               batch_syncobj);
 
       move_syncobj_to_batch(batch, &deps->read_syncobjs[other_batch_idx],
+                           I915_EXEC_FENCE_WAIT);
+      move_syncobj_to_batch(batch, &deps->read_syncobjs[batch_idx],
                            I915_EXEC_FENCE_WAIT);
 
    } else {
