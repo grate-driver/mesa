@@ -4954,7 +4954,7 @@
         "description": "venus: VkExternalImageFormatProperties is optional",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "108f386a612054e1617515af6e7ae7f87a9da5ba"
     },
