@@ -1867,7 +1867,7 @@
         "description": "virgl: Fix texture transfers by using a staging resource",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cdc480585c9be368ddfdc33e2eb73e3582f25fe7"
     },
