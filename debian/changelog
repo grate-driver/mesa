@@ -4,6 +4,7 @@ mesa (21.3.4-1) UNRELEASED; urgency=medium
   * control: Switch to libglvnd-core-dev build-dep. (Closes: #1003264)
   * freedreno-afuc-Disable-the-disassembler-on-32-bit-bu.diff: Dropped,
     upstream.
+  * Build with llvm-13 again.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 07 Jan 2022 10:37:14 +0200
 
