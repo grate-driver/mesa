@@ -1345,7 +1345,7 @@
         "description": "Revert \"nir/algebraic: distribute fmul(fadd(a, b), c) when b and c are constants\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 2,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a1af902531122464b0f4eb66a7c4bf207a8a69f1"
     },
