@@ -4252,7 +4252,7 @@
         "description": "intel/fs: disable VRS when omask is written",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b6332fc4a8ae58b3551b5fc04fa30286dd783304"
     },
