@@ -4081,7 +4081,7 @@
         "description": "driconf: Fix unhandled tags in static conf",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5740ac370142aa626d7a03b16d63fa3fb160f100"
     },
