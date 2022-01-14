@@ -2740,7 +2740,7 @@
         "description": "llvmpipe: Add get_{driver,device}_uuid implementations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9da15aa3aa94bc94ca1492df8c444ff76b92d19d"
     },
