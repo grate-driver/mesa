@@ -3748,7 +3748,7 @@
         "description": "nir/unsigned_upper_bound: don't follow 64-bit f2u32()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "72ac3f60261a8510512861b93e843e695331e2ab"
     },
