@@ -2324,7 +2324,7 @@
         "description": "panfrost: Process scissor state earlier",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "79356b2e5f1762aeaaa81cc148cd5b469a47713d"
     },
     {
