@@ -688,7 +688,7 @@
         "description": "radv: Fix preamble argument order.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "915e9178faf9c0ee9098b8915d8b30009ae4f08d"
     },
