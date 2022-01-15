@@ -2715,7 +2715,7 @@ panfrost_draw_emit_tiler(struct panfrost_batch *batch,
                 }
         }
 
-        bool points = info->mode == PIPE_PRIM_POINTS;
+        enum pipe_prim_type prim = u_reduced_prim(info->mode);
         void *prim_size = pan_section_ptr(job, TILER_JOB, PRIMITIVE_SIZE);
 
 #if PAN_ARCH >= 6
@@ -2746,9 +2746,7 @@ panfrost_draw_emit_tiler(struct panfrost_batch *batch,
                  * be set to 0 and the provoking vertex is selected with the
                  * PRIMITIVE.first_provoking_vertex field.
                  */
-                if (info->mode == PIPE_PRIM_LINES ||
-                    info->mode == PIPE_PRIM_LINE_LOOP ||
-                    info->mode == PIPE_PRIM_LINE_STRIP) {
+                if (prim == PIPE_PRIM_LINES) {
                         /* The logic is inverted across arches. */
                         cfg.flat_shading_vertex = rast->flatshade_first
                                                 ^ (PAN_ARCH <= 5);
@@ -2769,7 +2767,7 @@ panfrost_draw_emit_tiler(struct panfrost_batch *batch,
                 }
         }
 
-        panfrost_emit_primitive_size(ctx, points, psiz, prim_size);
+        panfrost_emit_primitive_size(ctx, prim == PIPE_PRIM_POINTS, psiz, prim_size);
 }
 
 static void

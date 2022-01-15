@@ -697,7 +697,7 @@
         "description": "panfrost: Use u_reduced_prim for primitive checks",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
