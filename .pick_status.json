@@ -3091,7 +3091,7 @@
         "description": "vulkan/wsi/wayland: Fix add_drm_format_modifier aplha/opaqueness.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d944136f3635aeacd97e167176c968c5078d92d7"
     },
