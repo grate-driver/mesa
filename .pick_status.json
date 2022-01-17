@@ -3109,7 +3109,7 @@
         "description": "vulkan/wsi/wayland: Convert  missing vulkan formats to shm formats.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6b36f35734a9ffa2c6fde475933eb46d7f4fb6f4"
     },
