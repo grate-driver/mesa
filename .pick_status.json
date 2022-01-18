@@ -1624,7 +1624,7 @@
         "description": "mesa: use less temporaries in build_lighting",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "272acbed0e2cb68f48f23dc6b891853c1920f019"
     },
