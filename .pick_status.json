@@ -202,7 +202,7 @@
         "description": "intel/nir: fix shader call lowering",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c5a42e401036eb2eecf8798c103f8ae2cce08eab"
     },
