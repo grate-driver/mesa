@@ -3478,7 +3478,7 @@
         "description": "zink: check EXT_image_drm_format_modifier for dmabuf support",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
