@@ -193,7 +193,7 @@
         "description": "Revert \"radv: re-apply \"Do not access set layout during vkCmdBindDescriptorSets.\"\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b775aaff1ec86f4ebd50867a045695da1fbeb2e1"
     },
