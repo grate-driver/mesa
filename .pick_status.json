@@ -1939,7 +1939,7 @@
         "description": "intel/fs: Fix gl_FrontFacing optimization on Gfx12+",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c92fb60007f9c73a4c174f5f4cbce57fbc5118f4"
     },
