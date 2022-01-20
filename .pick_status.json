@@ -715,7 +715,7 @@
         "description": "freedreno/a6xx: Fix clip_mask",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f2ae8d116ab05419764be444f0615f0310ae9936"
     },
