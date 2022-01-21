@@ -555,10 +555,9 @@ st_init_driver_flags(struct st_context *st)
       f->NewDepthClamp = ST_NEW_RASTERIZER;
    }
 
+   f->NewClipPlaneEnable = ST_NEW_RASTERIZER;
    if (st->lower_ucp)
-      f->NewClipPlaneEnable = ST_NEW_VS_STATE | ST_NEW_GS_STATE;
-   else
-      f->NewClipPlaneEnable = ST_NEW_RASTERIZER;
+      f->NewClipPlaneEnable |= ST_NEW_VS_STATE | ST_NEW_GS_STATE;
 
    f->NewLineState = ST_NEW_RASTERIZER;
    f->NewPolygonState = ST_NEW_RASTERIZER;
