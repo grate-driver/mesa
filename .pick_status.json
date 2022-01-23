@@ -931,7 +931,7 @@
         "description": "util/fossilize_db: Fix double free in error handling.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "eca6bb9540d8d1b260511cd0a71bdddb00ff4a3c"
     },
