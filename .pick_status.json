@@ -1354,7 +1354,7 @@
         "description": "Revert \"zink: handle vertex buffer offset overflows\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "9823b970fb51db21ac6ce29753eba82dc25f3072"
     },
