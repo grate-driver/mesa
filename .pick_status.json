@@ -1300,7 +1300,7 @@
         "description": "Revert \"intel/isl: Don't reconfigure aux surfaces for MCS\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "2f0fbe06e65c5ae6c3e9ab3943a4a7d01ae9dc2f"
     },
