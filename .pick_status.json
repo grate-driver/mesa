@@ -3784,7 +3784,7 @@
         "description": "zink: fix vertex buffer mask computation for null buffers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "53aade0ef0def4ea7f8468cdec04acd2384e2d2c"
     },
