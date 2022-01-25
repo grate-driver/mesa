@@ -4477,7 +4477,7 @@
         "description": "anv: Re-enable CCS_E on TGL+",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e61478958854c63d3d8dfe12948445e0086d3a91"
     },
