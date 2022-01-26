@@ -4621,7 +4621,7 @@
         "description": "tu: VkExternalImageFormatProperties is optional",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "26380b3a9f8fd513dc4da86798f3c15191914fc2"
     },
