@@ -4297,7 +4297,7 @@
         "description": "panvk: Fix pointer corruption in panvk_add_wait_event_syncobjs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1e23004600c3b29776c2a36854b1a1c8756d5f81"
     },
