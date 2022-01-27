@@ -1183,7 +1183,7 @@
         "description": "zink: add VK_BUFFER_USAGE_CONDITIONAL_RENDERING_BIT_EXT for query binds",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
