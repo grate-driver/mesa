@@ -742,7 +742,7 @@
         "description": "iris: Make an iris_foreach_batch macro that skips unsupported batches",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a90a1f15a7c8943893e76a202f65bdac8c3e6b49"
     },
