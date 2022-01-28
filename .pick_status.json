@@ -3919,7 +3919,7 @@
         "description": "anv: Fix subgroupSupportedStages physical property",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f40a08d25c91256cd3dff0211b8e10d5bbb3734e"
     },
