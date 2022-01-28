@@ -3343,7 +3343,7 @@
         "description": "aco: fix neg(abs(mul(a, b))) if the mul is not VOP3",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "93c8ebfa780ebd1495095e794731881aef29e7d3"
     },
