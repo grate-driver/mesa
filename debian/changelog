@@ -1,6 +1,8 @@
 mesa (21.3.5-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * iris-inter-context-busy-tracking.diff: Fix a regression causing
+    flickering and corruption on Intel. (Closes: #1003987)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 28 Jan 2022 10:30:13 +0200
 
