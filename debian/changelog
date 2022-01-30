@@ -1,3 +1,9 @@
+mesa (21.3.5-2) UNRELEASED; urgency=medium
+
+  * rules: Disable sse2 on i386. (Closes: #1002872)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Sun, 30 Jan 2022 12:00:44 +0200
+
 mesa (21.3.5-1) unstable; urgency=medium
 
   * New upstream release.
