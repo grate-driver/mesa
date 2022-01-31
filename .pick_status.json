@@ -58,7 +58,7 @@
         "description": "iris: invalidate L3 read only cache when VF cache is invalidated",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ed8f2c4cbee1096c67cae288b85302ffadfba2bb"
     },
