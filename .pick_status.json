@@ -4306,7 +4306,7 @@
         "description": "intel/genxml: add PIPE_CONTROL field for L3 read only cache invalidation",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
