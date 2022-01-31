@@ -4297,7 +4297,7 @@
         "description": "anv: invalidate L3 read only cache when VF cache is invalidated",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6c345ddbe409af73d005beb6be4c529f249deea0"
     },
