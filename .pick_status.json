@@ -832,7 +832,7 @@
         "description": "anv: don't set color state when input state was requested",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "814dc6693593c51d7d89da54ab6191dbf862397e"
     },
