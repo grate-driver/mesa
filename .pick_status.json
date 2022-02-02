@@ -301,7 +301,7 @@
         "description": "mesa: fix misaligned pointer returned by dlist_alloc",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "05605d7f537c4463cc5471f26fb2226a065561a8"
     },
