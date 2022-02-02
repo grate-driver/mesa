@@ -3094,8 +3094,9 @@ emit_store_output_via_intrinsic(struct ntd_context *ctx, nir_intrinsic_instr *in
     * generation, so muck with them here too.
     */
    nir_io_semantics semantics = nir_intrinsic_io_semantics(intr);
-   bool is_tess_level = semantics.location == VARYING_SLOT_TESS_LEVEL_INNER ||
-                        semantics.location == VARYING_SLOT_TESS_LEVEL_OUTER;
+   bool is_tess_level = is_patch_constant &&
+                        (semantics.location == VARYING_SLOT_TESS_LEVEL_INNER ||
+                         semantics.location == VARYING_SLOT_TESS_LEVEL_OUTER);
 
    const struct dxil_value *row = NULL;
    const struct dxil_value *col = NULL;
@@ -3198,8 +3199,9 @@ emit_load_input_via_intrinsic(struct ntd_context *ctx, nir_intrinsic_instr *intr
     * generation, so muck with them here too.
     */
    nir_io_semantics semantics = nir_intrinsic_io_semantics(intr);
-   bool is_tess_level = semantics.location == VARYING_SLOT_TESS_LEVEL_INNER ||
-                        semantics.location == VARYING_SLOT_TESS_LEVEL_OUTER;
+   bool is_tess_level = is_patch_constant &&
+                        (semantics.location == VARYING_SLOT_TESS_LEVEL_INNER ||
+                         semantics.location == VARYING_SLOT_TESS_LEVEL_OUTER);
 
    const struct dxil_value *row = NULL;
    const struct dxil_value *comp = NULL;

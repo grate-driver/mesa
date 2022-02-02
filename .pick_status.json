@@ -1066,7 +1066,7 @@
         "description": "microsoft/compiler: Only treat tess level location as special if it's a patch constant",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a550c059c735667266533258a25c0953c58adb3f"
     },
