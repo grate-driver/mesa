@@ -4,7 +4,7 @@
         "description": "aco: don't encode src2 for v_writelane_b32_e64",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
