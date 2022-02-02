@@ -1075,7 +1075,7 @@
         "description": "microsoft/compiler: Only prep phis for the current function",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "41af96209973c64c02f07d62a3663f93e1183681"
     },
