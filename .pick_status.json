@@ -3622,7 +3622,7 @@
         "description": "Revert \"venus: remove vn_ring_wait_all\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "7253e61d9d1a82f1fa0eac087a80c4a0957e1d14"
     },
