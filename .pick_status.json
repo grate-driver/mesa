@@ -166,7 +166,7 @@
         "description": "broadcom/compiler: fix offset alignment for ldunifa when skipping",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bdb6201ea1e7039732f047b8e545107615cb6e8e"
     },
