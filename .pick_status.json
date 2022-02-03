@@ -1,0 +1,227 @@
+[
+    {
+        "sha": "0447a2303fb06d6ad1f64e5f079a74bf2cf540da",
+        "description": "aco: don't encode src2 for v_writelane_b32_e64",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e3b8eeac4d8e81496d655b1bd57ed8e02f5863c",
+        "description": "aco: add test for optimizations with casts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b1dfa7eac2bd1e0dfb15febd0435b899101edb7",
+        "description": "aco: fix neg(mul)/abs(mul) optimization with different bit-size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13bbc7c882cd06435cee0a72352f409911a01ded",
+        "description": "aco: don't combine add/mul of different bit-size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d8a8c6fc1f5a53916f0fef68462ec0fad3a138a",
+        "description": "aco: don't apply omod/clamp of different bit-size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e30f99b0a783c3c9ec653e7af6d9eab1c98ea21",
+        "description": "aco: don't combine fneg/fabs of different bit-size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27f1f5537d4c7ff1cb753e19dbd885924f25be8f",
+        "description": "aco/tests: implement sub-dword program inputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e86b88f85bb36235574c765676712d2d488cce4e",
+        "description": "aco/tests: add a bunch more building helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1410d150e7fb61803048d5372fcb9f771027e7d3",
+        "description": "panfrost: Fix texel interleave flag on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3bf34a14940305b56401147dd11d06ef53330cac",
+        "description": "panfrost: Add remaining ZS/CRC XML",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bfba7533c7a5d2b9c43864a081f220a318152c4c",
+        "description": "panfrost: Add Valhall Plane Descriptor XML",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c34381d8e8d7c351082627ff20a25852154d2639",
+        "description": "panfrost: Fix alignments on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a98f0e280e9513caa44bb13643d2e9cf222efce9",
+        "description": "panfrost: Remove blend shader return value on v9",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d8c6596787a6e56f79f2d4de6a619a78f8092e5",
+        "description": "v3d/drm-shim: remove drm-shim driver",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f17d8acc96152f19e35a6ab0a227539d38ee734",
+        "description": "radeonsi: allocate protected buffer only if required",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eaa87b1a4659c1c06b0ac9e5659943c888dff6d3",
+        "description": "radeonsi: limit loop unrolling for LLVM < 13",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "9ff086052ab7bff3cb55c06365543190a3afe188"
+    },
+    {
+        "sha": "52c850445ed5d7d58b0be4cdd5b6a17dd288bf52",
+        "description": "radv: stop setting streamout state when a new pipeline is bound",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7561ea8fa17f28072c75ccf08bb8a56c610756ab",
+        "description": "broadcom/compiler: allow ldunifa with read-only SSBOs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a8449b07c48477d97b6252e67562abdd466cf37",
+        "description": "broadcom/compiler: fix offset alignment for ldunifa when skipping",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "bdb6201ea1e7039732f047b8e545107615cb6e8e"
+    },
+    {
+        "sha": "04f6e91de0ed421988c1e070d90bcf354cb3f65b",
+        "description": "docs: update calendar for 22.0.0-rc1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "647df89664d6bfed5d13b5902ae88b32d969aa20",
+        "description": "docs: reset new_features.txt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8a90104101b90af43dc6aabf19560a326be6333",
+        "description": "llvmpipe: ci updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a75392cd829df3f8f5a89dfecd4f2103658bfbd",
+        "description": "llvmpipe: disable PIPE_SHADER_CAP_FP16_CONST_BUFFERS",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a38dab2d18d5c6c685bdedb921d485bbb305eed",
+        "description": "zink: disable PIPE_SHADER_CAP_FP16_CONST_BUFFERS",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "366d83a30ec6f1033ef262ec309e72cce6d3cdf7",
+        "description": "VERSION: bump version for 22.0 release",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    }
+]
