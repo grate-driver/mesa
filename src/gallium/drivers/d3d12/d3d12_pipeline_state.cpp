@@ -44,11 +44,11 @@ struct d3d12_compute_pso_entry {
 };
 
 static const char *
-get_semantic_name(int slot, unsigned *index)
+get_semantic_name(int location, int driver_location, unsigned *index)
 {
    *index = 0; /* Default index */
 
-   switch (slot) {
+   switch (location) {
 
    case VARYING_SLOT_POS:
       return "SV_Position";
@@ -66,14 +66,30 @@ get_semantic_name(int slot, unsigned *index)
       return "SV_PrimitiveID";
 
    default: {
-         *index = slot - VARYING_SLOT_POS;
+         *index = driver_location;
          return "TEXCOORD";
       }
    }
 }
 
+static nir_variable *
+find_so_variable(nir_shader *s, int location, unsigned location_frac, unsigned num_components)
+{
+   nir_foreach_variable_with_modes(var, s, nir_var_shader_out) {
+      if (var->data.location != location || var->data.location_frac > location_frac)
+         continue;
+      unsigned var_num_components = var->data.compact ?
+         glsl_get_length(var->type) : glsl_get_components(var->type);
+      if (var->data.location_frac <= location_frac &&
+          var->data.location_frac + var_num_components >= location_frac + num_components)
+         return var;
+   }
+   return nullptr;
+}
+
 static void
 fill_so_declaration(const struct pipe_stream_output_info *info,
+                    nir_shader *last_vertex_stage,
                     D3D12_SO_DECLARATION_ENTRY *entries, UINT *num_entries,
                     UINT *strides, UINT *num_strides)
 {
@@ -105,9 +121,13 @@ fill_so_declaration(const struct pipe_stream_output_info *info,
       next_offset[buffer] = output->dst_offset + output->num_components;
 
       entries[*num_entries].Stream = output->stream;
-      entries[*num_entries].SemanticName = get_semantic_name(output->register_index, &index);
+      nir_variable *var = find_so_variable(last_vertex_stage,
+         output->register_index, output->start_component, output->num_components);
+      assert((var->data.stream & ~NIR_STREAM_PACKED) == output->stream);
+      entries[*num_entries].SemanticName = get_semantic_name(var->data.location,
+         var->data.driver_location, &index);
       entries[*num_entries].SemanticIndex = index;
-      entries[*num_entries].StartComponent = output->start_component;
+      entries[*num_entries].StartComponent = output->start_component - var->data.location_frac;
       entries[*num_entries].ComponentCount = output->num_components;
       entries[*num_entries].OutputSlot = buffer;
       (*num_entries)++;
@@ -192,7 +212,8 @@ create_gfx_pipeline_state(struct d3d12_context *ctx)
 {
    struct d3d12_screen *screen = d3d12_screen(ctx->base.screen);
    struct d3d12_gfx_pipeline_state *state = &ctx->gfx_pipeline_state;
-   enum pipe_prim_type reduced_prim = u_reduced_prim(state->prim_type);
+   enum pipe_prim_type reduced_prim = state->prim_type == PIPE_PRIM_PATCHES ?
+      PIPE_PRIM_PATCHES : u_reduced_prim(state->prim_type);
    D3D12_SO_DECLARATION_ENTRY entries[PIPE_MAX_SO_OUTPUTS] = {};
    UINT strides[PIPE_MAX_SO_OUTPUTS] = { 0 };
    UINT num_entries = 0, num_strides = 0;
@@ -200,22 +221,37 @@ create_gfx_pipeline_state(struct d3d12_context *ctx)
    D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = { 0 };
    pso_desc.pRootSignature = state->root_signature;
 
-   bool last_vertex_stage_writes_pos = false;
+   nir_shader *last_vertex_stage_nir = NULL;
 
    if (state->stages[PIPE_SHADER_VERTEX]) {
       auto shader = state->stages[PIPE_SHADER_VERTEX];
       pso_desc.VS.BytecodeLength = shader->bytecode_length;
       pso_desc.VS.pShaderBytecode = shader->bytecode;
-      last_vertex_stage_writes_pos = (shader->nir->info.outputs_written & VARYING_BIT_POS) != 0;
+      last_vertex_stage_nir = shader->nir;
+   }
+
+   if (state->stages[PIPE_SHADER_TESS_CTRL]) {
+      auto shader = state->stages[PIPE_SHADER_TESS_CTRL];
+      pso_desc.HS.BytecodeLength = shader->bytecode_length;
+      pso_desc.HS.pShaderBytecode = shader->bytecode;
+      last_vertex_stage_nir = shader->nir;
+   }
+
+   if (state->stages[PIPE_SHADER_TESS_EVAL]) {
+      auto shader = state->stages[PIPE_SHADER_TESS_EVAL];
+      pso_desc.DS.BytecodeLength = shader->bytecode_length;
+      pso_desc.DS.pShaderBytecode = shader->bytecode;
+      last_vertex_stage_nir = shader->nir;
    }
 
    if (state->stages[PIPE_SHADER_GEOMETRY]) {
       auto shader = state->stages[PIPE_SHADER_GEOMETRY];
       pso_desc.GS.BytecodeLength = shader->bytecode_length;
       pso_desc.GS.pShaderBytecode = shader->bytecode;
-      last_vertex_stage_writes_pos = (shader->nir->info.outputs_written & VARYING_BIT_POS) != 0;
+      last_vertex_stage_nir = shader->nir;
    }
 
+   bool last_vertex_stage_writes_pos = (last_vertex_stage_nir->info.outputs_written & VARYING_BIT_POS) != 0;
    if (last_vertex_stage_writes_pos && state->stages[PIPE_SHADER_FRAGMENT] &&
        !state->rast->base.rasterizer_discard) {
       auto shader = state->stages[PIPE_SHADER_FRAGMENT];
@@ -224,8 +260,7 @@ create_gfx_pipeline_state(struct d3d12_context *ctx)
    }
 
    if (state->num_so_targets)
-      fill_so_declaration(&state->so_info, entries, &num_entries,
-                          strides, &num_strides);
+      fill_so_declaration(&state->so_info, last_vertex_stage_nir, entries, &num_entries, strides, &num_strides);
    pso_desc.StreamOutput.NumEntries = num_entries;
    pso_desc.StreamOutput.pSODeclaration = entries;
    pso_desc.StreamOutput.RasterizedStream = state->rast->base.rasterizer_discard ? D3D12_SO_NO_RASTERIZED_STREAM : 0;
@@ -261,7 +296,19 @@ create_gfx_pipeline_state(struct d3d12_context *ctx)
       pso_desc.RTVFormats[i] = d3d12_rtv_format(ctx, i);
    pso_desc.DSVFormat = state->dsv_format;
 
-   pso_desc.SampleDesc.Count = state->samples;
+   if (state->num_cbufs || state->dsv_format != DXGI_FORMAT_UNKNOWN) {
+      pso_desc.SampleDesc.Count = state->samples;
+      if (!state->zsa->desc.DepthEnable &&
+          !state->zsa->desc.StencilEnable &&
+          !state->rast->desc.MultisampleEnable &&
+          state->samples > 1) {
+         pso_desc.RasterizerState.ForcedSampleCount = 1;
+         pso_desc.DSVFormat = DXGI_FORMAT_UNKNOWN;
+      }
+   } else if (state->samples > 1) {
+      pso_desc.SampleDesc.Count = 1;
+      pso_desc.RasterizerState.ForcedSampleCount = state->samples;
+   }
    pso_desc.SampleDesc.Quality = 0;
 
    pso_desc.NodeMask = 0;

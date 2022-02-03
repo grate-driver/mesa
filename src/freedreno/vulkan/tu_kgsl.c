@@ -358,6 +358,10 @@ tu_QueueSubmit(VkQueue _queue,
             entry_count++;
       }
 
+      struct tu_cmd_buffer **cmd_buffers = (void *)submit->pCommandBuffers;
+      if (tu_autotune_submit_requires_fence(cmd_buffers, submit->commandBufferCount))
+         entry_count++;
+
       max_entry_count = MAX2(max_entry_count, entry_count);
    }
 
@@ -402,6 +406,22 @@ tu_QueueSubmit(VkQueue _queue,
                .id = cs->entries[k].bo->gem_handle,
             };
          }
+      }
+
+      struct tu_cmd_buffer **cmd_buffers = (void *)submit->pCommandBuffers;
+      if (tu_autotune_submit_requires_fence(cmd_buffers, submit->commandBufferCount)) {
+         struct tu_cs *autotune_cs =
+            tu_autotune_on_submit(queue->device,
+                                  &queue->device->autotune,
+                                  cmd_buffers,
+                                  submit->commandBufferCount);
+         cmds[entry_idx++] = (struct kgsl_command_object) {
+            .offset = autotune_cs->entries[0].offset,
+            .gpuaddr = autotune_cs->entries[0].bo->iova,
+            .size = autotune_cs->entries[0].size,
+            .flags = KGSL_CMDLIST_IB,
+            .id = autotune_cs->entries[0].bo->gem_handle,
+         };
       }
 
       struct tu_syncobj s = sync_merge(submit->pWaitSemaphores,
@@ -657,9 +677,17 @@ tu_device_wait_u_trace(struct tu_device *dev, struct tu_u_trace_syncobj *syncobj
 }
 
 int
-tu_drm_get_timestamp(struct tu_physical_device *device, uint64_t *ts)
+tu_device_get_gpu_timestamp(struct tu_device *dev, uint64_t *ts)
 {
-   tu_finishme("tu_drm_get_timestamp");
+   tu_finishme("tu_device_get_gpu_timestamp");
+   return 0;
+}
+
+int
+tu_device_get_suspend_count(struct tu_device *dev, uint64_t *suspend_count)
+{
+   /* kgsl doesn't have a way to get it */
+   *suspend_count = 0;
    return 0;
 }
 

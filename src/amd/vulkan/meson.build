@@ -125,10 +125,6 @@ if with_platform_wayland
   radv_deps += dep_wayland_client
 endif
 
-if system_has_kms_drm and not with_platform_android
-  libradv_files += files('radv_wsi_display.c')
-endif
-
 if with_xlib_lease
   radv_deps += [dep_xlib_xrandr]
 endif
@@ -199,7 +195,7 @@ endif
 
 icd_command = [
   prog_python, '@INPUT0@',
-  '--api-version', '1.2', '--xml', '@INPUT1@',
+  '--api-version', '1.3', '--xml', '@INPUT1@',
   '--lib-path', join_paths(icd_lib_path, icd_file_name),
   '--out', '@OUTPUT@',
 ]

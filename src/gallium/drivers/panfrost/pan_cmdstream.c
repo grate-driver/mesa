@@ -33,7 +33,6 @@
 #include "pipe/p_state.h"
 #include "gallium/auxiliary/util/u_blend.h"
 
-#include "panfrost-quirks.h"
 #include "genxml/gen_macros.h"
 
 #include "pan_pool.h"
@@ -2738,7 +2737,8 @@ panfrost_draw_emit_tiler(struct panfrost_batch *batch,
 #endif
         }
 
-        bool points = info->mode == PIPE_PRIM_POINTS;
+        enum pipe_prim_type prim = u_reduced_prim(info->mode);
+        bool polygon = (prim == PIPE_PRIM_TRIANGLES);
         void *prim_size = pan_section_ptr(job, TILER_JOB, PRIMITIVE_SIZE);
 
 #if PAN_ARCH >= 6
@@ -2754,8 +2754,17 @@ panfrost_draw_emit_tiler(struct panfrost_batch *batch,
                 cfg.four_components_per_vertex = true;
                 cfg.draw_descriptor_is_64b = true;
                 cfg.front_face_ccw = rast->front_ccw;
-                cfg.cull_front_face = rast->cull_face & PIPE_FACE_FRONT;
-                cfg.cull_back_face = rast->cull_face & PIPE_FACE_BACK;
+
+                /*
+                 * From the Gallium documentation,
+                 * pipe_rasterizer_state::cull_face "indicates which faces of
+                 * polygons to cull". Points and lines are not considered
+                 * polygons and should be drawn even if all faces are culled.
+                 * The hardware does not take primitive type into account when
+                 * culling, so we need to do that check ourselves.
+                 */
+                cfg.cull_front_face = polygon && (rast->cull_face & PIPE_FACE_FRONT);
+                cfg.cull_back_face = polygon && (rast->cull_face & PIPE_FACE_BACK);
                 cfg.position = pos;
                 cfg.state = batch->rsd[PIPE_SHADER_FRAGMENT];
                 cfg.attributes = batch->attribs[PIPE_SHADER_FRAGMENT];
@@ -2769,9 +2778,7 @@ panfrost_draw_emit_tiler(struct panfrost_batch *batch,
                  * be set to 0 and the provoking vertex is selected with the
                  * PRIMITIVE.first_provoking_vertex field.
                  */
-                if (info->mode == PIPE_PRIM_LINES ||
-                    info->mode == PIPE_PRIM_LINE_LOOP ||
-                    info->mode == PIPE_PRIM_LINE_STRIP) {
+                if (prim == PIPE_PRIM_LINES) {
                         /* The logic is inverted across arches. */
                         cfg.flat_shading_vertex = rast->flatshade_first
                                                 ^ (PAN_ARCH <= 5);
@@ -2792,7 +2799,7 @@ panfrost_draw_emit_tiler(struct panfrost_batch *batch,
                 }
         }
 
-        panfrost_emit_primitive_size(ctx, points, psiz, prim_size);
+        panfrost_emit_primitive_size(ctx, prim == PIPE_PRIM_POINTS, psiz, prim_size);
 }
 
 static void
@@ -3730,7 +3737,7 @@ batch_get_polygon_list(struct panfrost_batch *batch)
                 /* Create the BO as invisible if we can. In the non-hierarchical tiler case,
                  * we need to write the polygon list manually because there's not WRITE_VALUE
                  * job in the chain (maybe we should add one...). */
-                bool init_polygon_list = !has_draws && (dev->quirks & MIDGARD_NO_HIER_TILING);
+                bool init_polygon_list = !has_draws && dev->model->quirks.no_hierarchical_tiling;
                 batch->tiler_ctx.midgard.polygon_list =
                         panfrost_batch_create_bo(batch, size,
                                                  init_polygon_list ? 0 : PAN_BO_INVISIBLE,

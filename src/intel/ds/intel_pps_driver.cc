@@ -16,8 +16,9 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#include <i915_drm.h>
+#include "drm-uapi/i915_drm.h"
 
+#include "common/intel_gem.h"
 #include "dev/intel_device_info.h"
 #include "perf/intel_perf.h"
 #include "perf/intel_perf_query.h"
@@ -26,6 +27,7 @@
 #include <pps/pps_algorithm.h>
 
 #include "intel_pps_perf.h"
+#include "intel_pps_priv.h"
 
 namespace pps
 {
@@ -40,29 +42,8 @@ uint64_t IntelDriver::get_min_sampling_period_ns()
    return (2.f * perf->devinfo.timestamp_frequency) / 1000000000ull;
 }
 
-uint64_t read_gpu_timestamp(int drm_fd)
-{
-   drm_i915_reg_read reg_read = {};
-   const uint64_t render_ring_timestamp = 0x2358;
-   reg_read.offset = render_ring_timestamp | I915_REG_READ_8B_WA;
-
-   if (perf_ioctl(drm_fd, DRM_IOCTL_I915_REG_READ, &reg_read) < 0) {
-      PPS_LOG_ERROR("Unable to read GPU clock");
-      return 0;
-   }
-
-   return reg_read.val;
-
-}
-
 IntelDriver::IntelDriver()
 {
-   /* Note: clock_id's below 128 are reserved.. for custom clock sources,
-    * using the hash of a namespaced string is the recommended approach.
-    * See: https://perfetto.dev/docs/concepts/clock-sync
-    */
-   this->clock_id =
-      _mesa_hash_string("org.freedesktop.mesa.intel") | 0x80000000;
 }
 
 IntelDriver::~IntelDriver()
@@ -72,90 +53,102 @@ IntelDriver::~IntelDriver()
 void IntelDriver::enable_counter(uint32_t counter_id)
 {
    auto &counter = counters[counter_id];
-   auto &group = groups[counter.group];
-   if (perf->query) {
-      if (perf->query->symbol_name != group.name) {
-         PPS_LOG_ERROR(
-            "Unable to enable metrics from different sets: %u "
-            "belongs to %s but %s is currently in use.",
-            counter_id,
-            perf->query->symbol_name,
-            group.name.c_str());
-         return;
-      }
-   }
 
    enabled_counters.emplace_back(counter);
-   if (!perf->query) {
-      perf->query = perf->find_query_by_name(group.name);
-   }
 }
 
 void IntelDriver::enable_all_counters()
 {
-   // We can only enable one metric set at a time so at least enable one.
-   for (auto &group : groups) {
-      if (group.name == "RenderBasic") {
-         for (uint32_t counter_id : group.counters) {
-            auto &counter = counters[counter_id];
-            enabled_counters.emplace_back(counter);
-         }
-
-         perf->query = perf->find_query_by_name(group.name);
-         break;
-      }
+   // We should only have one group
+   assert(groups.size() == 1);
+   for (uint32_t counter_id : groups[0].counters) {
+      auto &counter = counters[counter_id];
+      enabled_counters.emplace_back(counter);
    }
 }
 
 bool IntelDriver::init_perfcnt()
 {
+   /* Note: clock_id's below 128 are reserved.. for custom clock sources,
+    * using the hash of a namespaced string is the recommended approach.
+    * See: https://perfetto.dev/docs/concepts/clock-sync
+    */
+   this->clock_id = intel_pps_clock_id(drm_device.gpu_num);
+
    assert(!perf && "Intel perf should not be initialized at this point");
 
    perf = std::make_unique<IntelPerf>(drm_device.fd);
 
+   const char *metric_set_name = getenv("INTEL_PERFETTO_METRIC_SET");
+
+   struct intel_perf_query_info *default_query = nullptr;
+   selected_query = nullptr;
    for (auto &query : perf->get_queries()) {
-      // Create group
-      CounterGroup group = {};
-      group.id = groups.size();
-      group.name = query->symbol_name;
-
-      for (int i = 0; i < query->n_counters; ++i) {
-         intel_perf_query_counter &counter = query->counters[i];
-
-         // Create counter
-         Counter counter_desc = {};
-         counter_desc.id = counters.size();
-         counter_desc.name = counter.symbol_name;
-         counter_desc.group = group.id;
-         counter_desc.getter = [counter, query, this](
-                                  const Counter &c, const Driver &dri) -> Counter::Value {
-            switch (counter.data_type) {
-            case INTEL_PERF_COUNTER_DATA_TYPE_UINT64:
-            case INTEL_PERF_COUNTER_DATA_TYPE_UINT32:
-            case INTEL_PERF_COUNTER_DATA_TYPE_BOOL32:
-               return (int64_t)counter.oa_counter_read_uint64(perf->cfg, query, &perf->result);
-               break;
-            case INTEL_PERF_COUNTER_DATA_TYPE_DOUBLE:
-            case INTEL_PERF_COUNTER_DATA_TYPE_FLOAT:
-               return counter.oa_counter_read_float(perf->cfg, query, &perf->result);
-               break;
-            }
-
-            return {};
-         };
-
-         // Add counter id to the group
-         group.counters.emplace_back(counter_desc.id);
-
-         // Store counter
-         counters.emplace_back(std::move(counter_desc));
-      }
-
-      // Store group
-      groups.emplace_back(std::move(group));
+      if (!strcmp(query->symbol_name, "RenderBasic"))
+         default_query = query;
+      if (metric_set_name && !strcmp(query->symbol_name, metric_set_name))
+         selected_query = query;
    }
 
-   assert(groups.size() && "Failed to query groups");
+   assert(default_query);
+
+   if (!selected_query) {
+      if (metric_set_name) {
+         PPS_LOG_ERROR("Available metric sets:");
+         for (auto &query : perf->get_queries())
+            PPS_LOG_ERROR("   %s", query->symbol_name);
+         PPS_LOG_FATAL("Metric set '%s' not available.", metric_set_name);
+      }
+      selected_query = default_query;
+   }
+
+   PPS_LOG("Using metric set '%s': %s",
+           selected_query->symbol_name, selected_query->name);
+
+   // Create group
+   CounterGroup group = {};
+   group.id = groups.size();
+   group.name = selected_query->symbol_name;
+
+   for (int i = 0; i < selected_query->n_counters; ++i) {
+      intel_perf_query_counter &counter = selected_query->counters[i];
+
+      // Create counter
+      Counter counter_desc = {};
+      counter_desc.id = counters.size();
+      counter_desc.name = counter.symbol_name;
+      counter_desc.group = group.id;
+      counter_desc.getter = [counter, this](
+         const Counter &c, const Driver &dri) -> Counter::Value {
+         switch (counter.data_type) {
+         case INTEL_PERF_COUNTER_DATA_TYPE_UINT64:
+         case INTEL_PERF_COUNTER_DATA_TYPE_UINT32:
+         case INTEL_PERF_COUNTER_DATA_TYPE_BOOL32:
+            return (int64_t)counter.oa_counter_read_uint64(perf->cfg,
+                                                           selected_query,
+                                                           &perf->result);
+            break;
+         case INTEL_PERF_COUNTER_DATA_TYPE_DOUBLE:
+         case INTEL_PERF_COUNTER_DATA_TYPE_FLOAT:
+            return counter.oa_counter_read_float(perf->cfg,
+                                                 selected_query,
+                                                 &perf->result);
+            break;
+         }
+
+         return {};
+      };
+
+      // Add counter id to the group
+      group.counters.emplace_back(counter_desc.id);
+
+      // Store counter
+      counters.emplace_back(std::move(counter_desc));
+   }
+
+   // Store group
+   groups.emplace_back(std::move(group));
+
    assert(counters.size() && "Failed to query counters");
 
    // Clear accumulations
@@ -168,13 +161,14 @@ void IntelDriver::enable_perfcnt(uint64_t sampling_period_ns)
 {
    this->sampling_period_ns = sampling_period_ns;
 
-   if (!perf->open(sampling_period_ns)) {
+   if (!perf->open(sampling_period_ns, selected_query)) {
       PPS_LOG_FATAL("Failed to open intel perf");
    }
 }
 
 void IntelDriver::disable_perfcnt()
 {
+   gpu_timestamp_udw = 0;
    perf = nullptr;
    groups.clear();
    counters.clear();
@@ -211,7 +205,7 @@ std::vector<PerfRecord> IntelDriver::parse_perf_records(const std::vector<uint8_
          // Report is next to the header
          const uint32_t *report = reinterpret_cast<const uint32_t *>(header + 1);
          uint64_t gpu_timestamp_ldw =
-            intel_perf_report_timestamp(&perf->query.value(), report);
+            intel_perf_report_timestamp(selected_query, report);
 
          /* Our HW only provides us with the lower 32 bits of the 36bits
           * timestamp counter value. If we haven't captured the top bits yet,
@@ -219,12 +213,12 @@ std::vector<PerfRecord> IntelDriver::parse_perf_records(const std::vector<uint8_
           * again.
           */
          if (gpu_timestamp_udw == 0 || (gpu_timestamp_udw + gpu_timestamp_ldw) < last_gpu_timestamp)
-            gpu_timestamp_udw = read_gpu_timestamp(drm_device.fd) & 0xffffffff00000000;
+            gpu_timestamp_udw = intel_read_gpu_timestamp(drm_device.fd) & 0xffffffff00000000;
 
          uint64_t gpu_timestamp = gpu_timestamp_udw + gpu_timestamp_ldw;
 
-         auto duration = intel_perf_scale_gpu_timestamp(&perf->devinfo,
-                                                        gpu_timestamp - prev_gpu_timestamp);
+         auto duration = intel_device_info_timebase_scale(&perf->devinfo,
+                                                          gpu_timestamp - prev_gpu_timestamp);
 
          // Skip perf-records that are too short by checking
          // the distance between last report and this one
@@ -306,11 +300,11 @@ uint64_t IntelDriver::gpu_next()
    auto record_b = reinterpret_cast<const drm_i915_perf_record_header *>(records[1].data.data());
 
    intel_perf_query_result_accumulate_fields(&perf->result,
-      &perf->query.value(),
-      &perf->devinfo,
-      record_a + 1,
-      record_b + 1,
-      false /* no_oa_accumulate */);
+                                             selected_query,
+                                             &perf->devinfo,
+                                             record_a + 1,
+                                             record_b + 1,
+                                             false /* no_oa_accumulate */);
 
    // Get last timestamp
    auto gpu_timestamp = records[1].timestamp;
@@ -318,8 +312,7 @@ uint64_t IntelDriver::gpu_next()
    // Consume first record
    records.erase(std::begin(records), std::begin(records) + 1);
 
-   return intel_perf_scale_gpu_timestamp(&perf->devinfo,
-                                         gpu_timestamp);
+   return intel_device_info_timebase_scale(&perf->devinfo, gpu_timestamp);
 }
 
 uint64_t IntelDriver::next()
@@ -336,8 +329,8 @@ uint32_t IntelDriver::gpu_clock_id() const
 
 uint64_t IntelDriver::gpu_timestamp() const
 {
-   return intel_perf_scale_gpu_timestamp(&perf->devinfo,
-                                         read_gpu_timestamp(drm_device.fd));
+   return intel_device_info_timebase_scale(&perf->devinfo,
+                                           intel_read_gpu_timestamp(drm_device.fd));
 }
 
 } // namespace pps

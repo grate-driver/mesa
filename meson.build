@@ -73,6 +73,7 @@ with_tools = get_option('tools')
 if with_tools.contains('all')
   with_tools = [
     'drm-shim',
+    'dlclose-skip',
     'etnaviv',
     'freedreno',
     'glsl',
@@ -516,10 +517,13 @@ if not have_mtls_dialect
     warning('cannot auto-detect -mtls-dialect when cross-compiling, using compiler default')
   else
     # -fpic to force dynamic tls, otherwise TLS relaxation defeats check
-    gnu2_test = cc.run('int __thread x; int main() { return x; }', args: ['-mtls-dialect=gnu2', '-fpic'], name: '-mtls-dialect=gnu2')
+    gnu2_test = cc.run('int __thread x; int main() { return x; }',
+                       args: ['-mtls-dialect=gnu2', '-fpic'],
+                       name: '-mtls-dialect=gnu2')
     if gnu2_test.returncode() == 0 and (
+          # check for lld 13 bug: https://gitlab.freedesktop.org/mesa/mesa/-/issues/5665
           host_machine.cpu_family() != 'x86_64' or
-          # https://github.com/mesonbuild/meson/issues/6377
+          # get_linker_id misses LDFLAGS=-fuse-ld=lld: https://github.com/mesonbuild/meson/issues/6377
           #cc.get_linker_id() != 'ld.lld' or
           cc.links('''int __thread x; int y; int main() { __asm__(
                 "leaq x@TLSDESC(%rip), %rax\n"
@@ -996,7 +1000,7 @@ has_mako = run_command(
 from distutils.version import StrictVersion
 import mako
 assert StrictVersion(mako.__version__) > StrictVersion("0.8.0")
-  ''')
+  ''', check: false)
 if has_mako.returncode() != 0
   error('Python (3.x) mako module >= 0.8.0 required to build mesa.')
 endif
@@ -1631,7 +1635,7 @@ if with_gallium_opencl
     'linker', 'coverage', 'instrumentation', 'ipo', 'irreader',
     'lto', 'option', 'objcarcopts', 'profiledata'
   ]
-  llvm_optional_modules += ['frontendopenmp']
+  llvm_optional_modules += ['all-targets', 'frontendopenmp']
 endif
 if with_clc
   llvm_modules += ['coverage', 'target', 'linker', 'irreader', 'option', 'libdriver', 'lto']

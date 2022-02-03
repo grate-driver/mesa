@@ -266,7 +266,6 @@ _mesa_init_extensions(struct gl_extensions *extensions)
    extensions->MESA_window_pos = GL_TRUE;
 
    extensions->ARB_ES2_compatibility = GL_TRUE;
-   extensions->ARB_depth_texture = GL_TRUE;
    extensions->ARB_draw_elements_base_vertex = GL_TRUE;
    extensions->ARB_explicit_attrib_location = GL_TRUE;
    extensions->ARB_explicit_uniform_location = GL_TRUE;
@@ -279,17 +278,12 @@ _mesa_init_extensions(struct gl_extensions *extensions)
    extensions->ARB_map_buffer_range = GL_TRUE;
    extensions->ARB_occlusion_query = GL_TRUE;
    extensions->ARB_sync = GL_TRUE;
-   extensions->ARB_texture_env_crossbar = GL_TRUE;
    extensions->ARB_vertex_program = GL_TRUE;
    extensions->ARB_vertex_shader = GL_TRUE;
 
-   extensions->EXT_blend_color = GL_TRUE;
-   extensions->EXT_blend_func_separate = GL_TRUE;
-   extensions->EXT_blend_minmax = GL_TRUE;
    extensions->EXT_EGL_image_storage = GL_TRUE;
    extensions->EXT_gpu_program_parameters = GL_TRUE;
    extensions->EXT_pixel_buffer_object = GL_TRUE;
-   extensions->EXT_point_parameters = GL_TRUE;
    extensions->EXT_provoking_vertex = GL_TRUE;
    extensions->EXT_stencil_two_side = GL_TRUE;
    extensions->EXT_texture_env_dot3 = GL_TRUE;

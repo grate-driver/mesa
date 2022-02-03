@@ -505,46 +505,30 @@ bool si_shader_mem_ordered(struct si_shader *shader)
    if (shader->selector->screen->info.chip_class < GFX10)
       return false;
 
-   const struct si_shader_info *info = &shader->selector->info;
-   const struct si_shader_info *prev_info =
-      shader->previous_stage_sel ? &shader->previous_stage_sel->info : NULL;
-
-   bool sampler_or_bvh = info->uses_vmem_return_type_sampler_or_bvh;
-   bool other = info->uses_vmem_return_type_other ||
-                info->uses_indirect_descriptor ||
-                shader->config.scratch_bytes_per_wave ||
-                (info->stage == MESA_SHADER_FRAGMENT &&
-                 (info->base.fs.uses_fbfetch_output ||
-                  shader->key.ps.part.prolog.poly_stipple));
-
-   if (prev_info) {
-      sampler_or_bvh |= prev_info->uses_vmem_return_type_sampler_or_bvh;
-      other |= prev_info->uses_vmem_return_type_other ||
-               prev_info->uses_indirect_descriptor;
-   }
-
    /* Return true if both types of VMEM that return something are used. */
-   return sampler_or_bvh && other;
+   return shader->info.uses_vmem_sampler_or_bvh &&
+          (shader->info.uses_vmem_load_other ||
+           shader->config.scratch_bytes_per_wave);
 }
 
 static void si_set_tesseval_regs(struct si_screen *sscreen, const struct si_shader_selector *tes,
                                  struct si_shader *shader)
 {
    const struct si_shader_info *info = &tes->info;
-   unsigned tes_prim_mode = info->base.tess.primitive_mode;
+   enum tess_primitive_mode tes_prim_mode = info->base.tess._primitive_mode;
    unsigned tes_spacing = info->base.tess.spacing;
    bool tes_vertex_order_cw = !info->base.tess.ccw;
    bool tes_point_mode = info->base.tess.point_mode;
    unsigned type, partitioning, topology, distribution_mode;
 
    switch (tes_prim_mode) {
-   case GL_LINES:
+   case TESS_PRIMITIVE_ISOLINES:
       type = V_028B6C_TESS_ISOLINE;
       break;
-   case GL_TRIANGLES:
+   case TESS_PRIMITIVE_TRIANGLES:
       type = V_028B6C_TESS_TRIANGLE;
       break;
-   case GL_QUADS:
+   case TESS_PRIMITIVE_QUADS:
       type = V_028B6C_TESS_QUAD;
       break;
    default:
@@ -569,7 +553,7 @@ static void si_set_tesseval_regs(struct si_screen *sscreen, const struct si_shad
 
    if (tes_point_mode)
       topology = V_028B6C_OUTPUT_POINT;
-   else if (tes_prim_mode == GL_LINES)
+   else if (tes_prim_mode == TESS_PRIMITIVE_ISOLINES)
       topology = V_028B6C_OUTPUT_LINE;
    else if (tes_vertex_order_cw)
       /* for some reason, this must be the other way around */
@@ -1288,7 +1272,7 @@ unsigned si_get_input_prim(const struct si_shader_selector *gs, const union si_s
    if (gs->info.stage == MESA_SHADER_TESS_EVAL) {
       if (gs->info.base.tess.point_mode)
          return PIPE_PRIM_POINTS;
-      if (gs->info.base.tess.primitive_mode == GL_LINES)
+      if (gs->info.base.tess._primitive_mode == TESS_PRIMITIVE_ISOLINES)
          return PIPE_PRIM_LINES;
       return PIPE_PRIM_TRIANGLES;
    }
@@ -3167,7 +3151,7 @@ static void *si_create_shader_selector(struct pipe_context *ctx,
       if (sel->info.stage == MESA_SHADER_TESS_EVAL) {
          if (sel->info.base.tess.point_mode)
             sel->rast_prim = PIPE_PRIM_POINTS;
-         else if (sel->info.base.tess.primitive_mode == GL_LINES)
+         else if (sel->info.base.tess._primitive_mode == TESS_PRIMITIVE_ISOLINES)
             sel->rast_prim = PIPE_PRIM_LINE_STRIP;
          else
             sel->rast_prim = PIPE_PRIM_TRIANGLES;
@@ -3548,7 +3532,7 @@ static void si_bind_tes_shader(struct pipe_context *ctx, void *state)
 
    sctx->shader.tcs.key.ge.part.tcs.epilog.prim_mode =
    sctx->fixed_func_tcs_shader.key.ge.part.tcs.epilog.prim_mode =
-      sel ? sel->info.base.tess.primitive_mode : 0;
+      sel ? sel->info.base.tess._primitive_mode : 0;
 
    sctx->shader.tcs.key.ge.part.tcs.epilog.tes_reads_tess_factors =
    sctx->fixed_func_tcs_shader.key.ge.part.tcs.epilog.tes_reads_tess_factors =

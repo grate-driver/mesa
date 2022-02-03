@@ -679,15 +679,15 @@ vn_physical_device_init_properties(struct vn_physical_device *physical_dev)
    }
    memcpy(props->deviceName, device_name, device_name_len + 1);
 
-   vk12_props->driverID = 0;
+   vk12_props->driverID = VK_DRIVER_ID_MESA_VENUS;
    snprintf(vk12_props->driverName, sizeof(vk12_props->driverName), "venus");
    snprintf(vk12_props->driverInfo, sizeof(vk12_props->driverInfo),
             "Mesa " PACKAGE_VERSION MESA_GIT_SHA1);
    vk12_props->conformanceVersion = (VkConformanceVersionKHR){
-      .major = 0,
-      .minor = 0,
-      .subminor = 0,
-      .patch = 0,
+      .major = 1,
+      .minor = 2,
+      .subminor = 7,
+      .patch = 1,
    };
 
    vn_physical_device_init_uuids(physical_dev);
@@ -954,7 +954,7 @@ vn_physical_device_get_passthrough_extensions(
       .EXT_separate_stencil_usage = true,
       .EXT_shader_viewport_index_layer = true,
 
-      /* EXT */
+   /* EXT */
 #ifndef ANDROID
       .EXT_image_drm_format_modifier = true,
 #endif
@@ -1048,14 +1048,14 @@ vn_physical_device_init_renderer_extensions(
             continue;
 
          /* check encoder support */
-         const uint32_t spec_version =
-            vn_info_extension_spec_version(props->extensionName);
-         if (!spec_version)
+         const struct vn_info_extension *enc_ext =
+            vn_info_extension_get(props->extensionName);
+         if (!enc_ext)
             continue;
 
          physical_dev->renderer_extensions.extensions[i] = true;
          physical_dev->extension_spec_versions[i] =
-            MIN2(exts[j].specVersion, spec_version);
+            MIN2(exts[j].specVersion, enc_ext->spec_version);
 
          break;
       }

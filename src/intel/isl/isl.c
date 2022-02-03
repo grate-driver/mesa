@@ -103,6 +103,30 @@ isl_device_setup_mocs(struct isl_device *dev)
          /* L3CC=WB; BSpec: 45101 */
          dev->mocs.internal = 3 << 1;
          dev->mocs.external = 3 << 1;
+
+         /* XY_BLOCK_COPY_BLT MOCS fields have programming notes which say:
+          *
+          *    "Destination MOCS value, which is used to program MOCS index
+          *     for writing to memory, should select a MOCS register having
+          *     "L3 Cacheability Control" programmed as uncacheable(UC) and
+          *     "Global GO" parameter set as GOMemory (pushes GO point to
+          *     memory). The MOCS Register may have L3 Lookup programmed as
+          *     UCL3LKDIS for better efficiency."
+          *
+          * The GO:Memory setting requires us to use MOCS 1 or 2.  MOCS 2
+          * has LKUP set to 0 and is marked "Non-Coherent", which we assume
+          * is probably the "better efficiency" they mention...
+          *
+          *   "Source MOCS value, which is used to program MOCS index for
+          *    reading from memory, should select a MOCS register having
+          *    "L3 Cacheability Control" programmed as uncacheable(UC).
+          *    The MOCS Register may have L3 Lookup programmed as UCL3LKDIS
+          *    for better efficiency."
+          *
+          * Any MOCS except 3 should work.  We use MOCS 2...
+          */
+         dev->mocs.blitter_dst = 2 << 1;
+         dev->mocs.blitter_src = 2 << 1;
       } else if (dev->info->platform == INTEL_PLATFORM_DG1) {
          /* L3CC=WB */
          dev->mocs.internal = 5 << 1;
@@ -172,6 +196,9 @@ isl_mocs(const struct isl_device *dev, isl_surf_usage_flags_t usage,
 
    if (dev->info->verx10 == 120 && dev->info->platform != INTEL_PLATFORM_DG1) {
       if (usage & ISL_SURF_USAGE_STAGING_BIT)
+         return dev->mocs.internal;
+
+      if (usage & ISL_SURF_USAGE_CPB_BIT)
          return dev->mocs.internal;
 
       /* Using L1:HDC for storage buffers breaks Vulkan memory model
@@ -282,6 +309,10 @@ isl_device_init(struct isl_device *dev,
    } else {
       dev->max_buffer_size = 1ull << 27;
    }
+
+   dev->cpb.size = _3DSTATE_CPSIZE_CONTROL_BUFFER_length(info) * 4;
+   dev->cpb.offset =
+      _3DSTATE_CPSIZE_CONTROL_BUFFER_SurfaceBaseAddress_start(info) / 8;
 
    isl_device_setup_mocs(dev);
 }
@@ -828,8 +859,6 @@ isl_choose_image_alignment_el(const struct isl_device *dev,
 {
    const struct isl_format_layout *fmtl = isl_format_get_layout(info->format);
    if (fmtl->txc == ISL_TXC_MCS) {
-      assert(tiling == ISL_TILING_Y0);
-
       /*
        * IvyBrigde PRM Vol 2, Part 1, "11.7 MCS Buffer for Render Target(s)":
        *
@@ -1577,6 +1606,9 @@ isl_calc_row_pitch_alignment(const struct isl_device *dev,
       return tile_info->phys_extent_B.width;
    }
 
+   /* We only support tiled fragment shading rate buffers. */
+   assert((surf_info->usage & ISL_SURF_USAGE_CPB_BIT) == 0);
+
    /* From the Broadwel PRM >> Volume 2d: Command Reference: Structures >>
     * RENDER_SURFACE_STATE Surface Pitch (p349):
     *
@@ -1760,6 +1792,10 @@ isl_calc_row_pitch(const struct isl_device *dev,
        !pitch_in_range(row_pitch_B, stencil_pitch_bits))
       return false;
 
+   if ((surf_info->usage & ISL_SURF_USAGE_CPB_BIT) &&
+       !pitch_in_range(row_pitch_B, _3DSTATE_CPSIZE_CONTROL_BUFFER_SurfacePitch_bits(dev->info)))
+      return false;
+
  done:
    *out_row_pitch_B = row_pitch_B;
    return true;
@@ -1770,6 +1806,10 @@ isl_surf_init_s(const struct isl_device *dev,
                 struct isl_surf *surf,
                 const struct isl_surf_init_info *restrict info)
 {
+   /* Some sanity checks */
+   assert(!(info->usage & ISL_SURF_USAGE_CPB_BIT) ||
+          dev->info->has_coarse_pixel_primitive_and_cb);
+
    const struct isl_format_layout *fmtl = isl_format_get_layout(info->format);
 
    const struct isl_extent4d logical_level0_px = {
@@ -2057,38 +2097,12 @@ isl_surf_get_mcs_surf(const struct isl_device *dev,
    if (surf->msaa_layout != ISL_MSAA_LAYOUT_ARRAY)
       return false;
 
-   if (mcs_surf->size_B > 0)
-      return false;
-
    /* The following are true of all multisampled surfaces */
    assert(surf->samples > 1);
    assert(surf->dim == ISL_SURF_DIM_2D);
    assert(surf->levels == 1);
    assert(surf->logical_level0_px.depth == 1);
-
-   /* From the Ivy Bridge PRM, Vol4 Part1 p77 ("MCS Enable"):
-    *
-    *   This field must be set to 0 for all SINT MSRTs when all RT channels
-    *   are not written
-    *
-    * In practice this means that we have to disable MCS for all signed
-    * integer MSAA buffers.  The alternative, to disable MCS only when one
-    * of the render target channels is disabled, is impractical because it
-    * would require converting between CMS and UMS MSAA layouts on the fly,
-    * which is expensive.
-    */
-   if (ISL_GFX_VER(dev) == 7 && isl_format_has_sint_channel(surf->format))
-      return false;
-
-   /* The "Auxiliary Surface Pitch" field in RENDER_SURFACE_STATE is only 9
-    * bits which means the maximum pitch of a compression surface is 512
-    * tiles or 64KB (since MCS is always Y-tiled).  Since a 16x MCS buffer is
-    * 64bpp, this gives us a maximum width of 8192 pixels.  We can create
-    * larger multisampled surfaces, we just can't compress them.   For 2x, 4x,
-    * and 8x, we have enough room for the full 16k supported by the hardware.
-    */
-   if (surf->samples == 16 && surf->logical_level0_px.width > 8192)
-      return false;
+   assert(isl_format_supports_multisampling(dev->info, surf->format));
 
    enum isl_format mcs_format;
    switch (surf->samples) {
@@ -2110,7 +2124,7 @@ isl_surf_get_mcs_surf(const struct isl_device *dev,
                         .array_len = surf->logical_level0_px.array_len,
                         .samples = 1, /* MCS surfaces are really single-sampled */
                         .usage = ISL_SURF_USAGE_MCS_BIT,
-                        .tiling_flags = ISL_TILING_Y0_BIT);
+                        .tiling_flags = ISL_TILING_ANY_MASK);
 }
 
 bool
@@ -2147,6 +2161,12 @@ isl_surf_supports_ccs(const struct isl_device *dev,
    if (surf->tiling == ISL_TILING_LINEAR)
       return false;
 
+   /* TODO: Disable for now, as we're not sure about the meaning of
+    * 3DSTATE_CPSIZE_CONTROL_BUFFER::CPCBCompressionEnable
+    */
+   if (isl_surf_usage_is_cpb(surf->usage))
+      return false;
+
    if (ISL_GFX_VER(dev) >= 12) {
       if (isl_surf_usage_is_stencil(surf->usage)) {
          /* HiZ and MCS aren't allowed with stencil */
@@ -2173,7 +2193,6 @@ isl_surf_supports_ccs(const struct isl_device *dev,
             return false;
 
          assert(mcs_surf->usage & ISL_SURF_USAGE_MCS_BIT);
-         assert(isl_tiling_is_any_y(mcs_surf->tiling));
          assert(isl_format_is_mcs(mcs_surf->format));
       } else {
          /* Single-sampled color can't have MCS or HiZ */
@@ -2209,7 +2228,12 @@ isl_surf_supports_ccs(const struct isl_device *dev,
        */
 
       /* TODO: Handle the other tiling formats */
-      if (surf->tiling != ISL_TILING_Y0)
+      if (surf->tiling != ISL_TILING_Y0 && surf->tiling != ISL_TILING_4 &&
+          surf->tiling != ISL_TILING_64)
+         return false;
+
+      /* TODO: Handle single-sampled Tile64. */
+      if (surf->samples == 1 && surf->tiling == ISL_TILING_64)
          return false;
    } else {
       /* ISL_GFX_VER(dev) < 12 */
@@ -2457,6 +2481,21 @@ isl_emit_depth_stencil_hiz_s(const struct isl_device *dev, void *batch,
    }
 
    isl_genX_call(dev, emit_depth_stencil_hiz_s, dev, batch, info);
+}
+
+void
+isl_emit_cpb_control_s(const struct isl_device *dev, void *batch,
+                       const struct isl_cpb_emit_info *restrict info)
+{
+   if (info->surf) {
+      assert((info->surf->usage & ISL_SURF_USAGE_CPB_BIT));
+      assert(info->surf->dim != ISL_SURF_DIM_3D);
+      assert(info->surf->tiling == ISL_TILING_4 ||
+             info->surf->tiling == ISL_TILING_64);
+      assert(info->surf->format == ISL_FORMAT_R8_UINT);
+   }
+
+   isl_genX_call(dev, emit_cpb_control_s, dev, batch, info);
 }
 
 /**
@@ -3488,4 +3527,18 @@ isl_get_render_compression_format(enum isl_format format)
       unreachable("Unsupported render compression format!");
       return 0;
    }
+}
+
+const char *
+isl_aux_op_to_name(enum isl_aux_op op)
+{
+   static const char *names[] = {
+      [ISL_AUX_OP_NONE]            = "none",
+      [ISL_AUX_OP_FAST_CLEAR]      = "fast-clear",
+      [ISL_AUX_OP_FULL_RESOLVE]    = "full-resolve",
+      [ISL_AUX_OP_PARTIAL_RESOLVE] = "partial-resolve",
+      [ISL_AUX_OP_AMBIGUATE]       = "ambiguate",
+   };
+   assert(op < ARRAY_SIZE(names));
+   return names[op];
 }

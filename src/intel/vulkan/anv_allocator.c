@@ -1691,9 +1691,7 @@ anv_device_alloc_bo(struct anv_device *device,
       uint32_t nregions = 0;
 
       if (alloc_flags & ANV_BO_ALLOC_LOCAL_MEM) {
-         /* For vram allocation, still use system memory as a fallback. */
          regions[nregions++] = device->physical->vram.region;
-         regions[nregions++] = device->physical->sys.region;
       } else {
          regions[nregions++] = device->physical->sys.region;
       }
@@ -1718,7 +1716,8 @@ anv_device_alloc_bo(struct anv_device *device,
       .is_external = (alloc_flags & ANV_BO_ALLOC_EXTERNAL),
       .has_client_visible_address =
          (alloc_flags & ANV_BO_ALLOC_CLIENT_VISIBLE_ADDRESS) != 0,
-      .has_implicit_ccs = ccs_size > 0,
+      .has_implicit_ccs = ccs_size > 0 || (device->info.verx10 >= 125 &&
+         (alloc_flags & ANV_BO_ALLOC_LOCAL_MEM)),
    };
 
    if (alloc_flags & ANV_BO_ALLOC_MAPPED) {
@@ -1825,9 +1824,8 @@ anv_device_import_bo_from_host_ptr(struct anv_device *device,
                            ANV_BO_ALLOC_SNOOPED |
                            ANV_BO_ALLOC_FIXED_ADDRESS)));
 
-   /* We can't do implicit CCS with an aux table on shared memory */
-   if (!device->physical->has_implicit_ccs || device->info.has_aux_map)
-       assert(!(alloc_flags & ANV_BO_ALLOC_IMPLICIT_CCS));
+   assert(!(alloc_flags & ANV_BO_ALLOC_IMPLICIT_CCS) ||
+          (device->physical->has_implicit_ccs && device->info.has_aux_map));
 
    struct anv_bo_cache *cache = &device->bo_cache;
    const uint32_t bo_flags =
@@ -1916,9 +1914,8 @@ anv_device_import_bo(struct anv_device *device,
                            ANV_BO_ALLOC_SNOOPED |
                            ANV_BO_ALLOC_FIXED_ADDRESS)));
 
-   /* We can't do implicit CCS with an aux table on shared memory */
-   if (!device->physical->has_implicit_ccs || device->info.has_aux_map)
-       assert(!(alloc_flags & ANV_BO_ALLOC_IMPLICIT_CCS));
+   assert(!(alloc_flags & ANV_BO_ALLOC_IMPLICIT_CCS) ||
+          (device->physical->has_implicit_ccs && device->info.has_aux_map));
 
    struct anv_bo_cache *cache = &device->bo_cache;
    const uint32_t bo_flags =

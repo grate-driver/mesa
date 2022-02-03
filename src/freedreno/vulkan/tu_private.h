@@ -77,6 +77,7 @@
 #include "perfcntrs/freedreno_perfcntr.h"
 
 #include "tu_descriptor_set.h"
+#include "tu_autotune.h"
 #include "tu_util.h"
 #include "tu_perfetto.h"
 
@@ -251,6 +252,7 @@ enum tu_debug_flags
    TU_DEBUG_FLUSHALL = 1 << 10,
    TU_DEBUG_SYNCDRAW = 1 << 11,
    TU_DEBUG_DONT_CARE_AS_LOAD = 1 << 12,
+   TU_DEBUG_GMEM = 1 << 13,
 };
 
 struct tu_instance
@@ -462,6 +464,8 @@ struct tu_device
    pthread_cond_t timeline_cond;
    pthread_mutex_t submit_mutex;
 
+   struct tu_autotune autotune;
+
 #ifdef ANDROID
    const void *gralloc;
    enum {
@@ -658,7 +662,10 @@ struct tu_descriptor_set
 {
    struct vk_object_base base;
 
-   const struct tu_descriptor_set_layout *layout;
+   /* Link to descriptor pool's desc_sets list . */
+   struct list_head pool_link;
+
+   struct tu_descriptor_set_layout *layout;
    struct tu_descriptor_pool *pool;
    uint32_t size;
 
@@ -687,6 +694,8 @@ struct tu_descriptor_pool
    uint8_t *host_memory_ptr;
    uint8_t *host_memory_end;
    uint8_t *host_bo;
+
+   struct list_head desc_sets;
 
    uint32_t entry_count;
    uint32_t max_entry_count;
@@ -739,14 +748,8 @@ struct tu_buffer
    VkBufferCreateFlags flags;
 
    struct tu_bo *bo;
-   VkDeviceSize bo_offset;
+   uint64_t iova;
 };
-
-static inline uint64_t
-tu_buffer_iova(struct tu_buffer *buffer)
-{
-   return buffer->bo->iova + buffer->bo_offset;
-}
 
 const char *
 tu_get_debug_option_name(int id);
@@ -1058,6 +1061,35 @@ struct tu_cmd_state
    bool disable_gmem;
    enum a5xx_line_mode line_mode;
 
+   uint32_t drawcall_count;
+
+   /* A calculated "draw cost" value for renderpass, which tries to
+    * estimate the bandwidth-per-sample of all the draws according
+    * to:
+    *
+    *    foreach_draw (...) {
+    *      cost += num_frag_outputs;
+    *      if (blend_enabled)
+    *        cost += num_blend_enabled;
+    *      if (depth_test_enabled)
+    *        cost++;
+    *      if (depth_write_enabled)
+    *        cost++;
+    *    }
+    *
+    * The idea is that each sample-passed minimally does one write
+    * per MRT.  If blend is enabled, the hw will additionally do
+    * a framebuffer read per sample-passed (for each MRT with blend
+    * enabled).  If depth-test is enabled, the hw will additionally
+    * a depth buffer read.  If depth-write is enable, the hw will
+    * additionally do a depth buffer write.
+    *
+    * This does ignore depth buffer traffic for samples which do not
+    * pass do to depth-test fail, and some other details.  But it is
+    * just intended to be a rough estimate that is easy to calculate.
+    */
+   uint32_t total_drawcalls_cost;
+
    struct tu_lrz_state lrz;
 
    struct tu_draw_state depth_plane_state;
@@ -1096,6 +1128,8 @@ struct tu_cmd_buffer
    struct u_trace trace;
    struct u_trace_iterator trace_renderpass_start;
    struct u_trace_iterator trace_renderpass_end;
+
+   struct list_head renderpass_autotune_results;
 
    VkCommandBufferUsageFlags usage_flags;
    VkCommandBufferLevel level;
@@ -1295,6 +1329,9 @@ struct tu_pipeline
 
    struct tu_lrz_pipeline lrz;
 
+   /* Base drawcall cost for sysmem vs gmem autotuner */
+   uint8_t drawcall_base_cost;
+
    void *executables_mem_ctx;
    /* tu_pipeline_executable */
    struct util_dynarray executables;
@@ -1446,7 +1483,7 @@ struct tu_image
 
    /* Set when bound */
    struct tu_bo *bo;
-   VkDeviceSize bo_offset;
+   uint64_t iova;
 
    uint32_t lrz_height;
    uint32_t lrz_pitch;
@@ -1728,8 +1765,12 @@ VkResult
 tu_enumerate_devices(struct tu_instance *instance);
 
 int
-tu_drm_get_timestamp(struct tu_physical_device *device,
-                     uint64_t *ts);
+tu_device_get_gpu_timestamp(struct tu_device *dev,
+                            uint64_t *ts);
+
+int
+tu_device_get_suspend_count(struct tu_device *dev,
+                            uint64_t *suspend_count);
 
 int
 tu_drm_submitqueue_new(const struct tu_device *dev,
@@ -1759,24 +1800,40 @@ VkResult
 tu_create_copy_timestamp_cs(struct tu_cmd_buffer *cmdbuf, struct tu_cs** cs,
                             struct u_trace **trace_copy);
 
+/* If we copy trace and timestamps we will have to free them. */
 struct tu_u_trace_cmd_data
 {
    struct tu_cs *timestamp_copy_cs;
    struct u_trace *trace;
 };
 
-void
-tu_u_trace_cmd_data_finish(struct tu_device *device,
-                           struct tu_u_trace_cmd_data *trace_data,
-                           uint32_t entry_count);
-
-struct tu_u_trace_flush_data
+/* Data necessary to retrieve timestamps and clean all
+ * associated resources afterwards.
+ */
+struct tu_u_trace_submission_data
 {
    uint32_t submission_id;
+   /* We have to know when timestamps are available,
+    * this sync object indicates it.
+    */
    struct tu_u_trace_syncobj *syncobj;
-   uint32_t trace_count;
+
+   uint32_t cmd_buffer_count;
+   uint32_t last_buffer_with_tracepoints;
    struct tu_u_trace_cmd_data *cmd_trace_data;
 };
+
+VkResult
+tu_u_trace_submission_data_create(
+   struct tu_device *device,
+   struct tu_cmd_buffer **cmd_buffers,
+   uint32_t cmd_buffer_count,
+   struct tu_u_trace_submission_data **submission_data);
+
+void
+tu_u_trace_submission_data_finish(
+   struct tu_device *device,
+   struct tu_u_trace_submission_data *submission_data);
 
 #define TU_FROM_HANDLE(__tu_type, __name, __handle)                          \
    VK_FROM_HANDLE(__tu_type, __name, __handle)

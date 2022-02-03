@@ -699,7 +699,7 @@ copy_texture_region(struct d3d12_context *ctx,
    d3d12_batch_reference_resource(batch, info.dst, true);
    d3d12_transition_resource_state(ctx, info.src, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_BIND_INVALIDATE_FULL);
    d3d12_transition_resource_state(ctx, info.dst, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_BIND_INVALIDATE_FULL);
-   d3d12_apply_resource_states(ctx);
+   d3d12_apply_resource_states(ctx, false);
    ctx->cmdlist->CopyTextureRegion(&info.dst_loc, info.dst_x, info.dst_y, info.dst_z,
                                    &info.src_loc, info.src_box);
 }
@@ -890,7 +890,7 @@ transfer_buf_to_buf(struct d3d12_context *ctx,
    assert(src_d3d12 != dst_d3d12);
    d3d12_transition_resource_state(ctx, src, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_BIND_INVALIDATE_FULL);
    d3d12_transition_resource_state(ctx, dst, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_BIND_INVALIDATE_FULL);
-   d3d12_apply_resource_states(ctx);
+   d3d12_apply_resource_states(ctx, false);
    ctx->cmdlist->CopyBufferRegion(dst_d3d12, dst_offset,
                                   src_d3d12, src_offset,
                                   width);
@@ -1308,8 +1308,8 @@ d3d12_transfer_map(struct pipe_context *pctx,
          range.Begin = aligned_x;
       }
 
-      pipe_resource_usage staging_usage = (usage & (PIPE_MAP_READ | PIPE_MAP_READ_WRITE)) ?
-         PIPE_USAGE_STAGING : PIPE_USAGE_STREAM;
+      pipe_resource_usage staging_usage = (usage & (PIPE_MAP_DISCARD_RANGE | PIPE_MAP_DISCARD_WHOLE_RESOURCE)) ?
+         PIPE_USAGE_STREAM : PIPE_USAGE_STAGING;
 
       trans->staging_res = pipe_buffer_create(pctx->screen, 0,
                                               staging_usage,
@@ -1319,7 +1319,7 @@ d3d12_transfer_map(struct pipe_context *pctx,
 
       struct d3d12_resource *staging_res = d3d12_resource(trans->staging_res);
 
-      if (usage & PIPE_MAP_READ) {
+      if ((usage & (PIPE_MAP_DISCARD_RANGE | PIPE_MAP_DISCARD_WHOLE_RESOURCE | TC_TRANSFER_MAP_THREADED_UNSYNC)) == 0) {
          bool ret = true;
          if (pres->target == PIPE_BUFFER) {
             uint64_t src_offset = box->x;

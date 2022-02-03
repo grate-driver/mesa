@@ -562,7 +562,7 @@ iris_get_aux_clear_color_state_size(struct iris_screen *screen,
 
 static void
 map_aux_addresses(struct iris_screen *screen, struct iris_resource *res,
-                  enum isl_format format, unsigned plane)
+                  enum pipe_format pfmt, unsigned plane)
 {
    void *aux_map_ctx = iris_bufmgr_get_aux_map_context(screen->bufmgr);
    if (!aux_map_ctx)
@@ -571,6 +571,8 @@ map_aux_addresses(struct iris_screen *screen, struct iris_resource *res,
    if (isl_aux_usage_has_ccs(res->aux.usage)) {
       const unsigned aux_offset = res->aux.extra_aux.surf.size_B > 0 ?
          res->aux.extra_aux.offset : res->aux.offset;
+      const enum isl_format format =
+         iris_format_for_usage(&screen->devinfo, pfmt, res->surf.usage).fmt;
       const uint64_t format_bits =
          intel_aux_map_format_bits(res->surf.tiling, format, plane);
       intel_aux_map_add_mapping(aux_map_ctx, res->bo->address + res->offset,
@@ -915,7 +917,7 @@ iris_resource_init_aux_buf(struct iris_screen *screen,
    if (res->aux.surf.size_B > 0) {
       res->aux.bo = res->bo;
       iris_bo_reference(res->aux.bo);
-      map_aux_addresses(screen, res, res->surf.format, 0);
+      map_aux_addresses(screen, res, res->internal_format, 0);
    }
 
    if (iris_get_aux_clear_color_state_size(screen, res) > 0) {
@@ -957,23 +959,13 @@ iris_resource_finish_aux_import(struct pipe_screen *pscreen,
       num_main_planes += r[num_planes++]->bo != NULL;
    }
 
-   /* Get an ISL format to use with the aux-map. */
-   enum isl_format format;
-   switch (res->external_format) {
-   case PIPE_FORMAT_NV12: format = ISL_FORMAT_PLANAR_420_8; break;
-   case PIPE_FORMAT_P010: format = ISL_FORMAT_PLANAR_420_10; break;
-   case PIPE_FORMAT_P012: format = ISL_FORMAT_PLANAR_420_12; break;
-   case PIPE_FORMAT_P016: format = ISL_FORMAT_PLANAR_420_16; break;
-   default: format = res->surf.format; break;
-   }
-
    /* Combine main and aux plane information. */
    switch (res->mod_info->modifier) {
    case I915_FORMAT_MOD_Y_TILED_CCS:
    case I915_FORMAT_MOD_Y_TILED_GEN12_RC_CCS:
       assert(num_main_planes == 1 && num_planes == 2);
       import_aux_info(r[0], r[1]);
-      map_aux_addresses(screen, r[0], format, 0);
+      map_aux_addresses(screen, r[0], res->external_format, 0);
 
       /* Add on a clear color BO.
        *
@@ -991,7 +983,7 @@ iris_resource_finish_aux_import(struct pipe_screen *pscreen,
    case I915_FORMAT_MOD_Y_TILED_GEN12_RC_CCS_CC:
       assert(num_main_planes == 1 && num_planes == 3);
       import_aux_info(r[0], r[1]);
-      map_aux_addresses(screen, r[0], format, 0);
+      map_aux_addresses(screen, r[0], res->external_format, 0);
 
       /* Import the clear color BO. */
       iris_bo_reference(r[2]->aux.clear_color_bo);
@@ -1002,19 +994,13 @@ iris_resource_finish_aux_import(struct pipe_screen *pscreen,
    case I915_FORMAT_MOD_Y_TILED_GEN12_MC_CCS:
       if (num_main_planes == 1 && num_planes == 2) {
          import_aux_info(r[0], r[1]);
-         map_aux_addresses(screen, r[0], format, 0);
-      } else if (num_main_planes == 2 && num_planes == 4) {
+         map_aux_addresses(screen, r[0], res->external_format, 0);
+      } else {
+         assert(num_main_planes == 2 && num_planes == 4);
          import_aux_info(r[0], r[2]);
          import_aux_info(r[1], r[3]);
-         map_aux_addresses(screen, r[0], format, 0);
-         map_aux_addresses(screen, r[1], format, 1);
-      } else {
-         /* Gallium has lowered a single main plane into two. */
-         assert(num_main_planes == 2 && num_planes == 3);
-         assert(isl_format_is_yuv(format) && !isl_format_is_planar(format));
-         import_aux_info(r[0], r[2]);
-         import_aux_info(r[1], r[2]);
-         map_aux_addresses(screen, r[0], format, 0);
+         map_aux_addresses(screen, r[0], res->external_format, 0);
+         map_aux_addresses(screen, r[1], res->external_format, 1);
       }
       assert(!isl_aux_usage_has_fast_clears(res->mod_info->aux_usage));
       break;
@@ -1595,13 +1581,16 @@ iris_resource_get_param(struct pipe_screen *pscreen,
    bool mod_with_aux =
       res->mod_info && res->mod_info->aux_usage != ISL_AUX_USAGE_NONE;
    bool wants_aux = mod_with_aux && plane > 0;
+   bool wants_cc = mod_with_aux &&
+      mod_plane_is_clear_color(res->mod_info->modifier, plane);
    bool result;
    unsigned handle;
 
    iris_resource_disable_aux_on_first_query(resource, handle_usage);
    iris_resource_disable_suballoc_on_first_query(pscreen, ctx, res);
 
-   struct iris_bo *bo = wants_aux ? res->aux.bo : res->bo;
+   struct iris_bo *bo = wants_cc ? res->aux.clear_color_bo :
+                        wants_aux ? res->aux.bo : res->bo;
 
    assert(iris_bo_is_real(bo));
 
@@ -1616,12 +1605,19 @@ iris_resource_get_param(struct pipe_screen *pscreen,
       }
       return true;
    case PIPE_RESOURCE_PARAM_STRIDE:
-      *value = wants_aux ? res->aux.surf.row_pitch_B : res->surf.row_pitch_B;
+      *value = wants_cc ? 1 :
+               wants_aux ? res->aux.surf.row_pitch_B : res->surf.row_pitch_B;
+
+      /* Mesa's implementation of eglCreateImage rejects strides of zero (see
+       * dri2_check_dma_buf_attribs). Ensure we return a non-zero stride as
+       * this value may be queried from GBM and passed into EGL.
+       */
+      assert(*value);
+
       return true;
    case PIPE_RESOURCE_PARAM_OFFSET:
-      *value = wants_aux ?
-               mod_plane_is_clear_color(res->mod_info->modifier, plane) ?
-               res->aux.clear_color_offset : res->aux.offset : 0;
+      *value = wants_cc ? res->aux.clear_color_offset :
+               wants_aux ? res->aux.offset : 0;
       return true;
    case PIPE_RESOURCE_PARAM_MODIFIER:
       *value = res->mod_info ? res->mod_info->modifier :

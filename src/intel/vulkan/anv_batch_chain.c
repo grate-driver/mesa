@@ -37,6 +37,7 @@
 #include "perf/intel_perf.h"
 
 #include "util/debug.h"
+#include "util/perf/u_trace.h"
 
 /** \file anv_batch_chain.c
  *
@@ -1956,6 +1957,94 @@ setup_empty_execbuf(struct anv_execbuf *execbuf, struct anv_queue *queue)
    return VK_SUCCESS;
 }
 
+static VkResult
+setup_utrace_execbuf(struct anv_execbuf *execbuf, struct anv_queue *queue,
+                     struct anv_utrace_flush_copy *flush)
+{
+   struct anv_device *device = queue->device;
+   VkResult result = anv_execbuf_add_bo(device, execbuf,
+                                        flush->batch_bo,
+                                        &flush->relocs, 0);
+   if (result != VK_SUCCESS)
+      return result;
+
+   result = anv_execbuf_add_sync(device, execbuf, flush->sync,
+                                 true /* is_signal */, 0 /* value */);
+   if (result != VK_SUCCESS)
+      return result;
+
+   if (flush->batch_bo->exec_obj_index != execbuf->bo_count - 1) {
+      uint32_t idx = flush->batch_bo->exec_obj_index;
+      uint32_t last_idx = execbuf->bo_count - 1;
+
+      struct drm_i915_gem_exec_object2 tmp_obj = execbuf->objects[idx];
+      assert(execbuf->bos[idx] == flush->batch_bo);
+
+      execbuf->objects[idx] = execbuf->objects[last_idx];
+      execbuf->bos[idx] = execbuf->bos[last_idx];
+      execbuf->bos[idx]->exec_obj_index = idx;
+
+      execbuf->objects[last_idx] = tmp_obj;
+      execbuf->bos[last_idx] = flush->batch_bo;
+      flush->batch_bo->exec_obj_index = last_idx;
+   }
+
+   if (!device->info.has_llc) {
+      __builtin_ia32_mfence();
+      for (uint32_t i = 0; i < flush->batch_bo->size; i += CACHELINE_SIZE)
+         __builtin_ia32_clflush(flush->batch_bo->map);
+   }
+
+   execbuf->execbuf = (struct drm_i915_gem_execbuffer2) {
+      .buffers_ptr = (uintptr_t) execbuf->objects,
+      .buffer_count = execbuf->bo_count,
+      .batch_start_offset = 0,
+      .batch_len = flush->batch.next - flush->batch.start,
+      .flags = I915_EXEC_HANDLE_LUT | I915_EXEC_FENCE_ARRAY | queue->exec_flags |
+               (execbuf->has_relocs ? 0 : I915_EXEC_NO_RELOC),
+      .rsvd1 = device->context_id,
+      .rsvd2 = 0,
+      .num_cliprects = execbuf->syncobj_count,
+      .cliprects_ptr = (uintptr_t)execbuf->syncobjs,
+   };
+
+   return VK_SUCCESS;
+}
+
+static VkResult
+anv_queue_exec_utrace_locked(struct anv_queue *queue,
+                             struct anv_utrace_flush_copy *flush)
+{
+   assert(flush->batch_bo);
+
+   struct anv_device *device = queue->device;
+   struct anv_execbuf execbuf;
+   anv_execbuf_init(&execbuf);
+   execbuf.alloc = &device->vk.alloc;
+   execbuf.alloc_scope = VK_SYSTEM_ALLOCATION_SCOPE_DEVICE;
+
+   VkResult result = setup_utrace_execbuf(&execbuf, queue, flush);
+   if (result != VK_SUCCESS)
+      goto error;
+
+   int ret = queue->device->info.no_hw ? 0 :
+      anv_gem_execbuffer(queue->device, &execbuf.execbuf);
+   if (ret)
+      result = vk_queue_set_lost(&queue->vk, "execbuf2 failed: %m");
+
+   struct drm_i915_gem_exec_object2 *objects = execbuf.objects;
+   for (uint32_t k = 0; k < execbuf.bo_count; k++) {
+      if (anv_bo_is_pinned(execbuf.bos[k]))
+         assert(execbuf.bos[k]->offset == objects[k].offset);
+      execbuf.bos[k]->offset = objects[k].offset;
+   }
+
+ error:
+   anv_execbuf_finish(&execbuf);
+
+   return result;
+}
+
 /* We lock around execbuf for three main reasons:
  *
  *  1) When a block pool is resized, we create a new gem handle with a
@@ -1992,16 +2081,37 @@ anv_queue_exec_locked(struct anv_queue *queue,
                       uint32_t perf_query_pass)
 {
    struct anv_device *device = queue->device;
+   struct anv_utrace_flush_copy *utrace_flush_data = NULL;
    struct anv_execbuf execbuf;
    anv_execbuf_init(&execbuf);
    execbuf.alloc = &queue->device->vk.alloc;
    execbuf.alloc_scope = VK_SYSTEM_ALLOCATION_SCOPE_DEVICE;
    execbuf.perf_query_pass = perf_query_pass;
 
+   /* Flush the trace points first, they need to be moved */
+   VkResult result =
+      anv_device_utrace_flush_cmd_buffers(queue,
+                                          cmd_buffer_count,
+                                          cmd_buffers,
+                                          &utrace_flush_data);
+   if (result != VK_SUCCESS)
+      goto error;
+
+   if (utrace_flush_data && !utrace_flush_data->batch_bo) {
+      result = anv_execbuf_add_sync(device, &execbuf,
+                                    utrace_flush_data->sync,
+                                    true /* is_signal */,
+                                    0);
+      if (result != VK_SUCCESS)
+         goto error;
+
+      utrace_flush_data = NULL;
+   }
+
    /* Always add the workaround BO as it includes a driver identifier for the
     * error_state.
     */
-   VkResult result =
+   result =
       anv_execbuf_add_bo(device, &execbuf, device->workaround_bo, NULL, 0);
    if (result != VK_SUCCESS)
       goto error;
@@ -2148,7 +2258,16 @@ anv_queue_exec_locked(struct anv_queue *queue,
  error:
    anv_execbuf_finish(&execbuf);
 
+   if (result == VK_SUCCESS && utrace_flush_data)
+      result = anv_queue_exec_utrace_locked(queue, utrace_flush_data);
+
    return result;
+}
+
+static inline bool
+can_chain_query_pools(struct anv_query_pool *p1, struct anv_query_pool *p2)
+{
+   return (!p1 || !p2 || p1 == p2);
 }
 
 static VkResult
@@ -2167,55 +2286,49 @@ anv_queue_submit_locked(struct anv_queue *queue,
       if (result != VK_SUCCESS)
          return result;
    } else {
-      struct anv_query_pool *perf_query_pool = NULL;
-      uint32_t start = 0;
-
       /* Everything's easier if we don't have to bother with container_of() */
       STATIC_ASSERT(offsetof(struct anv_cmd_buffer, vk) == 0);
       struct vk_command_buffer **vk_cmd_buffers = submit->command_buffers;
       struct anv_cmd_buffer **cmd_buffers = (void *)vk_cmd_buffers;
-
-      const uint32_t end = submit->command_buffer_count;
-      while (start < end) {
-         uint32_t i = start + 1;
-
-         /* Save the first query pool or NULL */
-         perf_query_pool = cmd_buffers[start]->perf_query_pool;
-
-         for (; i < end; i++) {
-            /* Can we chain the last buffer into the next one? */
-            if (!anv_cmd_buffer_is_chainable(cmd_buffers[i]))
-               break;
-
-            if (cmd_buffers[i]->perf_query_pool != NULL) {
-               if (perf_query_pool != NULL) {
-                  /* They have to have the same query pool */
-                  if (cmd_buffers[i]->perf_query_pool != perf_query_pool)
-                     break;
-               } else {
-                  perf_query_pool = cmd_buffers[i]->perf_query_pool;
-               }
+      uint32_t start = 0;
+      uint32_t end = submit->command_buffer_count;
+      struct anv_query_pool *perf_query_pool =
+         cmd_buffers[start]->perf_query_pool;
+      for (uint32_t n = 0; n < end; n++) {
+         bool can_chain = false;
+         uint32_t next = n + 1;
+         /* Can we chain the last buffer into the next one? */
+         if (next < end &&
+             anv_cmd_buffer_is_chainable(cmd_buffers[next]) &&
+             can_chain_query_pools
+             (cmd_buffers[next]->perf_query_pool, perf_query_pool)) {
+            can_chain = true;
+            perf_query_pool =
+               perf_query_pool ? perf_query_pool :
+               cmd_buffers[next]->perf_query_pool;
+         }
+         if (!can_chain) {
+            /* The next buffer cannot be chained, or we have reached the
+             * last buffer, submit what have been chained so far.
+             */
+            VkResult result =
+               anv_queue_exec_locked(queue,
+                                     start == 0 ? submit->wait_count : 0,
+                                     start == 0 ? submit->waits : NULL,
+                                     next - start, &cmd_buffers[start],
+                                     next == end ? submit->signal_count : 0,
+                                     next == end ? submit->signals : NULL,
+                                     perf_query_pool,
+                                     submit->perf_pass_index);
+            if (result != VK_SUCCESS)
+               return result;
+            if (next < end) {
+               start = next;
+               perf_query_pool = cmd_buffers[start]->perf_query_pool;
             }
          }
-
-         VkResult result =
-            anv_queue_exec_locked(queue,
-                                  start == 0 ? submit->wait_count : 0,
-                                  start == 0 ? submit->waits : NULL,
-                                  i - start, &cmd_buffers[start],
-                                  i == end ? submit->signal_count : 0,
-                                  i == end ? submit->signals : NULL,
-                                  perf_query_pool,
-                                  submit->perf_pass_index);
-         if (result != VK_SUCCESS)
-            return result;
-
-         perf_query_pool = NULL;
-         start = i;
       }
-      assert(start == end);
    }
-
    for (uint32_t i = 0; i < submit->signal_count; i++) {
       if (!vk_sync_is_anv_bo_sync(submit->signals[i].sync))
          continue;
@@ -2261,9 +2374,14 @@ anv_queue_submit(struct vk_queue *vk_queue,
       return VK_SUCCESS;
    }
 
+   uint64_t start_ts = intel_ds_begin_submit(queue->ds);
+
    pthread_mutex_lock(&device->mutex);
    result = anv_queue_submit_locked(queue, submit);
+   /* Take submission ID under lock */
    pthread_mutex_unlock(&device->mutex);
+
+   intel_ds_end_submit(queue->ds, start_ts);
 
    return result;
 }

@@ -1971,7 +1971,7 @@ link_tes_in_layout_qualifiers(struct gl_shader_program *prog,
    int point_mode = -1;
    unsigned vertex_order = 0;
 
-   gl_prog->info.tess.primitive_mode = PRIM_UNKNOWN;
+   gl_prog->info.tess._primitive_mode = TESS_PRIMITIVE_UNSPECIFIED;
    gl_prog->info.tess.spacing = TESS_SPACING_UNSPECIFIED;
 
    /* From the GLSL 4.0 spec (chapter 4.3.8.1):
@@ -1991,16 +1991,16 @@ link_tes_in_layout_qualifiers(struct gl_shader_program *prog,
    for (unsigned i = 0; i < num_shaders; i++) {
       struct gl_shader *shader = shader_list[i];
 
-      if (shader->info.TessEval.PrimitiveMode != PRIM_UNKNOWN) {
-         if (gl_prog->info.tess.primitive_mode != PRIM_UNKNOWN &&
-             gl_prog->info.tess.primitive_mode !=
-             shader->info.TessEval.PrimitiveMode) {
+      if (shader->info.TessEval._PrimitiveMode != TESS_PRIMITIVE_UNSPECIFIED) {
+         if (gl_prog->info.tess._primitive_mode != TESS_PRIMITIVE_UNSPECIFIED &&
+             gl_prog->info.tess._primitive_mode !=
+             shader->info.TessEval._PrimitiveMode) {
             linker_error(prog, "tessellation evaluation shader defined with "
                          "conflicting input primitive modes.\n");
             return;
          }
-         gl_prog->info.tess.primitive_mode =
-            shader->info.TessEval.PrimitiveMode;
+         gl_prog->info.tess._primitive_mode =
+            shader->info.TessEval._PrimitiveMode;
       }
 
       if (shader->info.TessEval.Spacing != 0) {
@@ -2039,7 +2039,7 @@ link_tes_in_layout_qualifiers(struct gl_shader_program *prog,
     * since we already know we're in the right type of shader program
     * for doing it.
     */
-   if (gl_prog->info.tess.primitive_mode == PRIM_UNKNOWN) {
+   if (gl_prog->info.tess._primitive_mode == TESS_PRIMITIVE_UNSPECIFIED) {
       linker_error(prog,
                    "tessellation evaluation shader didn't declare input "
                    "primitive modes.\n");
@@ -2164,8 +2164,8 @@ link_gs_inout_layout_qualifiers(struct gl_shader_program *prog,
    int vertices_out = -1;
 
    gl_prog->info.gs.invocations = 0;
-   gl_prog->info.gs.input_primitive = PRIM_UNKNOWN;
-   gl_prog->info.gs.output_primitive = PRIM_UNKNOWN;
+   gl_prog->info.gs.input_primitive = SHADER_PRIM_UNKNOWN;
+   gl_prog->info.gs.output_primitive = SHADER_PRIM_UNKNOWN;
 
    /* From the GLSL 1.50 spec, page 46:
     *
@@ -2180,26 +2180,26 @@ link_gs_inout_layout_qualifiers(struct gl_shader_program *prog,
    for (unsigned i = 0; i < num_shaders; i++) {
       struct gl_shader *shader = shader_list[i];
 
-      if (shader->info.Geom.InputType != PRIM_UNKNOWN) {
-         if (gl_prog->info.gs.input_primitive != PRIM_UNKNOWN &&
+      if (shader->info.Geom.InputType != SHADER_PRIM_UNKNOWN) {
+         if (gl_prog->info.gs.input_primitive != SHADER_PRIM_UNKNOWN &&
              gl_prog->info.gs.input_primitive !=
              shader->info.Geom.InputType) {
             linker_error(prog, "geometry shader defined with conflicting "
                          "input types\n");
             return;
          }
-         gl_prog->info.gs.input_primitive = shader->info.Geom.InputType;
+         gl_prog->info.gs.input_primitive = (enum shader_prim)shader->info.Geom.InputType;
       }
 
-      if (shader->info.Geom.OutputType != PRIM_UNKNOWN) {
-         if (gl_prog->info.gs.output_primitive != PRIM_UNKNOWN &&
+      if (shader->info.Geom.OutputType != SHADER_PRIM_UNKNOWN) {
+         if (gl_prog->info.gs.output_primitive != SHADER_PRIM_UNKNOWN &&
              gl_prog->info.gs.output_primitive !=
              shader->info.Geom.OutputType) {
             linker_error(prog, "geometry shader defined with conflicting "
                          "output types\n");
             return;
          }
-         gl_prog->info.gs.output_primitive = shader->info.Geom.OutputType;
+         gl_prog->info.gs.output_primitive = (enum shader_prim)shader->info.Geom.OutputType;
       }
 
       if (shader->info.Geom.VerticesOut != -1) {
@@ -2231,13 +2231,13 @@ link_gs_inout_layout_qualifiers(struct gl_shader_program *prog,
     * since we already know we're in the right type of shader program
     * for doing it.
     */
-   if (gl_prog->info.gs.input_primitive == PRIM_UNKNOWN) {
+   if (gl_prog->info.gs.input_primitive == SHADER_PRIM_UNKNOWN) {
       linker_error(prog,
                    "geometry shader didn't declare primitive input type\n");
       return;
    }
 
-   if (gl_prog->info.gs.output_primitive == PRIM_UNKNOWN) {
+   if (gl_prog->info.gs.output_primitive == SHADER_PRIM_UNKNOWN) {
       linker_error(prog,
                    "geometry shader didn't declare primitive output type\n");
       return;
@@ -2521,7 +2521,7 @@ link_intrastage_shaders(void *mem_ctx,
       return NULL;
    }
 
-   _mesa_reference_shader_program_data(ctx, &gl_prog->sh.data, prog->data);
+   _mesa_reference_shader_program_data(&gl_prog->sh.data, prog->data);
 
    /* Don't use _mesa_reference_program() just take ownership */
    linked->Program = gl_prog;

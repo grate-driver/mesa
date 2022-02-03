@@ -287,6 +287,7 @@ struct radv_physical_device {
    uint8_t ps_wave_size;
    uint8_t cs_wave_size;
    uint8_t ge_wave_size;
+   uint8_t rt_wave_size;
 
    /* Whether to use the LLVM compiler backend */
    bool use_llvm;
@@ -338,6 +339,7 @@ struct radv_instance {
    bool absolute_depth_bias;
    bool report_apu_as_dgpu;
    bool disable_htile_layers;
+   bool disable_aniso_single_level;
 };
 
 VkResult radv_init_wsi(struct radv_physical_device *physical_device);
@@ -1711,6 +1713,7 @@ struct radv_event {
 #define RADV_HASH_SHADER_ROBUST_BUFFER_ACCESS2 (1 << 15)
 #define RADV_HASH_SHADER_FORCE_EMULATE_RT      (1 << 16)
 #define RADV_HASH_SHADER_SPLIT_FMA             (1 << 17)
+#define RADV_HASH_SHADER_RT_WAVE64             (1 << 18)
 
 struct radv_pipeline_key;
 
@@ -2669,22 +2672,22 @@ void radv_describe_layout_transition(struct radv_cmd_buffer *cmd_buffer,
 uint64_t radv_get_current_time(void);
 
 static inline uint32_t
-si_conv_gl_prim_to_vertices(unsigned gl_prim)
+si_conv_gl_prim_to_vertices(enum shader_prim gl_prim)
 {
    switch (gl_prim) {
-   case 0: /* GL_POINTS */
+   case SHADER_PRIM_POINTS:
       return 1;
-   case 1: /* GL_LINES */
-   case 3: /* GL_LINE_STRIP */
+   case SHADER_PRIM_LINES:
+   case SHADER_PRIM_LINE_STRIP:
       return 2;
-   case 4: /* GL_TRIANGLES */
-   case 5: /* GL_TRIANGLE_STRIP */
+   case SHADER_PRIM_TRIANGLES:
+   case SHADER_PRIM_TRIANGLE_STRIP:
       return 3;
-   case 0xA: /* GL_LINE_STRIP_ADJACENCY_ARB */
+   case SHADER_PRIM_LINES_ADJACENCY:
       return 4;
-   case 0xc: /* GL_TRIANGLES_ADJACENCY_ARB */
+   case SHADER_PRIM_TRIANGLES_ADJACENCY:
       return 6;
-   case 7: /* GL_QUADS */
+   case SHADER_PRIM_QUADS:
       return V_028A6C_TRISTRIP;
    default:
       assert(0);

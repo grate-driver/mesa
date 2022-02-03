@@ -591,7 +591,7 @@ update_so_info(struct zink_shader *zs, const struct pipe_stream_output_info *so_
       const struct pipe_stream_output *output = &so_info->output[i];
       unsigned slot = reverse_map[output->register_index];
       /* always set stride to be used during draw */
-      zs->streamout.so_info.stride[output->output_buffer] = so_info->stride[output->output_buffer];
+      zs->sinfo.so_info.stride[output->output_buffer] = so_info->stride[output->output_buffer];
       if (zs->nir->info.stage != MESA_SHADER_GEOMETRY || util_bitcount(zs->nir->info.gs.active_stream_mask) == 1) {
          nir_variable *var = NULL;
          while (!var)
@@ -662,11 +662,11 @@ update_so_info(struct zink_shader *zs, const struct pipe_stream_output_info *so_
             }
          }
       }
-      zs->streamout.so_info.output[zs->streamout.so_info.num_outputs] = *output;
+      zs->sinfo.so_info.output[zs->sinfo.so_info.num_outputs] = *output;
       /* Map Gallium's condensed "slots" back to real VARYING_SLOT_* enums */
-      zs->streamout.so_info_slots[zs->streamout.so_info.num_outputs++] = reverse_map[output->register_index];
+      zs->sinfo.so_info_slots[zs->sinfo.so_info.num_outputs++] = reverse_map[output->register_index];
    }
-   zs->streamout.have_xfb = !!zs->streamout.so_info.num_outputs;
+   zs->sinfo.have_xfb = !!zs->sinfo.so_info.num_outputs;
 }
 
 struct decompose_state {
@@ -1086,7 +1086,7 @@ VkShaderModule
 zink_shader_compile(struct zink_screen *screen, struct zink_shader *zs, nir_shader *base_nir, const struct zink_shader_key *key)
 {
    VkShaderModule mod = VK_NULL_HANDLE;
-   void *streamout = NULL;
+   struct zink_shader_info *sinfo = &zs->sinfo;
    nir_shader *nir = nir_shader_clone(NULL, base_nir);
    bool need_optimize = false;
    bool inlined_uniforms = false;
@@ -1128,8 +1128,8 @@ zink_shader_compile(struct zink_screen *screen, struct zink_shader *zs, nir_shad
       case MESA_SHADER_TESS_EVAL:
       case MESA_SHADER_GEOMETRY:
          if (zink_vs_key_base(key)->last_vertex_stage) {
-            if (zs->streamout.have_xfb)
-               streamout = &zs->streamout;
+            if (zs->sinfo.have_xfb)
+               sinfo->last_vertex = true;
 
             if (!zink_vs_key_base(key)->clip_halfz) {
                NIR_PASS_V(nir, nir_lower_clip_halfz);
@@ -1189,7 +1189,7 @@ zink_shader_compile(struct zink_screen *screen, struct zink_shader *zs, nir_shad
 
    NIR_PASS_V(nir, nir_convert_from_ssa, true);
 
-   struct spirv_shader *spirv = nir_to_spirv(nir, streamout, screen->spirv_version);
+   struct spirv_shader *spirv = nir_to_spirv(nir, sinfo, screen->spirv_version);
    if (!spirv)
       goto done;
 
@@ -1606,17 +1606,27 @@ handle_bindless_var(nir_shader *nir, nir_variable *var, const struct glsl_type *
 }
 
 static enum pipe_prim_type
-gl_prim_to_pipe(unsigned primitive_type)
+prim_to_pipe(enum shader_prim primitive_type)
 {
    switch (primitive_type) {
-   case GL_POINTS:
+   case SHADER_PRIM_POINTS:
       return PIPE_PRIM_POINTS;
-   case GL_LINES:
-   case GL_LINE_LOOP:
-   case GL_LINE_STRIP:
-   case GL_LINES_ADJACENCY:
-   case GL_LINE_STRIP_ADJACENCY:
-   case GL_ISOLINES:
+   case SHADER_PRIM_LINES:
+   case SHADER_PRIM_LINE_LOOP:
+   case SHADER_PRIM_LINE_STRIP:
+   case SHADER_PRIM_LINES_ADJACENCY:
+   case SHADER_PRIM_LINE_STRIP_ADJACENCY:
+      return PIPE_PRIM_LINES;
+   default:
+      return PIPE_PRIM_TRIANGLES;
+   }
+}
+
+static enum pipe_prim_type
+tess_prim_to_pipe(enum tess_primitive_mode prim_mode)
+{
+   switch (prim_mode) {
+   case TESS_PRIMITIVE_ISOLINES:
       return PIPE_PRIM_LINES;
    default:
       return PIPE_PRIM_TRIANGLES;
@@ -1628,9 +1638,9 @@ get_shader_base_prim_type(struct nir_shader *nir)
 {
    switch (nir->info.stage) {
    case MESA_SHADER_GEOMETRY:
-      return gl_prim_to_pipe(nir->info.gs.output_primitive);
+      return prim_to_pipe(nir->info.gs.output_primitive);
    case MESA_SHADER_TESS_EVAL:
-      return nir->info.tess.point_mode ? PIPE_PRIM_POINTS : gl_prim_to_pipe(nir->info.tess.primitive_mode);
+      return nir->info.tess.point_mode ? PIPE_PRIM_POINTS : tess_prim_to_pipe(nir->info.tess._primitive_mode);
    default:
       break;
    }
@@ -1702,17 +1712,22 @@ lower_1d_shadow(nir_shader *shader)
 }
 
 static void
-scan_nir(nir_shader *shader)
+scan_nir(struct zink_screen *screen, nir_shader *shader, struct zink_shader *zs)
 {
    nir_foreach_function(function, shader) {
       if (!function->impl)
          continue;
       nir_foreach_block_safe(block, function->impl) {
          nir_foreach_instr_safe(instr, block) {
+            if (instr->type == nir_instr_type_tex) {
+               nir_tex_instr *tex = nir_instr_as_tex(instr);
+               zs->sinfo.have_sparse |= tex->is_sparse;
+            }
             if (instr->type != nir_instr_type_intrinsic)
                continue;
             nir_intrinsic_instr *intr = nir_instr_as_intrinsic(instr);
             if (intr->intrinsic == nir_intrinsic_image_deref_load ||
+                intr->intrinsic == nir_intrinsic_image_deref_sparse_load ||
                 intr->intrinsic == nir_intrinsic_image_deref_store ||
                 intr->intrinsic == nir_intrinsic_image_deref_atomic_add ||
                 intr->intrinsic == nir_intrinsic_image_deref_atomic_imin ||
@@ -1740,9 +1755,55 @@ scan_nir(nir_shader *shader)
 
                 shader->info.images_used |= mask;
             }
+            if (intr->intrinsic == nir_intrinsic_is_sparse_texels_resident ||
+                intr->intrinsic == nir_intrinsic_image_deref_sparse_load)
+               zs->sinfo.have_sparse = true;
+
+            static bool warned = false;
+            if (!screen->info.have_EXT_shader_atomic_float && !screen->is_cpu && !warned) {
+               switch (intr->intrinsic) {
+               case nir_intrinsic_image_deref_atomic_add:
+               case nir_intrinsic_image_deref_atomic_exchange: {
+                  nir_variable *var = nir_intrinsic_get_var(intr, 0);
+                  if (util_format_is_float(var->data.image.format))
+                     fprintf(stderr, "zink: Vulkan driver missing VK_EXT_shader_atomic_float but attempting to do atomic ops!\n");
+                  break;
+               }
+               default:
+                  break;
+               }
+            }
          }
       }
    }
+}
+
+static bool
+lower_sparse_instr(nir_builder *b, nir_instr *in, void *data)
+{
+   if (in->type != nir_instr_type_intrinsic)
+      return false;
+   nir_intrinsic_instr *instr = nir_instr_as_intrinsic(in);
+   if (instr->intrinsic != nir_intrinsic_is_sparse_texels_resident)
+      return false;
+
+   /* vulkan vec can only be a vec4, but this is (maybe) vec5,
+    * so just rewrite as the first component since ntv is going to use a different
+    * method for storing the residency value anyway
+    */
+   b->cursor = nir_before_instr(&instr->instr);
+   nir_instr *parent = instr->src[0].ssa->parent_instr;
+   assert(parent->type == nir_instr_type_alu);
+   nir_alu_instr *alu = nir_instr_as_alu(parent);
+   nir_ssa_def_rewrite_uses_after(instr->src[0].ssa, nir_channel(b, alu->src[0].src.ssa, 0), parent);
+   nir_instr_remove(parent);
+   return true;
+}
+
+static bool
+lower_sparse(nir_shader *shader)
+{
+   return nir_shader_instructions_pass(shader, lower_sparse_instr, nir_metadata_dominance, NULL);
 }
 
 struct zink_shader *
@@ -1780,6 +1841,7 @@ zink_shader_create(struct zink_screen *screen, struct nir_shader *nir,
    NIR_PASS_V(nir, lower_work_dim);
    NIR_PASS_V(nir, nir_lower_regs_to_ssa);
    NIR_PASS_V(nir, lower_baseinstance);
+   NIR_PASS_V(nir, lower_sparse);
 
    if (screen->need_2D_zs)
       NIR_PASS_V(nir, lower_1d_shadow);
@@ -1825,7 +1887,7 @@ zink_shader_create(struct zink_screen *screen, struct nir_shader *nir,
    if (has_bindless_io)
       NIR_PASS_V(nir, lower_bindless_io);
 
-   scan_nir(nir);
+   scan_nir(screen, nir, ret);
 
    foreach_list_typed_reverse_safe(nir_variable, var, node, &nir->variables) {
       if (_nir_shader_variable_has_mode(var, nir_var_uniform |

@@ -44,8 +44,8 @@ struct ntt_compile {
    bool native_integers;
    bool has_txf_lz;
 
-   bool addr_declared[2];
-   struct ureg_dst addr_reg[2];
+   bool addr_declared[3];
+   struct ureg_dst addr_reg[3];
 
    /* if condition set up at the end of a block, for ntt_emit_if(). */
    struct ureg_src if_cond;
@@ -631,6 +631,8 @@ ntt_get_load_const_src(struct ntt_compile *c, nir_load_const_instr *instr)
 static struct ureg_src
 ntt_reladdr(struct ntt_compile *c, struct ureg_src addr, int addr_index)
 {
+   assert(addr_index < ARRAY_SIZE(c->addr_reg));
+
    for (int i = 0; i <= addr_index; i++) {
       if (!c->addr_declared[i]) {
          c->addr_reg[i] = ureg_writemask(ureg_DECL_address(c->ureg),
@@ -1338,6 +1340,7 @@ ntt_emit_load_ubo(struct ntt_compile *c, nir_intrinsic_instr *instr)
       /* !PIPE_CAP_LOAD_CONSTBUF: Just emit it as a vec4 reference to the const
        * file.
        */
+      src.Index = nir_intrinsic_base(instr);
 
       if (nir_src_is_const(instr->src[1])) {
          src.Index += ntt_src_as_uint(c, instr->src[1]);
@@ -2571,6 +2574,21 @@ ntt_optimize_nir(struct nir_shader *s, struct pipe_screen *screen)
       NIR_PASS(progress, s, nir_opt_vectorize, ntt_should_vectorize_instr, NULL);
       NIR_PASS(progress, s, nir_opt_undef);
       NIR_PASS(progress, s, nir_opt_loop_unroll);
+
+      /* Try to fold addressing math into ubo_vec4's base to avoid load_consts
+       * and ALU ops for it.
+       */
+      static const nir_opt_offsets_options offset_options = {
+         .ubo_vec4_max = ~0,
+
+         /* No const offset in TGSI for shared accesses. */
+         .shared_max = 0,
+
+         /* unused intrinsics */
+         .uniform_max = 0,
+         .buffer_max = 0,
+      };
+      NIR_PASS(progress, s, nir_opt_offsets, &offset_options);
 
    } while (progress);
 }

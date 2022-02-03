@@ -70,6 +70,7 @@ enum intel_platform {
    INTEL_PLATFORM_RKL,
    INTEL_PLATFORM_DG1,
    INTEL_PLATFORM_ADL,
+   INTEL_PLATFORM_RPL,
    INTEL_PLATFORM_GROUP_START(DG2, INTEL_PLATFORM_DG2_G10),
    INTEL_PLATFORM_GROUP_END(DG2, INTEL_PLATFORM_DG2_G11),
 };
@@ -126,6 +127,12 @@ struct intel_device_info
    bool has_surface_tile_offset;
    bool supports_simd16_3src;
    bool disable_ccs_repack;
+
+   /**
+    * True if CCS uses a flat virtual address translation to a memory
+    * carve-out, rather than aux map translations, or additional surfaces.
+    */
+   bool has_flat_ccs;
    bool has_aux_map;
    bool has_tiling_uapi;
    bool has_ray_tracing;
@@ -138,6 +145,12 @@ struct intel_device_info
     *  @{
     */
    bool has_negative_rhw_bug;
+
+   /**
+    * Whether this platform supports fragment shading rate controlled by a
+    * primitive in geometry shaders and by a control buffer.
+    */
+   bool has_coarse_pixel_primitive_and_cb;
 
    /**
     * Some versions of Gen hardware don't do centroid interpolation correctly
@@ -268,6 +281,8 @@ struct intel_device_info
     */
    unsigned max_wm_threads;
 
+   unsigned max_threads_per_psd;
+
    /**
     * Maximum Compute Shader threads.
     *
@@ -369,6 +384,11 @@ struct intel_device_info
     * no_hw is true when the pci_device_id has been overridden
     */
    bool no_hw;
+
+   /**
+    * apply_hwconfig is true when the platform should apply hwconfig values
+    */
+   bool apply_hwconfig;
    /** @} */
 };
 
@@ -448,7 +468,12 @@ static inline uint64_t
 intel_device_info_timebase_scale(const struct intel_device_info *devinfo,
                                  uint64_t gpu_timestamp)
 {
-   return (1000000000ull * gpu_timestamp) / devinfo->timestamp_frequency;
+   /* Try to avoid going over the 64bits when doing the scaling */
+   uint64_t upper_ts = gpu_timestamp >> 32;
+   uint64_t lower_ts = gpu_timestamp & 0xffffffff;
+   uint64_t upper_scaled_ts = upper_ts * 1000000000ull / devinfo->timestamp_frequency;
+   uint64_t lower_scaled_ts = lower_ts * 1000000000ull / devinfo->timestamp_frequency;
+   return (upper_scaled_ts << 32) + lower_scaled_ts;
 }
 
 bool intel_get_device_info_from_fd(int fh, struct intel_device_info *devinfo);

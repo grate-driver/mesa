@@ -92,6 +92,11 @@ get_nir_options_for_stage(struct radv_physical_device *device, gl_shader_stage s
       .has_udot_4x8 = device->rad_info.has_accelerated_dot_product,
       .has_dot_2x16 = device->rad_info.has_accelerated_dot_product,
       .use_scoped_barrier = true,
+#ifdef LLVM_AVAILABLE
+      .has_fmulz = !device->use_llvm || LLVM_VERSION_MAJOR >= 12,
+#else
+      .has_fmulz = true,
+#endif
       .max_unroll_iterations = 32,
       .max_unroll_iterations_aggressive = 128,
       .use_interpolated_input_intrinsics = true,
@@ -211,8 +216,14 @@ radv_optimize_nir_algebraic(nir_shader *nir, bool opt_offsets)
       NIR_PASS(more_algebraic, nir, nir_opt_algebraic);
    }
 
-   if (opt_offsets)
-      NIR_PASS_V(nir, nir_opt_offsets);
+   if (opt_offsets) {
+      static const nir_opt_offsets_options offset_options = {
+         .uniform_max = 0,
+         .buffer_max = ~0,
+         .shared_max = ~0,
+      };
+      NIR_PASS_V(nir, nir_opt_offsets, &offset_options);
+   }
 
    /* Do late algebraic optimization to turn add(a,
     * neg(b)) back into subs, then the mandatory cleanup
@@ -317,8 +328,7 @@ lower_intrinsics(nir_shader *nir, const struct radv_pipeline_key *key,
                                         nir_iadd(&b, nir_channel(&b, intrin->src[0].ssa, 0),
                                                  nir_channel(&b, intrin->src[0].ssa, 1)));
 
-               def = nir_build_load_global(&b, 1, 64, addr, .access = ACCESS_NON_WRITEABLE,
-                                           .align_mul = 8, .align_offset = 0);
+               def = nir_build_load_global(&b, 1, 64, addr, .access = ACCESS_NON_WRITEABLE);
             } else {
                def = nir_vector_insert_imm(&b, intrin->src[0].ssa, nir_imm_int(&b, 0), 2);
             }
@@ -720,7 +730,7 @@ radv_shader_compile_to_nir(struct radv_device *device, struct vk_shader_module *
                                .ballot_components = 1,
                                .lower_to_scalar = 1,
                                .lower_subgroup_masks = 1,
-                               .lower_shuffle = 1,
+                               .lower_relative_shuffle = 1,
                                .lower_shuffle_to_32bit = 1,
                                .lower_vote_eq = 1,
                                .lower_quad_broadcast_dynamic = 1,
@@ -1015,7 +1025,7 @@ void radv_lower_ngg(struct radv_device *device, struct nir_shader *nir,
    if (nir->info.stage == MESA_SHADER_TESS_EVAL) {
       if (nir->info.tess.point_mode)
          num_vertices_per_prim = 1;
-      else if (nir->info.tess.primitive_mode == GL_ISOLINES)
+      else if (nir->info.tess._primitive_mode == TESS_PRIMITIVE_ISOLINES)
          num_vertices_per_prim = 2;
 
       /* Manually mark the primitive ID used, so the shader can repack it. */
@@ -1033,12 +1043,12 @@ void radv_lower_ngg(struct radv_device *device, struct nir_shader *nir,
    } else if (nir->info.stage == MESA_SHADER_GEOMETRY) {
       num_vertices_per_prim = nir->info.gs.vertices_in;
    } else if (nir->info.stage == MESA_SHADER_MESH) {
-      if (nir->info.mesh.primitive_type == GL_POINTS)
+      if (nir->info.mesh.primitive_type == SHADER_PRIM_POINTS)
          num_vertices_per_prim = 1;
-      else if (nir->info.mesh.primitive_type == GL_LINES)
+      else if (nir->info.mesh.primitive_type == SHADER_PRIM_LINES)
          num_vertices_per_prim = 2;
       else
-         assert(nir->info.mesh.primitive_type == GL_TRIANGLES);
+         assert(nir->info.mesh.primitive_type == SHADER_PRIM_TRIANGLES);
    } else {
       unreachable("NGG needs to be VS, TES or GS.");
    }
@@ -1560,7 +1570,7 @@ radv_postprocess_config(const struct radv_device *device, const struct ac_shader
 
       bool nggc = info->has_ngg_culling; /* Culling uses GS vertex offsets 0, 1, 2. */
       bool tes_triangles =
-         stage == MESA_SHADER_TESS_EVAL && info->tes.primitive_mode >= 4; /* GL_TRIANGLES */
+         stage == MESA_SHADER_TESS_EVAL && info->tes._primitive_mode != TESS_PRIMITIVE_ISOLINES;
       if (info->uses_invocation_id) {
          gs_vgpr_comp_cnt = 3; /* VGPR3 contains InvocationID. */
       } else if (info->uses_prim_id || (es_stage == MESA_SHADER_VERTEX &&
@@ -1853,6 +1863,7 @@ shader_compile(struct radv_device *device, struct vk_shader_module *module,
    options->enable_mrt_output_nan_fixup =
       module && !is_meta_shader(module->nir) && options->key.ps.enable_mrt_output_nan_fixup;
    options->adjust_frag_coord_z = device->adjust_frag_coord_z;
+   options->disable_aniso_single_level = device->instance->disable_aniso_single_level;
    options->has_image_load_dcc_bug = device->physical_device->rad_info.has_image_load_dcc_bug;
    options->debug.func = radv_compiler_debug;
    options->debug.private_data = &debug_data;

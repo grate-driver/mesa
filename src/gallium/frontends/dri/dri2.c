@@ -36,7 +36,7 @@
 #include "util/format/u_format.h"
 #include "util/u_debug.h"
 #include "frontend/drm_driver.h"
-#include "state_tracker/st_cb_fbo.h"
+#include "state_tracker/st_format.h"
 #include "state_tracker/st_cb_texture.h"
 #include "state_tracker/st_texture.h"
 #include "state_tracker/st_context.h"
@@ -1961,7 +1961,7 @@ dri2_interop_export_object(__DRIcontext *_ctx,
        *   "CL_OUT_OF_RESOURCES if there is a failure to allocate resources
        *    required by the OpenCL implementation on the device."
        */
-      res = st_renderbuffer(rb)->texture;
+      res = rb->texture;
       if (!res) {
          simple_mtx_unlock(&ctx->Shared->Mutex);
          return MESA_GLINTEROP_OUT_OF_RESOURCES;

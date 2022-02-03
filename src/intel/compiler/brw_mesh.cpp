@@ -48,10 +48,20 @@ brw_nir_lower_load_uniforms_impl(nir_builder *b, nir_instr *instr,
    nir_intrinsic_instr *intrin = nir_instr_as_intrinsic(instr);
    assert(intrin->intrinsic == nir_intrinsic_load_uniform);
 
-   return brw_nir_load_global_const(b,
-                                    intrin,
-                                    nir_load_mesh_global_arg_addr_intel(b),
-                                    0);
+   /* Read the first few 32-bit scalars from InlineData. */
+   if (nir_src_is_const(intrin->src[0]) &&
+       nir_dest_bit_size(intrin->dest) == 32 &&
+       nir_dest_num_components(intrin->dest) == 1) {
+      unsigned off = nir_intrinsic_base(intrin) + nir_src_as_uint(intrin->src[0]);
+      unsigned off_dw = off / 4;
+      if (off % 4 == 0 && off_dw < BRW_TASK_MESH_PUSH_CONSTANTS_SIZE_DW) {
+         off_dw += BRW_TASK_MESH_PUSH_CONSTANTS_START_DW;
+         return nir_load_mesh_inline_data_intel(b, 32, off_dw);
+      }
+   }
+
+   return brw_nir_load_global_const(b, intrin,
+                                    nir_load_mesh_inline_data_intel(b, 64, 0), 0);
 }
 
 static void
@@ -292,13 +302,13 @@ brw_compute_mue_map(struct nir_shader *nir, struct brw_mue_map *map)
 
    unsigned vertices_per_primitive = 0;
    switch (nir->info.mesh.primitive_type) {
-   case GL_POINTS:
+   case SHADER_PRIM_POINTS:
       vertices_per_primitive = 1;
       break;
-   case GL_LINES:
+   case SHADER_PRIM_LINES:
       vertices_per_primitive = 2;
       break;
-   case GL_TRIANGLES:
+   case SHADER_PRIM_TRIANGLES:
       vertices_per_primitive = 3;
       break;
    default:
@@ -346,13 +356,15 @@ brw_compute_mue_map(struct nir_shader *nir, struct brw_mue_map *map)
    map->per_primitive_pitch_dw = ALIGN(map->per_primitive_header_size_dw +
                                        map->per_primitive_data_size_dw, 8);
 
-   /* TODO(mesh): Multiview. */
-   map->per_vertex_header_size_dw = 8;
    map->per_vertex_start_dw = ALIGN(map->per_primitive_start_dw +
                                     map->per_primitive_pitch_dw * map->max_primitives, 8);
 
-   unsigned next_vertex = map->per_vertex_start_dw +
-                          map->per_vertex_header_size_dw;
+   /* TODO(mesh): Multiview. */
+   unsigned fixed_header_size = 8;
+   map->per_vertex_header_size_dw = ALIGN(fixed_header_size +
+                                          nir->info.clip_distance_array_size +
+                                          nir->info.cull_distance_array_size, 8);
+   map->per_vertex_data_size_dw = 0;
    u_foreach_bit64(location, outputs_written & ~nir->info.per_primitive_outputs) {
       assert(map->start_dw[location] == -1);
 
@@ -364,18 +376,27 @@ brw_compute_mue_map(struct nir_shader *nir, struct brw_mue_map *map)
       case VARYING_SLOT_POS:
          start = map->per_vertex_start_dw + 4;
          break;
+      case VARYING_SLOT_CLIP_DIST0:
+         start = map->per_vertex_start_dw + fixed_header_size + 0;
+         break;
+      case VARYING_SLOT_CLIP_DIST1:
+         start = map->per_vertex_start_dw + fixed_header_size + 4;
+         break;
+      case VARYING_SLOT_CULL_DIST0:
+      case VARYING_SLOT_CULL_DIST1:
+         unreachable("cull distances should be lowered earlier");
+         break;
       default:
          assert(location >= VARYING_SLOT_VAR0);
-         start = next_vertex;
-         next_vertex += 4;
+         start = map->per_vertex_start_dw +
+                 map->per_vertex_header_size_dw +
+                 map->per_vertex_data_size_dw;
+         map->per_vertex_data_size_dw += 4;
          break;
       }
       map->start_dw[location] = start;
    }
 
-   map->per_vertex_data_size_dw = next_vertex -
-                                  map->per_vertex_start_dw -
-                                  map->per_vertex_header_size_dw;
    map->per_vertex_pitch_dw = ALIGN(map->per_vertex_header_size_dw +
                                     map->per_vertex_data_size_dw, 8);
 
@@ -531,6 +552,10 @@ brw_compile_mesh(const struct brw_compiler *compiler,
    prog_data->base.local_size[1] = nir->info.workgroup_size[1];
    prog_data->base.local_size[2] = nir->info.workgroup_size[2];
 
+   prog_data->clip_distance_mask = (1 << nir->info.clip_distance_array_size) - 1;
+   prog_data->cull_distance_mask =
+         ((1 << nir->info.cull_distance_array_size) - 1) <<
+          nir->info.clip_distance_array_size;
    prog_data->primitive_type = nir->info.mesh.primitive_type;
 
    /* TODO(mesh): Use other index formats (that are more compact) for optimization. */
@@ -980,10 +1005,12 @@ fs_visitor::nir_emit_task_mesh_intrinsic(const fs_builder &bld,
       dest = get_nir_dest(instr->dest);
 
    switch (instr->intrinsic) {
-   case nir_intrinsic_load_mesh_global_arg_addr_intel:
+   case nir_intrinsic_load_mesh_inline_data_intel:
       assert(payload.num_regs == 3 || payload.num_regs == 4);
-      /* Passed in the Inline Parameter, the last element of the payload. */
-      bld.MOV(dest, retype(brw_vec1_grf(payload.num_regs - 1, 0), dest.type));
+      /* Inline Parameter is the last element of the payload. */
+      bld.MOV(dest, retype(brw_vec1_grf(payload.num_regs - 1,
+                                        nir_intrinsic_align_offset(instr)),
+                           dest.type));
       break;
 
    case nir_intrinsic_load_draw_id:

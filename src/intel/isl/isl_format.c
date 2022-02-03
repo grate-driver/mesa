@@ -603,6 +603,14 @@ isl_format_for_pipe_format(enum pipe_format pf)
       [PIPE_FORMAT_R8G8_R8B8_UNORM]         = ISL_FORMAT_YCRCB_NORMAL,
       [PIPE_FORMAT_G8R8_B8R8_UNORM]         = ISL_FORMAT_YCRCB_SWAPY,
 
+      /* We map these formats to help configure media compression. */
+      [PIPE_FORMAT_YUYV]                    = ISL_FORMAT_YCRCB_NORMAL,
+      [PIPE_FORMAT_UYVY]                    = ISL_FORMAT_YCRCB_SWAPY,
+      [PIPE_FORMAT_NV12]                    = ISL_FORMAT_PLANAR_420_8,
+      [PIPE_FORMAT_P010]                    = ISL_FORMAT_PLANAR_420_10,
+      [PIPE_FORMAT_P012]                    = ISL_FORMAT_PLANAR_420_12,
+      [PIPE_FORMAT_P016]                    = ISL_FORMAT_PLANAR_420_16,
+
       [PIPE_FORMAT_R8G8B8X8_SRGB]           = ISL_FORMAT_R8G8B8X8_UNORM_SRGB,
       [PIPE_FORMAT_B10G10R10X2_UNORM]       = ISL_FORMAT_B10G10R10X2_UNORM,
       [PIPE_FORMAT_R16G16B16X16_UNORM]      = ISL_FORMAT_R16G16B16X16_UNORM,
@@ -900,6 +908,21 @@ isl_format_supports_multisampling(const struct intel_device_info *devinfo,
        * is multisampled.  See also isl_surf_get_hiz_surf().
        */
       return devinfo->ver <= 8;
+   } else if (devinfo->ver == 7 && isl_format_has_sint_channel(format)) {
+      /* From the Ivy Bridge PRM, Vol4 Part1 p73 ("Number of Multisamples"):
+       *
+       *   This field must be set to MULTISAMPLECOUNT_1 for SINT MSRTs when
+       *   all RT channels are not written
+       *
+       * From the Ivy Bridge PRM, Vol4 Part1 p77 ("MCS Enable"):
+       *
+       *   This field must be set to 0 for all SINT MSRTs when all RT channels
+       *   are not written
+       *
+       * Disable multisampling support now as we don't handle the case when
+       * one of the render target channels is disabled.
+       */
+      return false;
    } else if (devinfo->ver < 7 && isl_format_get_layout(format)->bpb > 64) {
       return false;
    } else if (isl_format_is_compressed(format)) {

@@ -87,6 +87,7 @@ ir3_optimize_loop(struct ir3_compiler *compiler, nir_shader *s)
       progress |= OPT(s, nir_lower_phis_to_scalar, false);
 
       progress |= OPT(s, nir_copy_prop);
+      progress |= OPT(s, nir_opt_deref);
       progress |= OPT(s, nir_opt_dce);
       progress |= OPT(s, nir_opt_cse);
       static int gcm = -1;
@@ -117,6 +118,17 @@ ir3_optimize_loop(struct ir3_compiler *compiler, nir_shader *s)
       progress |= OPT(s, nir_lower_alu);
       progress |= OPT(s, nir_lower_pack);
       progress |= OPT(s, nir_opt_constant_folding);
+
+      static const nir_opt_offsets_options offset_options = {
+         /* How large an offset we can encode in the instr's immediate field.
+          */
+         .uniform_max = (1 << 9) - 1,
+
+         .shared_max = ~0,
+
+         .buffer_max = ~0,
+      };
+      progress |= OPT(s, nir_opt_offsets, &offset_options);
 
       nir_load_store_vectorize_options vectorize_opts = {
          .modes = nir_var_mem_ubo,
@@ -447,6 +459,8 @@ ir3_nir_post_finalize(struct ir3_shader *shader)
              .lower_vote_eq = true,
              .lower_subgroup_masks = true,
              .lower_read_invocation_to_cond = true,
+             .lower_shuffle = true,
+             .lower_relative_shuffle = true,
           });
    }
 

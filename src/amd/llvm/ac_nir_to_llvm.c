@@ -688,6 +688,13 @@ static void visit_alu(struct ac_nir_context *ctx, const nir_alu_instr *instr)
       src[1] = ac_to_float(&ctx->ac, src[1]);
       result = LLVMBuildFMul(ctx->ac.builder, src[0], src[1], "");
       break;
+   case nir_op_fmulz:
+      assert(LLVM_VERSION_MAJOR >= 12);
+      src[0] = ac_to_float(&ctx->ac, src[0]);
+      src[1] = ac_to_float(&ctx->ac, src[1]);
+      result = ac_build_intrinsic(&ctx->ac, "llvm.amdgcn.fmul.legacy", ctx->ac.f32,
+                                  src, 2, AC_FUNC_ATTR_READNONE);
+      break;
    case nir_op_frcp:
       /* For doubles, we need precise division to pass GLCTS. */
       if (ctx->ac.float_mode == AC_FLOAT_MODE_DEFAULT_OPENGL && ac_get_type_size(def_type) == 8) {
@@ -905,6 +912,14 @@ static void visit_alu(struct ac_nir_context *ctx, const nir_alu_instr *instr)
       assert(instr->dest.dest.ssa.bit_size != 32 || ctx->ac.chip_class >= GFX9);
       result = emit_intrin_3f_param(&ctx->ac, "llvm.fma", ac_to_float_type(&ctx->ac, def_type),
                                     src[0], src[1], src[2]);
+      break;
+   case nir_op_ffmaz:
+      assert(LLVM_VERSION_MAJOR >= 12 && ctx->ac.chip_class >= GFX10_3);
+      src[0] = ac_to_float(&ctx->ac, src[0]);
+      src[1] = ac_to_float(&ctx->ac, src[1]);
+      src[2] = ac_to_float(&ctx->ac, src[2]);
+      result = ac_build_intrinsic(&ctx->ac, "llvm.amdgcn.fma.legacy", ctx->ac.f32,
+                                  src, 3, AC_FUNC_ATTR_READNONE);
       break;
    case nir_op_ldexp:
       src[0] = ac_to_float(&ctx->ac, src[0]);
@@ -3963,7 +3978,7 @@ static void visit_intrinsic(struct ac_nir_context *ctx, nir_intrinsic_instr *ins
       };
 
       /* For triangles, the vector should be (u, v, 1-u-v). */
-      if (ctx->info->tess.primitive_mode == GL_TRIANGLES) {
+      if (ctx->info->tess._primitive_mode == TESS_PRIMITIVE_TRIANGLES) {
          coord[2] = LLVMBuildFSub(ctx->ac.builder, ctx->ac.f32_1,
                                   LLVMBuildFAdd(ctx->ac.builder, coord[0], coord[1], ""), "");
       }
