@@ -1,6 +1,6 @@
-mesa (22.0~git20220113-1) UNRELEASED; urgency=medium
+mesa (22.0.0~rc1-1) UNRELEASED; urgency=medium
 
-  * New upstream snapshot.
+  * New upstream release candidate.
   * path_max.diff: Refreshed.
   * rules: Drop classic drivers.
 
