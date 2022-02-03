@@ -139,7 +139,7 @@
         "description": "radeonsi: limit loop unrolling for LLVM < 13",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9ff086052ab7bff3cb55c06365543190a3afe188"
     },
