@@ -310,7 +310,7 @@
         "description": "svga: store shared_mem_size in svga_compute_shader instead of svga_context",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "247c61f2d0454a94bc8b26601f88ed5f0890cedd"
     },
