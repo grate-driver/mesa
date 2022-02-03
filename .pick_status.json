@@ -283,7 +283,7 @@
         "description": "intel/fs: don't set allow_sample_mask for CS intrinsics",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "77486db867bd39aa9b76e549c946b0a165fcb21a"
     },
