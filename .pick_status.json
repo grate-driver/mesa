@@ -445,7 +445,7 @@
         "description": "turnip: Unconditionaly remove descriptor set from pool's list on free",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "da7a475138d6b5cab15e26be3343abf36ab74727"
     },
