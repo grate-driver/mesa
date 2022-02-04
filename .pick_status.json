@@ -157,7 +157,7 @@
         "description": "egl/wayland: Reset buffer age when destroying buffers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "22d796feb828daad7c8d600adf271e19a82d67c8"
     },
