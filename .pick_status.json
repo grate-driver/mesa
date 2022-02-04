@@ -85,7 +85,7 @@
         "description": "anv: fix conditional render for vkCmdDrawIndirectByteCountEXT",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2be89cbd826f9ac2703127025714a55595de33d3"
     },
