@@ -130,7 +130,7 @@
         "description": "radv: fix R_02881C_PA_CL_VS_OUT_CNTL with mixed cull/clip distances",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
