@@ -229,7 +229,7 @@
         "description": "i915g: Initialize the rest of the \"from_nir\" temporary VS struct.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2b3fc26da8bed1f70f6631a3fc6c6cd43fe2acc2"
     },
