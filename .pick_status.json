@@ -4756,7 +4756,7 @@
         "description": "lavapipe: use util_pack_color_union() for generating clear colors",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
