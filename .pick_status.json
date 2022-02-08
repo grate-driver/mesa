@@ -6763,7 +6763,7 @@
         "description": "lavapipe: fix sampler + sampler view leaks.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e94fd4cc65899bccceb4642363bc4376c6831580"
     },
