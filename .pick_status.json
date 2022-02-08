@@ -1327,7 +1327,7 @@
         "description": "anv: Call vk_command_buffer_finish if create fails",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c9189f4813534b9525babdee09e95f53f025608a"
     },
