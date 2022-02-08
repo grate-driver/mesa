@@ -61,6 +61,8 @@ static unsigned int loop_max_possible_iterations(struct radeon_compiler *c,
 {
 	unsigned int total_i = rc_recompute_ips(c);
 	unsigned int loop_i = (loop->EndLoop->IP - loop->BeginLoop->IP) - 1;
+	if(total_i > c->max_alu_insts)
+		return 1;
 	/* +1 because the program already has one iteration of the loop. */
 	return 1 + ((c->max_alu_insts - total_i) / loop_i);
 }
