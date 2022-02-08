@@ -1,5 +1,320 @@
 [
     {
+        "sha": "5e9df85b1a4504c5b4162e77e139056dc80accc6",
+        "description": "aco: optimize discard_if when WQM is not needed afterwards",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13c31379603bbea4ce2f03b3c6a0443888217e0a",
+        "description": "aco: merge block_kind_uses_[demote|discard_if]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7d1c8cc5eb1b3a4ab056beba56f5feab75f7be0",
+        "description": "aco: make Preserve_WQM independent from block_kind_uses_discard_if",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "08b8500dfbd733bd8e47a3d659b22cc4480a6e6e",
+        "description": "aco: remove block_kind_discard",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b67092e685cdd35e3505607d2bef3dbc62cb295a",
+        "description": "aco: emit nir_intrinsic_discard() as p_discard_if()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1895e17591439ca876da1b1a1c9669cbb5c70f0a",
+        "description": "mesa: align constant/uniform uploads to driver expected alignment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "418c77640bfe433caf3edccec5a43bd86c7e04f3",
+        "description": "zink: Fix MSVC RTC in zink_get_framebuffer_imageless()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86cb664cd8548f05d3a0fc07fea3a14e34ba60cc",
+        "description": "zink: export PIPE_CAP_CULL_DISTANCE_NOCOMBINE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e9481eaacf54f850ee413c7872c41644f4d94e6",
+        "description": "gallium: add PIPE_CAP_CULL_DISTANCE_NOCOMBINE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "93a90fc85d037e2c6834fb969562391310ae9cd0",
+        "description": "anv: fix conditional render for vkCmdDrawIndirectByteCountEXT",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "2be89cbd826f9ac2703127025714a55595de33d3"
+    },
+    {
+        "sha": "5d3e4193786f1b55aa6a3d74e2b9b954eb9287e5",
+        "description": "anv: enable ray queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c78be5da300ae386a12b91a22efb064335e2043a",
+        "description": "intel/fs: lower ray query intrinsics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "712d8fb0434a0af6d0479a5ea44a7bbc49dd8b2b",
+        "description": "intel/nir: document RT builder",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e06f9d49bc2263bf8d129d858a01072eab2f9fd5",
+        "description": "nir/lower_shader_calls: consider relocated constants as rematerializable",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "046571479028aeb5577344a91f0c4d565415f4bc",
+        "description": "intel/nir/rt: add more helpers for ray queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d5b994ec8aa4b85b0d131c2249452ffd4c429cc6",
+        "description": "intel/nir/rt: make RT manipulation helpers helper invocations ready",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fb69fed65b7c3e30815f69c26f99ecab0050bd00",
+        "description": "intel/nir: document committed argument",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b0624e414f42a93d8ae1210ad58065dd1c97d2a4",
+        "description": "intel/fs: make trivial shader complete tracing operations with missing shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35bd19f53d033f83b8c17aeba7a5f973246387c2",
+        "description": "intel/nir/rt: load bvh_level value off mem_hit structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d9ae6ec1eaae3ff3407a37262d4b0a68e69c826",
+        "description": "intel: add a new intrinsic to get the shader stage from bindless shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8f087b0e6da6bce11ae294ae4735c712c7d76ef",
+        "description": "nir/builder: add nir_ior_imm() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb40e999d114db361539cdc4ddb65ace37d76562",
+        "description": "intel/nir: use a single intel intrinsic to deal with ray traversal",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39f6cd5d799ad077ad41d920dc31c5da1fae3c24",
+        "description": "intel/nir: fix shader call lowering",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c5a42e401036eb2eecf8798c103f8ae2cce08eab"
+    },
+    {
+        "sha": "2665595244811d84b0acd4a8df32d2feaf95cb9e",
+        "description": "intel/fs: limit FS dispatch to SIMD16 when using ray queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "57eed6698b5cf462f762a4b04ef45ec84c01f262",
+        "description": "intel/compiler: tracker number of ray queries in prog_data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9b366243ed882f5b705bc99e641bca7b3015a23b",
+        "description": "intel/fs: load more fields from BVH instance leafs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c89024e4463389663cf7f7d2f2752de2029efb23",
+        "description": "intel/fs: don't set allow_sample_mask for CS intrinsics",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "77486db867bd39aa9b76e549c946b0a165fcb21a"
+    },
+    {
+        "sha": "9d22f8ed23d9192789fd656f64cd9defbe02fea8",
+        "description": "intel/fs: add support for ACCESS_ENABLE_HELPER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c199f44d17cb72e9aa55ec4885cb0bde985ae972",
+        "description": "intel/fs: name sources for A64 opcodes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23ce94ff7e28ee1771f53931d20c0ed1fe87c4a5",
+        "description": "intel/nir/rt: add a new number of SIMD lanes per DSS helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "61c9b7a82e99892cfcd70fedb2a4fd3fdd795256",
+        "description": "intel/fs: add support for Eu/Thread/Lane id",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3dabe9325762d6e0492261b18b496c3d152c250c",
+        "description": "intel/fs: rework dss_id opcode into generic opcode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4deb8e86dfd1a5da404d91c717cf2372738f1a07",
+        "description": "nir: change intel dss_id intrinsic to topology_id",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fdb74a77d289a23457b62ae3efe3c032562087cf",
+        "description": "intel/ds: fix compilation with perfetto",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "9da3d714b87ce237cf61de4403c5b6af12f1d79d"
+    },
+    {
+        "sha": "a52e4871fe9ffb5dc084ea7ab75f1b7d1264813d",
+        "description": "meson: add radv to meson devenv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "8335fdfeafbe1fd14cb65f9088bbba15d9eb00dc",
         "description": "vk/sync: add asserts for timeline semaphore count matching",
         "nominated": false,
