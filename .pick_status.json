@@ -184,7 +184,7 @@
         "description": "intel/fs: Fix constant propagation into 32x16 integer multiplication",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "de6c0f848797d26d28223bcad25da03654461874"
     },
