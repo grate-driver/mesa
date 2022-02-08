@@ -2002,7 +2002,7 @@
         "description": "lavapipe: reference gallium fences correctly.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "94a4982805164f87ec5ad7cb22251315c0577d71"
     },
