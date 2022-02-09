@@ -634,7 +634,7 @@
         "description": "glx: fix pbuffer refcount init",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bc8a51a79a5fc9981fd99c0d450c08630bfb7127"
     },
