@@ -373,7 +373,7 @@
         "description": "gallivm/nir: Call nir_lower_bool_to_int32 after nir_opt_algebraic_late",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "78b4e417d44016cdb5df7dbfc3b1ea28219e6fd4"
     },
