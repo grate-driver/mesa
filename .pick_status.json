@@ -132,7 +132,7 @@
         "description": "iris: fix race condition during busy tracking",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "89a34cb8450a6fdaceb0e537613871fa86d93132"
     },
     {
