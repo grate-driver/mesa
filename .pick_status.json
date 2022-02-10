@@ -1507,7 +1507,7 @@
         "description": "anv: make the pointer valid before we assign stuff into it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "665ffd4bf9c681f8fc37dc07b3c2445e1ed5bf25"
     },
