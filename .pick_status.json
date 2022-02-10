@@ -517,7 +517,7 @@
         "description": "ir3: Limit the maximum imm offset in nir_opt_offset for shared vars",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b024102d7c2959451bfef323432beaa4dca4dd88"
     },
