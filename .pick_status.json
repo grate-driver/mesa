@@ -1,5 +1,518 @@
 [
     {
+        "sha": "22fc53493092a7507c1e2db47b0c8763158d7b2d",
+        "description": "d3d12: Default newly-created resources to not-resident",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3a2cb4b679c7741e190351565464492053a0641",
+        "description": "d3d12: Implement residency management algorithm",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "40dafd00945fc662ee5aa490e4831d72151a7390",
+        "description": "d3d12: Add a budget/usage callback to the screen",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "671deb541ed44ddf84e2f6ab83e2ccd438ccf941",
+        "description": "d3d12: Add residency info to d3d12_bo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4c74f74f84eec26136e817bcdafea8dc814366f",
+        "description": "d3d12: Add sampler's textures to batch bo tracking",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "34e53d4c9c701918550057ec9d34a32a7488c8d5",
+        "description": "d3d12: Move ID3D12Fence from context to screen",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ce2d5aece56e609e6021d1947df37560af7bad7",
+        "description": "d3d12: Forward wait condition from query -> result buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5cbd7093af74a39efe64a7348f348e8eb57ff9f4",
+        "description": "d3d12: When mapping a resource used in the current batch without blocking, at least flush",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1cb3d1a6ae027b5045e47ccf7e551bd81fc3cab2",
+        "description": "nir: Produce correct results for atan with NaN",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "2098ae16c8b4e64d0694a28f74a461b69b98a336"
+    },
+    {
+        "sha": "7d0d9b9fbc231c2bd66778e0b0a62d5c514c5495",
+        "description": "nir: Properly handle various exceptional values in frexp",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "23d30f4099fac0e1fcbd7adf315a186f553e48d2"
+    },
+    {
+        "sha": "93ed87af28e7f5b7db7bae095e5a37b63b7bd2c7",
+        "description": "spirv: Produce correct result for GLSLstd450Tanh with NaN",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "9f9432d56c055b9704a76cad44da88d5e12f825c"
+    },
+    {
+        "sha": "e442b9d79296ad9322af61fdadbc81d680466f57",
+        "description": "spirv: Produce correct result for GLSLstd450Modf with Inf",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f92a35d831cf54f2244d5510932fd17c97b02ce4"
+    },
+    {
+        "sha": "75ef5991f5af06997551dabc053300261e32ca40",
+        "description": "spriv: Produce correct result for GLSLstd450Step with NaN",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "1feeee9cf476010f72cb973480f67de0764e6a90"
+    },
+    {
+        "sha": "38a94c82e6ac3ae3e76e01ff4994ae4c46c487ec",
+        "description": "intel/fs: Don't optimize out 1.0*x and -1.0*x",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "f5dd6dfe012666123bb59b9a4f8e9afb46d67414"
+    },
+    {
+        "sha": "38800b385c6b4752ec1a91db5b8a7de149d03d0c",
+        "description": "nir: All set-on-comparison opcodes can take all float types",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "4195a9450bde927256063da47488aafbd86bfffe"
+    },
+    {
+        "sha": "97ce3a56bd72fde0f78278a030de6987b9f1656c",
+        "description": "nir/search: Constify instr parameter to nir_search_expression::cond",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4dd4135551626f61062a317e17e12909b0692143",
+        "description": "nir: Constify def parameter to nir_ssa_def_bits_used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "510d24829966f9cc00d0b10e871446db17319800",
+        "description": "nir: Use proper macro to set bits of variable correctly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a0ace7d4ed6e99f133149bb38fab2ee4f63d1a3",
+        "description": "Revert \"ci: Disable Windows for now\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "be385ab5bcba60e30c8c980ae595e1e69a888393"
+    },
+    {
+        "sha": "c2168f845e7475d9a701be91ea761ae793a12636",
+        "description": "nir/lower_mediump: Treat u2u16 like i2i16.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "532665c73cbd3b2b241b15f6d83d8b6cf80e431e",
+        "description": "zink: anv (icl) ci updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b84f0596808574bb0d37355a896eaaf1aafe277f",
+        "description": "freedreno/pps: Expose same counters as blob",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03ab9d895e86668f7b2f8e118cefb7341b8b78b9",
+        "description": "radv/ci: update CI lists for CTS 1.3.1.0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fce6ca0f3a674f7531598c1588ed100ec80c89c1",
+        "description": "radv: remove exports without color attachment or writemask",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be385ab5bcba60e30c8c980ae595e1e69a888393",
+        "description": "ci: Disable Windows for now",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "137e170bcb83c8b56a03a83fca7a6c154661e573",
+        "description": "anv: update limit for maxVertexInputBindingStride",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f93059b19f0e4ecaf11c22e59ea3f15b11c91a5d",
+        "description": "venus: fix two VN_TRACE_SCOPE's in the same scope",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "987bc4495481cfd0d165945b1d0a321452a20532",
+        "description": "iris: Drop the iris_resource aux usage bit fields",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ae763940e8c70ea0cdc43fe66b216d54fc2dd799",
+        "description": "iris: Compute aux.possible_usages from aux.usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d905018a2c81a10a8f1b5931f7d6acfebc9b7b34",
+        "description": "iris: Use iris_sample_with_depth_aux more often",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "85a7fb1e197086bd0baf4a80558a4581da43b6d1",
+        "description": "intel/isl: Add format assertions for surfaces using CCS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "05b8b08ef49f7eb06ddc12e4c48febb61f3e6173",
+        "description": "iris: Avoid making some invalid CCS surface states",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9beb87dce3254e43bf17d4921182285574d2060",
+        "description": "iris: Inline some surface_state.cpu references",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d705faad6cb3d02feeb51faf28983eaf1c17cf1f",
+        "description": "iris: Add and use fill_surface_states",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb51fd04147418fbf71415f2e6075dc4834223b0",
+        "description": "iris: Add and use use_surface_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89ebdd67c4919be05781566b5759bfda30926db9",
+        "description": "iris: Add and use iris_surface_state::aux_usages",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b60af618a0e1ddd38ad247d0d825c8561aff9224",
+        "description": "iris: Drop res param from surf_state_offset_for_aux",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce37e176f1dcfe8b1514c95ffbef712e9e7e008f",
+        "description": "iris: Drop format param from fast_clear_color",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6778b3a379d010d9b4d82e7324bff19d73cd3d1a",
+        "description": "iris: Don't fast clear with the view format",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "230952c21017b184a9bfbfaa2c56489d55b71d30"
+    },
+    {
+        "sha": "68c1b50e48e32ec8ff4815666b7124d4cb4171ab",
+        "description": "aux/draw: fix llvm tcs lane vec generation",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d5be0a2b3f1dfa212adb50d09f0ff622dcb0457",
+        "description": "radv: Add submit locking with trace bo.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3cbc328e0dbb5865cc036ecbf977127850b4670",
+        "description": "gallivm/nir: Call nir_lower_bool_to_int32 after nir_opt_algebraic_late",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "78b4e417d44016cdb5df7dbfc3b1ea28219e6fd4"
+    },
+    {
+        "sha": "d633eace3fd51fc5c2b7f141651bb8d90e879e1c",
+        "description": "ci/freedreno: Try to detect a wedged MMU that's happened recently.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7278b2281fc2b8b60675926316656e0e3f88f49",
+        "description": "ci/lvp: Add a flake that's shown up a couple of times since VKCTS 1.3.1.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d15f9e3c212a4715450a65e39bffadab1a0164c",
+        "description": "ci/r300: Drop xfails that were fixed with the VK-GL-CTS 1.3.1.0 uprev.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "20469009c7153b154e754446b8e0694610c6d03e",
+        "description": "nir: Delete the per-instr SSA liveness impl.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74c02d99b224fbc02132b54bf23e6ac1e117d805",
+        "description": "nir_to_tgsi: Replace the NIR SSA liveness with TGSI reg-level liveness.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4ce3178d99f66cab57c492cc5fe3d3a1788fee1",
+        "description": "nir_to_tgsi: Track our TGSI insns in blocks before emitting tokens.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3f84c67af857637e29235ec02e3f5c23c66a7574",
+        "description": "tgsi: Refactor out a tgsi_util_get_src_usage_mask().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e92209f2990dc91d33fafb04a92e17a3ebdfb9e5",
+        "description": "i915g: Report the temps usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bfcc7c20c8c8a8654f26c0d99693a76898d92383",
+        "description": "docs: update calendar and link releases notes for 21.3.6",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d66a22a02b4ccd97f72bb9af85432c124d2cb81e",
+        "description": "docs: add release notes for 21.3.6",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aabc7034d7e4857351fef198e5c3f6791b945737",
+        "description": "docs: update calendar for 22.0.0-rc2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97c90c514fd45a982304a1077f213d8de7981b25",
+        "description": "turnip: Depth/stencil formats should not expose any bufferFeatures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "53dc5f774d43ba022627ec5e4ec970b0d472d1cf",
+        "description": "radv: only emit the per-vertex VRS state if the pipeline forced it",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d0171dffe18d3f0b4071752b5b5180b0812af166",
+        "description": "radv: do not force per-vertex VRS if there is no pixel shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2451290bc479b419874eb3ba2ab561a660157bba",
+        "description": "radv: rewrite RADV_FORCE_VRS directly in NIR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "7955df28a6660d8dff77c79c345aa28aa7fa859c",
         "description": "v3dv/ci: Update failure list",
         "nominated": false,
