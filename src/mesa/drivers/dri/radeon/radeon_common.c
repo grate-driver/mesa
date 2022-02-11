@@ -544,7 +544,8 @@ void radeonFlush(struct gl_context *ctx, unsigned gallium_flush_flags)
 		rcommonFlushCmdBuf(radeon, __func__);
 
 flush_front:
-	if (_mesa_is_winsys_fbo(ctx->DrawBuffer) && radeon->front_buffer_dirty) {
+	if (ctx->DrawBuffer && _mesa_is_winsys_fbo(ctx->DrawBuffer) &&
+	    radeon->front_buffer_dirty) {
 		__DRIscreen *const screen = radeon->radeonScreen->driScreen;
 
 		if (screen->dri2.loader && (screen->dri2.loader->base.version >= 2)

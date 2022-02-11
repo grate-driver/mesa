@@ -71,7 +71,7 @@ nouveau_flush(struct gl_context *ctx, unsigned gallium_flush_flags)
 
 	PUSH_KICK(push);
 
-	if (_mesa_is_winsys_fbo(ctx->DrawBuffer) &&
+	if (ctx->DrawBuffer && _mesa_is_winsys_fbo(ctx->DrawBuffer) &&
 	    ctx->DrawBuffer->_ColorDrawBufferIndexes[0] == BUFFER_FRONT_LEFT) {
 		__DRIscreen *screen = nctx->screen->dri_screen;
 		const __DRIdri2LoaderExtension *dri2 = screen->dri2.loader;
