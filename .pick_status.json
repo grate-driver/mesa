@@ -526,7 +526,7 @@
         "description": "intel/compiler: fix array & struct IO lowering in mesh shaders",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1f438eb0337d662b461fd1e335cf06ff68052b6d"
     },
