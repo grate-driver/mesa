@@ -172,6 +172,9 @@ create_bci(struct zink_screen *screen, const struct pipe_resource *templ, unsign
    if (bind & PIPE_BIND_SHADER_IMAGE)
       bci.usage |= VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT;
 
+   if (bind & PIPE_BIND_QUERY_BUFFER)
+      bci.usage |= VK_BUFFER_USAGE_CONDITIONAL_RENDERING_BIT_EXT;
+
    if (templ->flags & PIPE_RESOURCE_FLAG_SPARSE)
       bci.flags |= VK_BUFFER_CREATE_SPARSE_BINDING_BIT;
    return bci;
@@ -1036,7 +1039,7 @@ zink_resource_get_param(struct pipe_screen *pscreen, struct pipe_context *pctx,
    switch (param) {
    case PIPE_RESOURCE_PARAM_NPLANES:
       if (screen->info.have_EXT_image_drm_format_modifier)
-         *value = pscreen->get_dmabuf_modifier_planes(pscreen, res->obj->modifier, pres->format);
+         *value = pscreen->get_dmabuf_modifier_planes(pscreen, obj->modifier, pres->format);
       else
          *value = 1;
       break;
@@ -1066,7 +1069,7 @@ zink_resource_get_param(struct pipe_screen *pscreen, struct pipe_context *pctx,
    }
 
    case PIPE_RESOURCE_PARAM_MODIFIER: {
-      *value = res->obj->modifier;
+      *value = obj->modifier;
       break;
    }
 

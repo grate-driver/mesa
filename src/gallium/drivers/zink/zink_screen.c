@@ -468,7 +468,7 @@ zink_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
       return 1;
 
    case PIPE_CAP_TGSI_BALLOT:
-      return screen->vk_version >= VK_MAKE_VERSION(1,2,0) && screen->info.props11.subgroupSize <= 64;
+      return screen->info.have_vulkan12 && screen->info.have_EXT_shader_subgroup_ballot && screen->info.props11.subgroupSize <= 64;
 
    case PIPE_CAP_SAMPLE_SHADING:
       return screen->info.feats.features.sampleRateShading;
@@ -935,8 +935,10 @@ zink_get_shader_param(struct pipe_screen *pscreen,
       return 0; /* not implemented */
 
    case PIPE_SHADER_CAP_FP16_CONST_BUFFERS:
-      return screen->info.feats11.uniformAndStorageBuffer16BitAccess ||
-             (screen->info.have_KHR_16bit_storage && screen->info.storage_16bit_feats.uniformAndStorageBuffer16BitAccess);
+      //enabling this breaks GTF-GL46.gtf21.GL2Tests.glGetUniform.glGetUniform
+      //return screen->info.feats11.uniformAndStorageBuffer16BitAccess ||
+             //(screen->info.have_KHR_16bit_storage && screen->info.storage_16bit_feats.uniformAndStorageBuffer16BitAccess);
+      return 0;
    case PIPE_SHADER_CAP_FP16_DERIVATIVES:
       return 0; //spirv requires 32bit derivative srcs and dests
    case PIPE_SHADER_CAP_FP16:
