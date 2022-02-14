@@ -643,7 +643,7 @@
         "description": "pan/bi: Add interference between destinations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9146bafbb422dc535c04e5f177a44e8ea82031db"
     },
