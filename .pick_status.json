@@ -634,7 +634,7 @@
         "description": "pan/bi: Check dependencies of both destinations of instructions",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a303076c1ab71f92907b1967c4b542af0c847198"
     },
