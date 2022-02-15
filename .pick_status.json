@@ -625,7 +625,7 @@
         "description": "panfrost: Set dirty state in set_shader_buffers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c34b760b9f99ecbf1218e7b612a32ce43c7283bf"
     },
