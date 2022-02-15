@@ -211,7 +211,7 @@
         "description": "venus: properly destroy deferred ahb image before real image creation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "19b7b09885c5975535605465ceb58b06c0170148"
     },
