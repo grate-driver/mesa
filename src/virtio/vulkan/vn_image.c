@@ -206,7 +206,9 @@ vn_image_init_deferred(struct vn_device *dev,
                        const VkImageCreateInfo *create_info,
                        struct vn_image *img)
 {
-   return vn_image_init(dev, create_info, img);
+   VkResult result = vn_image_init(dev, create_info, img);
+   img->deferred_info->initialized = result == VK_SUCCESS;
+   return result;
 }
 
 VkResult
@@ -298,7 +300,9 @@ vn_DestroyImage(VkDevice device,
    if (img->private_memory != VK_NULL_HANDLE)
       vn_FreeMemory(device, img->private_memory, pAllocator);
 
-   vn_async_vkDestroyImage(dev->instance, device, image, NULL);
+   /* must not ask renderer to destroy uninitialized deferred image */
+   if (!img->deferred_info || img->deferred_info->initialized)
+      vn_async_vkDestroyImage(dev->instance, device, image, NULL);
 
    if (img->deferred_info)
       vk_free(alloc, img->deferred_info);
