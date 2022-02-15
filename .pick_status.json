@@ -85,7 +85,7 @@
         "description": "mesa/st: always use DXT5 when transcoding ASTC format",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "91cbe8d855c19d5e252fe4b29adf2a424c46a23d"
     },
