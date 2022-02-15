@@ -2900,7 +2900,7 @@
         "description": "turnip: Stop allocating unused pvtmem space in the pipeline CS.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "931ad19a18174bb01dfd76f3a1224a97db684d31"
     },
     {
