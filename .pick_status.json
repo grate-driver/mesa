@@ -643,7 +643,7 @@
         "description": "anv: Align GENERAL_STATE_POOL_MIN_ADDRESS to 2MiB",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c17e2216dd5f2ace77e44a8008b2b177d633b05e"
     },
