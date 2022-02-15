@@ -616,7 +616,7 @@
         "description": "panfrost: Re-emit descriptors after resource shadowing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cd2c1ef9da6c71c2d5f11e2b0843147b4c7069e3"
     },
