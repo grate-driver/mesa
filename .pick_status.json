@@ -1903,7 +1903,7 @@
         "description": "nir: fix lower_memcpy",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a3177cca9961452b436b12fd0790c6ffaa8f0eee"
     },
