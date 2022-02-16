@@ -6988,7 +6988,7 @@
         "description": "anv: Don't assume depth/stencil attachments have depth",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0d8b9c529ce34347032912d73c14c245919a3d37"
     },
