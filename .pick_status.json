@@ -1156,7 +1156,7 @@
         "description": "Revert \"nir: make tgsi_varying_semantic_to_slot(..) public\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "edbdd977232f0cfe8f26a44ddbda792780168f4a"
     },
