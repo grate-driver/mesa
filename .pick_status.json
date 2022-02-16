@@ -697,7 +697,7 @@
         "description": "nir: Fix flat new_var assignment in create_new_io_vars()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bcd14756eec808f2f04d38a8880488188eb0eef0"
     },
