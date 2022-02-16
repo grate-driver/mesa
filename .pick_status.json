@@ -1858,7 +1858,7 @@
         "description": "nir: Add missing dependency on nir_opcodes.py",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d1992255bb29054fa51763376d125183a9f602f3"
     },
