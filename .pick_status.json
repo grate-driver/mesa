@@ -4981,7 +4981,7 @@
         "description": "ac/nir/ngg: Fix mixed up primitive ID after culling.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e97f0463a8f55d5d407178f74b0cdb916a42aef8"
     },
