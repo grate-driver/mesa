@@ -4936,7 +4936,7 @@
         "description": "iris: fix register spilling on compute shaders on XeHP",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ae18e1e707c4be005256305a30b747ab1bdf55d8"
     },
