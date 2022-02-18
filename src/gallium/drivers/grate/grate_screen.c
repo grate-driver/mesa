@@ -203,7 +203,7 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_TGSI_TEXCOORD:
       return 0;
 
-   case PIPE_CAP_PREFER_BLIT_BASED_TEXTURE_TRANSFER:
+   case PIPE_CAP_TEXTURE_TRANSFER_MODES:
       return 1;
 
    case PIPE_CAP_COMPUTE:
@@ -330,7 +330,6 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_QUERY_SO_OVERFLOW:
    case PIPE_CAP_MEMOBJ:
    case PIPE_CAP_LOAD_CONSTBUF:
-   case PIPE_CAP_TGSI_ANY_REG_AS_ADDRESS:
    case PIPE_CAP_TILE_RASTER_ORDER:
    case PIPE_CAP_MAX_COMBINED_SHADER_OUTPUT_RESOURCES:
    case PIPE_CAP_SIGNED_VERTEX_BUFFER_OFFSET:
@@ -351,8 +350,8 @@ grate_screen_get_paramf(struct pipe_screen *pscreen,
    switch (param) {
    case PIPE_CAPF_MAX_LINE_WIDTH:
    case PIPE_CAPF_MAX_LINE_WIDTH_AA:
-   case PIPE_CAPF_MAX_POINT_WIDTH:
-   case PIPE_CAPF_MAX_POINT_WIDTH_AA:
+   case PIPE_CAPF_MAX_POINT_SIZE:
+   case PIPE_CAPF_MAX_POINT_SIZE_AA:
       return 8192.0f; /* no clue */
 
    case PIPE_CAPF_MAX_TEXTURE_ANISOTROPY:
