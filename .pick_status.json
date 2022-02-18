@@ -472,7 +472,7 @@
         "description": "intel/nir: disable assert on async stack id",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "046571479028aeb5577344a91f0c4d565415f4bc"
     },
