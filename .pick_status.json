@@ -1129,7 +1129,7 @@
         "description": "vulkan/wsi: drop unused wsi_create_win32_image",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ed391d2a469f1a17ef8768baa919436166d5b27b"
     },
