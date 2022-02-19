@@ -472,7 +472,7 @@
         "description": "winsys/radeon: fix a hang due to introducing spi_cu_en",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5406ad93a9e61cc2088c7fd4b5d038db794bd4f5"
     },
