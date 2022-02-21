@@ -562,7 +562,7 @@
         "description": "pan/bi: Don't assign slots for the blend second source",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "795638767d142a58b76c91a0719e42536435320f"
     },
