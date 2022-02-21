@@ -1516,7 +1516,7 @@
         "description": "vulkan/wsi: handle queue families properly for non-concurrent sharing mode.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5b13d74583513ddd029e30c989838b96993545a0"
     },
