@@ -904,7 +904,7 @@
         "description": "ir3: Don't always set bindless_tex with readonly images",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "274f3815a5efaf1b82f6c2d29122f7aac2fc9a19"
     },
