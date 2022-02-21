@@ -931,7 +931,7 @@
         "description": "ir3: Use CAN_REORDER instead of NON_WRITEABLE",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "aa93896156c7f076e5de1831292297084655cda3"
     },
