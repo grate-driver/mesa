@@ -265,7 +265,7 @@
         "description": "ac/surface: add more elements to meta equations because HTILE can use them",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9fabbf2150253d06dedca3bfa6cb852197e193ac"
     },
