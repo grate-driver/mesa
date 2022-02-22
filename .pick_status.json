@@ -895,7 +895,7 @@
         "description": "ir3/nir: Fix 1d array readonly images",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0bb0cac8dcd0d8907282242e548321f318a64536"
     },
