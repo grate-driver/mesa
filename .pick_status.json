@@ -616,7 +616,7 @@
         "description": "draw/so: don't use pre clip pos if we have a tes either.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "dacf8f5f5c82c18e841050af37db54ca21c026ee"
     },
