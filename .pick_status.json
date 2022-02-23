@@ -211,7 +211,7 @@
         "description": "docs: remove incorrect drivers from extension",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "da23a31726f4f0486319e900207c31f2815e9119"
     },
