@@ -823,7 +823,7 @@
         "description": "turnip: Use LATE_Z when there might be depth/stencil feedback loop",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "71595a189a0c372efd520ad51866ca57aa83298c"
     },
