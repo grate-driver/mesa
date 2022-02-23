@@ -124,8 +124,14 @@ get_shader_module_for_stage(struct zink_context *ctx, struct zink_screen *screen
       zm->shader = mod;
       list_inithead(&zm->list);
       zm->num_uniforms = base_size;
-      zm->key_size = key->size;
-      memcpy(zm->key, key, key->size);
+      if (pstage != PIPE_SHADER_TESS_CTRL || zs->is_generated) {
+         /* non-generated tcs won't use the shader key */
+         zm->key_size = key->size;
+         memcpy(zm->key, key, key->size);
+      } else {
+         zm->key_size = 0;
+         memset(zm->key, 0, key->size);
+      }
       if (base_size)
          memcpy(zm->key + key->size, &key->base, base_size * sizeof(uint32_t));
       zm->hash = shader_module_hash(zm);
