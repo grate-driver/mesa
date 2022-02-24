@@ -1980,7 +1980,7 @@
         "description": "nir/fold_16bit_sampler_conversions: Fix src type mismatches.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "fb29cef8ddabdd05aeddc5220017bb28a83bb19c"
     },
     {
