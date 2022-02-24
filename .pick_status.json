@@ -1318,7 +1318,7 @@
         "description": "intel/compiler: ignore per-primitive attrs when calculating flat input mask",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "be89ea3231c92960cf9b23b37ce6402e4612a207"
     },
