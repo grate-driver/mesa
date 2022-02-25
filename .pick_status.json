@@ -1,5 +1,203 @@
 [
     {
+        "sha": "22efeec399fb55dcb364dabd65afab137d6f3fc3",
+        "description": "freedreno/registers: add new register for 7nm DSI PHY v4.3 (sm8450)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "04b80489d575dab7ed2cd3714d60d32e91e26589",
+        "description": "ci: Disable windows-vs2019",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ded9cb904f02cfe4206f88f8a41f49258f09f2b0",
+        "description": "anv: Enable nir_opt_access",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "abb7f04674fa947a212053e235c5f347a037e2c6",
+        "description": "panfrost: Inline pan_emit_sfbd_tiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "910d4f8245cbe943d658783f63c29d9c07a84ca9",
+        "description": "panfrost: Remove pan_emit_fbd thunking",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8dc7757754bb4f3d144ba2ed336b670cd15337ed",
+        "description": "panfrost: Remove unrelated comment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "099d61c95d0961804ff08ac1ea32437bb43f1740",
+        "description": "panfrost: Use txl instead of tex in the blitter",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5b1a00c5659a9dd824966e7ebcafe7e23c8916e2",
+        "description": "panfrost: Inline pan_blit_emit_dcd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9784c9512e83796097d9a6c14e77d0baa123b42",
+        "description": "panfrost: Decouple tiler job and DCD emit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a13d87c4849f5e9d22646f163139a4cc8d82b241",
+        "description": "panfrost: Annotate slow clears as such",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1eb3dbafdb2ece83f13a62b0762885ccc2a36898",
+        "description": "panfrost: Set defaults for deprecated DCD fields",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bd3d7e33b6b53c2f0c9c73403ea9e85e4fa725de",
+        "description": "panfrost: Use pan_shader_prepare_rsd in blitter",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6fc81f163e8508bca7006ea00f0759e9426a6fe7",
+        "description": "pan/mdg: Fix partial execution mode names",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e703e4428c096fcf12019ba0f4f75940c1fa1f4",
+        "description": "turnip: Always use GMEM for feedback loops in autotuner",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ebc23ac963db2710553118de5b86caa7681ba774",
+        "description": "turnip: Implement VK_ARM_rasterization_order_attachment_access",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d6c89e1e4ab983afbb641341e674e868efa09b52",
+        "description": "turnip: Merge LRZ and DEPTH_PLANE draw states",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dab34bd5c80b7daf4c54efd457eafeec5dc2caa7",
+        "description": "turnip: Use LATE_Z when there might be depth/stencil feedback loop",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "71595a189a0c372efd520ad51866ca57aa83298c"
+    },
+    {
+        "sha": "d10fd5b7c9a695565c009c446882bed49bc20fdd",
+        "description": "iris: fix register spilling on compute shaders on XeHP",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "ae18e1e707c4be005256305a30b747ab1bdf55d8"
+    },
+    {
+        "sha": "c46d3acf0e3624f110c6d49f3eeef70fa1795855",
+        "description": "anv: Raise vertex input bindings and attributes limits slightly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dabba7d7263be6ffb6f3676465e92c65952fa824",
+        "description": "zink: ci updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "302900038909a509da44d116d0609bb48012595b",
+        "description": "zink: remove zink_descriptor_util_init_null_set()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7266182be0c96101e4e497b103b235087f12512c",
+        "description": "zink: allow null descriptor set layouts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "3759a16d8a883355effa435f46867951ce712dbe",
         "description": "ac/nir/ngg: Fix mixed up primitive ID after culling.",
         "nominated": true,
