@@ -1,5 +1,680 @@
 [
     {
+        "sha": "f030b75b7d2c359b90c18ee4ed83fa05265c12e0",
+        "description": "aco: relax condition to remove branches in case of few instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "53ca85ac2a1acf1476c4b494f5fdfa2cc39c644c",
+        "description": "radv,drirc: move RADV workarounds to 00-radv-defaults.conf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ca6b2f216017ca24b5488c8e9989efb44febdfe",
+        "description": "aco: Support memory modes properly with load/store_buffer_amd.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba4b48e787667bc99aa5dea4fddde95920aee852",
+        "description": "aco: Support task_payload with barriers, refactor allowed storage class.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd0dd5d6b7416bd68a2bdc9d50c2d3fa8e2d5a69",
+        "description": "aco: Add storage class for Task Shader payload.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "962b2fe214de502d5c6326abf33483e08a17cfe8",
+        "description": "spirv: Use task_payload mode for generic task outputs and mesh inputs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f629fbd77807f9f91725dbf6c0f44baf5f699afa",
+        "description": "nir: Add new variable mode for task/mesh payload.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2d6eca0817972a9d08f348f3a22354ce572c15b",
+        "description": "radv: Refactor mesh shader draws and add num_workgroups.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf519a7d4778b9d678f312dfbe7d6758cd09676e",
+        "description": "ac/nir: Refactor mesh shader output code to smaller functions.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a84789f7959834085c42e0b9c55d3bf5963d6614",
+        "description": "ac/nir: Make sure to exclude special outputs from arrayed output masks.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3956c03b053ffa60a8f5a8943d34357585108ec5",
+        "description": "ac/nir: Sanitize mesh shader primitive indices using umin.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0746b98f4a7fd0c4b332a084ba4461724a31fa5f",
+        "description": "ac/nir: Properly handle when mesh API workgroup size is smaller than HW.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d88516a23fe6df117b7e55a175286fb3d6016aa4",
+        "description": "ac/nir: Move LDS area for primitive count to the beginning.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9cc9cf77a8f7dd5548509ae2b67ac7c79fa87253",
+        "description": "aco: Fix multiview view index for mesh shaders.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "082b691141a5aa088afb532a2ca909ddca16b654",
+        "description": "aco: Fix workgroup_id.y and .z for NV_mesh_shader.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10ebfb3bf22e0524f3b119711fafcaadcf1bcb60",
+        "description": "aco: Allow 1-byte loads and stores with load/store_buffer_amd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ee3d49e3e39cb3f1d7cbf08ed3523b6a38ef539",
+        "description": "radv: Better exclude special MS outputs from driver location assignment.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d1c6185b5a1055bde0a5ac51b20e4af7863dc64d",
+        "description": "ci: skqp: Add Vulkan support for a630_skqp job",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8bfef8bf6b7f8d109e3543427fed417f9a407f73",
+        "description": "ci: skqp: Build skqp from android-cts-10.0_r11 tag with Clang",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ffed2a2991fc13ab6cd4846f11a802ab69de24f",
+        "description": "features: VK_EXT_depth_clip_control for lavapipe",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07c0801e608e491a47a5d35af8a074b31c96f401",
+        "description": "lavapipe: EXT_depth_clip_control",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f458c7f200fb993de458ab7294395effc78f3cef",
+        "description": "ci/zink: Add testing of dEQP GLES3.1/3.2.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4132bd026fc40480299aa54f654f4c89e861b70",
+        "description": "ci/zink: Move testing to shared 64-core runners at Google.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "834db3aa8d0f9c6c7587dff1a632223c38e7602c",
+        "description": "docs: remove incorrect drivers from extension",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "da23a31726f4f0486319e900207c31f2815e9119"
+    },
+    {
+        "sha": "988d5aae74d61d1416b369172ef286b4aac933d0",
+        "description": "panfrost: Flush resources when shadowing",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "cecb889481db23dc2b945dc3904f58f41a45fdfc"
+    },
+    {
+        "sha": "5536852d60e59dad52feb63e1e88150ece1fec15",
+        "description": "panfrost: Handle NULL samplers",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "53ef20f08d4340c1bad0b45a2501f4daba7fb479",
+        "description": "panfrost: Handle NULL sampler views",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "304851422a4610170e870a5315fefaa5ec42917f",
+        "description": "panfrost: Fix set_sampler_views for big GL",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b2769493ed4932a019ad8623c940f177a50fc07",
+        "description": "panfrost/ci: Update xfails list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97f18d29292ada87469fe90fe5d49ee2dccd0ee5",
+        "description": "blorp: Add blorp_measure hooks to the blitter codepaths",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "31eeb72e45be6ef943df0b60f3cd7a646fa7b349"
+    },
+    {
+        "sha": "e6b7e743083f5f71ff004b3c753e07e482c815d7",
+        "description": "iris: Set MI_FLUSH_DW::PostSyncOperation correctly",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "604d97671b663501195644f2a5f12535e88c563f"
+    },
+    {
+        "sha": "c393753daa4de92f3a5937cc4abd53881efa098a",
+        "description": "r300: add predicate instructions to statistics of vertex shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8eb9bffdfc1cebaf2f69ee4b7a7ed7e78d6a9788",
+        "description": "r300: report number of loops in shader statistics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "517b37a08c3f71a01ed35303611fcdae633c5b7f",
+        "description": "r300: use %u specifiers when printing unsigned stats values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7978412c3f83642d8d0cdf6610b0ac6f7b86308",
+        "description": "r300: only print shader statistics when compilation succeeds",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b124f83bc2722dd8cfbfb17d830751a636c50278",
+        "description": "zink: add a flake channel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd2a4cc47c341576e131e26117d9caef2f9b4f62",
+        "description": "pan/bi: Unit test message preloading optimization",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb1479bda22bf80b553a87ab781956dc068d5b19",
+        "description": "pan/bi: Support message preloading",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c8437cd415c79ad597b44c9d3c24540c772c5a59",
+        "description": "pan/bi: Account for message preloading in shaderdb",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19541dc8c86801aab5d764d27ce7a6f11ebb94be",
+        "description": "pan/bi: Add bi_before_nonempty_block helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6618697e0e7224b1759047578138ffd4e7d96db3",
+        "description": "panfrost: Pack message preloads from compiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bd06a26662345897a15efa6cf5c709242cccfeed",
+        "description": "panfrost: Add an unpacked message preload struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d0c4973dc1da428339a739fe59757499622b35f",
+        "description": "panfrost: Remove Message Preload Descriptor from v6.xml",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b130f8f4cfceb5a3f8e22851026f346ecd8e2105",
+        "description": "venus: add macros to help with future extensions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43bbe367ea5239439a2f480c7b82b0ebfef2e826",
+        "description": "panfrost/ci: Move T860 flake to skip",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c07f7c427c5bec71665a9c0fd192c2e16376283",
+        "description": "panfrost/ci: Move T720 flakes to skips",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eecc62ccbd86503db8f10f949eca95fccf188ccf",
+        "description": "Revert \"ci: Disable jobs to the Collabora lab\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "f692bda484384a5932dc42ce940ad3ea6b9a8741"
+    },
+    {
+        "sha": "cf99584f51099a23e7ecc6db40709b4fead22220",
+        "description": "broadcom/compiler: move uniforms right before their first use after scheduling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f1d20ec67c3f186886b97de94f74484650f8fda1",
+        "description": "nir/nir_opt_move: handle non-SSA defs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fe2249eac504471306f8f0d2ff3f4ba759b91e28",
+        "description": "nir: add a nir_instr_def_is_register helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a0446870404c5d4b259f51cdfffac903fd80dc1",
+        "description": "nir/nir_opt_move: allow to move uniform loads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f692bda484384a5932dc42ce940ad3ea6b9a8741",
+        "description": "ci: Disable jobs to the Collabora lab",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0695bb47337870581bdacd635e931b416cea7d4",
+        "description": "ci: Allow disabling the whole of the Collabora farm",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5fa7e04d7ac3bf482aac6f120ad3f2ce8717a39",
+        "description": "ci/lvp: Update the asan fails list.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b2eda6b729215ca61617943dc540a8c690f2f72",
+        "description": "pan/bi: Reorder pushed uniforms to avoid moves",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6eec8fcbfa6e90431d47919479debf76fb04b8b0",
+        "description": "glsl/nir: free GLSL IR right after we convert to NIR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0fda2ac4f09b81bc0dcd63ba9dd1c7134ffdb511",
+        "description": "ci/virgl: Drop the bvec4_from_mat4x2_vs xfail.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9e710af830cf506a942a498381603e2d780f5f9f",
+        "description": "ci/softpipe: Move most of testing to shared 64-core runners at Google.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73b37f9ff0b1a580716340e714b7bb689910ecd1",
+        "description": "ci/lavapipe: Test 1/3 of lavapipe on the shared 64-core google runners.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f64f4bdb5110503a4ca129ff61ef686f8a0916a",
+        "description": "ci/llvmpipe: Move most of testing to shared 64-core runners at Google.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6859b614a285ad19bc67161820a361dc579bad81",
+        "description": "ci: Stash the ldd and ccache stats output under collapsed sections.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2c1fa91377dbc6e742eb4dd62e836d8f6637e64",
+        "description": "radv: initialize extra state for internal pipelines at one place",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "959e8586aa916ffdab305b155b9155864cb11a25",
+        "description": "radv: remove useless radv_blend_state::single_cb_enable field",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8347d3dfd74c29c31d5299ca7835e0200571d96e",
+        "description": "radv: initialize VGT_GS_OUT_PRIM_TYPE earlier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9fb0831ca1b341cb87c8a905762103c1db4e746d",
+        "description": "radv: initialize more depth/stencil states earlier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4bef890ee49508c4cfcb0ed1a3d9a2dd01fe62b",
+        "description": "freedreno/regs: remove 5nm DSI PHY regs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9e6d3ba733140f61c764b839a339899ebbbaa6b",
+        "description": "docs: update calendar and link releases notes for 21.3.7",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9bb16991b81aa3413d7648f2550f6ea8b8a6decf",
+        "description": "docs: add release notes for 21.3.7",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b77ef4dd60d1d8fad0cb4d50740f1b8afc9e02f9",
+        "description": "draw/so: don't use pre clip pos if we have a tes either.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "dacf8f5f5c82c18e841050af37db54ca21c026ee"
+    },
+    {
+        "sha": "31b7ebcbc7fdbef3b26e714443b1f7840b7982e6",
+        "description": "pan/mdg: Fix overflow in intra-bundle interference",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0fffaa9fca93f6e9e8934b43d4aeb4594aea2202",
+        "description": "anv: Align state pools to 2MiB on XeHP",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c17e2216dd5f2ace77e44a8008b2b177d633b05e"
+    },
+    {
+        "sha": "5a28d2482f65209d376521be37e1ff0024fee4b1",
+        "description": "anv: Align GENERAL_STATE_POOL_MIN_ADDRESS to 2MiB",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c17e2216dd5f2ace77e44a8008b2b177d633b05e"
+    },
+    {
+        "sha": "d986731da97ed1013c071d2acdffde4301c56560",
+        "description": "iris,crocus,i915g: Don't stub flush_frontbuffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "51689a2b80b4daf5e78532304df311be8e627715",
+        "description": "panfrost: Simplify panfrost_resource_get_handle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b5734cc1c4666b4f21446649d2aba85c0c19350e",
+        "description": "panfrost: Fix FD resource_get_handle",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "7da251fc721360fc28b984507959ebfa0c88c8b2"
+    },
+    {
         "sha": "22efeec399fb55dcb364dabd65afab137d6f3fc3",
         "description": "freedreno/registers: add new register for 7nm DSI PHY v4.3 (sm8450)",
         "nominated": false,
