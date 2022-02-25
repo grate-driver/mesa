@@ -1300,7 +1300,7 @@
         "description": "util: unbreak non-linux mips64 build",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "88b234d7a7cd71fcb4955428010f238ec9530431"
     },
