@@ -1687,7 +1687,7 @@
         "description": "radeonsi: fix register shadowing after the pm4 state size was decreased",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "946bd90a097e8bf4f060f7a18d04f1df1c23275f"
     },
