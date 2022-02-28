@@ -635,20 +635,6 @@ add_aux_surface_if_supported(struct anv_device *device,
          return VK_SUCCESS;
       }
 
-      if (device->info.ver >= 12 &&
-          (image->vk.array_layers > 1 || image->vk.mip_levels)) {
-         /* HSD 14010672564: On TGL, if a block of fragment shader outputs
-          * match the surface's clear color, the HW may convert them to
-          * fast-clears. Anv only does clear color tracking for the first
-          * slice unfortunately. Disable CCS until anv gains more clear color
-          * tracking abilities.
-          */
-         anv_perf_warn(VK_LOG_OBJS(&image->vk.base),
-                       "HW may put fast-clear blocks on more slices than SW "
-                       "currently tracks. Not allocating a CCS buffer.");
-         return VK_SUCCESS;
-      }
-
       if (INTEL_DEBUG(DEBUG_NO_RBC))
          return VK_SUCCESS;
 
@@ -2044,6 +2030,20 @@ anv_layout_to_aux_state(const struct intel_device_info * const devinfo,
    bool aux_supported = true;
    bool clear_supported = isl_aux_usage_has_fast_clears(aux_usage);
 
+   const struct isl_format_layout *fmtl =
+      isl_format_get_layout(image->planes[plane].primary_surface.isl.format);
+
+   /* Disabling CCS for the following case avoids failures in:
+    *    - dEQP-VK.drm_format_modifiers.export_import.*
+    *    - dEQP-VK.synchronization*
+    */
+   if (usage & (VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+                VK_IMAGE_USAGE_TRANSFER_SRC_BIT) && fmtl->bpb <= 16 &&
+       aux_usage == ISL_AUX_USAGE_CCS_E && devinfo->ver >= 12) {
+      aux_supported = false;
+      clear_supported = false;
+   }
+
    if ((usage & VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT) && !read_only) {
       /* This image could be used as both an input attachment and a render
        * target (depth, stencil, or color) at the same time and this can cause
@@ -2264,6 +2264,17 @@ anv_layout_to_fast_clear_type(const struct intel_device_info * const devinfo,
    case ISL_AUX_STATE_PARTIAL_CLEAR:
    case ISL_AUX_STATE_COMPRESSED_CLEAR:
       if (aspect == VK_IMAGE_ASPECT_DEPTH_BIT) {
+         return ANV_FAST_CLEAR_DEFAULT_VALUE;
+      } else if (devinfo->ver >= 12 &&
+                 image->planes[plane].aux_usage == ISL_AUX_USAGE_CCS_E) {
+         /* On TGL, if a block of fragment shader outputs match the surface's
+          * clear color, the HW may convert them to fast-clears (see HSD
+          * 14010672564). This can lead to rendering corruptions if not
+          * handled properly. We restrict the clear color to zero to avoid
+          * issues that can occur with: 
+          *     - Texture view rendering (including blorp_copy calls)
+          *     - Images with multiple levels or array layers
+          */
          return ANV_FAST_CLEAR_DEFAULT_VALUE;
       } else if (layout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
          /* When we're in a render pass we have the clear color data from the

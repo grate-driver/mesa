@@ -1706,7 +1706,6 @@ genX(cmd_buffer_alloc_att_surf_states)(struct anv_cmd_buffer *cmd_buffer,
       else
          continue;
 
-      state->attachments[att].color.state = next_state;
       next_state.offset += ss_stride;
       next_state.map += ss_stride;
    }
@@ -2363,6 +2362,13 @@ genX(cmd_buffer_apply_pipe_flushes)(struct anv_cmd_buffer *cmd_buffer)
             bits & ANV_PIPE_STATE_CACHE_INVALIDATE_BIT;
          pipe.ConstantCacheInvalidationEnable =
             bits & ANV_PIPE_CONSTANT_CACHE_INVALIDATE_BIT;
+#if GFX_VER >= 12
+         /* Invalidates the L3 cache part in which index & vertex data is loaded
+          * when VERTEX_BUFFER_STATE::L3BypassDisable is set.
+          */
+         pipe.L3ReadOnlyCacheInvalidationEnable =
+            bits & ANV_PIPE_VF_CACHE_INVALIDATE_BIT;
+#endif
          pipe.VFCacheInvalidationEnable =
             bits & ANV_PIPE_VF_CACHE_INVALIDATE_BIT;
          pipe.TextureCacheInvalidationEnable =

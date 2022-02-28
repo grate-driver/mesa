@@ -4695,7 +4695,7 @@ radv_queue_submit_deferred(struct radv_deferred_queue_submission *submission,
 
    result =
       radv_get_preambles(queue, submission->cmd_buffers, submission->cmd_buffer_count,
-                         &initial_preamble_cs, &initial_flush_preamble_cs, &continue_preamble_cs);
+                         &initial_flush_preamble_cs, &initial_preamble_cs, &continue_preamble_cs);
    if (result != VK_SUCCESS)
       goto fail;
 

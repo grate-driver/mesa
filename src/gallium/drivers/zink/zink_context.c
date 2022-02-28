@@ -643,6 +643,9 @@ create_bvci(struct zink_context *ctx, struct zink_resource *res, enum pipe_forma
    assert(bvci.format);
    bvci.offset = offset;
    bvci.range = !offset && range == res->base.b.width0 ? VK_WHOLE_SIZE : range;
+   uint32_t clamp = util_format_get_blocksize(format) * screen->info.props.limits.maxTexelBufferElements;
+   if (bvci.range == VK_WHOLE_SIZE && res->base.b.width0 > clamp)
+      bvci.range = clamp;
    bvci.flags = 0;
    return bvci;
 }
@@ -909,34 +912,7 @@ update_existing_vbo(struct zink_context *ctx, unsigned slot)
       return;
    struct zink_resource *res = zink_resource(ctx->vertex_buffers[slot].buffer.resource);
    res->vbo_bind_mask &= ~BITFIELD_BIT(slot);
-   ctx->vbufs[slot] = VK_NULL_HANDLE;
-   ctx->vbuf_offsets[slot] = 0;
    update_res_bind_count(ctx, res, false, true);
-}
-
-ALWAYS_INLINE static struct zink_resource *
-set_vertex_buffer_clamped(struct zink_context *ctx, unsigned slot)
-{
-   const struct pipe_vertex_buffer *ctx_vb = &ctx->vertex_buffers[slot];
-   struct zink_resource *res = zink_resource(ctx_vb->buffer.resource);
-   struct zink_screen *screen = zink_screen(ctx->base.screen);
-   if (ctx_vb->buffer_offset > screen->info.props.limits.maxVertexInputAttributeOffset) {
-      /* buffer offset exceeds maximum: make a tmp buffer at this offset */
-      ctx->vbufs[slot] = zink_resource_tmp_buffer(screen, res, ctx_vb->buffer_offset, 0, &ctx->vbuf_offsets[slot]);
-      util_dynarray_append(&res->obj->tmp, VkBuffer, ctx->vbufs[slot]);
-      /* the driver is broken and sets a min alignment that's larger than its max offset: rebind as staging buffer */
-      if (unlikely(ctx->vbuf_offsets[slot] > screen->info.props.limits.maxVertexInputAttributeOffset)) {
-         static bool warned = false;
-         if (!warned)
-            debug_printf("zink: this vulkan driver is BROKEN! maxVertexInputAttributeOffset < VkMemoryRequirements::alignment\n");
-         warned = true;
-      }
-   } else {
-      ctx->vbufs[slot] = res->obj->buffer;
-      ctx->vbuf_offsets[slot] = ctx_vb->buffer_offset;
-   }
-   assert(ctx->vbufs[slot]);
-   return res;
 }
 
 static void
@@ -976,9 +952,9 @@ zink_set_vertex_buffers(struct pipe_context *pctx,
             /* always barrier before possible rebind */
             zink_resource_buffer_barrier(ctx, res, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
                                          VK_PIPELINE_STAGE_VERTEX_INPUT_BIT);
-            set_vertex_buffer_clamped(ctx, start_slot + i);
-         } else
-            enabled_buffers &= ~BITFIELD_BIT(i);
+         } else {
+            enabled_buffers &= ~BITFIELD_BIT(start_slot + i);
+         }
       }
    } else {
       if (need_state_change)
@@ -3118,11 +3094,15 @@ zink_fence_wait(struct pipe_context *pctx)
 void
 zink_wait_on_batch(struct zink_context *ctx, uint32_t batch_id)
 {
-   struct zink_batch_state *bs = ctx->batch.state;
-   assert(bs);
-   if (!batch_id || bs->fence.batch_id == batch_id)
+   struct zink_batch_state *bs;
+   if (!batch_id) {
       /* not submitted yet */
       flush_batch(ctx, true);
+      bs = zink_batch_state(ctx->last_fence);
+      assert(bs);
+      batch_id = bs->fence.batch_id;
+   }
+   assert(batch_id);
    if (ctx->have_timelines) {
       if (!zink_screen_timeline_wait(zink_screen(ctx->base.screen), batch_id, UINT64_MAX))
          check_device_lost(ctx);
@@ -3131,8 +3111,8 @@ zink_wait_on_batch(struct zink_context *ctx, uint32_t batch_id)
    simple_mtx_lock(&ctx->batch_mtx);
    struct zink_fence *fence;
 
-   assert(batch_id || ctx->last_fence);
-   if (ctx->last_fence && (!batch_id || batch_id == zink_batch_state(ctx->last_fence)->fence.batch_id))
+   assert(ctx->last_fence);
+   if (batch_id == zink_batch_state(ctx->last_fence)->fence.batch_id)
       fence = ctx->last_fence;
    else {
       for (bs = ctx->batch_states; bs; bs = bs->next) {
@@ -3608,6 +3588,11 @@ zink_set_stream_output_targets(struct pipe_context *pctx,
 {
    struct zink_context *ctx = zink_context(pctx);
 
+   /* always set counter_buffer_valid=false on unbind:
+    * - on resume (indicated by offset==-1), set counter_buffer_valid=true
+    * - otherwise the counter buffer is invalidated
+    */
+
    if (num_targets == 0) {
       for (unsigned i = 0; i < ctx->num_so_targets; i++) {
          if (ctx->so_targets[i]) {
@@ -3627,14 +3612,16 @@ zink_set_stream_output_targets(struct pipe_context *pctx,
          if (!t)
             continue;
          struct zink_resource *res = zink_resource(t->counter_buffer);
-         if (offsets[0] == (unsigned)-1)
+         if (offsets[0] == (unsigned)-1) {
             ctx->xfb_barrier |= zink_resource_buffer_needs_barrier(res,
                                                                    VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT,
                                                                    VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT);
-         else
+         } else {
             ctx->xfb_barrier |= zink_resource_buffer_needs_barrier(res,
                                                                    VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT,
                                                                    VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT);
+            t->counter_buffer_valid = false;
+         }
          struct zink_resource *so = zink_resource(ctx->so_targets[i]->buffer);
          if (so) {
             so->so_bind_count++;
@@ -3788,7 +3775,6 @@ rebind_buffer(struct zink_context *ctx, struct zink_resource *res, uint32_t rebi
       u_foreach_bit(slot, res->vbo_bind_mask) {
          if (ctx->vertex_buffers[slot].buffer.resource != &res->base.b) //wrong context
             goto end;
-         set_vertex_buffer_clamped(ctx, slot);
          num_rebinds++;
       }
       rebind_mask &= ~BITFIELD_BIT(TC_BINDING_VERTEX_BUFFER);
@@ -3932,8 +3918,6 @@ void
 zink_rebind_all_buffers(struct zink_context *ctx)
 {
    struct zink_batch *batch = &ctx->batch;
-   u_foreach_bit(slot, ctx->gfx_pipeline_state.vertex_buffers_enabled_mask)
-      set_vertex_buffer_clamped(ctx, slot);
    ctx->vertex_buffers_dirty = ctx->gfx_pipeline_state.vertex_buffers_enabled_mask > 0;
    ctx->dirty_so_targets = ctx->num_so_targets > 0;
    if (ctx->num_so_targets)
@@ -4090,6 +4074,7 @@ zink_context_create(struct pipe_screen *pscreen, void *priv, unsigned flags)
    ctx->base.set_patch_vertices = zink_set_patch_vertices;
 
    ctx->base.set_sample_mask = zink_set_sample_mask;
+   ctx->gfx_pipeline_state.sample_mask = UINT32_MAX;
 
    ctx->base.clear = zink_clear;
    ctx->base.clear_texture = zink_clear_texture;

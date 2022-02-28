@@ -134,16 +134,16 @@ zink_bind_vertex_buffers(struct zink_batch *batch, struct zink_context *ctx)
       return;
 
    for (unsigned i = 0; i < elems->hw_state.num_bindings; i++) {
-      const unsigned buffer_id = ctx->element_state->binding_map[i];
-      struct pipe_vertex_buffer *vb = ctx->vertex_buffers + buffer_id;
+      struct pipe_vertex_buffer *vb = ctx->vertex_buffers + ctx->element_state->binding_map[i];
       assert(vb);
       if (vb->buffer.resource) {
-         buffers[i] = ctx->vbufs[buffer_id];
-         assert(buffers[i]);
+         struct zink_resource *res = zink_resource(vb->buffer.resource);
+         assert(res->obj->buffer);
+         buffers[i] = res->obj->buffer;
+         buffer_offsets[i] = vb->buffer_offset;
+         buffer_strides[i] = vb->stride;
          if (HAS_VERTEX_INPUT)
             elems->hw_state.dynbindings[i].stride = vb->stride;
-         buffer_offsets[i] = ctx->vbuf_offsets[buffer_id];
-         buffer_strides[i] = vb->stride;
          zink_batch_resource_usage_set(&ctx->batch, zink_resource(vb->buffer.resource), false);
       } else {
          buffers[i] = zink_resource(ctx->dummy_vertex_buffer)->obj->buffer;
@@ -374,6 +374,8 @@ update_barriers(struct zink_context *ctx, bool is_compute)
                   access |= VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
                   pipeline |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
                   bind_count -= util_bitcount(res->vbo_bind_mask);
+                  if (res->write_bind_count[is_compute])
+                     pipeline |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
                }
                bind_count -= res->so_bind_count;
             }
@@ -462,6 +464,9 @@ zink_draw_vbo(struct pipe_context *pctx,
               const struct pipe_draw_start_count_bias *draws,
               unsigned num_draws)
 {
+   if (!dindirect && (!draws[0].count || !dinfo->instance_count))
+      return;
+
    struct zink_context *ctx = zink_context(pctx);
    struct zink_screen *screen = zink_screen(pctx->screen);
    struct zink_rasterizer_state *rast_state = ctx->rast_state;
