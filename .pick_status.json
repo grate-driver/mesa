@@ -1,5 +1,68 @@
 [
     {
+        "sha": "48b3ef625e1909c1be31fbe10adb53734af38eb4",
+        "description": "vulkan/wsi: handle queue families properly for non-concurrent sharing mode.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "5b13d74583513ddd029e30c989838b96993545a0"
+    },
+    {
+        "sha": "221ce1b35ae3db012e40c307fcc3027c59a0bca4",
+        "description": "ci/freedreno: Consolidate some information about an a630 flake.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a64408dcd5121d7bab74d43241ac035d5bf86cb4",
+        "description": "ir3: Don't assert on not finding the VS output for an FS input.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "feb7e30e2d40e1ab06823120288de131a86f88c5",
+        "description": "radv: include disable_aniso_single_level and adjust_frag_coord_z in key",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2de15273d5b332eb116841cab546464236dffc1d",
+        "description": "freedreno: Improve robustness behavior for VBs with offset > size.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92945825f5fcb59ef3787d21a21a61c07ade7588",
+        "description": "freedreno: Fix start_slot handling in set_vertex_buffers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35ddb65ea6b5310c56e75f274a2456e49ef04f55",
+        "description": "freedreno: Use the resource size rather than BO size for VFD_FETCH[].SIZE.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "b21e7e1ef7ba2c2cf97f073a8a01d6bc43835622",
         "description": "docs: match build-flags markup with meson docs",
         "nominated": false,
