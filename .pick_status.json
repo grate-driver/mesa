@@ -2146,7 +2146,7 @@
         "description": "crocus: change the line width workaround for gfx4/5",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6b7a68b7c21eeff1aa037b68b6fb9ab971fe9982"
     },
