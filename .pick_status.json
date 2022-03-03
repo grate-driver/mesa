@@ -1993,7 +1993,7 @@
         "description": "panfrost: Push twice as many uniforms",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d4dccea0ba37d6b8f91b689dd441ba6a4c8ff58c"
     },
