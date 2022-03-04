@@ -788,7 +788,7 @@
         "description": "iris: Fix MOCS for copy regions",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "d8cb76211c5d264d705dbd3c02b5fc61637d5a56"
     },
     {
