@@ -328,7 +328,7 @@
         "description": "panfrost: Emulate GL_CLAMP on Bifrost",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f9ceab7b237d40ded7728457114e59ca6707dd71"
     },
