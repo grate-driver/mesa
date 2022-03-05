@@ -319,7 +319,7 @@
         "description": "pan/bi: Handle non-2D arrays",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "70d6c5675d68103aeb72983a100418da15dd2bc9"
     },
