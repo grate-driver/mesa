@@ -670,7 +670,7 @@
         "description": "anv: fix xfb usage with rasterizer discard",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4d531c67dfd93ff6b1dc4a9626074a74dfb14a2d"
     },
