@@ -1651,7 +1651,7 @@
         "description": "panfrost: Fix set_sampler_views for big GL",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 1,
+        "resolution": 0,
         "main_sha": null,
         "because_sha": null
     },

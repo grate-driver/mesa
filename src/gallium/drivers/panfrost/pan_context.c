@@ -627,35 +627,32 @@ panfrost_set_sampler_views(
         struct panfrost_context *ctx = pan_context(pctx);
         ctx->dirty_shader[shader] |= PAN_DIRTY_STAGE_TEXTURE;
 
+        unsigned new_nr = 0;
         unsigned i;
 
-        for (i = 0; i < num_views; ++i) {
-                struct pipe_sampler_view *view = views ? views[i] : NULL;
-                unsigned p = i + start_slot;
+        assert(start_slot == 0);
 
+        if (!views)
+                num_views = 0;
+
+        for (i = 0; i < num_views; ++i) {
+                if (views[i])
+                        new_nr = i + 1;
                 if (take_ownership) {
-                        pipe_sampler_view_reference((struct pipe_sampler_view **)&ctx->sampler_views[shader][p],
+                        pipe_sampler_view_reference((struct pipe_sampler_view **)&ctx->sampler_views[shader][i],
                                                     NULL);
-                        ctx->sampler_views[shader][i] = (struct panfrost_sampler_view *)view;
+                        ctx->sampler_views[shader][i] = (struct panfrost_sampler_view *)views[i];
                 } else {
-                        pipe_sampler_view_reference((struct pipe_sampler_view **)&ctx->sampler_views[shader][p],
-                                                    view);
+                        pipe_sampler_view_reference((struct pipe_sampler_view **)&ctx->sampler_views[shader][i],
+                                                    views[i]);
                 }
         }
 
-        for (; i < num_views + unbind_num_trailing_slots; i++) {
-                unsigned p = i + start_slot;
-		pipe_sampler_view_reference((struct pipe_sampler_view **)&ctx->sampler_views[shader][p],
+        for (; i < ctx->sampler_view_count[shader]; i++) {
+		pipe_sampler_view_reference((struct pipe_sampler_view **)&ctx->sampler_views[shader][i],
 		                            NULL);
         }
-
-        /* Recalculate sampler view count */
-        ctx->sampler_view_count[shader] = 0;
-
-        for (i = 0; i < ARRAY_SIZE(ctx->sampler_views[shader]); ++i) {
-                if (ctx->sampler_views[shader][i])
-                        ctx->sampler_view_count[shader] = i + 1;
-        }
+        ctx->sampler_view_count[shader] = new_nr;
 }
 
 static void
