@@ -328,7 +328,7 @@
         "description": "ir3/lower_spill: Fix corner case with oob offsets",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9912c61362b650e09dad7ec6fc6a72095969ffab"
     },
