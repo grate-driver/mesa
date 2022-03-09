@@ -598,7 +598,7 @@
         "description": "docs: fixup zink gl 4.3 requirements",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "29f8f21bff69019671f96e3c9aef6a17dbe3ba94"
     },
