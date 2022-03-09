@@ -256,7 +256,7 @@
         "description": "zink: lower dmod on AMD hardware",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5fae35fb17d6d89c4fe1d9d5a19d827caf25b9fc"
     },
