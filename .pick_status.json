@@ -202,7 +202,7 @@
         "description": "lavapipe: Reset the free_cmd_buffers list in TrimCommandPool",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b38879f8c5f57b7f1802e433e33181bdf5e72aef"
     },
