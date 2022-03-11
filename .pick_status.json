@@ -4316,7 +4316,7 @@
         "description": "vulkan: Make sure we've loaded our connectors when querying plane props.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 5,
+        "resolution": 1,
         "because_sha": null
     },
     {
