@@ -8716,11 +8716,7 @@
         "description": "lavapipe: Don't use VK_OUTARRAY_MAKE()/vk_outarray_append()",
         "nominated": true,
         "nomination_type": 1,
-<<<<<<< HEAD
-        "resolution": 0,
-=======
         "resolution": 1,
->>>>>>> 6d51ee55b30 (lavapipe: Don't use VK_OUTARRAY_MAKE()/vk_outarray_append())
         "because_sha": "dc8fdab71efdc3e516f2a8abdfdc2dec05fce448"
     },
     {
@@ -9608,7 +9604,11 @@
         "description": "nir/linker: disable varying from uniform lowering by default",
         "nominated": true,
         "nomination_type": 1,
+<<<<<<< HEAD
         "resolution": 0,
+=======
+        "resolution": 1,
+>>>>>>> c11e0af8ad3 (nir/linker: disable varying from uniform lowering by default)
         "because_sha": "260462504372a0b398af8b41bd790a1a557abec9"
     },
     {

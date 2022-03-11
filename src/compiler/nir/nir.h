@@ -3497,6 +3497,15 @@ typedef struct nir_shader_compiler_options {
     * into same slot.
     */
    nir_pack_varying_options pack_varying_options;
+
+   /**
+    * Remove varying loaded from uniform, let fragment shader load the
+    * uniform directly. GPU passing varying by memory can benifit from it
+    * for sure; but GPU passing varying by on chip resource may not.
+    * Because it saves on chip resource but may increase memory pressure when
+    * fragment task is far more than vertex one, so better left it disabled.
+    */
+   bool lower_varying_from_uniform;
 } nir_shader_compiler_options;
 
 typedef struct nir_shader {
