@@ -1012,7 +1012,7 @@
         "description": "panfrost: Fix primitive restart with 32-bit indices",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "7a6a5f3fe1532414ece15f227e89b0c39ba5a626"
     },
     {
