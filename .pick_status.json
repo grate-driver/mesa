@@ -908,7 +908,7 @@
         "description": "pan/bi: Don't analyze helper reqs in !frag shaders",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": null
     },
     {
