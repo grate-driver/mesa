@@ -1228,7 +1228,7 @@
         "description": "vulkan/wsi: keep allocate queue families in image, just don't fill them",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "48b3ef625e1909c1be31fbe10adb53734af38eb4"
     },
