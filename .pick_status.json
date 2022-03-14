@@ -229,7 +229,7 @@
         "description": "meson: restore private requires to libdrm in dri.pc file",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3ae3569d822c2546c4c748090f8a6c8016f763ea"
     },
