@@ -121,7 +121,7 @@
         "description": "gallivm: fix oob image detection for cube/1dArray/2dArray/cubeArray",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
