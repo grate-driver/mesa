@@ -748,7 +748,7 @@
         "description": "nir/lower_is_helper_invocation: create load_helper_invocation instr with bitsize=1",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "f17b41ab4f017b562fdf7c388200e68c22105331"
     },
     {
