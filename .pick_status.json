@@ -157,7 +157,7 @@
         "description": "Revert \"glx: Fix build errors with --enable-mangling (v2)\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "a27f2d991b1723c3349623401ce3c8f26dcdb28b"
     },
