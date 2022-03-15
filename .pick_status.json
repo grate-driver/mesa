@@ -8644,7 +8644,7 @@
         "description": "anv: fix dynamic sample locations on Gen7/7.5",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "27ee40f4c9d86ed9190a8fee6d230e7416b288e3"
     },
     {
