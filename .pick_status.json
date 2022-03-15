@@ -1,5 +1,266 @@
 [
     {
+        "sha": "dc247e5d4319b644e373534495cc75f41bc7bcd2",
+        "description": "radv: remove VK_AMD_shader_info support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0ccc469693d20f6ad286732e9a165094224df66",
+        "description": "radv: Expose VK_VALVE_descriptor_set_host_mapping for vkd3d only.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86a7b5e2769f0b0d81eec9b38e91394d27ea4997",
+        "description": "radv: Implement VK_VALVE_descriptor_set_host_mapping.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6c0bc7eb07779b1fa56810aaa2a749fb55bddff0",
+        "description": "vk: Update xml and headers to 1.3.207.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6ac3e017d9bbfbdcbd7585cf174fb8377efb7a6",
+        "description": "llvmpipe/fs: add missing depth_clamp key printing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b2c4d7196d73e2ad009e15847b69db2c03dd1ee",
+        "description": "lavapipe: KHR_shader_integer_dot_product",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4cf9e24039874592cb6126595716d161838f25a7",
+        "description": "gallivm: implement nir_op_pack_32_4x8_split",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a33a07bd069fc9aaa7ad92b3c46b7499bed89083",
+        "description": "lavapipe: maintenance4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2f69a8bb8de772fedeecea4cf16c1dc6684d6c0",
+        "description": "lavapipe: set maxBufferSize for maintenance4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "987e8a5a0c011822f4f964f2ca2f8e250884054d",
+        "description": "lavapipe: implement vkGetDevice*MemoryRequirements",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "49cac7b33da6990d79648ed7fbd1f5e1391e0e8f",
+        "description": "lavapipe: ref/unref pipeline layouts for pipeline creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f9976debc549450d37595bdbe34c9115c3605fb",
+        "description": "lavapipe: always clone shader nir for shader states",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2170c3ac63079a99864a29e2c23207e61a30278f",
+        "description": "panvk: Use the correct integer border colors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8dd917b9f0b6d4e65a8cd47d030abd59fc32d92d",
+        "description": "panvk: Rework texture, sampler, and image binding index calculation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "17e79b044e47656ae82c87e6f1e336d10833c326",
+        "description": "panvk: Skip ZS setup if there is no depth/stencil attachment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f843db0a14c30f66e7a18c9e1246e04d5ebd605",
+        "description": "panvk: Make panvk_image_view derive from vk_image_view",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1865b7a93e60f4e97cea536d7124ca8af0fb83af",
+        "description": "panvk: Make panvk_image derive from vk_image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5dbbc0f0a824e4addffeb115631a9c5bcb426c29",
+        "description": "Revert \"glx: Fix build errors with --enable-mangling (v2)\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a27f2d991b1723c3349623401ce3c8f26dcdb28b"
+    },
+    {
+        "sha": "f30334b6c4605ca7eeda35670ef9b96d46db0bce",
+        "description": "Venus: add VN_CMD_ENQUEUE to vn_cmd_encode_memory_barriers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a65d2ef1c1399da8ea6f04b361913bfe6abfa98a",
+        "description": "Venus: Adjust VN_CMD_ENQUEUE to set VN_COMMAND_BUFFER_STATE_INVALID",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6cdbc0299a4b97031e06787f8aafa2d20d00bfcc",
+        "description": "Venus: Add VN_CMD_ENQUEUE macro with vkCmd* common code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1dfee91fdf1002ac5c2ae555b374d501d4437f8f",
+        "description": "radv: export the pipeline hash via VK_KHR_pipeline_executable_properties",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4cf92cad778e3040ab3bed4706b3f9c5cbea502",
+        "description": "radv,aco,ac/llvm: fix indirect dispatches on the compute queue on GFX7-10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "973967c49d70b9d751f76361db8511a2403e4432",
+        "description": "aco: split and recombine unaligned sgpr inputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "000b935c50513ab80fae800f6af9fc573faf6fc9",
+        "description": "v3dv/ci: add test to skip list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff8aa15fa0d3f813efb45878d77111af6575a049",
+        "description": "panvk: Add support for texel buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9dc8382de8be8f8f899276d0d9f466335483f403",
+        "description": "panvk: Add a dummy sampler for NIR tex operations that don't take one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a35e721162bb7dad087e75fd07fec08bc635dc96",
+        "description": "panvk: Stop advertising Vulkan 1.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd9b8881e0ad84ab1e74d972a8233f5c03e7b37a",
+        "description": "Revert \"ci: downgrade sphinx to v3.x\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a545b6eda040ee40b5c36533d7ae378fc24fcf09"
+    },
+    {
         "sha": "d5870c45ae82c091e72f1258920aa54974e19a36",
         "description": "panfrost: Optimise recalculation of max sampler view",
         "nominated": true,
