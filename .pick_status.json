@@ -256,7 +256,7 @@
         "description": "Revert \"ci: downgrade sphinx to v3.x\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "a545b6eda040ee40b5c36533d7ae378fc24fcf09"
     },
