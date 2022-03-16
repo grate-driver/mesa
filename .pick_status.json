@@ -8340,7 +8340,7 @@
         "description": "lavapipe: fix typo in set_event execution",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "eb7eccc76f0a02b3a3291adaa39788b157979dc5"
     },
     {
