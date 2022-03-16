@@ -66,6 +66,7 @@ class CommitWidget(urwid.Text):
     _selectable = True
 
     def __init__(self, ui: 'UI', commit: 'core.Commit'):
+        assert commit.nomination_type is not None
         reason = commit.nomination_type.name.ljust(6)
         super().__init__(f'{commit.date()} {reason} {commit.sha[:10]} {commit.description}')
         self.ui = ui
