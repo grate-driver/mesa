@@ -1,5 +1,428 @@
 [
     {
+        "sha": "acbb0d86f71c950e29df70e357ae08e5ca903a49",
+        "description": "panvk: Implement VK_EXT_vertex_attribute_divisor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58587c32cbdb997d47d998dd6785c95a095e094f",
+        "description": "panvk: Implement indexed rendering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a08b6953865eef1ae6355bb99546e23e6354b917",
+        "description": "panvk: Fix per-instance attribute handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "417cf3d35e06e559c81c31a1a48dee809417946c",
+        "description": "panvk: No-op zero-vertex draws",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3244100557fc8c92fccb8258a7c1f69bbabb9172",
+        "description": "Revert \"virgl: Enable PIPE_CAP_TGSI_TEXCOORD when the host supports it\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "2fbb4e85f7e35ae9f4fd27d5ab38b5609eb117fe"
+    },
+    {
+        "sha": "60517948af1fc3802b5fcb60295b4b0550b9ecf8",
+        "description": "radv: fix missing destruction of the inotify thread",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "c50557d9612a975fd8983438a80ea7a1208698fa"
+    },
+    {
+        "sha": "550f48a8265c2e3b7103f96081d06ff5275c115e",
+        "description": "anv: implement EXT_depth_clip_control",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "61ad60dc009f25d5346fd9280fea44b5e45da359",
+        "description": "ci, radv: Update flake expectations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a815d4001a61a602ab68aafda6f0425653bbc805",
+        "description": "ci, valve: Bump the trigger container",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "729537438e9fe3ea30dfaf2e5a5209c1cbcc98a1",
+        "description": "ci, valve: Show real kernel addresses in KFENCE reports.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "737c86da624dd1f547ab5d0e271c6f999a9013b1",
+        "description": "radv: only clear VRAM for app and descriptor BOs when set via drirc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "45b909a5a0a873f933b9729ea2eb0a1d2bb79ee9",
+        "description": "radv/winsys: remove old comment about zerovram",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "acb300a3f0284bd77c2433e89c5af31c2b998d8e",
+        "description": "lavapipe: EXT_image_robustness",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6345575f8a9e97f5856e53a1c3aee4474c4433c2",
+        "description": "gallivm: fix oob image detection for cube/1dArray/2dArray/cubeArray",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7fbaf924d8d9742390ab3cbc362d87849612aa4",
+        "description": "lavapipe: EXT_pipeline_creation_cache_control",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9bce87849089ede5f2de7f2e8dff219650cabcc8",
+        "description": "lavapipe: EXT_pipeline_creation_feedback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dffe8141bdf15cdc153b044b4f408375425deecc",
+        "description": "lavapipe: KHR_zero_initialize_workgroup_memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e106c1294ba20df8bcc0b91f0697bfdddec2a5ba",
+        "description": "llvmpipe: add handling for zeroing cs shared memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f72d5a930b17fb287a58b1ecbc4ec1356e36160b",
+        "description": "lavapipe: KHR_format_feature_flags2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90e091b072bdd8212e1d104385ece73c4992cdf5",
+        "description": "lavapipe: use VkFormatFeatureFlags2 in format detection",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65bf1cbc26eeef9581fe5787a0da81d8a49549a8",
+        "description": "gallium: add flag to draw info to indicate converted draws",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "864f3c0ee0e6939c347625d0261c9f8e455c5f4d",
+        "description": "panvk: Fix SSBO buffer offsets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6214cce382694003fa97d3b82e85d9ecdadc8b15",
+        "description": "panvk: Require 16B alignment for UBOs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a54f5e8e00eaede1f6428d33422aecfb7ad3796b",
+        "description": "anv: silence compiler warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2221e3d48730546fb6c04c1ad1fc0b79699829a5",
+        "description": "ci: Add new Panfrost G52 skip",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c287ed4f398b43204af397a377b1a55bc2b03ff7",
+        "description": "meson: restore private requires to libdrm in dri.pc file",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "3ae3569d822c2546c4c748090f8a6c8016f763ea"
+    },
+    {
+        "sha": "3b90d3997a14bd8bea633fa4b7bbb5accff5e559",
+        "description": "turnip: use vk_shader_module_to_nir().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a0e081e00a4191a1a18d0a021dbb7b560710d13",
+        "description": "panvk: Use vk_shader_module_to_nir()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c871d89aed6b70a526992dcc3c1cebfeb07a549",
+        "description": "panvk: Use vk_shader_module",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b4a80b4c4f3a0e2ac18bc721d728807aa1a326e",
+        "description": "anv: Use vk_shader_module_to_nir()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21b405fbbc539666f83bd881011c9d7333d6b060",
+        "description": "vulkan: Add a vk_shader_module_to_nir() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "40fcd8ef83d17c4a777f1d351db2dca1405707c6",
+        "description": "lavapipe: enable KHR_memory_model support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13d900de0dcf7885972100f2ad36a6bc5cc0eeb1",
+        "description": "llvmpipe: set nir_shader_compiler_options::use_scoped_barrier",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3e31868558eb30b17b3b8dbe9f832ad1e976d3d",
+        "description": "lavapipe: strip unneeded scoped barriers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a83ea0253f7f9be348b6dad4ac74ecaac87ba692",
+        "description": "ir3: Use isam for bindless readonly ssbo loads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "625ebb977f42b1f834c149aa2e4e1b19a512259d",
+        "description": "ir3: Actually use wrmask in emit_sam",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f020bcc8d00f91136d91f453c572684a48c149d",
+        "description": "ir3/lower_spill: Fix corner case with oob offsets",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "9912c61362b650e09dad7ec6fc6a72095969ffab"
+    },
+    {
+        "sha": "6304c7cb82ccfee8233893f535fda87cdd3a0d61",
+        "description": "ir3/parser: Don't use right recursion",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9d9c0172a7ae534ad05a1583fb1ab4d0f8775b9",
+        "description": "tu: Add an extra storage descriptor for isam",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ec3d39407370f883729d032d81e53244d5b6a2b",
+        "description": "tu: Handle UBO/SSBO descriptors with different sizes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ba3ea1eb3ef92f58c9923cd449336de0f117a98",
+        "description": "tu: Rewrite dynamic descriptor handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f7f6df2877ea93485d0f8f4a8eae5daa721810f",
+        "description": "zink: export indirect io pipe caps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02569428a8f56e481366f85f31c07a0a1a35ad6b",
+        "description": "zink: fix unreachable() location in ntv streamout info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b53ee0219258a60dc26902bd393c54d7945f4866",
+        "description": "zink: add DOUBLE glsl type for streamout export",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68267aeab856961ece73c1fbd661d6ecbd6bf319",
+        "description": "zink: add nir_var_function_temp support to ntv",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eb9b0920015822c915e358019eb82d49bc7c3e05",
+        "description": "turnip: Enable VK_EXT_display_control using the common code.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10d69d5f0bcc03ab68e2fffa4883404b1616c432",
+        "description": "radv: fix returning empty drmFormatModifierTilingFeatures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "dc247e5d4319b644e373534495cc75f41bc7bcd2",
         "description": "radv: remove VK_AMD_shader_info support",
         "nominated": false,
