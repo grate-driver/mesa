@@ -8332,7 +8332,7 @@
         "description": "intel/fs: Fix IsHelperInvocation for the case no discard/demote are used",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "45f5db5a84ae6fe5d4a4d1cd8b62b48d70629fc9"
     },
     {
