@@ -9228,7 +9228,7 @@
         "description": "intel/fs: Force destination types on DP4A instructions",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "0f809dbf4048cbd89c5cf28dbb9ab38cc726fe2a"
     },
     {
