@@ -8340,7 +8340,7 @@
         "description": "intel/fs: Initialize the sample mask in flags register when using demote",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "45f5db5a84ae6fe5d4a4d1cd8b62b48d70629fc9"
     },
     {
@@ -8356,11 +8356,7 @@
         "description": "mesa/st: add special casing for pointsize constant updating during validate",
         "nominated": true,
         "nomination_type": 0,
-<<<<<<< HEAD
-        "resolution": 0,
-=======
         "resolution": 1,
->>>>>>> 4062cbbdd05 (mesa/st: add special casing for pointsize constant updating during validate)
         "because_sha": null
     },
     {
