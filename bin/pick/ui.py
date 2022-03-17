@@ -74,10 +74,12 @@ class CommitWidget(urwid.Text):
 
     async def apply(self) -> None:
         async with self.ui.git_lock:
-            result, err = await self.commit.apply(self.ui)
+            result, err = await self.commit.apply()
             if not result:
                 self.ui.chp_failed(self, err)
             else:
+                self.ui.feedback(f'{self.commit.sha} ({self.commit.description}) applied successfully.')
+                self.ui.save()
                 self.ui.remove_commit(self)
 
     async def denominate(self) -> None:

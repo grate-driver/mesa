@@ -20,6 +20,7 @@
 
 """Core data structures and routines for pick."""
 
+from __future__ import annotations
 import asyncio
 import enum
 import itertools
@@ -146,7 +147,7 @@ class Commit:
             stderr=subprocess.DEVNULL
         ).decode("ascii").strip()
 
-    async def apply(self, ui: 'UI') -> typing.Tuple[bool, str]:
+    async def apply(self) -> typing.Tuple[bool, str]:
         # FIXME: This isn't really enough if we fail to cherry-pick because the
         # git tree will still be dirty
         async with COMMIT_LOCK:
@@ -161,10 +162,6 @@ class Commit:
             return (False, err.decode())
 
         self.resolution = Resolution.MERGED
-        await ui.feedback(f'{self.sha} ({self.description}) applied successfully')
-
-        # Append the changes to the .pickstatus.json file
-        ui.save()
         v = await commit_state(amend=True)
         return (v, '')
 
