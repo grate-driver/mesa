@@ -1,5 +1,309 @@
 [
     {
+        "sha": "860e3f6ff9dd396ae44060ef1cc4edc55300922b",
+        "description": "pvr: Check if the buffer/image was bound before unbinding.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "d876abeaa8c48dac44c843272ba218817fe89f8c",
+        "description": "anv: Drop dead code in anv_UpdateDescriptorSets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4e4b4113784e88abe175f9999c4377ffaa3c9cdf",
+        "description": "ci: cherry-pick deqp fix for zlib dependency",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "803705425e443feb6ec5f54ff162ca845c62b680",
+        "description": "ci: uprev vkd3d-proton to v2.6",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "f2fa850888b4ced4decf5d3836ca5e2547c79740",
+        "description": "ci: uprev Fossilize",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "684a4ea30cd5547090998d9cc701c6b9adfcf8e8",
+        "description": "intel/clc: fix missing pointer write",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "346a7f14fba0b79e587d0088566b0212ed7c81f9"
+    },
+    {
+        "sha": "03888bf09c0dce42d1857f3c7acbb86715837198",
+        "description": "radv: fix mismatch between radv_GetPhysicalDeviceMemoryProperties*()",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "87b65af43e2b63b3bcbddb41b18e748917ec1490"
+    },
+    {
+        "sha": "f86bc873ffc23bb5d33c7acc1a5c0578abc5b30f",
+        "description": "nir_to_tgsi: Require the block index to always be populated",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "74c02d99b224fbc02132b54bf23e6ac1e117d805"
+    },
+    {
+        "sha": "6cfde0abe9a126c24cdd2af24e212c1da2d7ac99",
+        "description": "mesa/st: don't add pointsize to ES programs if it already exists",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "2b2248570243c9cb1e73e9bb7aa7effe7a9dbd9f",
+        "description": "mesa/st: rework pointsize constant uploads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "01083239962889b2087e1f77f22744727882c03d",
+        "description": "mesa/st: always flag last vertex stage constants for upload on pointsize change",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "452d4d00df56d36f931bb52f85650a66f9a31445",
+        "description": "mesa/st: rework atom flagging when pointsize changes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "206d2f31274cf2749870f4942e81d4e31c51089b",
+        "description": "zink: add driver workaround for broken EXT_depth_clip_control",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "fe7c3eba335db0d510364281bc2875a9171796ac",
+        "description": "llvmpipe: handle sampling from 2d views of 3d images",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "d415c28e64dd5f281067130b39e5e6b22bc2e963",
+        "description": "zink: force push descriptors cache update if hashing detects changes",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "5461a1cbaa40731e82e2a1751cf4e862463aeb8e",
+        "description": "lavapipe: enforce monotonic timeline incrementing",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "7aed40e4abbb4d3c1e93a0059c77c02b2a5d2f37",
+        "description": "lavapipe: allow timeline progress in GetSemaphoreCounterValue",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4eca6e3e5d2b9426d6357e9af1514a0c942638f0",
+        "description": "lavapipe: fix xfb availability query copying",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "63d044003491516892758a14e53c2709f757932a",
+        "description": "lavapipe: add loop unrolling.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "8e2555234b7eee5a0b16ae171cdc2149a66fb0b3",
+        "description": "lavapipe: fix shader indexing of sampler arrays with const array index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c91e3c6a428825ef10630ac891ccb79d5116dd65",
+        "description": "util: Should not use ASSERTED in util_thread_get_time_nano",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "0f1b3fc17f0e543c55d6c30d9c1fadc610219b5b"
+    },
+    {
+        "sha": "4525d7ed8590deeddfc0461d4c0655b1e2e511a2",
+        "description": "vulkan: update more headers to 1.3.210",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "e2193514578126166d68a4c601072c3e08166c9b",
+        "description": "iris: assert that samplerview base_array_layer is zero for hw < skl",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4ec71a3429ee45037b25dfb408d31c7818365a1a",
+        "description": "crocus: assert that 3d samplerview base_array_layer is zero",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "65ec846f777a8a112510d9d7a2da2f225880a0e6",
+        "description": "intel/isl: fix 2d view of 3d textures",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "806dcf9db7c03996794b52e833be86c77ce3d36f",
+        "description": "r300: only output wpos in vertex shaders when needed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "8c90a5fab7ebca1f5589f0186851e6cf90ff80c3",
+        "description": "r300: move r300_init_vs_outputs to r300_translate_vertex_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "882811b1ff67fa37197e27f56caaffbe3e6164d6",
+        "description": "r300: restructure r300_vertex_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "d9449c5201bf12130edac60c4249261c242e46bf",
+        "description": "r300: optimize single write scenarios in rc_copy_output",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "5dcef1e7b87498f1f115f2167a007fb724987b97",
+        "description": "r300: don't move position output to the end when duplicating it for WPOS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "8cf10ae144fdafc475165cd24911387d66f849fd",
+        "description": "zink: add in radv passes to baseline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "f3fa085fc64cfb08386a768504d416c1c8b7164c",
+        "description": "zink: more radv fails",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4e6f1c1478be03e53710706a6d5701a49554e12d",
+        "description": "zink: update radv baseline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "8831cb38aa9ea3385addaa21dad9207adaf097b9",
+        "description": "anv: Stop updating STATE_BASE_ADDRESS on XeHP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "1967fd3b1018c8c609b388f4dc49afc641f501c5",
+        "description": "intel/compiler: Call inst->resize_sources before setting the sources",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "because_sha": "a920979d4f30a48a23f8ff375ce05fa8a947dd96"
+    },
+    {
+        "sha": "356f6bb8a5900597965e27e55d9323c91068139e",
+        "description": "docs: update calendar and link releases notes for 22.0.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "215ae6b27074fb0bea71cdf3bdbefc488e4328ad",
+        "description": "docs: add sah256 sum for mesa 22.0.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "d85cdcad5d1f52f34fe51909086d24b03fed7a09",
+        "description": "docs: add release notes for 22.0.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
         "sha": "5a459b8f6b0b59814865bc5869a868269f8f7ebf",
         "description": "r300: fix swizzle handling in transformation of abs",
         "nominated": false,
