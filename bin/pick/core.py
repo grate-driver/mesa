@@ -337,7 +337,9 @@ async def resolve_fixes(commits: typing.List['Commit'], previous: typing.List['C
 
 
 async def gather_commits(version: str, previous: typing.List['Commit'],
-                         new: typing.List[typing.Tuple[str, str]], cb) -> typing.List['Commit']:
+                         new: typing.List[typing.Tuple[str, str]],
+                         cb: typing.Optional[typing.Callable[[], None]] = None
+                         ) -> typing.List['Commit']:
     # We create an array of the final size up front, then we pass that array
     # to the "inner" co-routine, which is turned into a list of tasks and
     # collected by asyncio.gather. We do this to allow the tasks to be
@@ -348,9 +350,10 @@ async def gather_commits(version: str, previous: typing.List['Commit'],
 
     async def inner(commit: 'Commit', version: str,
                     commits: typing.List[typing.Optional['Commit']],
-                    index: int, cb) -> None:
+                    index: int, cb: typing.Optional[typing.Callable[[], None]]) -> None:
         commits[index] = await resolve_nomination(commit, version)
-        cb()
+        if cb:
+            cb()
 
     for i, (sha, desc) in enumerate(new):
         tasks.append(asyncio.ensure_future(
