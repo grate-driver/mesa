@@ -4380,7 +4380,7 @@
         "description": "anv: fix variable shadowing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 5,
+        "resolution": 3,
         "because_sha": "83fee30e85965c9c1caffd0ad829bacaef12ae7c"
     },
     {
