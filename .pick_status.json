@@ -2272,7 +2272,7 @@
         "description": "anv: advertise rectangularLines only for Gen10+",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f6e7de41d7b15185b746b79f7ef601c9405adc95"
     },
