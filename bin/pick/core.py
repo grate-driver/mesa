@@ -22,6 +22,7 @@
 
 import asyncio
 import enum
+import itertools
 import json
 import pathlib
 import re
@@ -370,6 +371,25 @@ async def gather_commits(version: str, previous: typing.List['Commit'],
             commit.resolution = Resolution.NOTNEEDED
 
     return commits
+
+
+async def update_commits() -> None:
+    """Gather all new commits and update the on-disk cache.
+    """
+    commits = load()
+    with open('VERSION', 'r') as f:
+        version = '.'.join(f.read().split('.')[:2])
+    if commits:
+        sha = commits[0].sha
+    else:
+        sha = f'{version}-branchpoint'
+
+    if new := await get_new_commits(sha):
+        collected_commits = await gather_commits(version, commits, new)
+    else:
+        collected_commits = []
+
+    save(itertools.chain(collected_commits, commits))
 
 
 def load() -> typing.List['Commit']:
