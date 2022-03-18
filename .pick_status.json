@@ -844,7 +844,7 @@
         "description": "spirv: Properly mangle generic pointers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "a8e53a772f617877f7735a2c7a4031701845b3a6"
     },
     {
