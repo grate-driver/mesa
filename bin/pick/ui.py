@@ -171,7 +171,7 @@ class UI:
             self.mainloop.widget = o
 
         for commit in reversed(list(itertools.chain(self.new_commits, self.previous_commits))):
-            if commit.nominated and commit.resolution is core.Resolution.UNRESOLVED:
+            if commit.nominated and commit.resolution in {core.Resolution.UNRESOLVED, core.Resolution.MANUAL_RESOLUTION}:
                 b = urwid.AttrMap(CommitWidget(self, commit), None, focus_map='reversed')
                 self.commit_list.append(b)
         self.save()
