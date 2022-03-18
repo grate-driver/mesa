@@ -8900,7 +8900,7 @@
         "description": "lavapipe: Use VK_OUTARRAY for GetPhysicalDeviceQueueFamilyProperties[2]",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "b38879f8c5f57b7f1802e433e33181bdf5e72aef"
     },
     {
