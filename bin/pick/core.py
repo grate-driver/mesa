@@ -81,6 +81,7 @@ class Resolution(enum.Enum):
     DENOMINATED = 2
     BACKPORTED = 3
     NOTNEEDED = 4
+    MANUAL_RESOLUTION = 5
 
 
 async def commit_state(*, amend: bool = False, message: str = 'Update') -> bool:
