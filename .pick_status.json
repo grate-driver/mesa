@@ -2212,7 +2212,7 @@
         "description": "anv: implement EXT_tooling_info",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "df8ac77af8093c87d5d56d6f1b36c0144a607c40"
     },
     {
