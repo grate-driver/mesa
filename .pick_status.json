@@ -76,7 +76,7 @@
         "description": "v3dv/queue: Rework multisync_free",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "ff8586c3452453527ae4c4d794edcb81ad65e661"
     },
     {
