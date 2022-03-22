@@ -1622,7 +1622,8 @@ VKAPI_ATTR VkResult VKAPI_CALL lvp_QueueWaitIdle(
    if (queue->last_fence) {
       queue->device->pscreen->fence_finish(queue->device->pscreen, NULL, queue->last_fence, PIPE_TIMEOUT_INFINITE);
       queue->device->pscreen->fence_reference(queue->device->pscreen, &queue->device->queue.last_fence, NULL);
-      queue->last_finished = timeline;
+      if (timeline > queue->last_finished)
+         queue->last_finished = timeline;
    }
    simple_mtx_unlock(&queue->last_lock);
    return VK_SUCCESS;
@@ -2136,7 +2137,8 @@ VKAPI_ATTR VkResult VKAPI_CALL lvp_GetFenceStatus(
    simple_mtx_lock(&device->queue.last_lock);
    if (fence->handle == device->queue.last_fence) {
       device->pscreen->fence_reference(device->pscreen, &device->queue.last_fence, NULL);
-      device->queue.last_finished = fence->timeline;
+      if (fence->timeline > device->queue.last_finished)
+         device->queue.last_finished = fence->timeline;
    }
    simple_mtx_unlock(&device->queue.last_lock);
    return VK_SUCCESS;
@@ -2252,7 +2254,8 @@ VKAPI_ATTR VkResult VKAPI_CALL lvp_WaitForFences(
    simple_mtx_lock(&device->queue.last_lock);
    if (fence->handle == device->queue.last_fence) {
       device->pscreen->fence_reference(device->pscreen, &device->queue.last_fence, NULL);
-      device->queue.last_finished = fence->timeline;
+      if (fence->timeline > device->queue.last_finished)
+         device->queue.last_finished = fence->timeline;
    }
    simple_mtx_unlock(&device->queue.last_lock);
    fence->signalled = true;
