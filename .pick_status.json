@@ -1908,7 +1908,7 @@
         "description": "iris: don't synchronize BO for batch decoding",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "9ac81f189050663335999a04336f14c45579dcb7"
     },
     {
