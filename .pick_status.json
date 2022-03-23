@@ -7044,7 +7044,11 @@
         "description": "lavapipe: Don't use VK_OUTARRAY_MAKE()/vk_outarray_append()",
         "nominated": true,
         "nomination_type": 1,
+<<<<<<< HEAD
         "resolution": 0,
+=======
+        "resolution": 1,
+>>>>>>> 6d51ee55b30 (lavapipe: Don't use VK_OUTARRAY_MAKE()/vk_outarray_append())
         "because_sha": "dc8fdab71efdc3e516f2a8abdfdc2dec05fce448"
     },
     {
@@ -8052,11 +8056,7 @@
         "description": "Revert \"anv: Disable CCS_E for some 8/16bpp copies on TGL+\"",
         "nominated": true,
         "nomination_type": 1,
-<<<<<<< HEAD
-        "resolution": 0,
-=======
         "resolution": 1,
->>>>>>> a697274e402 (gallivm/sample: detect if rho is inf or nan and flush to zero.)
         "because_sha": "57445adc89186fcadc1e6006d1aa32768b26556b"
     },
     {
