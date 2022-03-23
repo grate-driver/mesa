@@ -68,7 +68,7 @@
         "description": "turnip: Correctly store separate stencil in gmem store",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "b157a5d0d68ee8a1b4cb862a56b97bd881841413"
     },
     {
