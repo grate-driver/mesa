@@ -7916,7 +7916,7 @@
         "description": "aco/optimizer: fix call to can_use_opsel() in apply_insert()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "54292e99c7844500314bfd623469c65adef954c5"
     },
     {
