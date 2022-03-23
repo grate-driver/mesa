@@ -7788,7 +7788,7 @@
         "description": "glsl/nir/linker: fix shader_storage_blocks_write_access",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "79127f8d5be7ab95bde0ab30a03eb21e00df70c2"
     },
     {
