@@ -922,7 +922,7 @@
         "description": "vulkan: explicitly cast object-type enum",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "41318a58196d385ce97041e16a055baf892e38cb"
     },
