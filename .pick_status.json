@@ -524,7 +524,7 @@
         "description": "turnip: Fix the lack of WFM before indirect draws",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "abf0ae014a878d063132a4bf2f2515dc7052f069"
     },
     {
