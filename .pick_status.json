@@ -596,7 +596,7 @@
         "description": "radv: Add more RT pipeline stubs.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "f1095260a411c249af16928f96304ec225a0466b"
     },
     {
