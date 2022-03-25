@@ -604,7 +604,7 @@
         "description": "radv: Add a vkCmdBuildAccelerationStructuresIndirectKHR stub.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "82de184c3a2c797eb010b982636dd34c04cd1b8e"
     },
     {
