@@ -8356,7 +8356,11 @@
         "description": "mesa/st: add special casing for pointsize constant updating during validate",
         "nominated": true,
         "nomination_type": 0,
+<<<<<<< HEAD
         "resolution": 0,
+=======
+        "resolution": 1,
+>>>>>>> 4062cbbdd05 (mesa/st: add special casing for pointsize constant updating during validate)
         "because_sha": null
     },
     {
@@ -9604,11 +9608,7 @@
         "description": "nir/linker: disable varying from uniform lowering by default",
         "nominated": true,
         "nomination_type": 1,
-<<<<<<< HEAD
-        "resolution": 0,
-=======
         "resolution": 1,
->>>>>>> c11e0af8ad3 (nir/linker: disable varying from uniform lowering by default)
         "because_sha": "260462504372a0b398af8b41bd790a1a557abec9"
     },
     {
