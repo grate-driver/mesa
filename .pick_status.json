@@ -6380,7 +6380,7 @@
         "description": "llvmpipe: fix nr_sampler_view in key creation.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "690cc3bb803a933c86a2f6f975e9f49b6edfd7a9"
     },
     {
