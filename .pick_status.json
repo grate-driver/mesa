@@ -6588,7 +6588,7 @@
         "description": "vbo/dlist: do not try to pad an empty draw",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "dcbf2423d284b7bf2d0dc3e622c73de00c7d5bf4"
     },
     {
