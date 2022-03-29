@@ -5924,7 +5924,7 @@
         "description": "anv: Disallow blending on swizzled formats",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "c20f78dc5d7e0fabd58c2d8548d5a6ead1ec1072"
     },
     {
