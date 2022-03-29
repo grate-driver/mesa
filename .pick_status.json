@@ -7140,7 +7140,7 @@
         "description": "intel/compiler: Call inst->resize_sources before setting the sources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "a920979d4f30a48a23f8ff375ce05fa8a947dd96"
     },
     {
