@@ -6460,7 +6460,7 @@
         "description": "nir: intel/compiler: Lower TXD on array surfaces on DG2+",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "635ed58e527f1a1c0b11eca0552e892f56f8ccf6"
     },
     {
