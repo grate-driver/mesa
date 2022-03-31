@@ -740,7 +740,7 @@
         "description": "radv: fix cleaning the image view for CmdCopyImageToBuffer()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "f07e67272e8fd9690a7804e9c407a83a7c2b36f4"
     },
     {
