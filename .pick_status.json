@@ -1,5 +1,365 @@
 [
     {
+        "sha": "33c800bf913771ddadb5bd632df46582f4d1c9f3",
+        "description": "zink: remove radv cwrite driver workaround",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9632e6eefaef70e6bbc1262537339db606acbaef",
+        "description": "radv: Fix vk_queue_to_radv for radv_image_queue_family_mask.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "1ec4e568de22f601101ef70e36dec68bbfb8a768"
+    },
+    {
+        "sha": "d43e6a9a497f1d56d194572a1e5ab87cafa34d5e",
+        "description": "dri: Remove the megadriver compat stub",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "97554218f403e6515b560d9782a14df09d7339c8",
+        "description": "dri: Remove the globalDriverAPI hacks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "b6f7a4836ab273eaec5d030457e8d433dd9baed3",
+        "description": "dri: Fill in the driver extensions for the legacy createNewScreen paths",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c1dc98ceec40804909b9405ca00f19e472ee8112",
+        "description": "dri: Implement __DRI_DRIVER_VTABLE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9c772de270408c8a9b9e84b734d9fc0cee2d4265",
+        "description": "dri: Fold away some unused indirection in __DriverAPIRec",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "23bd889541a7fb213cae52becc891c34bfc9d19d",
+        "description": "dzn: Properly support static blend constants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "f16a7aa9d635829250a959ff8c045ef786e645aa",
+        "description": "dzn: Fix alpha blend factor translation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "738a6760e3723978877bc6ffc02a3792d4c4b3d6",
+        "description": "radv: suspend/resume queries during internal driver operations",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "83ed40cdcd54996b12eb78824f469ae8e44eb6fe",
+        "description": "vbo/dlist: do not try to pad an empty draw",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "because_sha": "dcbf2423d284b7bf2d0dc3e622c73de00c7d5bf4"
+    },
+    {
+        "sha": "b784910ac78ff067b4dd8bb3113738be8c2e8183",
+        "description": "radv: save/restore the stencil write mask during internal driver operations",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "d58105fdd4cc50a3e447a0878d28e42787aa9cda",
+        "description": "ac: remove LLVM 4.0 workaround",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "7d7c56e61a052cabcdf986abacf76506c8da086b",
+        "description": "radeonsi: drop LLVM global instruction selector",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "47152875c7cac89c9422416894f3db5f0936e0e2",
+        "description": "docs: document useful radeonsi env variables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9c2605ae4270005b33303acb38955fe3ab6c8a51",
+        "description": "drirc: enable radeonsi_zerovram for Black Geyser",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "329f16fffc8ae84267585d29c5a398c8491ff8ed",
+        "description": "dzn: Make a bunch of functions private",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4194c89ed87688651a229ce0ba8460965bb31143",
+        "description": "dzn: Remove the dzn_cmd_exec_functions file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "b402cff59126a9a1ac0a48064cce972b3e9d8361",
+        "description": "dzn: Add Missing return type to dzn_translate_sampler_filter()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "bf3c772e5e5854d60dcddceb29a6849701423320",
+        "description": "ci: Improve vs2019 mesa_build.ps1 for remove the need of cmd.exe",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "55ca1c8db37dec048b30f8888d6a76280923aeb1",
+        "description": "vulkan/microsoft: Remove `override_options: ['cpp_std=c++latest']` option for visual studio",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "db8c401f71b5057b39f0dd4782784173a7091e5e",
+        "description": "aco/ra: fix stride check on subdword parallelcopies for create_vector",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "9476986e6f6fe49ef8bc511f4ebeca4232263888"
+    },
+    {
+        "sha": "d32656bc65a7c0165e53d551e23462d626bbf870",
+        "description": "radv: lower has_multiview_view_index in NIR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "2b18234e6165952c1f42001b7a60f63f1c207c36",
+        "description": "radv: drop EXT or KHR suffixes for stuff promoted in Vulkan 1.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "e8a63cf61ecdf7cd80e4fe84f740816978f1d17d",
+        "description": "virgl: fake modifier plane count query support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "51077e821a9cd5dd0cbd6aaad7789ec1e843945c",
+        "description": "vulkan: Allow the driver to manually enable threaded submit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "08512aea09fcf28601c7997e73f8efc787b6f13a",
+        "description": "vulkan: Replace various uses of device->timeline_mode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "8e51778acfba4f87b252e869d7fdd254f5199a2e",
+        "description": "vulkan/queue: Rework vk_queue_submit()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "e0ffdc8ce0b5813940c20f2055477d0d95ba1a1a",
+        "description": "vulkan/queue: Rework submit thread enabling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9ddab162b7841d440523a094ef7005bb79cc8d16",
+        "description": "vulkan/queue: Add a submit mode enum",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "97f17d4b38ee104c46c7c790e0b5af64a9652d2b",
+        "description": "glsl: Delete dont_lower_swz path of lower_quadop_vector.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "761eb7e53969b8503ee20d59dfe016e326b9cc71",
+        "description": "glsl: Delete unused EmitNoPow path.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "dc2c9bae250f5db45e43fb492d290f63d1c43d7d",
+        "description": "vulkan: Add more VU comments to justify framebuffer asserts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "38064566c63d1ab2dc8e02947050c69560610afa",
+        "description": "zink: update radv ci baseline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "0c1fde956bf9b91182eca9c244ebc8bc63983481",
+        "description": "panfrost: Add Valhall compressed formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "42b9295fa651f4f7e743f8d198e98a7e829c0cd4",
+        "description": "panfrost: Restrict Z/S formats for Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "ac51142babbf870ec9a0492f1ed8f78d00e60494",
+        "description": "panfrost: Handle Valhall IDVS in job_uses_tiling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "ee9b63a7bbd1da817bff8cd2978b82a855a20abf",
+        "description": "panfrost: Disable AFBC on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "5b056971a334f5564d04c8a7da96e19783b6f22f",
+        "description": "pan/bi: Preload r60/r61 for MSAA + blend shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "913a7ed41a9185aa60d5ef6ad178b2f166a2aaa3",
+        "description": "pan/bi: Use ID accessors for LEA_ATTR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "3e086723690b1818e2136dbc32a43186af4f693f",
+        "description": "pan/bi: Split out load/store to thread storage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "5e76467d5d555bba3c394e5f953e1d5ac08386e4",
+        "description": "pan/bi: Use nir_tex_instr_has_implicit_derivative",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "fc81415f47f8f51b7fe0f6e97335f2c2401a2529",
+        "description": "pan/bi: Call Valhall backend passes on v9",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "ac5eb4934bd7bc0b2105115ec8af2656266f4df0",
+        "description": "pan/bi: Fix write_mask size",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "3c817ed511c084fdffc011963c0efcc607369669"
+    },
+    {
+        "sha": "12edaae64ab916f157c4a691f5e607ab0fee9329",
+        "description": "pan/bi: Add .shadow modifier to TEX_GATHER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
         "sha": "860e3f6ff9dd396ae44060ef1cc4edc55300922b",
         "description": "pvr: Check if the buffer/image was bound before unbinding.",
         "nominated": false,
