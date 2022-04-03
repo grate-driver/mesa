@@ -652,7 +652,7 @@
         "description": "vulkan/queue: Destroy wait temps if they are skipped",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "8a11d2a31bf931deca05c79871aeaf1441fb777e"
     },
     {
