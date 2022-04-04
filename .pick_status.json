@@ -175,7 +175,7 @@
         "description": "radv: fix memory leak of descriptor set layout",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "66f7289d568db8711adb885acc56622e2aff252a"
     },
