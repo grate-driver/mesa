@@ -220,7 +220,7 @@
         "description": "anv: limit RT writes to number of color outputs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a4f502de3228ec37dfcaa38225077ec3709d74ea"
     },
