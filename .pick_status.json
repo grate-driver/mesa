@@ -2916,7 +2916,7 @@
         "description": "intel/perf: Fix OA report accumulation on Gfx12+.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "3c513250255d6ad031b8574ed7bb54a1e1ccdeef"
     },
     {
