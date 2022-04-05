@@ -2748,7 +2748,7 @@
         "description": "anv: fix push constant lowering for task/mesh",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "a6031cd9bd409c793c3a2928eaf9f04f09d2f55a"
     },
     {
