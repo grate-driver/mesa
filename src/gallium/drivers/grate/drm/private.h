@@ -42,10 +42,11 @@
 #include "opentegra_lib.h"
 
 #ifndef NDEBUG
-#define VDBG_DRM(DRM, FMT, ...) do {					\
-	if (DRM->debug_bo)						\
-		fprintf(stderr, "%s: %d: " FMT,				\
-		__func__, __LINE__, __VA_ARGS__);			\
+#define VDBG_DRM(DRM, ...) do {					\
+	if ((DRM)->debug_bo) {						\
+		fprintf(stderr, "%s: %d: ", __func__, __LINE__);	\
+		fprintf(stderr, __VA_ARGS__);				\
+	}								\
 } while (0)
 
 #define DBG_BO_STATS(DRM) do {						\
