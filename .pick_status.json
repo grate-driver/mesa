@@ -5292,7 +5292,7 @@
         "description": "d3d12: fix return-code without dxcompiler.dll",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "2ea15cd661c8355e8e35624eba0bf10cbcd57f61"
     },
     {
