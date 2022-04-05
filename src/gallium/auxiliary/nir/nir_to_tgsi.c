@@ -1592,7 +1592,7 @@ ntt_emit_image_load_store(struct ntt_compile *c, nir_intrinsic_instr *instr)
       if (dim == GLSL_SAMPLER_DIM_MS) {
          temp = ureg_DECL_temporary(c->ureg);
          ureg_MOV(c->ureg, temp, coord);
-         ureg_MOV(c->ureg, ureg_writemask(temp, 1 << (is_array ? 3 : 2)),
+         ureg_MOV(c->ureg, ureg_writemask(temp, TGSI_WRITEMASK_W),
                   ureg_scalar(ntt_get_src(c, instr->src[2]), TGSI_SWIZZLE_X));
          coord = ureg_src(temp);
       }

@@ -3452,7 +3452,7 @@
         "description": "nir_to_tgsi: Fix emitting the sample number for non-array MSAA image access.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "c6d3fd8c21e06086e573be24ef3e28454245845f"
     },
     {
