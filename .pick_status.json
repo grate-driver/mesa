@@ -1980,7 +1980,7 @@
         "description": "nir: Dont set coord_components on txs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "e1fc23265f9f9e89a38f10c95289301563e0f957"
     },
     {
