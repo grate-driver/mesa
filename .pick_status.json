@@ -5260,7 +5260,7 @@
         "description": "blorp: disable depth bounds",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "939ddccb7a541259957e883d2c9dedbe4df265ad"
     },
     {
