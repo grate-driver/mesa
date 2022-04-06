@@ -108,7 +108,7 @@
         "description": "nir: Handle out of bounds access in nir_vectorize_tess_levels.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "f5adf27fb926a330a13af716f0a03da1a224656d"
     },
     {
