@@ -382,7 +382,7 @@
         "description": "anv: fix clflush usage on utrace copy batch",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cc5843a573bd0412c547b4f2af3cce18263ecfd4"
     },
