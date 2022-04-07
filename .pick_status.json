@@ -4036,7 +4036,7 @@
         "description": "nir/lower_tex: avoid adding invalid LOD to RECT textures",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "74ec2b12be17a7796186b3100a5a6b208be45b23"
     },
     {
