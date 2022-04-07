@@ -3284,7 +3284,7 @@
         "description": "nir_to_tgsi: Fix the address reg mapping for images and SSBOs to match G-T-T.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "4bb9c0a28a5f06341060353dba1a017d154d51a4"
     },
     {
