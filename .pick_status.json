@@ -544,7 +544,7 @@
         "description": "anv: Update line range",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "fce0027d913f6538cb1f1d40675191d2a9ffadfe"
     },
