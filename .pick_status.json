@@ -2484,7 +2484,7 @@
         "description": "nir/lower_int64: Fix [iu]mul_high handling",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "e551040c602d392019e68f54d9a3a310d2a937a3"
     },
     {
