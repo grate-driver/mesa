@@ -100,7 +100,7 @@
         "description": "radv: Fix gs_vgpr_comp_cnt for NGG VS without passthrough mode.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "7ad69e2f7ee10c0e7afc302b9324e7a320424dcb"
     },
     {
