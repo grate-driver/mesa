@@ -1,10 +1,10 @@
-mesa (21.3.8-1) UNRELEASED; urgency=medium
+mesa (21.3.8-1) unstable; urgency=medium
 
   * New upstream release.
   * rules: Drop kmsro option, which was removed upstream.
   * install: Add radv defaults dri conf.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 02 Mar 2022 16:52:10 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Sun, 10 Apr 2022 10:18:19 +0300
 
 mesa (21.3.7-1) unstable; urgency=medium
 
