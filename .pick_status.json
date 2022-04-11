@@ -1408,7 +1408,7 @@
         "description": "nir: Add lowering for fround_even on r300.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7d2ea9b0edef2176140629ac3dee6a6809c4abe2"
     },
