@@ -740,7 +740,7 @@
         "description": "zink: create pipeline layout if only bindless descriptor set is used",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": null
     },
     {
