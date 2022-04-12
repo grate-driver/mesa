@@ -2220,7 +2220,7 @@
         "description": "zink: avoid creating ssbo variable types with multiple runtime arrays",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": null
     },
     {
