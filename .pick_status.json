@@ -1956,7 +1956,7 @@
         "description": "nir/lower_tex: fix rect queries with lower_rect set",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "682e14d3eaee8991ee08ea309cbf9a509b6e6b27"
     },
     {
