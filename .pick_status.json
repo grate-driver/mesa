@@ -211,7 +211,7 @@
         "description": "vulkan/wsi/x11: Use atomic_int with sent_image_count",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d0bc1ad3776bce7d4b356e2a3d8bdbb9ae64e588"
     },
