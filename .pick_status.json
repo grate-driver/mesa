@@ -124,7 +124,7 @@
         "description": "iris: set a default EDSC flag",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "5ae278da18b63a03a1f38ecdb935a28484917dca"
     },
     {
