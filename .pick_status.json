@@ -760,7 +760,7 @@
         "description": "anv: invalidate all metadata in anv_nir_lower_ubo_loads",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "61749b5a1513888767c39b2099be3e82f8d91871"
     },
