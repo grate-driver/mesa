@@ -742,7 +742,7 @@
         "description": "intel/compiler: invalidate metadata in brw_nir_initialize_mue",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bc4f8c073a2cf35227df85a1edfce9848b9cdfae"
     },
