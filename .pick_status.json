@@ -112,7 +112,7 @@
         "description": "spirv: fix OpBranchConditional when both branches are the same",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "64cb143b922b4c074a8404359e7ed9b790941744"
     },
