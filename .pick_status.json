@@ -1822,7 +1822,7 @@
         "description": "Revert \"ci: Disable Google's lab\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8506c2b7ee447faabcda7c4b123717d6e375ee9c"
     },
