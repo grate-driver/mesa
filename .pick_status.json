@@ -562,7 +562,7 @@
         "description": "anv: skip acceleration structure in binding table emission",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "63e91148b7fe777b6ad7bfdb6b02d167c151dd55"
     },
