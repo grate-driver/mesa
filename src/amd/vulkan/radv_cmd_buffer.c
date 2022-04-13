@@ -8359,16 +8359,10 @@ radv_barrier(struct radv_cmd_buffer *cmd_buffer, const VkDependencyInfoKHR *dep_
    /* Make sure CP DMA is idle because the driver might have performed a
     * DMA operation for copying or filling buffers/images.
     */
-   if (src_stage_mask & (VK_PIPELINE_STAGE_2_COPY_BIT_KHR |
-                         VK_PIPELINE_STAGE_2_RESOLVE_BIT_KHR |
-                         VK_PIPELINE_STAGE_2_BLIT_BIT_KHR |
-                         VK_PIPELINE_STAGE_2_CLEAR_BIT_KHR)) {
-      /* Be conservative for now. */
-      src_stage_mask |= VK_PIPELINE_STAGE_2_TRANSFER_BIT_KHR;
-   }
-
-   if (src_stage_mask & (VK_PIPELINE_STAGE_2_TRANSFER_BIT_KHR |
-                         VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT_KHR))
+   if (src_stage_mask &
+       (VK_PIPELINE_STAGE_2_COPY_BIT | VK_PIPELINE_STAGE_2_CLEAR_BIT |
+        VK_PIPELINE_STAGE_2_TRANSFER_BIT | VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT |
+        VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT | VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT))
       si_cp_dma_wait_for_idle(cmd_buffer);
 
    cmd_buffer->state.flush_bits |= dst_flush_bits;
