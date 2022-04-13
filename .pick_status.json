@@ -564,7 +564,7 @@
         "description": "intel: fixup number of threads per EU on XeHP",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "4f9141607f40f0be9cee38ff6b006a05bba72e88"
     },
     {
