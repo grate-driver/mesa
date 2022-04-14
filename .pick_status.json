@@ -121,7 +121,7 @@
         "description": "nouveau/nir: Fix the inverted sense of usesSampleMaskIn.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9f3d5e99ea601ae4bc492ff47738290eed520651"
     },
