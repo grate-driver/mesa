@@ -202,7 +202,7 @@
         "description": "anv: Fix geometry flickering issue when compute and 3D passes are combined",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3501a3f9ed92831ed039f0d54bf295af41ed0195"
     },
