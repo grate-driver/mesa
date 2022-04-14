@@ -1996,7 +1996,7 @@
         "description": "nir/lower_tex: Copy more fields in lower_tex_to_txd and friends",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "1f97819fbe56a388878a23f49c0cf47016e4dde0"
     },
     {
