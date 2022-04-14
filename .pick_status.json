@@ -337,7 +337,7 @@
         "description": "iris: Add FLUSH_HDC to PIPE_CONTROL_CACHE_FLUSH_BITS",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a969ad1ddfd6b0b94cc484da45293c407203e3ac"
     },
