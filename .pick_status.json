@@ -1,5 +1,405 @@
 [
     {
+        "sha": "c7eaf0306876df53d3608ae3bf67afc272dcdf20",
+        "description": "radv: use shader_info::system_values_read",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "3cc21a42feaa8a3519efda0d1a32307fc29d3ba6",
+        "description": "radv: use shader_info::outputs_written/per_primitive_outputs for VS outputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "feaaf4ac7a608966ee1f6d7aacabe533826c8035",
+        "description": "radv: use shader_info::inputs_read/outputs_written for FS IO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "05d57159cf26308fdcdc8f5434a583c67ae9e6c8",
+        "description": "radv: use shader_info::gs::active_stream_mask",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9ca44062cdaf81e1aabb903544195d4632573e46",
+        "description": "radv: use shader_info::writes_memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "31ea1fcd14831ff3df2b06c921eecc4261502c65",
+        "description": "dzn: Make sure sampler heaps don't contain more than 2048 samplers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "3becb2729a54273cbe9e59eb11e07a217c037315",
+        "description": "dzn: Skip binding entries with zero descriptors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "b62087e069c4b5e9738d753c8c03cad2f3085d4f",
+        "description": "nouveau/nir: Don't try to emit OP_FMA pre-nvc0.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "36f12c85c84364d7f1ea797512462e7c7e47a260",
+        "description": "virgl: Extend integer write out output fix to all non-move integers ops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4d23967e8c1d8ba210a9b0065183ad8befc53d2e",
+        "description": "radv: exclude PRIMITIVE_{COUNT,INDICES} from the per-vertex output mask",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "f226222846780b88bc7bae2bf6213c4da0c8cdea",
+        "description": "clc: Use stringstream for printing spirv errors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "fb69d9925ed0c87c988f617eb4b0e9358c5fd056",
+        "description": "docs: truncate new_features.txt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "6a83d94e626bd439bc549326ebbe9f25ca33a19c",
+        "description": "VERSION: bump to 22.2-devel for next cycle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "2036a2c5c5ed63439d267b781c01e2edf7c15b74",
+        "description": "radv: use load_shared2_amd/store_shared2_amd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "67fc0e3655550600dcf16e98c78fe368f04b11e9",
+        "description": "ac/llvm: implement load_shared2_amd/store_shared2_amd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c883abda763de4034f62c473cfdb81b0afd41bde",
+        "description": "aco: implement load_shared2_amd/store_shared2_amd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "5aa5af7776f8a1183d69bc5252f4dda843291561",
+        "description": "aco: handle read2st64/write2st64 in optimizer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "2135c88d9cc264f3583c1c60d28374dff59be0c5",
+        "description": "aco: fix signedness of DS_instruction::offset0/1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "778fc176b15b65e5814278f22fae1881a8118b82",
+        "description": "nir/opt_load_store_vectorize: create load_shared2_amd/store_shared2_amd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "dc835626b36efc45b6ff9e9e8c4c6f15d726b155",
+        "description": "nir/opt_load_store_vectorize: fix broken indentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "8ff122f8b89648301b19e5d3eca528c6eb954369",
+        "description": "nir: add load_shared2_amd and store_shared2_amd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "bbdf22ce136a7f02a8bd6c7e646d12a7e10db18d",
+        "description": "radv: Fix barriers with cp dma",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "because_sha": "4b9bc4791b5778438f4829acd5a61d8b3574a257"
+    },
+    {
+        "sha": "d703a0e8081e9a67263e012f2c9c9729f7cb54e0",
+        "description": "aco: remove register hints entirely",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "2fe005a3fe51ff75c172a9094166ac27f1328819",
+        "description": "aco: remove occurences of VCC hint",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "b10c4d7dee1f77ec858b2621fe79fe68641857bf",
+        "description": "aco: make program->needs_vcc independent of VCC hints",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "415a3820fc1899fed11d5743514821f0adb3eec1",
+        "description": "aco/ra: omit VCC affinity on VOPC_SDWA for GFX9+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "6ebc61d71b853443e7f9f509352656a961b0841a",
+        "description": "aco/ra: create VCC-affinities during RA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "44fb9ba84ac1048bd045b147546a2731962ea458",
+        "description": "aco/ra: only use VCC if program->needs_vcc == true",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "08f3950d6b9bba4300f984c079463a3e5fbe2f53",
+        "description": "anv: stop using old entrypoint/struct/enum names for 1.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "5fad6bca72eb474b616eccb3e71c6427d4977bb9",
+        "description": "nir_to_tgsi: Do the required cleanup for nir_opt_find_array_copies().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c8df09ebd4f164c8cd8b828db08c00deb09fb887",
+        "description": "iris: More gracefully fail in resource_from_user_memory",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "e81f3edf76b09c1d72ae5ebacbda1390905e761b"
+    },
+    {
+        "sha": "85016613324db63bf59774eb3a8c3b213e62b444",
+        "description": "zink: set optimal tiling on swapchain images",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "3017522e74c57d43e09c18effbb0252b67039026",
+        "description": "dzn: Add CI target for vulkan driver",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "fb24f34fc3ed32afe638184ea48c3a6ede30ea2c",
+        "description": "dzn: Add a debug flag to enable D3D12 debug layer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "f7ddd584ab6aad353af21638e850c7bbcc455c77",
+        "description": "pvr: Implement vkCreateQueryPool() and vkDestroyQueryPool().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "1250e30929d21d715724704606b091ce15e28c63",
+        "description": "pvr: Add pvrsrvkm visibility test heap.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "76ee1671f6d8b99619abdba10fc328ea7f085bf3",
+        "description": "pvr: Add core count info and pvr_device_runtime_info.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "93fbaae7d546aa707dfd5057635aa37318e5adb7",
+        "description": "v3dv: Add emulated timeline semaphore support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "1cc917bc683c4980f3d6e98e5dd154d4eedc16a8",
+        "description": "v3dv: Use the core version property helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "1973b2da9d9c975107ce83675cf6a7c9878c80b6",
+        "description": "v3dv: Use the core version feature helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "316728a55bc8fe398be1ac2796a22f8c91fb886c",
+        "description": "v3dv: Switch to the common submit framework",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "321f0b85f2e5d539144aa3dd91d80289cce3c2a0",
+        "description": "v3dv: Always wait on last_job_syncs if job->serialize",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "00b84fae2df5fb2cc36f513731ed299c9ef3767f",
+        "description": "v3dv: Add a condition variable for queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "e5a0e2122f671093b26f5d106df1d2b9e2f1f87c",
+        "description": "v3dv: Use util/os_time helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "8bd7bd957791170c00702467844176644d2808bd",
+        "description": "v3dv: Switch to the common device lost tracking",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "32527f3cccd07a7442abc1264231c2a8e77ddc38",
+        "description": "v3dv: Destroy the device mutex on the teardown path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "30191fd9df1c6804e2041854f2bb79e7df157539",
+        "description": "v3dv: Don't use pthread functions on c11 mutexes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "25441b5e5c3a30b3df0c6bb231e47df0e15a9dec",
+        "description": "v3dv: Put indirect compute CSD jobs in the job list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "0208bb2d5820c3951dfffecbdd666493a1eddd08",
+        "description": "v3dv: Stop directly setting vk_device::alloc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "b284c512e6dd28858bf0f7e9444ec105c253e048",
+        "description": "vulkan/drm_syncobj: Implement WAIT_PENDING with a sync_file lookup",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
         "sha": "7478b00c7cc7f7ec8cbe224ce600362f7fdb9411",
         "description": "aco: remove old global access intrinsics",
         "nominated": false,
