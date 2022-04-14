@@ -1165,7 +1165,7 @@
         "description": "zink: use mixed zs renderpass for depth read/write",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7781a75229d5d071fdeb75b9932cc52c37b28552"
     },
