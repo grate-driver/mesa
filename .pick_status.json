@@ -1201,7 +1201,7 @@
         "description": "zink: remove tcs patch slot map",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f7ade1f1885b7133c68843d7bb31663256b8bb15"
     },
