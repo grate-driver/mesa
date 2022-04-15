@@ -355,7 +355,7 @@
         "description": "util/draw: fix map size of indirect buffer in util_draw_indirect_read",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3eb99323172902d34c80782aaa2d110567749cd9"
     },
