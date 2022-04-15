@@ -1147,7 +1147,7 @@
         "description": "zink: support restart with PIPE_PRIM_LINES_ADJACENCY if ext is available",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
