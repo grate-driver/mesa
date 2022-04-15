@@ -1756,7 +1756,7 @@
         "description": "nir/opcodes: fisfinite32 should return bool32",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "330e28155f79b533a72fc3376fb54ffbf245b458"
     },
     {
