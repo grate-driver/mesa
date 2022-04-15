@@ -1612,7 +1612,7 @@
         "description": "panfrost: Stop overallocating compressed textures",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "051d62cf041054bf0fdbd0ae5d2160d1b02e0203"
     },
     {
