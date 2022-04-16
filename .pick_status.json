@@ -404,7 +404,7 @@
         "description": "nir/opt_algebraic: Fix mask in shift by constant combining.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "0e6581b87dc4e168fa864cd39e8947a58999189a"
     },
     {
