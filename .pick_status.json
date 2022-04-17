@@ -1354,7 +1354,7 @@
         "description": "r600/sfn: Fix store_shared_r600 write masks",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "73ef225fc277cd7ccc996a0306cc3e9a30c46fa3"
     },
