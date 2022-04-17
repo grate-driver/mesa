@@ -1129,7 +1129,7 @@
         "description": "virgl: don't move input gl_SampleMaskIn to a temp",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bc912bace1cf8cd03793c5ae34bd5a2afd015019"
     },
