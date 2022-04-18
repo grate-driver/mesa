@@ -1291,7 +1291,7 @@
         "description": "nir: fix setting varying from uniform as flat",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9401990e6f7a4b024b3a62055339f71477b508d0"
     },
