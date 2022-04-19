@@ -337,7 +337,7 @@
         "description": "radv: Enable rt primitive culling for spirv2nir",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c8fe408fcc77cb38654770affaea71a3ab67799c"
     },
