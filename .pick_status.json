@@ -300,7 +300,7 @@
         "description": "util/draw: fix indirect draw count readback",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "3eb99323172902d34c80782aaa2d110567749cd9"
     },
     {
