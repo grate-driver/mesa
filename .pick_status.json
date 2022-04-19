@@ -76,7 +76,7 @@
         "description": "ci/b2c: fix the generation of the IMAGE_UNDER_TEST variable",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7d474c100e159393dce471f64b08e8f3b3411b9d"
     },
