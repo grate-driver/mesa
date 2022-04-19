@@ -346,7 +346,7 @@
         "description": "util/draw: handle draw_count=0 when reading indirect parameters",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3eb99323172902d34c80782aaa2d110567749cd9"
     },
