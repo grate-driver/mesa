@@ -1884,7 +1884,7 @@
         "description": "nir/lower_shader_calls: don't use nop instructions as cursors",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "8dfb240b1f063307aa5e53fb1bd0865105eef986"
     },
     {
@@ -1892,7 +1892,7 @@
         "description": "nir/cf: Return a cursor from nir_cf_extract as well",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "because_sha": null
     },
     {
