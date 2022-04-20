@@ -958,7 +958,7 @@
         "description": "nouveau/nir: Move FS output stores to the end of the last block.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b1fa2068b8e87474e1a0e3c98e2bff0e744348f3"
     },
