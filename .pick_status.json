@@ -1876,7 +1876,7 @@
         "description": "nir/lower_shader_calls: don't insert code after break/continue",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "8dfb240b1f063307aa5e53fb1bd0865105eef986"
     },
     {
