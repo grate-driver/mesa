@@ -4,7 +4,7 @@
         "description": "spirv: Handle Op*MulExtended for non-32-bit types",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "58bcebd987b7c4e7d741f42699d34b8189ab9e79"
     },
     {
