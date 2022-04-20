@@ -508,7 +508,7 @@
         "description": "ac/surface: adjust gfx9.pitch[*] based on surf->blk_w",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "86262b6eac0c232f4b3085cfc86cff9b7de7d11b"
     },
     {
