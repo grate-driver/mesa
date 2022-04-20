@@ -130,7 +130,7 @@
         "description": "u_blitter/stencil: take dstbox x/y into accounts for dst fb width",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b4c07a8a87d06f2c347f204cac9fe708428e272d"
     },
