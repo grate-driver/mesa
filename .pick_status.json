@@ -589,7 +589,7 @@
         "description": "anv: fix acceleration structure descriptor template writes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d258b0bf0e072438fc9eb921c5335734e6794459"
     },
