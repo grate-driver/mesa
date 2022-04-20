@@ -149,10 +149,6 @@ KHR-GL46.texture_view.view_sampling,Fail
 KHR-GL46.transform_feedback.capture_geometry_interleaved_test,Fail
 KHR-GL46.transform_feedback.capture_geometry_separate_test,Fail
 KHR-GL46.transform_feedback.capture_vertex_separate_test,Fail
-KHR-GL46.transform_feedback.draw_xfb_feedbackk_test,Fail
-KHR-GL46.transform_feedback.draw_xfb_instanced_test,Fail
-KHR-GL46.transform_feedback.draw_xfb_stream_instanced_test,Fail
-KHR-GL46.transform_feedback.draw_xfb_stream_test,Fail
 KHR-GL46.transform_feedback.draw_xfb_test,Fail
 KHR-GL46.transform_feedback.query_geometry_interleaved_test,Fail
 KHR-GL46.transform_feedback.query_geometry_separate_test,Fail
