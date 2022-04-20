@@ -1868,7 +1868,7 @@
         "description": "nir/lower_shader_calls: put inserted instructions into a dummy block",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "8dfb240b1f063307aa5e53fb1bd0865105eef986"
     },
     {
