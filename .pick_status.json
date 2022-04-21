@@ -229,7 +229,7 @@
         "description": "radv: only apply enable_mrt_output_nan_fixup for 32-bit float MRTs",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
