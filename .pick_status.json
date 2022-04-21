@@ -2556,7 +2556,7 @@
         "description": "Revert \"radv: Disable NGG for GS with suboptimal output vertex count.\"",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "because_sha": null
     },
     {
