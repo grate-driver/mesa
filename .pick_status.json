@@ -481,7 +481,7 @@
         "description": "intel/nir: fix potential invalid function impl ptr usage",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "96fde5518b5c47550f0f42f3a0504ccbdc4a4e92"
     },
