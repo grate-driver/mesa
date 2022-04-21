@@ -20,7 +20,7 @@
         "description": "mesa/st: clamp GL_RENDERBUFFER to GL_TEXTURE_2D for sparse queries",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "b1c32a6c8c2ffb38627a560bc738ffde2c5e25a4"
     },
     {
