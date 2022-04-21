@@ -59,6 +59,7 @@ struct radv_blend_state {
    uint32_t spi_shader_col_format;
    uint32_t col_format_is_int8;
    uint32_t col_format_is_int10;
+   uint32_t col_format_is_float32;
    uint32_t cb_shader_mask;
    uint32_t db_alpha_to_mask;
 
@@ -524,6 +525,16 @@ format_is_int10(VkFormat format)
    return false;
 }
 
+static bool
+format_is_float32(VkFormat format)
+{
+   const struct util_format_description *desc = vk_format_description(format);
+   int channel = vk_format_get_first_non_void_channel(format);
+
+   return channel >= 0 &&
+          desc->channel[channel].type == UTIL_FORMAT_TYPE_FLOAT && desc->channel[channel].size == 32;
+}
+
 static void
 radv_pipeline_compute_spi_color_formats(const struct radv_pipeline *pipeline,
                                         const VkGraphicsPipelineCreateInfo *pCreateInfo,
@@ -531,7 +542,7 @@ radv_pipeline_compute_spi_color_formats(const struct radv_pipeline *pipeline,
 {
    const VkPipelineRenderingCreateInfoKHR *render_create_info =
       vk_find_struct_const(pCreateInfo->pNext, PIPELINE_RENDERING_CREATE_INFO_KHR);
-   unsigned col_format = 0, is_int8 = 0, is_int10 = 0;
+   unsigned col_format = 0, is_int8 = 0, is_int10 = 0, is_float32 = 0;
    unsigned num_targets;
 
    if (render_create_info) {
@@ -552,6 +563,8 @@ radv_pipeline_compute_spi_color_formats(const struct radv_pipeline *pipeline,
                is_int8 |= 1 << i;
             if (format_is_int10(fmt))
                is_int10 |= 1 << i;
+            if (format_is_float32(fmt))
+               is_float32 |= 1 << i;
          }
 
          col_format |= cf << (4 * i);
@@ -588,6 +601,7 @@ radv_pipeline_compute_spi_color_formats(const struct radv_pipeline *pipeline,
    blend->spi_shader_col_format = col_format;
    blend->col_format_is_int8 = is_int8;
    blend->col_format_is_int10 = is_int10;
+   blend->col_format_is_float32 = is_float32;
 }
 
 /*
@@ -2952,7 +2966,7 @@ radv_generate_graphics_pipeline_key(const struct radv_pipeline *pipeline,
       key.ps.lower_discard_to_demote = true;
 
    if (pipeline->device->instance->enable_mrt_output_nan_fixup)
-      key.ps.enable_mrt_output_nan_fixup = true;
+      key.ps.enable_mrt_output_nan_fixup = blend->col_format_is_float32;
 
    key.ps.force_vrs = pipeline->device->force_vrs;
 

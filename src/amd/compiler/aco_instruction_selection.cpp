@@ -11061,13 +11061,11 @@ export_fs_mrt_color(isel_context* ctx, int slot)
 
    bool is_int8 = (ctx->options->key.ps.is_int8 >> slot) & 1;
    bool is_int10 = (ctx->options->key.ps.is_int10 >> slot) & 1;
+   bool enable_mrt_output_nan_fixup = (ctx->options->key.ps.enable_mrt_output_nan_fixup >> slot) & 1;
    bool is_16bit = values[0].regClass() == v2b;
 
-   /* Replace NaN by zero (only 32-bit) to fix game bugs if requested. */
-   if (ctx->options->enable_mrt_output_nan_fixup && !is_16bit &&
-       (col_format == V_028714_SPI_SHADER_32_R || col_format == V_028714_SPI_SHADER_32_GR ||
-        col_format == V_028714_SPI_SHADER_32_AR || col_format == V_028714_SPI_SHADER_32_ABGR ||
-        col_format == V_028714_SPI_SHADER_FP16_ABGR)) {
+   /* Replace NaN by zero (for 32-bit float formats) to fix game bugs if requested. */
+   if (enable_mrt_output_nan_fixup && !is_16bit) {
       for (int i = 0; i < 4; i++) {
          if (!(write_mask & (1 << i)))
             continue;
