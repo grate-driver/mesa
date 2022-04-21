@@ -9436,7 +9436,7 @@
         "description": "anv: disable task redistribution",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ef04caea9b8b98187340fd0ec6550aed06424b60"
     },
@@ -9463,7 +9463,7 @@
         "description": "Revert \"nir/lower_task_shader: don't use base index for shared memory intrinsics\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e5970fe22a66bf1727d8b677f4e3c93fe2172a71"
     },
