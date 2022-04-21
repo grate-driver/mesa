@@ -548,7 +548,7 @@
         "description": "nir: Remove single-source phis before opt_if_loop_last_continue",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "5921a19d4b0c6491b3535b5154d585384c9ea144"
     },
     {
