@@ -204,7 +204,7 @@
         "description": "nir/divergence: handle load_global_block_intel",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "dd39e311b336dddcc7343c5119ce05af410d8dc5"
     },
     {
