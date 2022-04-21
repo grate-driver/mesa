@@ -121,7 +121,7 @@
         "description": "util/stencil: fix stencil fallback blit shader texture types.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f05dfddeb1adad9f6d4ca18f5e066b3ae23d3e28"
     },
