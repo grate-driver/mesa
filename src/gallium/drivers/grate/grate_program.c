@@ -6,6 +6,8 @@
 
 #include "tgsi/tgsi_dump.h"
 #include "tgsi/tgsi_parse.h"
+#include "tgsi/tgsi_scan.h"
+#include "tgsi/tgsi_transform.h"
 
 #include "host1x01_hardware.h"
 #include "grate_common.h"
@@ -16,6 +18,71 @@
 #include "fp/fpir.h"
 #include "vp/vpir.h"
 #include "tgr_3d.xml.h"
+
+struct grate_vs_tgsi_transform_context {
+   struct tgsi_transform_context base;
+   unsigned next_temp;
+};
+
+static void
+grate_vs_tgsi_transform_instruction(struct tgsi_transform_context *ctx,
+                                    struct tgsi_full_instruction *inst)
+{
+   struct grate_vs_tgsi_transform_context *gctx =
+      (struct grate_vs_tgsi_transform_context *)ctx;
+
+   int const_index = -1;
+   for (unsigned i = 0; i < inst->Instruction.NumSrcRegs; i++) {
+      if (inst->Src[i].Register.File != TGSI_FILE_CONSTANT)
+         continue;
+
+      if (const_index < 0)
+         const_index = inst->Src[i].Register.Index;
+      else if (inst->Src[i].Register.Index != const_index) {
+         /* We already have a constant-reads in this instruction,
+          * add extra instructions in order to read more
+          */
+         unsigned temp = gctx->next_temp++;
+         tgsi_transform_temp_decl(ctx, temp);
+         /* insert MOV to temp */
+         tgsi_transform_op1_inst(ctx, TGSI_OPCODE_MOV,
+                                 /* dst reg */
+                                 TGSI_FILE_TEMPORARY, temp,
+                                 TGSI_WRITEMASK_XYZW,
+                                 /* src reg */
+                                 TGSI_FILE_CONSTANT,
+                                 inst->Src[i].Register.Index);
+
+         /* rewrite instruction */
+	 tgsi_transform_src_reg_xyzw(&inst->Src[i], TGSI_FILE_TEMPORARY, temp);
+	 inst->Src[i].Register.File = TGSI_FILE_TEMPORARY;
+         inst->Src[i].Register.Index = temp;
+      }
+   }
+
+   ctx->emit_instruction(ctx, inst);
+}
+
+static struct tgsi_token *
+grate_vs_tgsi_transform(const struct tgsi_token *tokens_in)
+{
+   const unsigned new_len = tgsi_num_tokens(tokens_in) + 100;
+
+   struct tgsi_shader_info info;
+   tgsi_scan_shader(tokens_in, &info);
+
+   struct grate_vs_tgsi_transform_context ctx = {};
+   ctx.base.transform_instruction = grate_vs_tgsi_transform_instruction;
+   ctx.next_temp = info.file_max[TGSI_FILE_TEMPORARY] + 1;
+
+   struct tgsi_token *new_tokens = tgsi_alloc_tokens(new_len);
+   if (!new_tokens)
+      return NULL;
+
+   tgsi_transform_shader(tokens_in, new_tokens, new_len, &ctx.base);
+   return new_tokens;
+}
+
 
 static void *
 grate_create_vs_state(struct pipe_context *pcontext,
@@ -35,8 +102,12 @@ grate_create_vs_state(struct pipe_context *pcontext,
       fprintf(stderr, "\n");
    }
 
+   struct tgsi_token *new_tokens = grate_vs_tgsi_transform(template->tokens);
+   if (!new_tokens)
+      return NULL;
+
    struct tgsi_parse_context parser;
-   unsigned ok = tgsi_parse_init(&parser, template->tokens);
+   unsigned ok = tgsi_parse_init(&parser, new_tokens);
    assert(ok == TGSI_PARSE_OK);
 
    struct grate_vp_shader vp;
