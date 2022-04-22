@@ -4,7 +4,7 @@
         "description": "glsl/nir: set new_style_shadow for sparse tex ops as necessary",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "f4a972b74837a9f7992b93a808115541bf20589b"
     },
     {
