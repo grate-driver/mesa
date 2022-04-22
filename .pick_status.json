@@ -859,7 +859,7 @@
         "description": "microsoft/compiler: Images are no longer reprensented by uniform vars",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cfdc7ee066ea86c87d128e68c43ce7103da3ef5a"
     },
