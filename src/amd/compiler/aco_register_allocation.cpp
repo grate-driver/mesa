@@ -48,7 +48,13 @@ void add_subdword_definition(Program* program, aco_ptr<Instruction>& instr, Phys
 struct assignment {
    PhysReg reg;
    RegClass rc;
-   bool assigned = false;
+   union {
+      struct {
+         bool assigned : 1;
+         bool vcc : 1;
+      };
+      uint8_t _ = 0;
+   };
    uint32_t affinity = 0;
    assignment() = default;
    assignment(PhysReg reg_, RegClass rc_) : reg(reg_), rc(rc_), assigned(-1) {}
@@ -1398,7 +1404,7 @@ get_reg_specified(ra_ctx& ctx, RegisterFile& reg_file, RegClass rc, aco_ptr<Inst
    PhysRegInterval bounds = get_reg_bounds(ctx.program, rc.type());
    PhysRegInterval vcc_win = {vcc, 2};
    /* VCC is outside the bounds */
-   bool is_vcc = rc.type() == RegType::sgpr && vcc_win.contains(reg_win);
+   bool is_vcc = rc.type() == RegType::sgpr && vcc_win.contains(reg_win) && ctx.program->needs_vcc;
    bool is_m0 = rc == s1 && reg == m0;
    if (!bounds.contains(reg_win) && !is_vcc && !is_m0)
       return false;
@@ -1623,6 +1629,10 @@ get_reg(ra_ctx& ctx, RegisterFile& reg_file, Temp temp,
          if (get_reg_specified(ctx, reg_file, temp.regClass(), instr, affinity.reg))
             return affinity.reg;
       }
+   }
+   if (ctx.assignments[temp.id()].vcc) {
+      if (get_reg_specified(ctx, reg_file, temp.regClass(), instr, vcc))
+         return vcc;
    }
 
    std::pair<PhysReg, bool> res;
@@ -2380,11 +2390,27 @@ get_affinities(ra_ctx& ctx, std::vector<IDSet>& live_out_per_block)
          } else if (instr->format == Format::MIMG && instr->operands.size() > 4) {
             for (unsigned i = 3; i < instr->operands.size(); i++)
                ctx.vectors[instr->operands[i].tempId()] = instr.get();
-         }
-
-         if (instr->opcode == aco_opcode::p_split_vector &&
-             instr->operands[0].isFirstKillBeforeDef())
+         } else if (instr->opcode == aco_opcode::p_split_vector &&
+                    instr->operands[0].isFirstKillBeforeDef()) {
             ctx.split_vectors[instr->operands[0].tempId()] = instr.get();
+         } else if (instr->isVOPC() && !instr->isVOP3()) {
+            if (!instr->isSDWA() || ctx.program->chip_class == GFX8)
+               ctx.assignments[instr->definitions[0].tempId()].vcc = true;
+         } else if (instr->isVOP2() && !instr->isVOP3()) {
+            if (instr->operands.size() == 3 && instr->operands[2].isTemp() &&
+                instr->operands[2].regClass().type() == RegType::sgpr)
+               ctx.assignments[instr->operands[2].tempId()].vcc = true;
+            if (instr->definitions.size() == 2)
+               ctx.assignments[instr->definitions[1].tempId()].vcc = true;
+         } else if (instr->opcode == aco_opcode::s_and_b32 ||
+                    instr->opcode == aco_opcode::s_and_b64) {
+            /* If SCC is used by a branch, we might be able to use
+             * s_cbranch_vccz/s_cbranch_vccnz if the operand is VCC.
+             */
+            if (!instr->definitions[1].isKill() && instr->operands[0].isTemp() &&
+                instr->operands[1].isFixed() && instr->operands[1].physReg() == exec)
+               ctx.assignments[instr->operands[0].tempId()].vcc = true;
+         }
 
          /* add operands to live variables */
          for (const Operand& op : instr->operands) {
@@ -2760,11 +2786,7 @@ register_allocation(Program* program, std::vector<IDSet>& live_out_per_block, ra
                continue;
 
             /* find free reg */
-            if (definition->hasHint() &&
-                get_reg_specified(ctx, register_file, definition->regClass(), instr,
-                                  definition->physReg())) {
-               definition->setFixed(definition->physReg());
-            } else if (instr->opcode == aco_opcode::p_split_vector) {
+            if (instr->opcode == aco_opcode::p_split_vector) {
                PhysReg reg = instr->operands[0].physReg();
                for (unsigned j = 0; j < i; j++)
                   reg.reg_b += instr->definitions[j].bytes();

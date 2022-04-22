@@ -265,20 +265,28 @@ st_nir_add_point_size(nir_shader *nir)
    nir_builder b;
    nir_function_impl *impl = nir_shader_get_entrypoint(nir);
    nir_builder_init(&b, impl);
+   bool found = false;
    nir_foreach_block_safe(block, impl) {
       nir_foreach_instr_safe(instr, block) {
          if (instr->type == nir_instr_type_intrinsic) {
             nir_intrinsic_instr *intr = nir_instr_as_intrinsic(instr);
-            if (intr->intrinsic == nir_intrinsic_store_deref) {
+            if (intr->intrinsic == nir_intrinsic_store_deref ||
+                intr->intrinsic == nir_intrinsic_copy_deref) {
                nir_variable *var = nir_intrinsic_get_var(intr, 0);
                if (var->data.location == VARYING_SLOT_POS) {
                   b.cursor = nir_after_instr(instr);
                   nir_deref_instr *deref = nir_build_deref_var(&b, psiz);
                   nir_store_deref(&b, deref, nir_imm_float(&b, 1.0), BITFIELD_BIT(0));
+                  found = true;
                }
             }
          }
       }
+   }
+   if (!found) {
+      b.cursor = nir_before_cf_list(&impl->body);
+      nir_deref_instr *deref = nir_build_deref_var(&b, psiz);
+      nir_store_deref(&b, deref, nir_imm_float(&b, 1.0), BITFIELD_BIT(0));
    }
 }
 
@@ -780,6 +788,27 @@ st_link_nir(struct gl_context *ctx,
    for (unsigned i = 0; i < num_shaders; i++) {
       struct gl_linked_shader *shader = linked_shader[i];
       nir_shader *nir = shader->Program->nir;
+      gl_shader_stage stage = shader->Stage;
+      const struct gl_shader_compiler_options *options =
+            &ctx->Const.ShaderCompilerOptions[stage];
+
+      /* If there are forms of indirect addressing that the driver
+       * cannot handle, perform the lowering pass.
+       */
+      if (options->EmitNoIndirectInput || options->EmitNoIndirectOutput ||
+          options->EmitNoIndirectTemp || options->EmitNoIndirectUniform) {
+         nir_variable_mode mode = options->EmitNoIndirectInput ?
+            nir_var_shader_in : (nir_variable_mode)0;
+         mode |= options->EmitNoIndirectOutput ?
+            nir_var_shader_out : (nir_variable_mode)0;
+         mode |= options->EmitNoIndirectTemp ?
+            nir_var_function_temp : (nir_variable_mode)0;
+         mode |= options->EmitNoIndirectUniform ?
+            nir_var_uniform | nir_var_mem_ubo | nir_var_mem_ssbo :
+            (nir_variable_mode)0;
+
+         nir_lower_indirect_derefs(nir, mode, UINT32_MAX);
+      }
 
       /* don't infer ACCESS_NON_READABLE so that Program->sh.ImageAccess is
        * correct: https://gitlab.freedesktop.org/mesa/mesa/-/issues/3278

@@ -1746,8 +1746,11 @@ struct radv_event {
 
 struct radv_pipeline_key;
 
-void radv_hash_shaders(unsigned char *hash, const VkPipelineShaderStageCreateInfo *stages,
-                       uint32_t stageCount, const struct radv_pipeline_layout *layout,
+void radv_pipeline_stage_init(const VkPipelineShaderStageCreateInfo *sinfo,
+                              struct radv_pipeline_stage *out_stage, gl_shader_stage stage);
+
+void radv_hash_shaders(unsigned char *hash, const struct radv_pipeline_stage *stages,
+                       const struct radv_pipeline_layout *layout,
                        const struct radv_pipeline_key *key, uint32_t flags);
 
 void radv_hash_rt_shaders(unsigned char *hash, const VkRayTracingPipelineCreateInfoKHR *pCreateInfo,
@@ -1756,6 +1759,10 @@ void radv_hash_rt_shaders(unsigned char *hash, const VkRayTracingPipelineCreateI
 uint32_t radv_get_hash_flags(const struct radv_device *device, bool stats);
 
 bool radv_rt_pipeline_has_dynamic_stack_size(const VkRayTracingPipelineCreateInfoKHR *pCreateInfo);
+
+bool radv_enable_rt(const struct radv_physical_device *pdevice);
+
+bool radv_emulate_rt(const struct radv_physical_device *pdevice);
 
 #define RADV_STAGE_MASK ((1 << MESA_VULKAN_SHADER_STAGES) - 1)
 
@@ -1928,11 +1935,20 @@ struct radv_pipeline {
 struct radv_pipeline_stage {
    gl_shader_stage stage;
 
-   struct vk_shader_module *module;
+   struct {
+      const struct vk_object_base *object;
+      const char *data;
+      uint32_t size;
+      unsigned char sha1[20];
+   } spirv;
+
    const char *entrypoint;
    const VkSpecializationInfo *spec_info;
 
+   unsigned char shader_sha1[20];
+
    nir_shader *nir;
+   nir_shader *internal_nir; /* meta shaders */
 
    struct radv_shader_info info;
    struct radv_shader_args args;

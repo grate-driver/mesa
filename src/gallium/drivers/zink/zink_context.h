@@ -291,6 +291,8 @@ struct zink_context {
       float tess_levels[6];
    };
 
+   struct zink_vk_query *curr_xfb_queries[PIPE_MAX_VERTEX_STREAMS];
+
    struct list_head query_pools;
    struct list_head suspended_queries;
    struct list_head primitives_generated_queries;
@@ -361,7 +363,6 @@ struct zink_context {
    uint32_t num_so_targets;
    struct pipe_stream_output_target *so_targets[PIPE_MAX_SO_OUTPUTS];
    bool dirty_so_targets;
-   bool xfb_barrier;
    bool first_frame_done;
    bool have_timelines;
 

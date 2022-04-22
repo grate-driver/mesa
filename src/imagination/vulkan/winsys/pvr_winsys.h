@@ -40,6 +40,7 @@
 #include "util/vma.h"
 
 struct pvr_device_info;
+struct pvr_device_runtime_info;
 
 /* device virtual address */
 typedef struct pvr_dev_addr {
@@ -55,6 +56,7 @@ struct pvr_winsys_heaps {
    struct pvr_winsys_heap *pds_heap;
    struct pvr_winsys_heap *rgn_hdr_heap;
    struct pvr_winsys_heap *usc_heap;
+   struct pvr_winsys_heap *vis_test_heap;
 };
 
 struct pvr_winsys_static_data_offsets {
@@ -357,7 +359,8 @@ struct pvr_winsys_render_submit_info {
 struct pvr_winsys_ops {
    void (*destroy)(struct pvr_winsys *ws);
    int (*device_info_init)(struct pvr_winsys *ws,
-                           struct pvr_device_info *dev_info);
+                           struct pvr_device_info *dev_info,
+                           struct pvr_device_runtime_info *runtime_info);
    void (*get_heaps_info)(struct pvr_winsys *ws,
                           struct pvr_winsys_heaps *heaps);
 

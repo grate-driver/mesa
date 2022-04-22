@@ -38,6 +38,7 @@
 #include "vk_common_entrypoints.h"
 
 #include "ac_debug.h"
+#include "ac_shader_args.h"
 
 #include "util/fast_idiv_by_const.h"
 
@@ -3277,10 +3278,24 @@ radv_flush_constants(struct radv_cmd_buffer *cmd_buffer, VkShaderStageFlags stag
 
       need_push_constants |= radv_shader_loads_push_constants(pipeline, stage);
 
-      uint8_t base = shader->info.min_push_constant_used / 4;
+      uint64_t mask = shader->info.inline_push_constant_mask;
+      if (!mask)
+         continue;
 
-      radv_emit_inline_push_consts(cmd_buffer, pipeline, stage, AC_UD_INLINE_PUSH_CONSTANTS,
-                                   (uint32_t *)cmd_buffer->push_constants + base);
+      uint8_t base = ffs(mask) - 1;
+      if (mask == u_bit_consecutive64(base, util_last_bit64(mask) - base)) {
+         /* consecutive inline push constants */
+         radv_emit_inline_push_consts(cmd_buffer, pipeline, stage, AC_UD_INLINE_PUSH_CONSTANTS,
+                                      (uint32_t *)cmd_buffer->push_constants + base);
+      } else {
+         /* sparse inline push constants */
+         uint32_t consts[AC_MAX_INLINE_PUSH_CONSTS];
+         unsigned num_consts = 0;
+         u_foreach_bit64 (idx, mask)
+            consts[num_consts++] = ((uint32_t *)cmd_buffer->push_constants)[idx];
+         radv_emit_inline_push_consts(cmd_buffer, pipeline, stage, AC_UD_INLINE_PUSH_CONSTANTS,
+                                      consts);
+      }
    }
 
    if (need_push_constants) {
@@ -8437,9 +8452,10 @@ radv_barrier(struct radv_cmd_buffer *cmd_buffer, const VkDependencyInfo *dep_inf
    /* Make sure CP DMA is idle because the driver might have performed a DMA operation for copying a
     * buffer (or a MSAA image using FMASK) or updated a buffer which is a transfer operation.
     */
-   if (src_stage_mask & (VK_PIPELINE_STAGE_2_COPY_BIT |
-                         VK_PIPELINE_STAGE_2_TRANSFER_BIT |
-                         VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT))
+   if (src_stage_mask &
+       (VK_PIPELINE_STAGE_2_COPY_BIT | VK_PIPELINE_STAGE_2_CLEAR_BIT |
+        VK_PIPELINE_STAGE_2_TRANSFER_BIT | VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT |
+        VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT | VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT))
       si_cp_dma_wait_for_idle(cmd_buffer);
 
    cmd_buffer->state.flush_bits |= dst_flush_bits;

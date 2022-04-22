@@ -2553,15 +2553,15 @@ emit_get_ssbo_size(struct ntv_context *ctx, nir_intrinsic_instr *intr)
    nir_const_value *const_block_index = nir_src_as_const_value(intr->src[0]);
    assert(const_block_index); // no dynamic indexing for now
    nir_variable *var = ctx->ssbo_vars[const_block_index->u32];
+   unsigned last_member_idx = glsl_get_length(var->interface_type) - 1;
    SpvId result = spirv_builder_emit_binop(&ctx->builder, SpvOpArrayLength, uint_type,
-                                             ctx->ssbos[const_block_index->u32][2], 1);
+                                             ctx->ssbos[const_block_index->u32][2], last_member_idx);
    /* this is going to be converted by nir to:
 
       length = (buffer_size - offset) / stride
 
       * so we need to un-convert it to avoid having the calculation performed twice
       */
-   unsigned last_member_idx = glsl_get_length(var->interface_type) - 1;
    const struct glsl_type *last_member = glsl_get_struct_field(var->interface_type, last_member_idx);
    /* multiply by stride */
    result = emit_binop(ctx, SpvOpIMul, uint_type, result, emit_uint_const(ctx, 32, glsl_get_explicit_stride(last_member)));
@@ -2676,7 +2676,11 @@ emit_image_deref_size(struct ntv_context *ctx, nir_intrinsic_instr *intr)
    SpvId img_type = var->data.bindless ? get_bare_image_type(ctx, var, false) : ctx->image_types[var->data.driver_location];
    const struct glsl_type *type = glsl_without_array(var->type);
    SpvId img = spirv_builder_emit_load(&ctx->builder, img_type, img_var);
-   SpvId result = spirv_builder_emit_image_query_size(&ctx->builder, get_uvec_type(ctx, 32, glsl_get_sampler_coordinate_components(type)), img, 0);
+   unsigned num_components = glsl_get_sampler_coordinate_components(type);
+   /* SPIRV requires 2 components for non-array cube size */
+   if (glsl_get_sampler_dim(type) == GLSL_SAMPLER_DIM_CUBE && !glsl_sampler_type_is_array(type))
+      num_components = 2;
+   SpvId result = spirv_builder_emit_image_query_size(&ctx->builder, get_uvec_type(ctx, 32, num_components), img, 0);
    store_dest(ctx, &intr->dest, result, nir_type_uint);
 }
 

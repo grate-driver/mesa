@@ -674,18 +674,18 @@ init_context(isel_context* ctx, nir_shader* shader)
                case nir_intrinsic_ssbo_atomic_comp_swap:
                case nir_intrinsic_ssbo_atomic_fmin:
                case nir_intrinsic_ssbo_atomic_fmax:
-               case nir_intrinsic_global_atomic_add:
-               case nir_intrinsic_global_atomic_imin:
-               case nir_intrinsic_global_atomic_umin:
-               case nir_intrinsic_global_atomic_imax:
-               case nir_intrinsic_global_atomic_umax:
-               case nir_intrinsic_global_atomic_and:
-               case nir_intrinsic_global_atomic_or:
-               case nir_intrinsic_global_atomic_xor:
-               case nir_intrinsic_global_atomic_exchange:
-               case nir_intrinsic_global_atomic_comp_swap:
-               case nir_intrinsic_global_atomic_fmin:
-               case nir_intrinsic_global_atomic_fmax:
+               case nir_intrinsic_global_atomic_add_amd:
+               case nir_intrinsic_global_atomic_imin_amd:
+               case nir_intrinsic_global_atomic_umin_amd:
+               case nir_intrinsic_global_atomic_imax_amd:
+               case nir_intrinsic_global_atomic_umax_amd:
+               case nir_intrinsic_global_atomic_and_amd:
+               case nir_intrinsic_global_atomic_or_amd:
+               case nir_intrinsic_global_atomic_xor_amd:
+               case nir_intrinsic_global_atomic_exchange_amd:
+               case nir_intrinsic_global_atomic_comp_swap_amd:
+               case nir_intrinsic_global_atomic_fmin_amd:
+               case nir_intrinsic_global_atomic_fmax_amd:
                case nir_intrinsic_bindless_image_atomic_add:
                case nir_intrinsic_bindless_image_atomic_umin:
                case nir_intrinsic_bindless_image_atomic_imin:
@@ -725,6 +725,7 @@ init_context(isel_context* ctx, nir_shader* shader)
                case nir_intrinsic_load_cull_small_prim_precision_amd:
                case nir_intrinsic_load_vector_arg_amd: type = RegType::vgpr; break;
                case nir_intrinsic_load_shared:
+               case nir_intrinsic_load_shared2_amd:
                   /* When the result of these loads is only used by cross-lane instructions,
                    * it is beneficial to use a VGPR destination. This is because this allows
                    * to put the s_waitcnt further down, which decreases latency.
@@ -747,8 +748,7 @@ init_context(isel_context* ctx, nir_shader* shader)
                case nir_intrinsic_load_sbt_amd:
                case nir_intrinsic_load_ubo:
                case nir_intrinsic_load_ssbo:
-               case nir_intrinsic_load_global:
-               case nir_intrinsic_load_global_constant:
+               case nir_intrinsic_load_global_amd:
                   type = nir_dest_is_divergent(intrinsic->dest) ? RegType::vgpr : RegType::sgpr;
                   break;
                case nir_intrinsic_load_view_index:

@@ -788,42 +788,15 @@ lower_rt_derefs(nir_shader *shader)
    return progress;
 }
 
-static gl_shader_stage
-convert_rt_stage(VkShaderStageFlagBits vk_stage)
-{
-   switch (vk_stage) {
-   case VK_SHADER_STAGE_RAYGEN_BIT_KHR:
-      return MESA_SHADER_RAYGEN;
-   case VK_SHADER_STAGE_ANY_HIT_BIT_KHR:
-      return MESA_SHADER_ANY_HIT;
-   case VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR:
-      return MESA_SHADER_CLOSEST_HIT;
-   case VK_SHADER_STAGE_MISS_BIT_KHR:
-      return MESA_SHADER_MISS;
-   case VK_SHADER_STAGE_INTERSECTION_BIT_KHR:
-      return MESA_SHADER_INTERSECTION;
-   case VK_SHADER_STAGE_CALLABLE_BIT_KHR:
-      return MESA_SHADER_CALLABLE;
-   default:
-      unreachable("Unhandled RT stage");
-   }
-}
-
 static nir_shader *
 parse_rt_stage(struct radv_device *device, const VkPipelineShaderStageCreateInfo *sinfo)
 {
    struct radv_pipeline_key key;
    memset(&key, 0, sizeof(key));
 
-   struct radv_pipeline_stage rt_stage = {
-      .stage = convert_rt_stage(sinfo->stage),
-      .module = vk_shader_module_from_handle(sinfo->module),
-      .entrypoint = sinfo->pName,
-      .spec_info = sinfo->pSpecializationInfo,
-      .feedback = {
-         .flags = VK_PIPELINE_CREATION_FEEDBACK_VALID_BIT,
-      },
-   };
+   struct radv_pipeline_stage rt_stage;
+
+   radv_pipeline_stage_init(sinfo, &rt_stage, vk_to_mesa_shader_stage(sinfo->stage));
 
    nir_shader *shader = radv_shader_compile_to_nir(device, &rt_stage, &key);
 
@@ -1499,8 +1472,7 @@ insert_traversal(struct radv_device *device, const VkRayTracingPipelineCreateInf
 
       bvh_node = nir_iadd(b, nir_load_var(b, trav_vars.bvh_base), nir_u2u(b, bvh_node, 64));
       nir_ssa_def *intrinsic_result = NULL;
-      if (device->physical_device->rad_info.chip_class >= GFX10_3
-       && !(device->instance->perftest_flags & RADV_PERFTEST_FORCE_EMULATE_RT)) {
+      if (!radv_emulate_rt(device->physical_device)) {
          intrinsic_result = nir_bvh64_intersect_ray_amd(
             b, 32, desc, nir_unpack_64_2x32(b, bvh_node), nir_load_var(b, vars->tmax),
             nir_load_var(b, trav_vars.origin), nir_load_var(b, trav_vars.dir),

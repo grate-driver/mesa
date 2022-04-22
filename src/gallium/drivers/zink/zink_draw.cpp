@@ -20,45 +20,27 @@
 static void
 zink_emit_xfb_counter_barrier(struct zink_context *ctx)
 {
-   /* Between the pause and resume there needs to be a memory barrier for the counter buffers
-    * with a source access of VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT
-    * at pipeline stage VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT
-    * to a destination access of VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT
-    * at pipeline stage VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT.
-    *
-    * - from VK_EXT_transform_feedback spec
-    */
    for (unsigned i = 0; i < ctx->num_so_targets; i++) {
       struct zink_so_target *t = zink_so_target(ctx->so_targets[i]);
       if (!t)
          continue;
       struct zink_resource *res = zink_resource(t->counter_buffer);
-      if (t->counter_buffer_valid)
-          zink_resource_buffer_barrier(ctx, res, VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT,
-                                       VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT);
-      else
-          zink_resource_buffer_barrier(ctx, res, VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT,
-                                       VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT);
+      VkAccessFlags access = VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT;
+      VkPipelineStageFlags stage = VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT;
+      if (t->counter_buffer_valid) {
+         /* Between the pause and resume there needs to be a memory barrier for the counter buffers
+          * with a source access of VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT
+          * at pipeline stage VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT
+          * to a destination access of VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT
+          * at pipeline stage VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT.
+          *
+          * - from VK_EXT_transform_feedback spec
+          */
+         access |= VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT;
+         stage |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
+      }
+      zink_resource_buffer_barrier(ctx, res, access, stage);
    }
-   ctx->xfb_barrier = false;
-}
-
-static void
-zink_emit_xfb_vertex_input_barrier(struct zink_context *ctx, struct zink_resource *res)
-{
-   /* A pipeline barrier is required between using the buffers as
-    * transform feedback buffers and vertex buffers to
-    * ensure all writes to the transform feedback buffers are visible
-    * when the data is read as vertex attributes.
-    * The source access is VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT
-    * and the destination access is VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT
-    * for the pipeline stages VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT
-    * and VK_PIPELINE_STAGE_VERTEX_INPUT_BIT respectively.
-    *
-    * - 20.3.1. Drawing Transform Feedback
-    */
-   zink_resource_buffer_barrier(ctx, res, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
-                                VK_PIPELINE_STAGE_VERTEX_INPUT_BIT);
 }
 
 static void
@@ -237,25 +219,6 @@ update_gfx_program(struct zink_context *ctx)
       ctx->gfx_pipeline_state.final_hash ^= ctx->curr_program->last_variant_hash;
    }
    ctx->dirty_shader_stages &= ~bits;
-}
-
-static bool
-line_width_needed(enum pipe_prim_type reduced_prim,
-                  unsigned polygon_mode)
-{
-   switch (reduced_prim) {
-   case PIPE_PRIM_POINTS:
-      return false;
-
-   case PIPE_PRIM_LINES:
-      return true;
-
-   case PIPE_PRIM_TRIANGLES:
-      return polygon_mode == VK_POLYGON_MODE_LINE;
-
-   default:
-      unreachable("unexpected reduced prim");
-   }
 }
 
 ALWAYS_INLINE static void
@@ -552,8 +515,7 @@ zink_draw(struct pipe_context *pctx,
 
    bool have_streamout = !!ctx->num_so_targets;
    if (have_streamout) {
-      if (ctx->xfb_barrier)
-         zink_emit_xfb_counter_barrier(ctx);
+      zink_emit_xfb_counter_barrier(ctx);
       if (ctx->dirty_so_targets) {
          /* have to loop here and below because barriers must be emitted out of renderpass,
           * but xfb buffers can't be bound before the renderpass is active to avoid
@@ -568,8 +530,13 @@ zink_draw(struct pipe_context *pctx,
       }
    }
 
-   if (so_target)
-      zink_emit_xfb_vertex_input_barrier(ctx, zink_resource(so_target->base.buffer));
+   /* ensure synchronization between doing streamout with counter buffer
+    * and using counter buffer for indirect draw
+    */
+   if (so_target && so_target->counter_buffer_valid)
+      zink_resource_buffer_barrier(ctx, zink_resource(so_target->counter_buffer),
+                                   VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT,
+                                   VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT);
 
    barrier_draw_buffers(ctx, dinfo, dindirect, index_buffer);
 
@@ -745,12 +712,7 @@ zink_draw(struct pipe_context *pctx,
          unreachable("unexpected reduced prim");
       }
 
-      if (line_width_needed(reduced_prim, rast_state->hw_state.polygon_mode)) {
-         if (screen->info.feats.features.wideLines || rast_state->line_width == 1.0f)
-            VKCTX(CmdSetLineWidth)(batch->state->cmdbuf, rast_state->line_width);
-         else
-            debug_printf("BUG: wide lines not supported, needs fallback!");
-      }
+      VKCTX(CmdSetLineWidth)(batch->state->cmdbuf, rast_state->line_width);
       if (depth_bias)
          VKCTX(CmdSetDepthBias)(batch->state->cmdbuf, rast_state->offset_units, rast_state->offset_clamp, rast_state->offset_scale);
       else

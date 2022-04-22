@@ -777,7 +777,7 @@ fs_visitor::try_emit_b2fi_of_inot(const fs_builder &bld,
                                   fs_reg result,
                                   nir_alu_instr *instr)
 {
-   if (devinfo->ver < 6 || devinfo->ver >= 12)
+   if (devinfo->ver < 6 || devinfo->verx10 >= 125)
       return false;
 
    nir_alu_instr *inot_instr = nir_src_as_alu_instr(instr->src[0].src);
@@ -1359,7 +1359,13 @@ fs_visitor::nir_emit_alu(const fs_builder &bld, nir_alu_instr *instr,
    case nir_op_imul_high:
    case nir_op_umul_high:
       assert(nir_dest_bit_size(instr->dest.dest) < 64);
-      bld.emit(SHADER_OPCODE_MULH, result, op[0], op[1]);
+      if (nir_dest_bit_size(instr->dest.dest) == 32) {
+         bld.emit(SHADER_OPCODE_MULH, result, op[0], op[1]);
+      } else {
+         fs_reg tmp = bld.vgrf(brw_reg_type_from_bit_size(32, op[0].type));
+         bld.MUL(tmp, op[0], op[1]);
+         bld.MOV(result, subscript(tmp, result.type, 1));
+      }
       break;
 
    case nir_op_idiv:

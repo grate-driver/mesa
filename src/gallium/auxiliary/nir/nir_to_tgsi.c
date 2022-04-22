@@ -160,7 +160,7 @@ static inline void ntt_##op(struct ntt_compile *c,                              
 
 #define OP10( op )                                                                     \
 static inline void ntt_##op(struct ntt_compile *c,                                     \
-                     struct ureg_dst tgsi_dst_register)                                \
+                     struct ureg_dst dst)                                              \
 {                                                                                      \
    ntt_insn(c, TGSI_OPCODE_##op, dst, ureg_src_undef(), ureg_src_undef(), ureg_src_undef(), ureg_src_undef()); \
 }
@@ -2553,6 +2553,10 @@ ntt_emit_intrinsic(struct ntt_compile *c, nir_intrinsic_instr *instr)
       ntt_store(c, &instr->dest, ntt_get_src(c, instr->src[0]));
       break;
 
+   case nir_intrinsic_shader_clock:
+      ntt_CLOCK(c, ntt_get_dest(c, &instr->dest));
+      break;
+
    default:
       fprintf(stderr, "Unknown intrinsic: ");
       nir_print_instr(&instr->instr, stderr);
@@ -3149,6 +3153,9 @@ ntt_optimize_nir(struct nir_shader *s, struct pipe_screen *screen)
       NIR_PASS(progress, s, nir_opt_dead_cf);
       NIR_PASS(progress, s, nir_opt_cse);
       NIR_PASS(progress, s, nir_opt_find_array_copies);
+      NIR_PASS(progress, s, nir_opt_copy_prop_vars);
+      NIR_PASS(progress, s, nir_opt_dead_write_vars);
+
       NIR_PASS(progress, s, nir_opt_if, true);
       NIR_PASS(progress, s, nir_opt_peephole_select,
                control_flow_depth == 0 ? ~0 : 8, true, true);
@@ -3181,8 +3188,9 @@ ntt_optimize_nir(struct nir_shader *s, struct pipe_screen *screen)
          .buffer_max = 0,
       };
       NIR_PASS(progress, s, nir_opt_offsets, &offset_options);
-
    } while (progress);
+
+   NIR_PASS_V(s, nir_lower_var_copies);
 }
 
 /* Scalarizes all 64-bit ALU ops.  Note that we only actually need to

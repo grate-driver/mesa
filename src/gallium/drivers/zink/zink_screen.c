@@ -347,6 +347,7 @@ zink_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
       if (screen->info.have_EXT_primitive_topology_list_restart) {
          modes |= BITFIELD_BIT(PIPE_PRIM_POINTS) |
                   BITFIELD_BIT(PIPE_PRIM_LINES) |
+                  BITFIELD_BIT(PIPE_PRIM_LINES_ADJACENCY) |
                   BITFIELD_BIT(PIPE_PRIM_TRIANGLES) |
                   BITFIELD_BIT(PIPE_PRIM_TRIANGLES_ADJACENCY);
          if (screen->info.list_restart_feats.primitiveTopologyPatchListRestart)
@@ -1279,29 +1280,52 @@ choose_pdev(struct zink_screen *screen)
    assert(result == VK_SUCCESS);
    assert(pdev_count > 0);
 
-   VkPhysicalDeviceProperties *props = &screen->info.props;
-   for (i = 0; i < pdev_count; ++i) {
-      vkGetPhysicalDeviceProperties(pdevs[i], props);
+   VkPhysicalDeviceProperties props;
+   bool cpu = debug_get_bool_option("LIBGL_ALWAYS_SOFTWARE", false);
+   /* priority when multiple drivers are available (highest to lowest):
+      VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU
+      VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+      VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU
+      VK_PHYSICAL_DEVICE_TYPE_CPU
+      VK_PHYSICAL_DEVICE_TYPE_OTHER
 
-#ifdef ZINK_WITH_SWRAST_VK
-      char *use_lavapipe = getenv("ZINK_USE_LAVAPIPE");
-      if (use_lavapipe) {
-         if (props->deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU) {
-            screen->pdev = pdevs[i];
-            screen->info.device_version = props->apiVersion;
-            is_cpu = true;
+    * users should specify VK_ICD_FILENAMES since this is a standardized variable
+    * used by all vulkan applications
+    */
+   unsigned prio_map[] = {
+      [VK_PHYSICAL_DEVICE_TYPE_OTHER] = 0,
+      [VK_PHYSICAL_DEVICE_TYPE_CPU] = 1,
+      [VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU] = 2,
+      [VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU] = 3,
+      [VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU] = 4,
+   };
+   unsigned idx = 0;
+   int cur_prio = 0;
+   for (i = 0; i < pdev_count; ++i) {
+      vkGetPhysicalDeviceProperties(pdevs[i], &props);
+
+      if (cpu) {
+         /* if user wants cpu, only give them cpu */
+         if (props.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU) {
+            idx = i;
+            cur_prio = prio_map[props.deviceType];
             break;
          }
-         continue;
-      }
-#endif
-      if (props->deviceType != VK_PHYSICAL_DEVICE_TYPE_CPU) {
-         screen->pdev = pdevs[i];
-         screen->info.device_version = props->apiVersion;
-         break;
+      } else {
+         assert(props.deviceType <= VK_PHYSICAL_DEVICE_TYPE_CPU);
+         if (prio_map[props.deviceType] > cur_prio) {
+            idx = i;
+            cur_prio = prio_map[props.deviceType];
+         }
       }
    }
-   free(pdevs);
+   is_cpu = cur_prio == prio_map[VK_PHYSICAL_DEVICE_TYPE_CPU];
+   if (cpu && !is_cpu)
+      goto out;
+
+   screen->pdev = pdevs[idx];
+   vkGetPhysicalDeviceProperties(screen->pdev, &screen->info.props);
+   screen->info.device_version = screen->info.props.apiVersion;
 
    /* runtime version is the lesser of the instance version and device version */
    screen->vk_version = MIN2(screen->info.device_version, screen->instance_info.loader_version);
@@ -1313,6 +1337,8 @@ choose_pdev(struct zink_screen *screen)
       screen->spirv_version = SPIRV_VERSION(1, 3);
    else
       screen->spirv_version = SPIRV_VERSION(1, 0);
+out:
+   free(pdevs);
    return is_cpu;
 }
 
@@ -2093,6 +2119,11 @@ init_driver_workarounds(struct zink_screen *screen)
 static struct zink_screen *
 zink_internal_create_screen(const struct pipe_screen_config *config)
 {
+   if (getenv("ZINK_USE_LAVAPIPE")) {
+      mesa_loge("ZINK_USE_LAVAPIPE is obsolete. Use LIBGL_ALWAYS_SOFTWARE\n");
+      return NULL;
+   }
+
    struct zink_screen *screen = rzalloc(NULL, struct zink_screen);
    if (!screen)
       return NULL;

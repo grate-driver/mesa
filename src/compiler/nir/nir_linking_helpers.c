@@ -148,7 +148,8 @@ nir_remove_unused_io_vars(nir_shader *shader,
          used = used_by_other_stage;
 
       if (var->data.location < VARYING_SLOT_VAR0 && var->data.location >= 0)
-         continue;
+         if (shader->info.stage != MESA_SHADER_MESH || var->data.location != VARYING_SLOT_PRIMITIVE_ID)
+            continue;
 
       if (var->data.always_active_io)
          continue;
@@ -1390,8 +1391,10 @@ nir_link_opt_varyings(nir_shader *producer, nir_shader *consumer)
             /* The varying is loaded from same uniform, so no need to do any
              * interpolation. Mark it as flat explicitly.
              */
-            if (in_var && in_var->data.interpolation <= INTERP_MODE_NOPERSPECTIVE)
+            if (in_var && in_var->data.interpolation <= INTERP_MODE_NOPERSPECTIVE) {
                in_var->data.interpolation = INTERP_MODE_FLAT;
+               out_var->data.interpolation = INTERP_MODE_FLAT;
+            }
          }
       }
 

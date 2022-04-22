@@ -1169,23 +1169,27 @@ rewrite_and_discard_read(nir_builder *b, nir_instr *instr, void *data)
 void
 zink_compiler_assign_io(nir_shader *producer, nir_shader *consumer)
 {
-   unsigned reserved = 0, patch_reserved = 0;
+   unsigned reserved = 0;
    unsigned char slot_map[VARYING_SLOT_MAX];
    memset(slot_map, -1, sizeof(slot_map));
-   unsigned char patch_slot_map[VARYING_SLOT_MAX];
-   memset(patch_slot_map, -1, sizeof(patch_slot_map));
    bool do_fixup = false;
    nir_shader *nir = producer->info.stage == MESA_SHADER_TESS_CTRL ? producer : consumer;
+   if (consumer->info.stage != MESA_SHADER_FRAGMENT) {
+      /* remove injected pointsize from all but the last vertex stage */
+      nir_variable *var = nir_find_variable_with_location(producer, nir_var_shader_out, VARYING_SLOT_PSIZ);
+      if (var && !var->data.explicit_location) {
+         var->data.mode = nir_var_shader_temp;
+         nir_fixup_deref_modes(producer);
+         NIR_PASS_V(producer, nir_remove_dead_variables, nir_var_shader_temp, NULL);
+         optimize_nir(producer);
+      }
+   }
    if (producer->info.stage == MESA_SHADER_TESS_CTRL) {
       /* never assign from tcs -> tes, always invert */
       nir_foreach_variable_with_modes(var, consumer, nir_var_shader_in)
-         assign_producer_var_io(consumer->info.stage, var,
-                                var->data.patch ? &patch_reserved : &reserved,
-                                var->data.patch ? patch_slot_map : slot_map);
+         assign_producer_var_io(consumer->info.stage, var, &reserved, slot_map);
       nir_foreach_variable_with_modes_safe(var, producer, nir_var_shader_out) {
-         if (!assign_consumer_var_io(producer->info.stage, var,
-                                     var->data.patch ? &patch_reserved : &reserved,
-                                     var->data.patch ? patch_slot_map : slot_map))
+         if (!assign_consumer_var_io(producer->info.stage, var, &reserved, slot_map))
             /* this is an output, nothing more needs to be done for it to be dropped */
             do_fixup = true;
       }
@@ -1530,12 +1534,13 @@ unbreak_bos(nir_shader *shader)
       u_foreach_bit(slot, ssbo_used) {
          char buf[64];
          snprintf(buf, sizeof(buf), "ssbo_slot_%u", slot);
-         if (ssbo_sizes[slot])
+         bool use_runtime = ssbo_sizes[slot] && max_ssbo_size;
+         if (use_runtime)
             fields[1].type = unsized;
          else
             fields[1].type = NULL;
          nir_variable *var = nir_variable_create(shader, nir_var_mem_ssbo,
-                                                 glsl_struct_type(fields, 1 + !!ssbo_sizes[slot], "struct", false), buf);
+                                                 glsl_struct_type(fields, 1 + use_runtime, "struct", false), buf);
          var->interface_type = var->type;
          var->data.driver_location = slot;
       }

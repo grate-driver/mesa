@@ -250,7 +250,7 @@ shared_var_info(const struct glsl_type *type, unsigned *size, unsigned *align)
 
 struct radv_shader_debug_data {
    struct radv_device *device;
-   const struct vk_shader_module *module;
+   const struct vk_object_base *object;
 };
 
 static void
@@ -269,7 +269,7 @@ radv_spirv_nir_debug(void *private_data, enum nir_spirv_debug_level level, size_
 
    snprintf(buffer, sizeof(buffer), "SPIR-V offset %lu: %s", (unsigned long)spirv_offset, message);
 
-   vk_debug_report(&instance->vk, vk_flags[level], &debug_data->module->base, 0, 0, "radv", buffer);
+   vk_debug_report(&instance->vk, vk_flags[level], debug_data->object, 0, 0, "radv", buffer);
 }
 
 static void
@@ -556,8 +556,6 @@ nir_shader *
 radv_shader_compile_to_nir(struct radv_device *device, const struct radv_pipeline_stage *stage,
                            const struct radv_pipeline_key *key)
 {
-   struct vk_shader_module *module = stage->module;
-
    unsigned subgroup_size = 64, ballot_bit_size = 64;
    if (key->cs.compute_subgroup_size) {
       /* Only compute shaders currently support requiring a
@@ -570,29 +568,29 @@ radv_shader_compile_to_nir(struct radv_device *device, const struct radv_pipelin
 
    nir_shader *nir;
 
-   if (module->nir) {
+   if (stage->internal_nir) {
       /* Some things such as our meta clear/blit code will give us a NIR
        * shader directly.  In that case, we just ignore the SPIR-V entirely
        * and just use the NIR shader.  We don't want to alter meta and RT
        * shaders IR directly, so clone it first. */
-      nir = nir_shader_clone(NULL, module->nir);
+      nir = nir_shader_clone(NULL, stage->internal_nir);
       nir->options = &device->physical_device->nir_options[stage->stage];
       nir_validate_shader(nir, "in internal shader");
 
       assert(exec_list_length(&nir->functions) == 1);
    } else {
-      uint32_t *spirv = (uint32_t *)module->data;
-      assert(module->size % 4 == 0);
+      uint32_t *spirv = (uint32_t *)stage->spirv.data;
+      assert(stage->spirv.size % 4 == 0);
 
       if (device->instance->debug_flags & RADV_DEBUG_DUMP_SPIRV)
-         radv_print_spirv(module->data, module->size, stderr);
+         radv_print_spirv(stage->spirv.data, stage->spirv.size, stderr);
 
       uint32_t num_spec_entries = 0;
       struct nir_spirv_specialization *spec_entries =
          vk_spec_info_to_nir_spirv(stage->spec_info, &num_spec_entries);
       struct radv_shader_debug_data spirv_debug_data = {
          .device = device,
-         .module = module,
+         .object = stage->spirv.object,
       };
       const struct spirv_to_nir_options spirv_options = {
          .caps =
@@ -634,6 +632,7 @@ radv_shader_compile_to_nir(struct radv_device *device, const struct radv_pipelin
                .post_depth_coverage = true,
                .ray_query = true,
                .ray_tracing = true,
+               .ray_traversal_primitive_culling = true,
                .runtime_descriptor_array = true,
                .shader_clock = true,
                .shader_viewport_index_layer = true,
@@ -670,7 +669,7 @@ radv_shader_compile_to_nir(struct radv_device *device, const struct radv_pipelin
                .private_data = &spirv_debug_data,
             },
       };
-      nir = spirv_to_nir(spirv, module->size / 4, spec_entries, num_spec_entries, stage->stage,
+      nir = spirv_to_nir(spirv, stage->spirv.size / 4, spec_entries, num_spec_entries, stage->stage,
                          stage->entrypoint, &spirv_options,
                          &device->physical_device->nir_options[stage->stage]);
       assert(nir->info.stage == stage->stage);
@@ -1677,18 +1676,29 @@ radv_postprocess_config(const struct radv_device *device, const struct ac_shader
          unreachable("Unexpected ES shader stage");
       }
 
-      bool nggc = info->has_ngg_culling; /* Culling uses GS vertex offsets 0, 1, 2. */
-      bool tes_triangles =
-         stage == MESA_SHADER_TESS_EVAL && info->tes._primitive_mode != TESS_PRIMITIVE_ISOLINES;
+      /* GS vertex offsets in NGG:
+       * - in passthrough mode, they are all packed into VGPR0
+       * - in the default mode: VGPR0: offsets 0, 1; VGPR1: offsets 2, 3
+       *
+       * The vertex offset 2 is always needed when NGG isn't in passthrough mode
+       * and uses triangle input primitives, including with NGG culling.
+       */
+      bool need_gs_vtx_offset2 = !info->is_ngg_passthrough || info->gs.vertices_in >= 3;
+
+      /* TES only needs vertex offset 2 for triangles or quads. */
+      if (stage == MESA_SHADER_TESS_EVAL)
+         need_gs_vtx_offset2 &= info->tes._primitive_mode == TESS_PRIMITIVE_TRIANGLES ||
+                                info->tes._primitive_mode == TESS_PRIMITIVE_QUADS;
+
       if (info->uses_invocation_id) {
          gs_vgpr_comp_cnt = 3; /* VGPR3 contains InvocationID. */
       } else if (info->uses_prim_id || (es_stage == MESA_SHADER_VERTEX &&
                                         info->vs.outinfo.export_prim_id)) {
          gs_vgpr_comp_cnt = 2; /* VGPR2 contains PrimitiveID. */
-      } else if (info->gs.vertices_in >= 3 || tes_triangles || nggc) {
+      } else if (need_gs_vtx_offset2) {
          gs_vgpr_comp_cnt = 1; /* VGPR1 contains offsets 2, 3 */
       } else {
-         gs_vgpr_comp_cnt = 0; /* VGPR0 contains offsets 0, 1 */
+         gs_vgpr_comp_cnt = 0; /* VGPR0 contains offsets 0, 1 (or passthrough prim) */
       }
 
       /* Disable the WGP mode on gfx10.3 because it can hang. (it
@@ -1955,7 +1965,7 @@ shader_compile(struct radv_device *device, struct nir_shader *const *shaders, in
 
    struct radv_shader_debug_data debug_data = {
       .device = device,
-      .module = NULL,
+      .object = NULL,
    };
 
    options->family = chip_family;
@@ -2169,6 +2179,7 @@ radv_create_vs_prolog(struct radv_device *device, const struct radv_vs_prolog_ke
                             key->next_stage != MESA_SHADER_VERTEX, MESA_SHADER_VERTEX, &args);
 
    info.user_sgprs_locs = args.user_sgprs_locs;
+   info.inline_push_constant_mask = args.ac.inline_push_const_mask;
 
 #ifdef LLVM_AVAILABLE
    if (options.dump_shader || options.record_ir)

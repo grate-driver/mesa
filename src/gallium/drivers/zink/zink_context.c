@@ -2075,7 +2075,11 @@ get_render_pass(struct zink_context *ctx)
 
       bool needs_write_s = state.rts[fb->nr_cbufs].clear_stencil || outputs_written & BITFIELD64_BIT(FRAG_RESULT_STENCIL);
       if (!needs_write_z && (!ctx->dsa_state || !ctx->dsa_state->base.depth_enabled))
+         /* depth sample, stencil write */
          state.rts[fb->nr_cbufs].mixed_zs = needs_write_s && zsbuf->bind_count[0];
+      else
+         /* depth write + sample */
+         state.rts[fb->nr_cbufs].mixed_zs = needs_write_z && zsbuf->bind_count[0];
       state.rts[fb->nr_cbufs].needs_write = needs_write_z | needs_write_s;
       state.num_rts++;
    }
@@ -2194,16 +2198,18 @@ setup_framebuffer(struct zink_context *ctx)
    }
 
    ctx->rp_changed = false;
+   bool has_swapchain = false;
    for (unsigned i = 0; i < ctx->fb_state.nr_cbufs; i++) {
       if (!ctx->fb_state.cbufs[i])
          continue;
       struct zink_resource *res = zink_resource(ctx->fb_state.cbufs[i]->texture);
       if (res->obj->dt) {
+         has_swapchain = true;
          zink_kopper_acquire(ctx, res, UINT64_MAX);
          zink_surface_swapchain_update(ctx, zink_csurface(ctx->fb_state.cbufs[i]));
       }
    }
-   if (ctx->swapchain_size.width || ctx->swapchain_size.height) {
+   if (has_swapchain && (ctx->swapchain_size.width || ctx->swapchain_size.height)) {
       unsigned old_w = ctx->fb_state.width;
       unsigned old_h = ctx->fb_state.height;
       ctx->fb_state.width = ctx->swapchain_size.width;
@@ -3439,45 +3445,52 @@ static void
 zink_texture_barrier(struct pipe_context *pctx, unsigned flags)
 {
    struct zink_context *ctx = zink_context(pctx);
+   VkAccessFlags dst = flags == PIPE_TEXTURE_BARRIER_FRAMEBUFFER ?
+                       VK_ACCESS_INPUT_ATTACHMENT_READ_BIT :
+                       VK_ACCESS_SHADER_READ_BIT;
+
    if (!ctx->framebuffer || !ctx->framebuffer->state.num_attachments)
       return;
 
-   zink_batch_no_rp(ctx);
-   if (ctx->fb_state.zsbuf) {
-      VkMemoryBarrier dmb;
-      dmb.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+   if (zink_screen(ctx->base.screen)->info.have_KHR_synchronization2) {
+      VkDependencyInfo dep = {0};
+      dep.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+      dep.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+      dep.memoryBarrierCount = 1;
+
+      VkMemoryBarrier2 dmb = {0};
+      dmb.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
       dmb.pNext = NULL;
-      dmb.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-      dmb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+      dmb.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+      dmb.dstAccessMask = dst;
+      dmb.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+      dmb.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+      dep.pMemoryBarriers = &dmb;
+
+      /* if zs fbfetch is a thing?
+      if (ctx->fb_state.zsbuf) {
+         const VkPipelineStageFlagBits2 depth_flags = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT;
+         dmb.dstAccessMask |= VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+         dmb.srcStageMask |= depth_flags;
+         dmb.dstStageMask |= depth_flags;
+      }
+      */
+      VKCTX(CmdPipelineBarrier2)(ctx->batch.state->cmdbuf, &dep);
+   } else {
+      VkMemoryBarrier bmb = {0};
+      bmb.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+      bmb.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+      bmb.dstAccessMask = dst;
       VKCTX(CmdPipelineBarrier)(
          ctx->batch.state->cmdbuf,
-         VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
          0,
-         1, &dmb,
+         1, &bmb,
          0, NULL,
          0, NULL
       );
    }
-   if (!ctx->fb_state.nr_cbufs)
-      return;
-
-   VkMemoryBarrier bmb;
-   bmb.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
-   bmb.pNext = NULL;
-   bmb.srcAccessMask = 0;
-   bmb.dstAccessMask = 0;
-   bmb.srcAccessMask |= VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-   bmb.dstAccessMask |= VK_ACCESS_SHADER_READ_BIT;
-   VKCTX(CmdPipelineBarrier)(
-      ctx->batch.state->cmdbuf,
-      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-      VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-      0,
-      1, &bmb,
-      0, NULL,
-      0, NULL
-   );
 }
 
 static inline void
@@ -3878,17 +3891,8 @@ zink_set_stream_output_targets(struct pipe_context *pctx,
          pipe_so_target_reference(&ctx->so_targets[i], targets[i]);
          if (!t)
             continue;
-         struct zink_resource *res = zink_resource(t->counter_buffer);
-         if (offsets[0] == (unsigned)-1) {
-            ctx->xfb_barrier |= zink_resource_buffer_needs_barrier(res,
-                                                                   VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT,
-                                                                   VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT);
-         } else {
-            ctx->xfb_barrier |= zink_resource_buffer_needs_barrier(res,
-                                                                   VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT,
-                                                                   VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT);
+         if (offsets[0] != (unsigned)-1)
             t->counter_buffer_valid = false;
-         }
          struct zink_resource *so = zink_resource(ctx->so_targets[i]->buffer);
          if (so) {
             so->so_bind_count++;
