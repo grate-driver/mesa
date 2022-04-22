@@ -940,7 +940,7 @@
         "description": "nir: Handle register sources in lower_phis_to_regs_block",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a620f66872c27fa24a1ccdd1d0a6e563eefbaad6"
     },
