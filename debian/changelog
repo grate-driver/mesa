@@ -1,6 +1,6 @@
-mesa (22.1~git20220410-1) UNRELEASED; urgency=medium
+mesa (22.1.0~rc2-1) UNRELEASED; urgency=medium
 
-  * New upstream snapshot.
+  * New upstream release candidate.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Sun, 10 Apr 2022 10:54:07 +0300
 
