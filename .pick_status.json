@@ -1,5 +1,205 @@
 [
     {
+        "sha": "5e84335fb578f03938468bb8ac0029f68349d330",
+        "description": "zink: fix memory_barrier intrinsic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "5a2acfeffb084a2c875c78a3eaa6ad47dec1a430",
+        "description": "zink: always use vk mem model for shaders if available",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "306b5f37241260d9199ab39b4fe1bf0d31ef5c95",
+        "description": "zink: use vulkan memory model shader semantics for tcs barriers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "6f04f4c8ea094d5ddc3c34db34d1425dcfc258d6",
+        "description": "zink: hook up VK_KHR_vulkan_memory_model",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "5e931cd0e18e91d896d7cb428cbe6c4f142bc51b",
+        "description": "zink: fix semantics mask for compute control barriers",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "55baf0c676a33a29aa8fb26e506e44eed598c091",
+        "description": "zink: fix tcs control barriers for use without vk memory model",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "01ed71f9451057647a57129c8c01ae19a0f8bfb7",
+        "description": "wgl: support kopper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "a88bb3c5fbd3809e4ac5ffa2c10f5f44f1d88bed",
+        "description": "zink: support win32 wsi",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9b6b5e74fa5eae49c407a6f68962d57e6945d7b1",
+        "description": "kopper: add win32 loader interface",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "92a7caaf03c5289f60a288b7eb192f38a2a19d32",
+        "description": "zink: support VK_KHR_win32_surface",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "400661c122f98bfc7263a966cfe82b78a1ab9ec3",
+        "description": "wgl: add zink to the list of auto-loaded drivers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "863ce662b47b1e3a181845f537bc32802bf889a0",
+        "description": "wgl: add a flag to determine if running on zink",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "3d5e6093a21117d6aedfc7870806d9ffd128cc72",
+        "description": "zink: add a stencil blit fallback path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c3caf5f183bb895a351f283c76ead3a9cc4781ad",
+        "description": "zink: rework clear_depth_stencil hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "605f3021f0eedf2114c5c6f1b2a2df48def88fce",
+        "description": "zink: make update_framebuffer_state() public",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "710ad9cd6b27ec7bc7144b27d4672fa50c25edff",
+        "description": "zink: make unsupported blit formats an error",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "3532c374de2de1655b7d56aca69588c3f5de19ee",
+        "description": "iris: fix race condition during busy tracking",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "because_sha": "89a34cb8450a6fdaceb0e537613871fa86d93132"
+    },
+    {
+        "sha": "370a851ef0f0397c1c52bc380aa79082d6859da0",
+        "description": "zink: Improve zink.rst with links",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "b0de09f48a3e6028b4f9945e676a8bd5281db31c",
+        "description": "zink: Trim spaces in zink.rst",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "f8f5b5455ae17160fb979c6a16f5304461333ad5",
+        "description": "wgl: support GL 4.6",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "64d5f71bbcb92b564377664371397f8d0a5b57be",
+        "description": "zink: move the kopper present fence to the displaytarget object",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "8ade5588e39d736bdeab9bdd8ffa7cbfb6a5191e"
+    },
+    {
+        "sha": "c5cc9ed29b50ada77f875ad0d999678021678922",
+        "description": "virgl: Switch to nir-to-tgsi by default.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "337b3dabc0ee1b31343e76a316f4d0443552650d",
+        "description": "tgsi: Extend array lengths when merging usage_masks.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4205039a9f3c928ec059df0331a36846b3a6caa2",
+        "description": "nir_to_tgsi: Lower FS input array indexing since we don't declare input arrays.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "e6d262a7fab7a8090556f7c178f2ece5b52d1147",
+        "description": "virgl: Clear all indirect flags when writing to a temporary",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "36f12c85c84364d7f1ea797512462e7c7e47a260"
+    },
+    {
         "sha": "9f44a264623461c98368185b023d99446676e039",
         "description": "nir/divergence: handle load_global_block_intel",
         "nominated": true,
