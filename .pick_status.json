@@ -391,7 +391,7 @@
         "description": "gallivm: fix ssbo oob reads",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "591899eedd2d797bfdb7dbb6b3e2169d50d42109"
     },
