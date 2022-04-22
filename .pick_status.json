@@ -877,7 +877,7 @@
         "description": "vulkan/util: Fill VkPhysicalDeviceIDProperties::deviceNodeMask",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "19ff5019b7551ef401db26da48d0199c1c88c1ca"
     },
