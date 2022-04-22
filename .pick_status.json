@@ -580,7 +580,7 @@
         "description": "nir: fix marking XFB varyings as always active IO",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": null
     },
     {
