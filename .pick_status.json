@@ -445,7 +445,7 @@
         "description": "dzn: Fix the STATIC_ASSERT() in dzn_meta_blits_get_context()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a012b219640e875aa552b37dfdaf69336d5863c7"
     },
