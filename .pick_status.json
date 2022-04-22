@@ -1,5 +1,509 @@
 [
     {
+        "sha": "fbece25a451bb7915891851ee5c72724974ae5e2",
+        "description": "zink: add synchronization for buffer clears",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "06df3ed5c0e9d26b393f2ebdaa26d87e59928da4",
+        "description": "zink: fix stride=0 for dynamic state vertex stride checking",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "1eada1b02d3b16b88a07b9924a52617e08371907"
+    },
+    {
+        "sha": "dd24ab86cc2e3dc5b3082f17b2902f6abf15c153",
+        "description": "vulkan/runtime: repair thread safety in method vk_queue_start_submit_thread()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca40bad84a535b80476d9b01d792ffdf71970d98",
+        "description": "ac/spm: setup write broadcasting correctly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "77116d34eafa17f2d848017bfeeef00e07c73136",
+        "description": "radeonsi: make sure profile_peak is used before using sqtt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c96ee36289ddcadd52304adbfdd98056b1353ad3",
+        "description": "radeonsi/sqtt: enable spm counters on gfx10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e5e8b56236cd287b0cd70f02a64161a2b2031de2",
+        "description": "radeonsi/sqtt: setup spm bo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a884f3694984fb2ee446351a1fad30d6d545d7dc",
+        "description": "radeonsi: add spm counters setup code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb16154d948ad3d1933fc3d26e9c681d3dab1c3e",
+        "description": "radeonsi: add helpers to deal with spm counters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d733e940bc6e8675bb7335c018ae47432029510",
+        "description": "radeonsi: make si_pc_emit_shaders non static",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e018311b3559896cc6176a50efcd9b9a06020e84",
+        "description": "dzn: Add KHR_draw_indirect_count support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ece5e27a7fcd50c0a9718b7506b0edee542ec50d",
+        "description": "dzn: Allow multiDrawIndirect and drawIndirectFirstInstance",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "697e98c66e5ab10506b4a95c3e849c5d60d8e1a1",
+        "description": "v3dv: duplicate key on hashtable insert",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39cebe24ae39a0d5f5bddc74663d05b240d48de5",
+        "description": "gallium: move get_canonical_format hook to pipe_screen",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "606e42027e61aa759eb7ac69403e13816f8ccde1"
+    },
+    {
+        "sha": "e293691a99187361b99c45f27665227317a0a2ce",
+        "description": "dzn: Get rid of the render pass logic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d0798440b4f89068a855e1ff6d78f302ef3c93f",
+        "description": "dzn: Add support for dynamic rendering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "076eac0e62045ffc8b737e83410f67f0511fc615",
+        "description": "dzn: Inline dzn_cmd_buffer_clear_attachments()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "70b06e775b58f9e44ba8c347a6b62c04ff8e7c31",
+        "description": "dzn: Move all render-related states to a substruct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d3836df8d46dc18e5df832be018aa631eb2e613e",
+        "description": "dzn: Set MAX_RTS to D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39851688df772fb258f45433d5d7b822d8dde06f",
+        "description": "dzn: Pass an image view to dzn_cmd_buffer_clear_attachment()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3420110ee75868eae66dfa6c1c4be189100636a9",
+        "description": "dzn: Advertise KHR_shader_draw_parameters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2eadd8dd16a12f545f80b943100be2350da83e2e",
+        "description": "dzn: Update the draw_id sysval when issuing indirect draws",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02d8436bbdbe99d1b81cc270274010bdbf863596",
+        "description": "dzn: Simplify the triangle_fan_rewrite_index shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1cefda7cb4cdaf9a8bd7aba600403ac7040f1d27",
+        "description": "dzn: Fix exec_buf_stride calculation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7673697256b29574471e2e128033d6f775f5365f",
+        "description": "microsoft/spirv_to_dxil: Add a draw_id field to vertex_runtime_data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5121e6dd7ea9127842814239fe5a8b5dd231dd8c",
+        "description": "radv: only apply enable_mrt_output_nan_fixup for 32-bit float MRTs",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d839d37642b5ab1eb1bcb864683a7907d0870798",
+        "description": "docs: update calendar for 22.1.0-rc2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5afa2cb0b332950b3d44fdf2b97fb8c432caeb13",
+        "description": "docs: update calendar for 22.1.0-rc1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cdfece6123cda350ad6a3446b506c783011b440d",
+        "description": "docs: update calendar and link releases notes for 22.0.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f64e50967240df2124d75f195f054ad0e118babd",
+        "description": "docs: Add sha256sums for 22.0.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c2c3bc5d9e3c2626842d1e4a58d2b84e5d07ca1f",
+        "description": "docs: add release notes for 22.0.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e84335fb578f03938468bb8ac0029f68349d330",
+        "description": "zink: fix memory_barrier intrinsic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5a2acfeffb084a2c875c78a3eaa6ad47dec1a430",
+        "description": "zink: always use vk mem model for shaders if available",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "306b5f37241260d9199ab39b4fe1bf0d31ef5c95",
+        "description": "zink: use vulkan memory model shader semantics for tcs barriers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f04f4c8ea094d5ddc3c34db34d1425dcfc258d6",
+        "description": "zink: hook up VK_KHR_vulkan_memory_model",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e931cd0e18e91d896d7cb428cbe6c4f142bc51b",
+        "description": "zink: fix semantics mask for compute control barriers",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55baf0c676a33a29aa8fb26e506e44eed598c091",
+        "description": "zink: fix tcs control barriers for use without vk memory model",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "01ed71f9451057647a57129c8c01ae19a0f8bfb7",
+        "description": "wgl: support kopper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a88bb3c5fbd3809e4ac5ffa2c10f5f44f1d88bed",
+        "description": "zink: support win32 wsi",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9b6b5e74fa5eae49c407a6f68962d57e6945d7b1",
+        "description": "kopper: add win32 loader interface",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92a7caaf03c5289f60a288b7eb192f38a2a19d32",
+        "description": "zink: support VK_KHR_win32_surface",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "400661c122f98bfc7263a966cfe82b78a1ab9ec3",
+        "description": "wgl: add zink to the list of auto-loaded drivers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "863ce662b47b1e3a181845f537bc32802bf889a0",
+        "description": "wgl: add a flag to determine if running on zink",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d5e6093a21117d6aedfc7870806d9ffd128cc72",
+        "description": "zink: add a stencil blit fallback path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3caf5f183bb895a351f283c76ead3a9cc4781ad",
+        "description": "zink: rework clear_depth_stencil hook",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "605f3021f0eedf2114c5c6f1b2a2df48def88fce",
+        "description": "zink: make update_framebuffer_state() public",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "710ad9cd6b27ec7bc7144b27d4672fa50c25edff",
+        "description": "zink: make unsupported blit formats an error",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3532c374de2de1655b7d56aca69588c3f5de19ee",
+        "description": "iris: fix race condition during busy tracking",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "89a34cb8450a6fdaceb0e537613871fa86d93132"
+    },
+    {
+        "sha": "370a851ef0f0397c1c52bc380aa79082d6859da0",
+        "description": "zink: Improve zink.rst with links",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b0de09f48a3e6028b4f9945e676a8bd5281db31c",
+        "description": "zink: Trim spaces in zink.rst",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8f5b5455ae17160fb979c6a16f5304461333ad5",
+        "description": "wgl: support GL 4.6",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64d5f71bbcb92b564377664371397f8d0a5b57be",
+        "description": "zink: move the kopper present fence to the displaytarget object",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "8ade5588e39d736bdeab9bdd8ffa7cbfb6a5191e"
+    },
+    {
+        "sha": "c5cc9ed29b50ada77f875ad0d999678021678922",
+        "description": "virgl: Switch to nir-to-tgsi by default.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "337b3dabc0ee1b31343e76a316f4d0443552650d",
+        "description": "tgsi: Extend array lengths when merging usage_masks.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4205039a9f3c928ec059df0331a36846b3a6caa2",
+        "description": "nir_to_tgsi: Lower FS input array indexing since we don't declare input arrays.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6d262a7fab7a8090556f7c178f2ece5b52d1147",
+        "description": "virgl: Clear all indirect flags when writing to a temporary",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "36f12c85c84364d7f1ea797512462e7c7e47a260"
+    },
+    {
         "sha": "9f44a264623461c98368185b023d99446676e039",
         "description": "nir/divergence: handle load_global_block_intel",
         "nominated": true,
