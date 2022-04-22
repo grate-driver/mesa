@@ -553,7 +553,7 @@
         "description": "ac/surface: fix an addrlib race condition on gfx9",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "df2cbdd2e321d198e973be21eea25e9b296cceff"
     },
