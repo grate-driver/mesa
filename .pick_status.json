@@ -517,7 +517,7 @@
         "description": "winsys/amdgpu: fix a mutex deadlock when we fail to create pipe_screen",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2eb067db0febcd71b4182153155e3e43f215624c"
     },
