@@ -441,6 +441,7 @@ dEQP-GLES31.functional.texture.border_clamp.unused_channels.depth24_stencil8_sam
 dEQP-GLES31.functional.texture.border_clamp.unused_channels.depth24_stencil8_sample_stencil,Fail
 dEQP-GLES31.functional.texture.border_clamp.unused_channels.depth32f_stencil8_sample_stencil,Fail
 dEQP-GLES31.functional.texture.border_clamp.unused_channels.stencil_index8,Fail
+<<<<<<< HEAD
 dEQP-GLES31.functional.texture.format.sized.cube_array.depth24_stencil8_npot,Fail
 dEQP-GLES31.functional.texture.format.sized.cube_array.depth24_stencil8_pot,Fail
 dEQP-GLES31.functional.texture.format.sized.cube_array.depth_component24_npot,Fail
@@ -540,6 +541,51 @@ KHR-GL46.shader_image_load_store.non-layered_binding,Fail
 KHR-GL46.shader_storage_buffer_object.advanced-readWrite-case1-cs,Fail
 KHR-GL46.shader_storage_buffer_object.basic-operations-case1-cs,Fail
 KHR-GL46.shader_storage_buffer_object.basic-operations-case1-vs,Fail
+=======
+dEQP-GLES3.functional.clipping.line.wide_line_clip_viewport_center,Fail
+dEQP-GLES3.functional.clipping.line.wide_line_clip_viewport_corner,Fail
+dEQP-GLES3.functional.clipping.point.wide_point_clip,Fail
+dEQP-GLES3.functional.clipping.point.wide_point_clip_viewport_center,Fail
+dEQP-GLES3.functional.clipping.point.wide_point_clip_viewport_corner,Fail
+dEQP-GLES3.functional.draw_buffers_indexed.overwrite_common.common_advanced_blend_eq_buffer_advanced_blend_eq,Fail
+dEQP-GLES3.functional.draw_buffers_indexed.overwrite_common.common_blend_eq_buffer_advanced_blend_eq,Fail
+dEQP-GLES3.functional.draw_buffers_indexed.overwrite_common.common_separate_blend_eq_buffer_advanced_blend_eq,Fail
+dEQP-GLES3.functional.draw_buffers_indexed.overwrite_indexed.common_advanced_blend_eq_buffer_advanced_blend_eq,Fail
+dEQP-GLES3.functional.draw_buffers_indexed.overwrite_indexed.common_advanced_blend_eq_buffer_blend_eq,Fail
+dEQP-GLES3.functional.draw_buffers_indexed.overwrite_indexed.common_advanced_blend_eq_buffer_separate_blend_eq,Fail
+dEQP-GLES3.functional.fbo.depth.depth_test_clamp.depth24_stencil8,Fail
+dEQP-GLES3.functional.fbo.depth.depth_test_clamp.depth32f_stencil8,Fail
+dEQP-GLES3.functional.fbo.depth.depth_test_clamp.depth_component24,Fail
+dEQP-GLES3.functional.fbo.depth.depth_test_clamp.depth_component32f,Fail
+dEQP-GLES3.functional.fbo.depth.depth_write_clamp.depth24_stencil8,Fail
+dEQP-GLES3.functional.fbo.depth.depth_write_clamp.depth32f_stencil8,Fail
+dEQP-GLES3.functional.fbo.depth.depth_write_clamp.depth_component24,Fail
+dEQP-GLES3.functional.fbo.depth.depth_write_clamp.depth_component32f,Fail
+dEQP-GLES3.functional.polygon_offset.fixed16_render_with_units,Fail
+dEQP-GLES3.functional.rasterization.primitives.line_loop_wide,Fail
+dEQP-GLES3.functional.rasterization.primitives.line_strip_wide,Fail
+dEQP-GLES3.functional.shaders.metamorphic.bubblesort_flag.variant_1,Fail
+dEQP-GLES3.functional.shaders.metamorphic.bubblesort_flag.variant_2,Fail
+dEQP-GLES3.functional.shaders.texture_functions.textureprojlodoffset.sampler2dshadow_vertex,Fail
+dEQP-GLES3.functional.shaders.texture_functions.textureprojoffset.sampler2dshadow_vertex,Fail
+
+# cubes are hard #6270
+spec@glsl-1.20@execution@tex-miplevel-selection gl2:texture() cube,Fail
+spec@glsl-1.30@execution@tex-miplevel-selection texture() cube,Fail
+spec@glsl-1.30@execution@tex-miplevel-selection texture() cubearray,Fail
+spec@glsl-1.30@execution@tex-miplevel-selection texture() cubearrayshadow,Fail
+spec@glsl-1.30@execution@tex-miplevel-selection texture() cubeshadow,Fail
+spec@glsl-1.30@execution@tex-miplevel-selection texture(bias) cubeshadow,Fail
+spec@glsl-1.30@execution@tex-miplevel-selection texturegrad cube,Fail
+spec@glsl-1.30@execution@tex-miplevel-selection texturegrad cubearray,Fail
+spec@glsl-1.30@execution@tex-miplevel-selection texturegrad cubeshadow,Fail
+spec@arb_shader_texture_lod@execution@tex-miplevel-selection *gradarb cube,Fail
+
+# kopper
+glx@glx-multi-window-single-context,Crash
+spec@ext_image_dma_buf_import@ext_image_dma_buf_import-export-tex,Crash
+spec@egl_chromium_sync_control@conformance@eglGetSyncValuesCHROMIUM_ust_test,Fail
+>>>>>>> 4ebb5391acf (nir: mark XFB varyings as unmoveable to prevent them to be remapped)
 
 # 3D isn't supported by radv yet
 KHR-GL46.sparse_texture_tests.InternalFormatQueries,Fail
