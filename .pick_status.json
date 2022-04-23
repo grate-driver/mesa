@@ -202,7 +202,7 @@
         "description": "isl: disable mcs (and mcs+ccs) for color msaa on DG2",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
