@@ -337,7 +337,7 @@
         "description": "gallivm: fix oob txf swizzling",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0b6554ba6f2aa8a771852566340c24205e406d02"
     },
