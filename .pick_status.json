@@ -332,7 +332,7 @@
         "description": "nir: Lower all bit sizes of usub_borrow",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "8a3e3441802c417ec944f02a9f38491b3b236d7c"
     },
     {
