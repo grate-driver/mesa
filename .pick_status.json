@@ -204,7 +204,7 @@
         "description": "vulkan: Set signals[i].stageMask = ALL_COMMANDS for QueueSubmit2 wrapping",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "97f0a4494b97d89146cf66dfa0c9b1946bf3fc22"
     },
     {
