@@ -265,7 +265,7 @@
         "description": "radv: fix clearing of TRUNC_COORD with tg4 and immutable samplers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "15640e58d96c5db0cd78769a06b6b204dcd60799"
     },
