@@ -460,7 +460,7 @@
         "description": "panfrost: Fix pack_32_2x16 implementation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "6f0eff548c16c12309edec812b6573c63fdc866d"
     },
     {
