@@ -1,5 +1,671 @@
 [
     {
+        "sha": "f329f67243d671965d73bd2243cffc4e1e68c4a3",
+        "description": "panfrost: Kick off v9 support in the driver",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a1546ca7e803a7860b5a5bfdebce94b513e13b3",
+        "description": "panfrost: Compile for v9",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26d339ef8ac7338a39aa5908d2dd38950933a474",
+        "description": "panfrost: Generate Valhall Malloc IDVS jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e626c9f6f87566d8de2dbc73c6a93203887e5a2a",
+        "description": "panfrost: Use dirty flags to emit v9 descriptors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "351403fe750c1280d2ced27191ca14f718f608ae",
+        "description": "panfrost: Specialize shader descriptors for Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b15f53ffaaf18ffd940db6005713080466e51e84",
+        "description": "panfrost: Specialize ZSA state for Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68e7bcab3d50fe9be07e1c4d672afbbeecf48422",
+        "description": "panfrost: Specialize vertex elements for Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a027abfcfb353f85b09c7e5e1fbdf8242ebe8ef",
+        "description": "panfrost: Simplify attribute format expression",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "603c06d00f31073f37b662b534a9a3ac2c4e61fc",
+        "description": "panfrost: Specialize rasterizer state for Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "818bbcecb23d63e817c13a2e3e486488f2973cad",
+        "description": "panfrost: Adapt compute job emit for Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb14c639eb4b8750dd03212b9315996b333d04c8",
+        "description": "panfrost: Use common state emit for compute jobs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7ad159aab2fc3874194636ec60bd7c846ba51d83",
+        "description": "panfrost: Don't fix up alpha test on Bifrost",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf02a1a5557d6f095896204d5284ec8d843ab064",
+        "description": "panfrost: Port uniform/UBO logic to Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d7b35325533ed38f75a73bbce021068b5b2c6fd1",
+        "description": "panfrost: Add helper to emit UBOs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bfbce9c1d9acd0abb0e841110b717d06147f0c33",
+        "description": "panfrost: Compile libpanfrost for v9",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af6071053b15d0e9f9d99d81dc51fecbd3e2c675",
+        "description": "panfrost: Don't allocate storage for PSIZ on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "44689b222a77445bf77ab873a851725ebfbf606c",
+        "description": "pan/blit: Support v9 data structures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec6de03487cc703a6157e3196b18ba39160df213",
+        "description": "pan/blit: Prepare for Valhall port",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dbe95af5dd1f5bcdb36b51136dbceb0584f3d93a",
+        "description": "pan/blit: Generalize texture alignment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7e8084af53eb52c0c6fd90f2631331275d3857a",
+        "description": "pan/blit: Compile blit shaders without IDVS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ee4852239f8f7ef2337dd361b28d4a5072060a1",
+        "description": "panfrost: Add texture features enum to v9.xml",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0db826a038a431daabc7d7d2e1dafc97b92d128f",
+        "description": "docs: Update supported drivers for 22.x",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ddc59ccd71829064e6fcc90eed3604179bc1b593",
+        "description": "docs: Note EGL enum allocation for EGL_EXT_present_opaque",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e0f27eca7abbb7ab39734207ca4d89b5fee96c37",
+        "description": "vulkan: Use ALL_COMMANDS_BIT for waits/signals instead of ~0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02fea6c179b00bd9dad179638ee1491c1acea65a",
+        "description": "vulkan: Set signals[i].stageMask = ALL_COMMANDS for QueueSubmit2 wrapping",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "97f0a4494b97d89146cf66dfa0c9b1946bf3fc22"
+    },
+    {
+        "sha": "2f5cf6fcee41dff0415b130a482ca7627ea2056f",
+        "description": "ci: skqp: update URL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d597c9f9d62df913455afff2980b274c6bffb18",
+        "description": "panvk: quiet non-conformant warning on ci",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c61aa5eed964207276e40880a2db11fa1292073",
+        "description": "lavapipe: quiet non-conformant warning on ci",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28ca5636f6519f70cede02742f5ba0e00e6afcd3",
+        "description": "anv: workaround apps that assume full subgroups without specifying it",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f97d82c52bec095a4592c40e19869f95fa07f561",
+        "description": "radv: fix clearing of TRUNC_COORD with tg4 and immutable samplers",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "15640e58d96c5db0cd78769a06b6b204dcd60799"
+    },
+    {
+        "sha": "c63346eb69c2ae3f5626bd2154854be6a2948fab",
+        "description": "gallium/util: Increase the debug_flush map depth to 64",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "16019ff7ccfca0ffa710912b20e195bd7a4eae29",
+        "description": "svga: Add support for SVGAv3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e5306d190a22afeb592f41dea678b1d57a0513c5",
+        "description": "svga: Use direct maps when GB objects are present",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7b0309723721495edd318eb6ecd4446900d702b",
+        "description": "svga: finish readbacks before mapping resources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "71a749bc7b05ebc7289c3201c9baeb183f436386",
+        "description": "svga: Don't try to build x86/x64 assembly on different arch's",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2ca8b014d1134bb8888a1da19c6171033c664176",
+        "description": "pan/bi: Implement pack_uvec[24]_to_uint",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94b01ddcdd9f45ca2a22702f1534ed6d12bacb73",
+        "description": "nir: Use u_worklist to back nir_block_worklist",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "04a2c6efb172f20d4be1ac0e1603c2bbaddf1e8c",
+        "description": "util: Add a generic worklist implementation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "148dba95b8b472b7fa6b690a7008d37e32eb4605",
+        "description": "radv: add an SQTT workaround for chips with disabled RBs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "76b2b6ebe96cdfaf5bfb78352831a6717335f711",
+        "description": "vk/cache: unbreak vk_pipeline_cache_create with flags",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "591da9877900c56434f9e23e0ad0058b118b0be8"
+    },
+    {
+        "sha": "17557303625d95fc30b24d15b45e41d9b747aee6",
+        "description": "nir: Lower all bit sizes of usub_borrow",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "8a3e3441802c417ec944f02a9f38491b3b236d7c"
+    },
+    {
+        "sha": "7898721cce41e93e09c3d055e618754ef064f1ae",
+        "description": "panfrost: Fix memory leaks on unit test failures.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "bb6c14a69785e932c9a1f60e6db077bc60fcb822"
+    },
+    {
+        "sha": "f5bc062ffdd34f66a9c65de5e02c0c8490d576db",
+        "description": "vulkan: bump layer api versions to current vk header version",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dbceb561b054fbfc6dbaae14388dd7adec21453b",
+        "description": "meson: call run_command with check=true",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ecb4407059f4235a6dca3c8f9900ee0ac69ce1a",
+        "description": "meson: replace deprecated dep.get_pkgconfig_variable(...) with dep.get_variable(pkgconfig : ...)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e01f86c67b0bd955758366827cb8322aa1bec263",
+        "description": "r300: set PIPE_BIND_CONSTANT_BUFFER for const_uploader",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5a40f24ace33404e82fa48591833f6bbc7518e5",
+        "description": "virgl/ci: Update checksums for some virgl iris traces",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7f8a0010ce41f93f5264c4e984aada377b86c16f",
+        "description": "virgl/ci: Rename virgl-lava-* jobs to virgl-iris-*",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e111c259cd46ed3b12225ec90ee2821684a22c1",
+        "description": "panvk: Lower shared memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "179d9e35112a993476d33638309f5984614a202b",
+        "description": "panvk: Handle empty shaders gracefully",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c9b33fe7dcc5bc2f633f5ad56ddb6463417561bd",
+        "description": "pan/bi: Implement fquantize2f16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dfcb2f0699f548a9152168b146036895e416ea59",
+        "description": "panvk: Consider primitive restart in index buffer walks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68c05c660b24427ecdcd9584f547986ba380d59b",
+        "description": "panvk: Respect line width",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d217fb9b0a7d0d3ad5ab4950c65b6633bf20e91c",
+        "description": "vulkan: do not depend on alignof(void)",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "591da9877900c56434f9e23e0ad0058b118b0be8"
+    },
+    {
+        "sha": "d0b594a4d3efcc775925db57ae35d65b737a8661",
+        "description": "ci: put lima farm back online",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f6a43cde66bc3b2af35a97ee12a22f2a653b8c7",
+        "description": "mesa/st: call pipe->link_shader even if ir loaded from cache when linking",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e94f89189b9c018299b693f60c73ffafcfc5146e",
+        "description": "radeonsi/ci: add polaris11 baseline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4a982aa5421780a90b812e7654d4d32459d9bdbd",
+        "description": "winsys/amdgpu: fix a mutex deadlock when we fail to create pipe_screen",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "2eb067db0febcd71b4182153155e3e43f215624c"
+    },
+    {
+        "sha": "fe4ec76115fe1c51cfa3659a61747d0397635a9d",
+        "description": "radeonsi: fail to create pipe_screen if LLVM doesn't support the GPU",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "12ab3e6853e1e9d452c66ac4ff66fca6b0311836",
+        "description": "radeonsi: remove an obsolete comment about LLVM 14",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8a6bbc6c521341daef7a839975a9d79e4ad329f",
+        "description": "ac/llvm: don't create the target machine if the LLVM processor is unsupported",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fc0e6fdcce118feb65406ec245599feda5a70077",
+        "description": "ac/llvm: remove unused LLVM helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fe413962b4dd89ec5be539b13e7cbf7f871dd04a",
+        "description": "anv: skip acceleration structure in binding table emission",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "63e91148b7fe777b6ad7bfdb6b02d167c151dd55"
+    },
+    {
+        "sha": "ce02eeecf4930e38b4042c02ebf61bac2be19dd0",
+        "description": "zink: fix group memory barrier emission",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4080f18163f4ea8cd9a7be7905752f609d6a9b77",
+        "description": "radv: Fix lowering ignore_ray_intersection",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c3d82a962217def9b9f7e1f4c5ce0a450b97e9c7"
+    },
+    {
+        "sha": "b7828f56ba9fb885b998da55ada38d9c038bc8a5",
+        "description": "anv: fix acceleration structure descriptor template writes",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "d258b0bf0e072438fc9eb921c5335734e6794459"
+    },
+    {
+        "sha": "ace22edd3011d27aa34f18ea6be1aebe5719c344",
+        "description": "anv: remove unused enum",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "51ea72e621e4aa93c1bb3f7e3c6c146e524bc2f4",
+        "description": "radv: remove redundant VK_PIPELINE_STAGE_2_TRANSFER_BIT for CP DMA idle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "591e3296cd24869581e75f664a53873b64b042ea",
+        "description": "radv: clarify why STAGE_2_CLEAR_BIT needs to wait for CP DMA to be idle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "107acf5a4a4d742df283b45fbbe5f65bef0883fd",
+        "description": "intel: fixup number of threads per EU on XeHP",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "4f9141607f40f0be9cee38ff6b006a05bba72e88"
+    },
+    {
+        "sha": "4ebb5391acf1d0bcd24947af84ce8930a9429894",
+        "description": "nir: mark XFB varyings as unmoveable to prevent them to be remapped",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26f74f17d9be014e70f297a0af4143970347008e",
+        "description": "nir: fix marking XFB varyings as always active IO",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6873da0e42182520a38a6f88abb3717eea12d774",
+        "description": "aco: fix load_barycentric_at_{sample,offset} on GFX6-7",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9662f9bcdcebeb9e5843baddd2d67cb1f3dad42b",
+        "description": "radv/ci: update the flakes list for GFX9 chips",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "a6a4bf0f1eae36cb68d5c67653ac013fe0fbde8a",
         "description": "glsl/nir: set new_style_shadow for sparse tex ops as necessary",
         "nominated": true,
