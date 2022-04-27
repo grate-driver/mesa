@@ -1196,7 +1196,7 @@
         "description": "ac/llvm: set the correct cache policy for sparse buffer loads",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "6d5e26752c664c7095ed0e7693591be797066110"
     },
     {
