@@ -7753,7 +7753,7 @@
         "description": "crocus: Fix memory leaks on iris_resource_create failure paths",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d8a38edc48e5567e5f0205b7347761e3d05a4bda"
     },
