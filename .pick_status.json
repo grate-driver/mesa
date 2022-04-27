@@ -172,7 +172,7 @@
         "description": "anv: disable streamout before emitting mesh shading state",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "ef04caea9b8b98187340fd0ec6550aed06424b60"
     },
     {
