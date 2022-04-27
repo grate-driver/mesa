@@ -949,7 +949,7 @@
         "description": "anv: don't emit 3DSTATE_BLEND_STATE_POINTERS in pipeline batch",
         "nominated": false,
         "nomination_type": null,
-        "resolution": 4,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },

@@ -3432,8 +3432,6 @@ struct anv_graphics_pipeline {
     */
    bool                                         use_primitive_replication;
 
-   struct anv_state                             blend_state;
-
    uint32_t                                     vb_used;
    struct anv_pipeline_vertex_binding {
       uint32_t                                  stride;
