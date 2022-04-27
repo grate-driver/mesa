@@ -1,5 +1,671 @@
 [
     {
+        "sha": "f17d3a125126dd7e0f1c2072545976cec1eeb1c8",
+        "description": "radeon/vcn: skip create and destroy message for jpeg",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "de3890daa548b698382a44d02740b1fd2b8918b5",
+        "description": "zink: add supported present modes to kopper displaytarget",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d89b95b247cf173ef72fd8488d5578566603437d",
+        "description": "ci: Limit Intel CPU scaling frequency for performance tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "99b04cbb7365fb9da670e88f1264e2a1b92637ac",
+        "description": "ci: Add CPU frequency adjustment capability",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "76cea8e27b3bb16cf752962ca53da42ab4bf51e4",
+        "description": "panfrost: Fix pack_32_2x16 implementation",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "6f0eff548c16c12309edec812b6573c63fdc866d"
+    },
+    {
+        "sha": "92e5eee39e51a5b89e36f68bcc3d6e405ec07e6e",
+        "description": "radv: use correct push constants range for internal operations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "031bcf686b1a1d50bed1562df0a1112c4abcc60d",
+        "description": "v3d/simulator: add support for AMD cards",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c3144d2efc5fec477be0f6491e8dc4f5fc01569",
+        "description": "v3dv: store device_id on device init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3f824e0e85c7247e25bc3103160d94c65c0b9474",
+        "description": "panvk: Eliminate unused vertex attributes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e248c64f06986f1a555f2d145274f1f1acbfba3e",
+        "description": "panvk: Take buffer offsets into account in BindVertexBuffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "657b0ff8615afa9e124be3ebf2eb2ca15df88a7f",
+        "description": "ci/iris: Enable SKQP on Tiger Lake boards",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c1e59bea05c6145baf4c5e9d5dd16c38fb14bfdb",
+        "description": "ci: intel: Merge anv and iris into src/intel/ci",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3620e7e71c7a1190726110db558b15f419e57adb",
+        "description": "vulkan: drop empty vulkan_wsi_args",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6623f60c34c8c40d2624c6f10406c09504d12c0d",
+        "description": "vulkan: use c_msvc_compat_args for shared code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6bcdc763c9e228aea9a767c35dbd63bb1a5689e",
+        "description": "radv: enable radv_disable_sinking_load_input_fs for Grid Autosport",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1dbfd2be4b13da08e097bfdcdb000283e4ebe741",
+        "description": "radv: allow to disable sinking of load inputs for FS via drirc",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6261ca742572b350962c824b90501b83436b66a3",
+        "description": "etnaviv: add tile size helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d2f9572c24ff99822efc8b1e7108de482b197e3",
+        "description": "etnaviv: use feature bit to check for big tile support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "412201169785b63edafe99063df024bb36bddc18",
+        "description": "etnaviv: properly set additional DEC400 compression states",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "17d9b0808ab76edb4d2ead0e64a45ef810a13229",
+        "description": "etnaviv: add support for big tile RS states",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c2a3236d1a33be8e517d97a9533fbd7eea0725fe",
+        "description": "etnaviv: clean up tiling setup in etna_compile_rs_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d6b6e31e1889a9b626e7284082777ba6469f91e",
+        "description": "etnaviv: use feature bit for one const src per instuction limitation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5fcf55bb1532208772a00bb82c9cf1726a470514",
+        "description": "etnaviv: use feature flag to determine which RS states to use",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7c46a4883625a20691a78170f8da783dc9b8a9c6",
+        "description": "etnaviv: use new PE pipe address states on >= HALTI0",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "617339ab5b4aac1199caed2dfc609e376cd11667",
+        "description": "etnaviv: correct bits per tile and clear value for HALTI5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd8a314d3f648506cc4750437aaa60a9d89e10c9",
+        "description": "etnaviv: update headers from rnndb",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c153bb0919bd217e53597daa0db5fc75c4a6172",
+        "description": "etnaviv: fill all minor GPU features from the kernel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ab942aaed0fe76f3c781dcc16daf9ed3a7f0736b",
+        "description": "etnaviv: don't supertile textures if supertiling is disabled via debug option",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f525706e7725345e187f076118feb3937dfb8c43",
+        "description": "radv: fix handling divisor == 0 with dynamic vertex input state",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f3736595f03ba3055df654aad34e771bbe81850",
+        "description": "r600: Add support for TGSI_OPCODE_ATOMIMIN and IMAX",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "a4840e15ab77b44a72cabd7d503172e8357477eb"
+    },
+    {
+        "sha": "a8430c43a7289f94c59146dce605cc2507062124",
+        "description": "r600: tune nir options",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "a4840e15ab77b44a72cabd7d503172e8357477eb"
+    },
+    {
+        "sha": "6cb510156ef47abb155b02d447684083df7d30b5",
+        "description": "r600/sb: Don't optimize float GT and GE",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "a4840e15ab77b44a72cabd7d503172e8357477eb"
+    },
+    {
+        "sha": "e9797b648a0020f1d173ce7b8e483bc158d69a70",
+        "description": "ntt: remove dead input variables before lowering FS IO",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "a4840e15ab77b44a72cabd7d503172e8357477eb"
+    },
+    {
+        "sha": "47d3f7c69f52432566653834cde0f4fcbef408dd",
+        "description": "nir: Don't optimize to 64 bit fsub if the driver doesn't support it",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "a4840e15ab77b44a72cabd7d503172e8357477eb"
+    },
+    {
+        "sha": "1598d18a8868b6f506811661a20fa65307349771",
+        "description": "venus: flush when batched draw calls reach a threshold",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9dc68bd975e138011d39326f7b597ad6e1e8f79f",
+        "description": "venus: refactor vn_cmd_submit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42a83831705f2bfca9f8e8faddf18a9b6a7e8d28",
+        "description": "venus: add VN_PERF option no_async_queue_submit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0fc36b11ab526da21797fd4d02dbe2ff3325e2a3",
+        "description": "venus: add VN_PERF option no_async_buffer_create",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f0bfd8afe2e52861c5486b98f6549ed225bb6581",
+        "description": "venus: add env perf options and introduce no_async_set_alloc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ab640852b86911407e6aeb7aea0e47db914bd3f",
+        "description": "venus: refactor to add struct vn_env",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e24d8760e9fb205fff4cd31dadd093d52305c3dd",
+        "description": "nir: Constant fold sampler/texture offsets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9332598b26232e5c70e2050dd38e56efffe80d61",
+        "description": "nir/constant_folding: Break TXB folding into a helper function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f7de83110654e3c254b0ec0943ab240e0e68d27",
+        "description": "venus: fix view format for ahb image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "054bd2d38f83515bbb0e99d7569be7594671819e",
+        "description": "kopper: copy a bunch of code for texture_from_pixmap",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89602c3970823f7f87ff244a378c2a00652d879e",
+        "description": "kopper: store whether screen has dmabuf support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "476f8ad350364e56626e422c91b8cb4c624b2535",
+        "description": "kopper: move drawable geometry updating up in function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c38a2ad2ff1942599df6dba80eb0adf81e8df436",
+        "description": "kopper: always fetch and store drawable info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a9def8c9f8ff7b6131fb5c78c303d5b1376542a",
+        "description": "drisw: remove dead code",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "d760a9151b73d1998fceff38fb1c642e4d77bf67"
+    },
+    {
+        "sha": "1a4dca989c678f7b4056255a05fa683ba81f1046",
+        "description": "panfrost: Enable NIR lowering of half float packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d7b5bd3b93f5956a08bf388d993473b41c369b9",
+        "description": "zink: fix up swapchain depth buffer geometry during fb update",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "305fe87d9807d0e4b8f79e1f9ee280a8dcd92314",
+        "description": "zink: fix/improve swapchain surface info updating",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "25840a31ebe13bdad26ed2fcf3e697c6091643ec",
+        "description": "kopper: add DISPLAY_TARGET bind for depth buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aeeb0b4deb3f3b2ddfdc5aa01883764e748a1b88",
+        "description": "radv: Copy shader modules to avoid use after free",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1873880b50031fb4614befab069e070748652f31",
+        "description": "vulkan: Add a shader module clone helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7998f242a889e2650571d015b594fbfb17a9a0a6",
+        "description": "panfrost: Add a test for pan_image_layout_init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "52f8f7d6c9bf4ea943403ad5a83889f09a6fe812",
+        "description": "panfrost: Simplify how image_layout_init is called",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c45ed7e576c5cbb9264fbf73b0da2a34dab704a6",
+        "description": "panfrost: Unit test block size queries",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "11d0a5292b4fc6993b58548e0020b0fd43e08e97",
+        "description": "panfrost: Remove unused dev argument",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "321e1b37b93678adcd308e0e31d6414dd2519d9d",
+        "description": "panfrost: Unify paths through image_layout_init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "724f835d2faf55039d376bbd2888180b23adf278",
+        "description": "panfrost: Unify panfrost_block_size paths",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef5e66b1fd88bac9d80fdded427dfe711274b412",
+        "description": "panfrost: Use pan_block_size in layout calculation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4ee2c213a0f1597d8c2c89fb408ce8367434310",
+        "description": "panfrost: Extract panfrost_afbc_is_wide helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6f3abd5ecb970ccb6cbf446f7a9e2733ac81ffa",
+        "description": "panfrost: Don't pretend to support multiplane AFBC",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d25bb73bb66cc3c3a554954abd06041d7d240513",
+        "description": "panfrost: Use panfrost_afbc_superblock_width",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "36449bdcdcdce8967cb6fc2c9f4dd66a5f974a43",
+        "description": "panfrost: Add afbc_superblock_{size, width, height} helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43202320ee8cc0ca5da828e86d87cbddcfb29889",
+        "description": "panfrost: Always use 64-bit SD with strides",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "644611010e2877f67893846938847bb8095efa41",
+        "description": "panfrost: Split pan_layout.c from pan_texture.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ccba4943dd309144fc20577d0b94e57ab727d78",
+        "description": "panfrost: Advertise all textures in drm-shim",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65caf46b3b827f4cf5a32972ca5844c69e598aa6",
+        "description": "nir: Remove single-source phis before opt_if_loop_last_continue",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "5921a19d4b0c6491b3535b5154d585384c9ea144"
+    },
+    {
+        "sha": "90ea4283b47d846628e5c5fec7d205771220811f",
+        "description": "etnaviv: set VIVS_GL_VERTEX_ELEMENT_CONFIG depending on prim type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9696355802bce3da6873a0b8f9ef5276232a95d7",
+        "description": "etnaviv: update headers from rnndb",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37d4b72ff3b594f15b794f6e2f0f25774b0c7d88",
+        "description": "vulkan/log: Allow but warn for client-invisible objects",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "62a44d1bda958e6f8f56fd958023de9be7347a08",
+        "description": "vulkan/log: Allow but warn if called with a NULL object",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef9d97ec1f9d9834db3066b5a7ec67ce6d4ecd86",
+        "description": "spirv: Handle Op*MulExtended for non-32-bit types",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "58bcebd987b7c4e7d741f42699d34b8189ab9e79"
+    },
+    {
         "sha": "f329f67243d671965d73bd2243cffc4e1e68c4a3",
         "description": "panfrost: Kick off v9 support in the driver",
         "nominated": false,
