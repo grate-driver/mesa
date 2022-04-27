@@ -7807,7 +7807,7 @@
         "description": "iris: Delete unused iris_screen::aperture_bytes field",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bb3545a6ee419c4802ac4153eb690a93dc2f339d"
     },
