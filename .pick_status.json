@@ -994,7 +994,7 @@
         "description": "Revert \"anv: fix dynamic state emission\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f348103fce4484b891a58bf3147b71e3a3558135"
     },
