@@ -804,7 +804,7 @@
         "description": "meson: remove unused defines",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "e030d5ba8ac321b4d75587d72a0a381bb906d70e"
     },
     {
