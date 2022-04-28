@@ -1075,7 +1075,7 @@
         "description": "mesa: unref syncobj after wait_sync",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0af7c1e385b94c4d3610c4bff4c3af8a1afb26c6"
     },
