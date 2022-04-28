@@ -15340,7 +15340,7 @@
         "description": "panfrost: Optimise recalculation of max sampler view",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 5,
+        "resolution": 2,
         "because_sha": "304851422a4610170e870a5315fefaa5ec42917f"
     },
     {
