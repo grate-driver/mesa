@@ -4852,7 +4852,7 @@
         "description": "radv: Fix barriers with cp dma",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "because_sha": "4b9bc4791b5778438f4829acd5a61d8b3574a257"
     },
     {
