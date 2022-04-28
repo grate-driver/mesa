@@ -11676,7 +11676,7 @@
         "description": "anv: fix VK_DYNAMIC_STATE_COLOR_WRITE_ENABLE_EXT state",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "because_sha": "b15bfe92f7f87e270160a9221a1394fc7b5de5d2"
     },
     {
