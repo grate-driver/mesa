@@ -1,5 +1,429 @@
 [
     {
+        "sha": "1dc697942af7254798f83583f5788e1abf136d27",
+        "description": "zink: radv ci updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "2d4067a6fb8f3f95218a93e2fdf3923861b6e2d7",
+        "description": "util: change util_format_snorm8_to_sint8 -> snorm_to_sint for radeonsi",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "09d6ebac7e6bb3aa61d93438aaf412ee5c27d9e4",
+        "description": "util: add pipe formats R10G10B10X2_SINT, B10G10R10X2_SINT, G16R16_SINT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "08bdee3f107647090df8d5f98f0994949e8c9a22",
+        "description": "etnaviv: reinstate accidentially commented assert",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "3477dbd34f18bb40c437af0687b2dfe5dbfd256e",
+        "description": "drm-uapi/i915_drm.h: Update from drm-next (2022-04-28)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "09e4fd1d84b045da640d9acf24a3368ec44d5040",
+        "description": "vulkan/device_select: force default device if environment variable set",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "201b0b6d2948eedfd1821e5173ecba09f0d453c6",
+        "description": "ci/lava: Retry when data fetching log RPC call is corrupted",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4ffd21ca70e2fbacc80da026f40101e7a5414ed8",
+        "description": "ci/lava: Improve exception handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "5fc333d0b6acdcacc3a8f788216ea33654c5ae9f",
+        "description": "ci/lava: Cancel the job if the script is interrupted",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c64e3d92df7d9021d84312735c15bfc681cefcc5",
+        "description": "ci/lava: Reduce LAVA boot phase timeout to 3 minutes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9666ab7172985f9958574eb40b4c92bbefa4326d",
+        "description": "ci/lava: Let LAVA job submitter run without JWT file",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "18d80f25ee242ec21a4f772d107551e8dadae955",
+        "description": "ci/lava: Parse all test cases from 0_mesa suite",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "e3f71aaa3764a48f25fd6fc37ad018955b9019c2",
+        "description": "ci/lava: Fix shebang in deqp-runner.sh",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "e9aef19e2b937b6bdacbf3cb1184be17cfb09c37",
+        "description": "ci/lava: Trap init-stage2.sh background processes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "09236d9607a999026081b2c93af497e3bdd599e3",
+        "description": "ci/lava: Use lava-test-case to run custom scripts in LAVA",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "33a1c51e3e700b4483507e486e876ae7a09456df",
+        "description": "ci/lava: Always validate the lava job",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "805de830c9365e7263503faeb9a1acff3392e69b",
+        "description": "ci/lava: Set lava-signal to kmsg",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "75410c3d76f0e39d32f8c05fe094c14b0023dfbd",
+        "description": "ci/lava: Fix LAVA job validation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "6a3ee3ea32336a4fb9004d4f0587d32af72ba495",
+        "description": "ci/lava: Return test-suite result as exit code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "43d8ed840ed697b435219a36ebd986a5113c2108",
+        "description": "ci/lava: Filter log lines from LAVA return",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "84a5ea422826c678fb36eaa294b172f6387f01f1",
+        "description": "ci/lava: Encapsulate job data in a class",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "b3ba448ba529caa9d88f180794d479cc441d5f2f",
+        "description": "ci/lava: Sleep before, not after, API calls",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "d3ef3657b280b3c273957641183e64d388804d08",
+        "description": "isl: disable mcs (and mcs+ccs) for color msaa on DG2",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "212fb25b267120c6cc8eead21a7eb016f2b58f2a",
+        "description": "vulkan/wsi/x11: Use atomic_int with sent_image_count",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "because_sha": "d0bc1ad3776bce7d4b356e2a3d8bdbb9ae64e588"
+    },
+    {
+        "sha": "b4bbf9d1acf04debb0abd2c3ebeac21fe389cf83",
+        "description": "llvmpipe: add user memory resources to the debug global list.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "because_sha": "9a57dceeb760a1d4f7d9d1666bec0844ee41852e"
+    },
+    {
+        "sha": "6a3dc4e370d7bc54383eb3de906acd0d29660a42",
+        "description": "freedreno: Use staging transfer if mmap fails",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "a6be0cc12d568ae4c725eadf9b6680cf2abf4450",
+        "description": "freedreno: Split out helper for staging blit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "0b7d910b2ce174bd7ddd5deffdef71adefaf9ce0",
+        "description": "freedreno/a6xx: A couple more FD_BO_NOMAP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "e42cea4db6721d0eb329091fbe79dd27915a842f",
+        "description": "freedreno/drm/virtio: Split up large uploads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "0aab31043979bc478f2d2a2a35bbe882154f457e",
+        "description": "freedreno/drm/virtio: Async ccmd batching",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "528fa581c1f74a0abbb63a11faed8dea7a3d7af7",
+        "description": "freedreno/drm/virtio: Pass guest handles to execbuf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "cb5f25ea71a9b65558763d48dbb94158d0afcf58",
+        "description": "freedreno/drm/virtio: Protocol updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "fa23ddf258b3a2fe079194e5e0e15daf006005fe",
+        "description": "freedreno/drm/virtio: Fix SHAREABLE+MAPPABLE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "441f01e778184be8e5f99d3c40f47ee49402dd03",
+        "description": "freedreno/drm/virtio: Drop blocking in host",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "e6b2785811c23e44d3acfeef71ef240d95fc1663",
+        "description": "freedreno/drm/virtio: Use userspace IOVA allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "ae01c27ac0d1222d547383594603e43a8971e803",
+        "description": "freedreno/drm/virtio: Support ring_idx",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "122cedf98c0870a388acafb5852fc62071f45696",
+        "description": "freedreno/drm: Move bo common init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "d52455a9620ff596488634cdcf205776555feb8b",
+        "description": "freedreno/drm: Close bo handle after bo->destroy()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4ed346c6fbe66998853870ac9333a2cbe0bb067c",
+        "description": "freedreno/drm: Drop FD_PP_PGTABLE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "0004cae6384208c4fa884fd153b509a762998915",
+        "description": "freedreno/drm/virtio: Appease valgrind",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "d79c71c705c183f3a00b8cd3e0cdb84a04058e15",
+        "description": "freedreno: Misc indent fixes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c865416f4436707dd6e67121971cd7f4103e0bf7",
+        "description": "glx/kopper: Wire up a way for SwapBuffers to fail",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "0394f35424350a387e449fb3954df89f51657752",
+        "description": "zink/kopper: add a mechanism for checking swapchain status",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4af98df9554cb526af792ecb4cc55e547025c12f",
+        "description": "zink: flag swapchain resources as swapchains",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "625457caafb3c68e753bf26dc99e065428c45b31",
+        "description": "zink: handle swapchain acquire failures more directly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "494d02eacfc8b4abc6cdd790ff74a4b053904b39",
+        "description": "zink: fix return for zink_kopper_acquire",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "ce9cbeee33c7a1d444be8b650ab3fe1ebcf4d057",
+        "description": "zink: rework swapchain object check for acquires",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "a2c9cc7200697f9f9dd5f226a7d193ac9e9f6f70",
+        "description": "zink: unset image layout when killing swapchain",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "5cb9e5db72d94ee69b2c6fbb91db8313fa54a3f4",
+        "description": "zink: handle dead swapchains in acquire",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "651b71a6ca829bc7977748d506fc3b2afd8e7999",
+        "description": "zink: flag swapchains when updating fails",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "b86c81434755319edde8c25760ea977a3d318ea2",
+        "description": "zink: add a util function for finding swapchain resource",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "8d73315bce2d62b294df2403e95074be90b77407",
+        "description": "draw: fix double free of NIR IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "f4f350a06c0144904131e78c9f8469d4ed828e8a",
+        "description": "anv: reemit 3DSTATE_STREAMOUT after memcpy",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
         "sha": "f17d3a125126dd7e0f1c2072545976cec1eeb1c8",
         "description": "radeon/vcn: skip create and destroy message for jpeg",
         "nominated": false,
