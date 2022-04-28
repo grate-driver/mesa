@@ -1021,7 +1021,7 @@
         "description": "microsoft/compiler: Unload DXIL validator library *after* calling Release()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "193cf76c095ccbaa7f5a0a08a8fa0e9abe080abc"
     },
