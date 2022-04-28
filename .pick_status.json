@@ -3052,7 +3052,7 @@
         "description": "zink: set VK_QUERY_RESULT_WAIT_BIT when copying to qbo",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 2,
         "because_sha": null
     },
     {
