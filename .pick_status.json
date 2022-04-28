@@ -1777,7 +1777,7 @@
         "description": "llvmpipe: add user memory resources to the debug global list.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9a57dceeb760a1d4f7d9d1666bec0844ee41852e"
     },
