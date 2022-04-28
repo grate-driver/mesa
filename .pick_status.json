@@ -11684,7 +11684,7 @@
         "description": "anv: fix dynamic state emission",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "because_sha": "505d176a8ebfb6a2c7d0b0a51753332036ae6f75"
     },
     {
