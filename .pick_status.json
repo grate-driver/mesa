@@ -193,7 +193,7 @@
         "description": "egl/wgl: Delete unused variables/code",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3415bf0268884bf3c16d495a4e1afd30d67bc71d"
     },
