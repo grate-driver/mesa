@@ -6100,7 +6100,7 @@
         "description": "zink: fix tessellation shader key matching.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "because_sha": "62b8daa889daefb2f191a63f370541bf2b807e88"
     },
     {
