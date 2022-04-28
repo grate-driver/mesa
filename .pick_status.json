@@ -256,7 +256,7 @@
         "description": "nir: fix sorting before assigning varying driver locations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1e93b0caa10d9d9090eaa3bd517a5144930f28a4"
     },
