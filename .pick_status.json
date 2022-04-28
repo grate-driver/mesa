@@ -1260,7 +1260,7 @@
         "description": "iris: Return a 64B stride for clear color plane",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "db475c81b7cdde9d967b0216e6f12d17e0adae83"
     },
     {
