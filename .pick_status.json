@@ -244,7 +244,7 @@
         "description": "util: Keep quiet NaNs quiet when converting to half float.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": null
     },
     {
