@@ -985,7 +985,7 @@
         "description": "gallium/xlib: fix stale comment",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5f60a00743f6e03c3b90fa3a95e448e53bc150e1"
     },
