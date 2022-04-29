@@ -900,7 +900,7 @@
         "description": "iris: Fix assertion meant to only target the clear-color stride",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "2bc8c61fd00b2877319f54afeaba3d606fd8532c"
     },
     {
