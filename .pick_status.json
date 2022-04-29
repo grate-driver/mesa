@@ -1,5 +1,413 @@
 [
     {
+        "sha": "575068a1656ab4303647ade1491da7d711d36db7",
+        "description": "panfrost: Unit test \"from legacy\" helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "6d0505701d0c5de8a357b736b411f041787adf37",
+        "description": "panfrost: Unit test stride calculations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "579fd30209fa5ca7fa2af75f0eee90d2d2984afd",
+        "description": "panfrost: Unify row stride and AFBC row stride",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "1842e14a733b442fd6265d1efe7c0282879be048",
+        "description": "panfrost: Remove line_stride",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "61100e7011109affa1746593ff72010cfe702913",
+        "description": "lima,panfrost: Use row stride for tiling routines",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c4241a831f3a3b8cff707ea7fb4e2a99c830b697",
+        "description": "panfrost: Use row_stride even for linear resources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c11df56cff601f7dec9c5e4ec26a8b0e5244b674",
+        "description": "panfrost: Adapt get_param for row strides",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "3a4207dde6b655b0eaa6096f21758e5943b2721b",
+        "description": "panfrost: Use row stride to calculate slice size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "0b788e2ee4a229f3e19420f7c653495e98995af7",
+        "description": "panfrost: Rename away from bytes_per_pixel",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "81a686a714a39bc943c916352ab32642dfbe796c",
+        "description": "panfrost: Use row stride for explicit layouts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c40ebd859c5147ff6f2b0ce529bef81899369233",
+        "description": "panfrost: Add helpers to work with legacy strides",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "a741bd5db1376b7a354a3472f5b15078cdfced77",
+        "description": "panvk: Report row_stride in GetImageSubresourceLayout",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "a7fdedd247ca6ae66011c7d74894d3c2aaaac340",
+        "description": "panvk: Remove unused layout structs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "f45816181f52187b1fd906bcf689ee77cb500b3a",
+        "description": "pan/decode: Print row strides, not line strides",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "58d9afb80ba729cc9f9d43e635c0386b59815bfa",
+        "description": "pvr: Add compute update kernel in vkCmdDispatch().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "5e9e3fe7f7497981a929cf47fac6acfb72e8517e",
+        "description": "pvr: Add compute update shared kernel in vkCmdDispatch().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "7ccf9494b61b00230ada9e9e44771ea13f9cf28e",
+        "description": "pvr: Add initial implementation of vkCmdDispatch().",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4b7a9bf364475597b3d76bd8999e8605b2e54185",
+        "description": "pvr: Add PVR_WORKGROUP_DIMENSIONS define.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4efc99747247520f186365c530a4f955cbc1fb79",
+        "description": "anv: fix invalid utrace memcpy l3 config on gfx < 11",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "because_sha": "02a4d622ed08ff7f02cb5c4e7476d99fb7ebc127"
+    },
+    {
+        "sha": "4a4adb65cec466ca7861856922f84b95bfd0fac1",
+        "description": "llvmpipe: disable compute statistics queries if queries are disabled",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "e4884c35d6b45bbdd357b2706d65e7ae1c1e6095",
+        "description": "llvmpipe: remove misleading query comment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "a36c3f6f6a41d84961b5633a627cd90feaa4d18d",
+        "description": "llvmpipe: disable statistic queries during draw if queries are disabled",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "6ee9e6ce87549c84ca81b63732320df680f6887d",
+        "description": "radeonsi: generate unique shader name in si_get_nir_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "f1f2d407e77d05e34e6892709c58cbef96d54415",
+        "description": "radeonsi: don't always strip NIR debug infos",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "ce7966fcb4942643efe932bf564d2401c5fd04e7",
+        "description": "aco: Use movk for AddressHi bits in vertex prolog",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "58bd9a379efada22efc3d1ac0848f681c2dd811a",
+        "description": "aco/ra: fix live-range splits of phi definitions",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "d639608b8bff266f8340105b1a7c50c4f1f605ed",
+        "description": "ac/nir: Do not set cursor in try_extract_additions",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "61ac5acca3b58ea4ebac45d1aa0732ae9c6517d5"
+    },
+    {
+        "sha": "3829981eb74103ca5294a4d8e84e55e087329f38",
+        "description": "radv: use 3D views for 3D internal operations on GFX6-8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "180398f7851a01d9cb2879a426f3cf1b4686c917",
+        "description": "nir: fix sorting before assigning varying driver locations",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "because_sha": "1e93b0caa10d9d9090eaa3bd517a5144930f28a4"
+    },
+    {
+        "sha": "067023dce2cae5ef44d2b8cd52a81aa880256037",
+        "description": "util: Add some unit tests of the half-float conversions.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "27e33d5c963f13a47c4b9276378db913d8ecb189",
+        "description": "util: Keep quiet NaNs quiet when converting to half float.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "acf6bf88c07e0a1f0283ad1acd0e5f0d2a156535",
+        "description": "iris: use new kernel uAPI to compute video memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "763744aa8b0bc592f972c131da304ab29f054c3b",
+        "description": "panvk: Add address/range helpers for panvk_buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "631f47e83a3575ede1cf7b15c0c6e252d072e2b6",
+        "description": "panvk: Only write depth when depth test enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "46778f2b2a5a4a3b563aed226bb3ee526e443b10",
+        "description": "panvk: Lower image deref atomics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "54412afadc395238572fd6460887eb0b48ff3f6e",
+        "description": "pan/bi: Handle texture offset + index",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "86d32eed38c62db2d73b0495eff5ca115a06d485",
+        "description": "panvk: Allocate stack for each thread",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "7a7403f6aae32c389fa15e988e7785005ddc757a",
+        "description": "panvk: Lower global vars to local",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "3f44bad1ce8d6ae7a35a698825cbb0d17ae37838",
+        "description": "venus: log performance envs upon instance creation with debug init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "84a53de76ceccb85835eb03c626be846f9b06095",
+        "description": "venus: add VN_RELAX_BASE_SLEEP_US env var for tuning cpu utils",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "f3fb1d663277f231f0d429c6bbb784461e26cb09",
+        "description": "drm-shim: Cleanup on device file close",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "409b76511c9ed2699643586d220575aae9d6db79",
+        "description": "freedreno/drm-shim: Better iova handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "6c465ad6c76d804e0d08f9f089f2b74dd773153d",
+        "description": "drm-shim: Add error handling for bo_init()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c4b5ebe1fc911ff4a50c30efdcf31b66f47e5bae",
+        "description": "drm-shim: Better mmap offsets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "97f4e48717c16cde6549d426c5c013b90ac58a61",
+        "description": "freedreno/drm-shim: Robustify error handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "d06fc7bb4f97d6bb1ea9f658970864b96e81c822",
+        "description": "freedreno/drm-shim: Update to latest uapi version",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "a922997ffd3c47755fbf8892e73f0c389b4463a5",
+        "description": "drm-shim: Add GET_UNIQUE support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "bf04be17f7f7cb41ef90176a8bc1fad587206046",
+        "description": "vulkan/wsi/wayland: Fix double free on error condition",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "because_sha": "b626a5be43d4cd81d6f6e7c17eef8f9055f555d7"
+    },
+    {
+        "sha": "1e7ea180268668880b2f3fff853d1f071da04492",
+        "description": "vulkan/runtime: 0-out pipeline cache object",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "591da9877900c56434f9e23e0ad0058b118b0be8"
+    },
+    {
+        "sha": "7cd9adeb415eb94dd31483ad1dd2ec45b1f4363f",
+        "description": "intel/compiler: In XeHP prefer <1;1,0> regions before compacting",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "562fd989982dbcf6de362ade9f55ac72955b50c0",
+        "description": "llvmpipe: add a ci flake",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
         "sha": "2505afc430c6b151e7e4243503953ba0b0a2c842",
         "description": "d3d12: Destroy empty residency bo set during early-return",
         "nominated": false,
