@@ -355,7 +355,7 @@
         "description": "pan/bi: Use texture index instead of sampler for message preloading",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "eb1479bda22bf80b553a87ab781956dc068d5b19"
     },
