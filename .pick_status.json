@@ -236,7 +236,7 @@
         "description": "r600: Allow eight bit, three channel formats for vertex buffers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "e41958e344cb4b15d01008140a1ee08817104334"
     },
     {
