@@ -1,5 +1,93 @@
 [
     {
+        "sha": "2505afc430c6b151e7e4243503953ba0b0a2c842",
+        "description": "d3d12: Destroy empty residency bo set during early-return",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "1e940f2ccf3740397235ca1c9106afb236d1c812",
+        "description": "d3d12: Fix a couple over-releases from incorrect take-ownership flag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "32c1b5fd05cece801b85411f6a468f64a01f436c",
+        "description": "d3d12: Fix leaks in map with do-not-wait",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "5b46ef9857304d72b620aff722c09959a9235b1a",
+        "description": "d3d12: Use a pipe_reference in d3d12_bo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "8de1e310a768539c093f1d86d0f7d7fc5d7668c6",
+        "description": "u_primconvert: Handle take_index_buffer_ownership",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "12d88d500dae9d67db0c33f316ba327cf5aaed4e",
+        "description": "u_primconvert: Refactor to remove recursion from util_primconvert_draw_vbo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "0474bbcfb9395d53b3738fc3aff6fafed368f8cb",
+        "description": "u_debug_stack: Lock around stack dumps to prevent interleaving",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "303c2754a32549305d83f0f5c52eb1350865ec87",
+        "description": "u_debug_symbol: Allow re-init of DbgHelp to work around already-initialized issues",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "f51840d87c9808e3dfa0095a4096b5b7c0424695",
+        "description": "u_debug_symbol: Use correct sizeof for DbgHelp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "d8024b25048b5f62f08d18041fedcf97ff343467",
+        "description": "u_debug_refcnt: Don't loop for initial refcounts if the initial value is huge",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "0bcb5f919ed5c6ecac7395fd06c6bc71601dbd86",
+        "description": "bin: Add a script for filtering/sorting refcount logs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
         "sha": "53a94fbdd57acbbe2bc745901cbfeca968e25273",
         "description": "mesa: Ensure ARB programs end in a newline",
         "nominated": false,
