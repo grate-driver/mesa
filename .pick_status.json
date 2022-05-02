@@ -805,7 +805,7 @@
         "description": "nir: Don't set writes_memory for reading XFB",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "85a723975bbd651fa6692655b9a4f14b4405d0ae"
     },
