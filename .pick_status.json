@@ -238,7 +238,7 @@
         "description": "ac/nir: Do not set cursor in try_extract_additions",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "61ac5acca3b58ea4ebac45d1aa0732ae9c6517d5"
     },
