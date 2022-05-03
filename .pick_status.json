@@ -476,7 +476,7 @@
         "description": "aco/ra: fix vgpr_limit",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "b98a4d4dd7eaf1f299a0e8cbf5c52d8f2a93da0d"
     },
     {
