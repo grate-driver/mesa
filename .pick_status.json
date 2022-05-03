@@ -409,7 +409,7 @@
         "description": "radv: re-emit dynamic line stipple state if the primitive topology changed",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
