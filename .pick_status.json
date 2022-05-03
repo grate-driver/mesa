@@ -1,5 +1,173 @@
 [
     {
+        "sha": "17c98393f9f3cb0801b73b2d4c62442859417368",
+        "description": "panfrost: Increase the maximum tiler heap size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "7c5b242aec3d5b759dd3d3656ee918bcb8c2c2e2",
+        "description": "docs/features: flag VK_KHR_timeline_semaphore as implemented",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "1442d77bc5d19ab45f3160053232b1c76ed57c4b",
+        "description": "v3dv: trivially implement VK_KHR_separate_depth_stencil_layouts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "32223ac67f6015171c79dcd2dd0a5f19d7dafc60",
+        "description": "v3dv: implement VK_EXT_separate_stencil_usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "44791ba8259e492e111f9eb397f4623da053721a",
+        "description": "v3dv: check input attachment usage as sampled usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "e7351178aabd3903d11e1e6a2dc7bdff318295f3",
+        "description": "pvr: Update pvrsrvkm to fw 1.17 .",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "184a48197f08372555f0cc408def63bfdb70adee",
+        "description": "v3dv: use wait stage for wait semaphores to decide about binning syncs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "a981ac053964b3fa129fda124e89bff01a572394",
+        "description": "v3dv: skip binning sync if binning shaders don't access external resources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "46dd903cc6119456b41c352e6fe19e2e6f15fa66",
+        "description": "v3dv: flag BCL barriers for all-graphics and all-commands stages",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "1571954be95a06154eaa83f572167b1623aef895",
+        "description": "v3dv: drop default sampler states if not used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9348620946e667e9485d010980ac9ffdd0446a23",
+        "description": "radv: disable instance packing to fix pipeline query stats",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "7a6d85299c8a49b97109012a5f68726939080cba",
+        "description": "ci: Fix tests expectations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "57f21b5039c4a4c6e1b4feca8780fc5d80e4e005",
+        "description": "ci: Update trace after CI fix",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "ea85f6cfda145e85ec9e88634501e225ed856339",
+        "description": "ci: Fix init-stage2 exit code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "681abdcc572ee80874651aaa6f9359586f3ab224",
+        "description": "docs: Add sh256sum for mesa 20.0.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "6eb129f108d7d3240d9fe5fcba85bc96866bbc29",
+        "description": "docs: add release notes for 22.0.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9b94ef56976df1a137f54d7426189ac9626482d6",
+        "description": "docs: update calendar for 22.1.0-rc4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "e83a8b1d105b7b47a489d8faa1476975de78cfac",
+        "description": "docs: update calendar for 22.1.0-rc3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9543fc10118111b06c0ecbb8c3cee08e05c91b21",
+        "description": "docs: Extend calendar entries for 22.1 by 1 releases.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "2876359dcefb7a7e9daa71fbd22d6d5cd3a0ad92",
+        "description": "docs: update calendar and link releases notes for 22.0.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9e8f516e9281fa8bb397d567345263ac9ec5f6f3",
+        "description": "docs: Extend calendar entries for 22.0 by 1 releases.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
         "sha": "7f91e8fad94dd34f83c6a124dbbe5d210be7715f",
         "description": "zink: Fix memory leak on error path.",
         "nominated": false,
@@ -364,7 +532,7 @@
         "description": "radv: re-emit dynamic line stipple state if the primitive topology changed",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": null
     },
     {
