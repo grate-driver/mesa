@@ -1318,7 +1318,7 @@ choose_pdev(struct zink_screen *screen)
       }
    }
    is_cpu = cur_prio == prio_map[VK_PHYSICAL_DEVICE_TYPE_CPU];
-   if (cpu && !is_cpu)
+   if (cpu != is_cpu)
       goto out;
 
    screen->pdev = pdevs[idx];
