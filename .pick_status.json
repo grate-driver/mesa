@@ -148,7 +148,7 @@
         "description": "anv: fix invalid utrace memcpy l3 config on gfx < 11",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "02a4d622ed08ff7f02cb5c4e7476d99fb7ebc127"
     },
     {
