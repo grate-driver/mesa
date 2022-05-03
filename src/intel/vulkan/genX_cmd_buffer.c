@@ -2689,6 +2689,7 @@ emit_binding_table(struct anv_cmd_buffer *cmd_buffer,
          const struct anv_descriptor *desc = &set->descriptors[binding->index];
 
          switch (desc->type) {
+         case VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR:
          case VK_DESCRIPTOR_TYPE_SAMPLER:
             /* Nothing for us to do here */
             continue;
@@ -6529,6 +6530,8 @@ void genX(CmdBeginRendering)(
                                             color_att_valid);
    if (result != VK_SUCCESS)
       return;
+
+   genX(flush_pipeline_select_3d)(cmd_buffer);
 
    for (uint32_t i = 0; i < gfx->color_att_count; i++) {
       if (!(color_att_valid & BITFIELD_BIT(i)))

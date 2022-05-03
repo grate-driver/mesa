@@ -1029,6 +1029,12 @@ static const struct intel_device_info intel_device_info_rpl = {
    .platform = INTEL_PLATFORM_RPL,
 };
 
+static const struct intel_device_info intel_device_info_rpl_p = {
+   GFX12_GT_FEATURES(2),
+   .platform = INTEL_PLATFORM_RPL,
+   .display_ver = 13,
+};
+
 #define GFX12_DG1_SG1_FEATURES                  \
    GFX12_GT_FEATURES(2),                        \
    .platform = INTEL_PLATFORM_DG1,              \
@@ -1047,6 +1053,7 @@ static const struct intel_device_info intel_device_info_sg1 = {
 
 #define XEHP_FEATURES(_gt, _slices, _l3)                        \
    GFX12_FEATURES(_gt, _slices, _l3),                           \
+   .num_thread_per_eu = 8 /* BSpec 44472 */,                    \
    .verx10 = 125,                                               \
    .has_llc = false,                                            \
    .has_local_mem = true,                                       \

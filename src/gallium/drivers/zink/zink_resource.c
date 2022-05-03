@@ -104,7 +104,6 @@ zink_destroy_resource_object(struct zink_screen *screen, struct zink_resource_ob
 
    zink_descriptor_set_refs_clear(&obj->desc_set_refs, obj);
    if (obj->dt) {
-      util_queue_fence_destroy(&obj->present_fence);
       FREE(obj->bo); //this is a dummy struct
    } else
       zink_bo_unref(screen, obj->bo);
@@ -521,7 +520,6 @@ resource_object_create(struct zink_screen *screen, const struct pipe_resource *t
    if (loader_private) {
       obj->bo = CALLOC_STRUCT(zink_bo);
       obj->transfer_dst = true;
-      util_queue_fence_init(&obj->present_fence);
       return obj;
    } else if (templ->target == PIPE_BUFFER) {
       VkBufferCreateInfo bci = create_bci(screen, templ, templ->bind);
@@ -1506,6 +1504,15 @@ zink_buffer_map(struct pipe_context *pctx,
          ptr = map_resource(screen, res);
          ptr = ((uint8_t *)ptr) + trans->offset;
       }
+   } else if ((usage & PIPE_MAP_UNSYNCHRONIZED) && !res->obj->host_visible) {
+      trans->offset = box->x % screen->info.props.limits.minMemoryMapAlignment;
+      trans->staging_res = pipe_buffer_create(&screen->base, PIPE_BIND_LINEAR, PIPE_USAGE_STAGING, box->width + trans->offset);
+      if (!trans->staging_res)
+         goto fail;
+      struct zink_resource *staging_res = zink_resource(trans->staging_res);
+      res = staging_res;
+      ptr = map_resource(screen, res);
+      ptr = ((uint8_t *)ptr) + trans->offset;
    }
 
    if (!(usage & PIPE_MAP_UNSYNCHRONIZED)) {
