@@ -1524,7 +1524,7 @@
         "description": "tu: Do not flush ccu in clear/blits during renderpass",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "487aa807bd1b70602fcb6fbdabd101d4cff7c07b"
     },
     {
