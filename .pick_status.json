@@ -1380,7 +1380,7 @@
         "description": "panfrost: Copy blend constant into variant even when reusing it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "bbff09b9521f17b40441885d06e089abf6c2e0b1"
     },
     {
