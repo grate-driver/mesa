@@ -85,7 +85,7 @@
         "description": "intel/common: allocate space for at least one task urb",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c93cbc77f78ac4d6c479f657e6f92952fd357211"
     },
