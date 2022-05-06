@@ -90,7 +90,7 @@ struct radv_pipeline_key {
       uint8_t num_samples;
 
       bool lower_discard_to_demote;
-      bool enable_mrt_output_nan_fixup;
+      uint8_t enable_mrt_output_nan_fixup;
       uint8_t force_vrs;
    } ps;
 
@@ -121,7 +121,7 @@ struct radv_nir_compiler_options {
    bool check_ir;
    bool has_ls_vgpr_init_bug;
    bool has_image_load_dcc_bug;
-   bool enable_mrt_output_nan_fixup;
+   uint8_t enable_mrt_output_nan_fixup;
    bool wgp_mode;
    bool remap_spi_ps_input;
    bool disable_aniso_single_level;
@@ -376,6 +376,7 @@ struct radv_vs_input_state {
 
    uint32_t instance_rate_inputs;
    uint32_t nontrivial_divisors;
+   uint32_t zero_divisors;
    uint32_t post_shuffle;
    /* Having two separate fields instead of a single uint64_t makes it easier to remove attributes
     * using bitwise arithmetic.
