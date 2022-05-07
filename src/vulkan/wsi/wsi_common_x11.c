@@ -1495,6 +1495,7 @@ x11_manage_fifo_queues(void *state)
                result = VK_ERROR_SURFACE_LOST_KHR;
                goto fail;
             }
+            free(geometry);
          }
       }
    }
