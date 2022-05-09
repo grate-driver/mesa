@@ -1420,7 +1420,7 @@
         "description": "pps: Open writable renderer node in DrmDevice::create",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "1cc72b2aef82373247466c2e7b81970c867ad0fa"
     },
     {
