@@ -620,7 +620,7 @@
         "description": "pan/mdg: Keep min_bound at 16 when alignment requires it",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "553c2cf16b7612d4a70bd96230dad63777ec867e"
     },
     {
