@@ -958,7 +958,7 @@
         "description": "amd: fix ac_build_mbcnt_add in wave32 mode",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1e49018cedf700fd21fe1498d24742cecf4b5ff4"
     },
