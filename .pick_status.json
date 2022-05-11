@@ -84,7 +84,7 @@
         "description": "radeonsi: fix a crash when failing to create a context",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "792a638b032d16fbe6404f9d90c34b3e0f1fb0b5"
     },
     {
