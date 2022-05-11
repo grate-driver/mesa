@@ -3396,7 +3396,7 @@
         "description": "anv: add missing logic op set in pipeline dyn state",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "because_sha": "75ad0e4b087410dceaaa00184b64ea15ec61540a"
     },
     {
