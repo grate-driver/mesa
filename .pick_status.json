@@ -60,7 +60,7 @@
         "description": "aco: fix p_constaddr with a non-zero offset",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "0af7ff49fdecd05531b4c4f5fb841e11f9f451c1"
     },
     {
