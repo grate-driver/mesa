@@ -548,7 +548,7 @@
         "description": "radv: disable DCC for Senra Kagura Shinovi Versus",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": null
     },
     {
