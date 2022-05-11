@@ -1,3 +1,13 @@
+# #6463
+KHR-GL46.shader_image_load_store.incomplete_textures,Fail
+spec@arb_shader_image_load_store@invalid,Fail
+spec@arb_shader_image_load_store@invalid@imageLoad/incompatible format test,Fail
+spec@arb_shader_image_load_store@invalid@imageLoad/incomplete image test,Fail
+spec@arb_shader_image_load_store@invalid@imageLoad/invalid format test,Fail
+spec@arb_shader_image_load_store@invalid@imageLoad/layer bounds test,Fail
+spec@arb_shader_image_load_store@invalid@imageLoad/level bounds test,Fail
+spec@arb_shader_image_load_store@invalid@imageLoad/unbound image test,Fail
+
 # #6115
 spec@arb_tessellation_shader@execution@variable-indexing@tes-both-input-array-float-index-rd,Crash
 spec@arb_tessellation_shader@execution@variable-indexing@tes-both-input-array-vec2-index-rd,Crash
