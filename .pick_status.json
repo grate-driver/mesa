@@ -1039,7 +1039,7 @@
         "description": "zink: set all usage flags when querying sparse features",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 3,
         "main_sha": null,
         "because_sha": null
     },
