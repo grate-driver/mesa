@@ -1291,7 +1291,7 @@
         "description": "aco/ra: fix usage of invalidated iterator",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "58bd9a379efada22efc3d1ac0848f681c2dd811a"
     },
