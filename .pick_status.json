@@ -1900,7 +1900,7 @@
         "description": "zink: fix up sparse texture sampling for shadow samplers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "73ef54e34242fa59803a3a89b5a6eb92053e917e"
     },
     {
