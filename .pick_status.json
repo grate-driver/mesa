@@ -436,7 +436,7 @@
         "description": "tu: Fix indices of drm_msm_gem_submit_cmd when filling them",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "dbae9fa7d8412252c96e53ef3d50f4349969928a"
     },
