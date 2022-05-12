@@ -373,7 +373,7 @@
         "description": "zink: remove implicit query resets",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "57dd05616fad8ba39c15ec4816682016a15bed1c"
     },
