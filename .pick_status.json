@@ -3685,7 +3685,7 @@
         "description": "Revert \"ci: remove nouveau from shader-db runs\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "0464117ad9bd47f079175058771220e8dad4f00b"
     },
