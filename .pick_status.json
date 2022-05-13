@@ -1588,7 +1588,7 @@
         "description": "anv: Handle the null FS optimization after compiling shaders",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "36ee2fd61c8f943be1d1e2b0354f7a121ffef28f"
     },
