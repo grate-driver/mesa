@@ -500,7 +500,7 @@
         "description": "zink: simplify dumb update flagging in set_shader_images",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": null
     },
     {
