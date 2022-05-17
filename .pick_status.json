@@ -103,7 +103,7 @@
         "description": "Revert \"st/mesa: Transcode ASTC to BC7 (BPTC) where possible\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "68ef895674b176b4faf875a4d7f4d787b330d4d9"
     },
