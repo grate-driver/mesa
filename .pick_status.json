@@ -283,7 +283,7 @@
         "description": "zink: only reject non-blittable resource creation if it has no other binds",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "main_sha": null,
         "because_sha": "37ac8647fca4ab8aa1be6879fa810def7404449c"
     },
