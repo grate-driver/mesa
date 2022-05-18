@@ -300,7 +300,7 @@
         "description": "radeonsi: don't use sel->nir in si_check_blend_dst_sampler_noop",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "b78a38bd0223188ee585bfaa32384ef98527e016"
     },
     {
