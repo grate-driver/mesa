@@ -571,7 +571,7 @@
         "description": "pan/bi: Fix mov and pack_32_2x16",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "76cea8e27b3bb16cf752962ca53da42ab4bf51e4"
     },
