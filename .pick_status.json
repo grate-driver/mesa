@@ -140,7 +140,7 @@
         "description": "radeonsi: lower nir_intrinsic_sparse_residency_code_and",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "ee040a6b6393c8a4726db070a708233e3b5ed44c"
     },
     {
