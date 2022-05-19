@@ -193,7 +193,7 @@
         "description": "zink: use a zink_render_pass_pipeline_state bit for fbfetch",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
