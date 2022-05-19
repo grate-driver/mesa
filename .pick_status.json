@@ -1,5 +1,230 @@
 [
     {
+        "sha": "8b13ee75ba9f27ceac6b6180ca05d321caa13612",
+        "description": "vulkan: Fall back to raw data objects when deserializing if ops == NULL",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "d35e78bb853634da3ac6ea306797e770a875df94"
+    },
+    {
+        "sha": "1e710f7a2c6f9c7777e719e05a71eca12eacbdfc",
+        "description": "radv: validate shaders after linking passes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "75c80be484d19d9b54939d0d4bff78959e9d10bc",
+        "description": "radv: add missing NIR_PASS() and switch from NIR_PASS_V()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d98b7817fcf657af8a49a2a89a3f30b4b998eda8",
+        "description": "radv: call nir_metadata_preserve in various lowering passes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6087f1951e42f71b9b5043f0d5e23e7c31762572",
+        "description": "nir: call nir_metadata_preserve in nir_lower_memory_model",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3eed871f41fd7d590c57c684ca841a61513b7b8d",
+        "description": "nir: call nir_metadata_preserve in nir_vectorize_tess_levels",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f10d4bf963a4ba7ac5caafa809281b31bed13b9f",
+        "description": "nir: call nir_metadata_preserve in nir_io_add_const_offset_to_base",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d9ead8ca24f38966490c51dfc57e237e40c7af3",
+        "description": "nir: print file when validation fails",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "836470d433164b274a881bbcd4835f5784766bce",
+        "description": "nir: allow NIR_PASS(_, )",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf9ee6d43203803dfad3780582da0872ac534e27",
+        "description": "radeonsi: wait for PS idle in si_set_framebuffer_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "244305493240ee9e0fc08a9b3da806d47a5cf257",
+        "description": "amd: rename fishes to Navi21, Navi22, Navi23, Navi24, and Rembrandt",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6bb8961a89f81749b73efd92419b7a793327cf3",
+        "description": "mesa/st: clear color buffers using color from a constant buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2204bf509d6d85ac47d029809bb004a03fd12a9a",
+        "description": "mesa/st: add nir shader to clear color buffers using constant value",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "773a23eb6daa470766a537ea34891237b790c2e6",
+        "description": "gallium/u_blitter: clear color buffers using color from a constant buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03bc7503d471dd2d2795a8f18a7212e98209a051",
+        "description": "radeonsi: save the fs constant buffer to the util blitter context",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d8cbf551db482e6168a4353fe41e174749728a4",
+        "description": "Revert \"ci: Disable jobs to the Collabora lab\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "224544dc33c60b933b379eef067058ad31ef7bae"
+    },
+    {
+        "sha": "850ae76970dabec1fe9c53674e515f496914915d",
+        "description": "util/u_trace: Add json output",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c8a07f25dba4806ab688510207f60a5716080f7",
+        "description": "aco: remove unnecessary intrinsics that are lowered at the ABI level",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "f553076eaf157a3705e61875898e96551ecb154d"
+    },
+    {
+        "sha": "fb2426db7a1eec78121609c0fb744c8f9cf885e9",
+        "description": "r300: keep negation if w is an inline constant",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c4cec842315313a24342d1d9a4dbd4ad11fbdd6c",
+        "description": "nir/i915g/r300/nv30: skip marking varyings as flat in some drivers",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "7647023f3bb5785f15476b64c08b3ed01c46c536"
+    },
+    {
+        "sha": "2f38adda6383f426195f435fadb5c3b0c9fc1659",
+        "description": "v3dv: Loosen an assert in copy_buffer_to_image_shader",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "f99ac7f2de1983482452021824c897f56703eb8e"
+    },
+    {
+        "sha": "f5e714cbf9a59a633d4cedca7ed994934d5d3c89",
+        "description": "ci/crosvm: Terminate the previous crosvm after a deqp-runner timeout.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b82f92038482b7af2b0287cfc72aa5311231ca2c",
+        "description": "ci/crosvm: Rename VSOCK_TEMP_DIR -> VM_TEMP_DIR.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b836cd937ccf709548d483f0fd705ecc8df74647",
+        "description": "ci/crosvm: Simplify the CID setup.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be5c7c0351e18357939e9052e97c92cb2cd3b3ee",
+        "description": "dzn: Add new parameter to vk_image_view_init call",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "fc8d2543fc654acacac1f80203e4646ad4c238af"
+    },
+    {
         "sha": "29a8f1f03bed317370e07288fd9d4b85a24562e6",
         "description": "d3d12: MSVC warning around operator precedence causing uint32_t==bool",
         "nominated": false,
