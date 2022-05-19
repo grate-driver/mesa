@@ -2776,7 +2776,7 @@
         "description": "pan/mdg: Scalarize with 64-bit sources",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
