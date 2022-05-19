@@ -139,7 +139,7 @@
         "description": "radv: Add a sqtt entrypoint for CmdBindVertexBuffers2",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b2622843003ea0d4769947b02673ead1d5fa695a"
     },
