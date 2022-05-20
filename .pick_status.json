@@ -2569,7 +2569,7 @@
         "description": "zink: only warn once for SRGB fb without KHR_swapchain_mutable_format",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4bb45bcd168039be52ca7764310a58d5a0832617"
     },
