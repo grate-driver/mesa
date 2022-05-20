@@ -881,10 +881,11 @@ rewrite_bo_access_instr(nir_builder *b, nir_instr *instr, void *data)
                         nir_src_as_uint(intr->src[0]) == 0 &&
                         nir_dest_bit_size(intr->dest) == 64 &&
                         nir_intrinsic_align_offset(intr) % 8 != 0;
-      nir_instr_rewrite_src_ssa(instr, &intr->src[1], nir_udiv_imm(b, intr->src[1].ssa,
-                                (force_2x32 ? 32 : nir_dest_bit_size(intr->dest)) / 8));
+      force_2x32 |= nir_dest_bit_size(intr->dest) == 64 && !has_int64;
+      nir_ssa_def *offset = nir_udiv_imm(b, intr->src[1].ssa, (force_2x32 ? 32 : nir_dest_bit_size(intr->dest)) / 8);
+      nir_instr_rewrite_src_ssa(instr, &intr->src[1], offset);
       /* if 64bit isn't supported, 64bit loads definitely aren't supported, so rewrite as 2x32 with cast and pray */
-      if (force_2x32 || (nir_dest_bit_size(intr->dest) == 64 && !has_int64)) {
+      if (force_2x32) {
          /* this is always scalarized */
          assert(intr->dest.ssa.num_components == 1);
          /* rewrite as 2x32 */
@@ -905,9 +906,11 @@ rewrite_bo_access_instr(nir_builder *b, nir_instr *instr, void *data)
    }
    case nir_intrinsic_load_shared:
       b->cursor = nir_before_instr(instr);
-      nir_instr_rewrite_src_ssa(instr, &intr->src[0], nir_udiv_imm(b, intr->src[0].ssa, nir_dest_bit_size(intr->dest) / 8));
+      bool force_2x32 = nir_dest_bit_size(intr->dest) == 64 && !has_int64;
+      nir_ssa_def *offset = nir_udiv_imm(b, intr->src[0].ssa, (force_2x32 ? 32 : nir_dest_bit_size(intr->dest)) / 8);
+      nir_instr_rewrite_src_ssa(instr, &intr->src[0], offset);
       /* if 64bit isn't supported, 64bit loads definitely aren't supported, so rewrite as 2x32 with cast and pray */
-      if (nir_dest_bit_size(intr->dest) == 64 && !has_int64) {
+      if (force_2x32) {
          /* this is always scalarized */
          assert(intr->dest.ssa.num_components == 1);
          /* rewrite as 2x32 */
@@ -921,11 +924,13 @@ rewrite_bo_access_instr(nir_builder *b, nir_instr *instr, void *data)
          return true;
       }
       break;
-   case nir_intrinsic_store_ssbo:
+   case nir_intrinsic_store_ssbo: {
       b->cursor = nir_before_instr(instr);
-      nir_instr_rewrite_src_ssa(instr, &intr->src[2], nir_udiv_imm(b, intr->src[2].ssa, nir_src_bit_size(intr->src[0]) / 8));
+      bool force_2x32 = nir_src_bit_size(intr->src[0]) == 64 && !has_int64;
+      nir_ssa_def *offset = nir_udiv_imm(b, intr->src[2].ssa, (force_2x32 ? 32 : nir_src_bit_size(intr->src[0])) / 8);
+      nir_instr_rewrite_src_ssa(instr, &intr->src[2], offset);
       /* if 64bit isn't supported, 64bit loads definitely aren't supported, so rewrite as 2x32 with cast and pray */
-      if (nir_src_bit_size(intr->src[0]) == 64 && !has_int64) {
+      if (force_2x32) {
          /* this is always scalarized */
          assert(intr->src[0].ssa->num_components == 1);
          /* cast to 32bit: nir_unpack_64_2x32 not supported by ntv */
@@ -935,9 +940,12 @@ rewrite_bo_access_instr(nir_builder *b, nir_instr *instr, void *data)
          nir_instr_remove(instr);
       }
       return true;
-   case nir_intrinsic_store_shared:
+   }
+   case nir_intrinsic_store_shared: {
       b->cursor = nir_before_instr(instr);
-      nir_instr_rewrite_src_ssa(instr, &intr->src[1], nir_udiv_imm(b, intr->src[1].ssa, nir_src_bit_size(intr->src[0]) / 8));
+      bool force_2x32 = nir_src_bit_size(intr->src[0]) == 64 && !has_int64;
+      nir_ssa_def *offset = nir_udiv_imm(b, intr->src[1].ssa, (force_2x32 ? 32 : nir_src_bit_size(intr->src[0])) / 8);
+      nir_instr_rewrite_src_ssa(instr, &intr->src[1], offset);
       /* if 64bit isn't supported, 64bit loads definitely aren't supported, so rewrite as 2x32 with cast and pray */
       if (nir_src_bit_size(intr->src[0]) == 64 && !has_int64) {
          /* this is always scalarized */
@@ -949,6 +957,7 @@ rewrite_bo_access_instr(nir_builder *b, nir_instr *instr, void *data)
          nir_instr_remove(instr);
       }
       return true;
+   }
    default:
       break;
    }
