@@ -1687,7 +1687,7 @@
         "description": "vulkan/wsi: fix extra free if buffer_blit_queue",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7bd5aa111cffb5c266d220ce44a2d6bfc1190ba9"
     },
