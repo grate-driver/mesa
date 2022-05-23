@@ -1,5 +1,842 @@
 [
     {
+        "sha": "ee2278de654853f1d6107e6ef6fc8537a668866e",
+        "description": "ci/lava: Fix Gitlab Section markers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e00281f6dae98e9dec3da751fc23a451e8627379",
+        "description": "ci/lava: Fix colored LAVA outputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cc10c53333673fc9b8645001d9efad26eda35223",
+        "description": "nir: Fixes MSVC compiling error about unused variable `_`",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "836470d433164b274a881bbcd4835f5784766bce"
+    },
+    {
+        "sha": "836ff4b58670d8ed96e304cea8ed13a029bee74f",
+        "description": "nir/algebraic: Add two more pack/unpack rules",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "849ebe3057a7f47614f1ae6c26a5380c04f135d3",
+        "description": "d3d12: add missing cmath includes",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "b171a6baa21977395a72d578306f30faa521dd87"
+    },
+    {
+        "sha": "4513cb8d418438843c2e2ef494c648e4fd1e791c",
+        "description": "aco: only add/subtract low bits of program addresses",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69d1f4186a0cbdbc83a753630aa58bd5f498213c",
+        "description": "aco/tests: add test for p_constaddr with a non-zero offset",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bd8f8dda8cfcf8918c9a9842bf31da23deb45cee",
+        "description": "aco: fix p_constaddr with a non-zero offset",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "0af7ff49fdecd05531b4c4f5fb841e11f9f451c1"
+    },
+    {
+        "sha": "da49fee80fc71e4d2e105b604fac68625264a974",
+        "description": "radv: introduce radv_graphics_pipeline_info and split existing info structs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "106dc60fc0b14e3c2ab7febe5a635a7e5fc31e05",
+        "description": "lima/ppir: merge branch nodes in simple cases",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3f13ee5511501a350c2fba5ab3369e6bb5aa46c",
+        "description": "lima/ppir: optimize branch comparison when possible",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5718629a704ced0e3186ded2f39d51d28c0a1aa8",
+        "description": "docs/ci: fix literalinclude of caching setup files",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9fb97c75f2441e3cbffb46226ba9201f55e5988d",
+        "description": "pvr: use UINT64_C for 64-bit constant",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47c6f7ccf3313626127238df42201fe90c11c0b4",
+        "description": "dzn: Use the correct ICD path on Win32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c79451e23cd341188da8801bcb5d629201967d3d",
+        "description": "spirv: Fix windows build",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "87d74311985257dd9bbef15f9010c9fe9f64c84c"
+    },
+    {
+        "sha": "1eaba553e24c5569c0f47a6fdd22a545e8e78ffa",
+        "description": "dzn: Use the vk_sync_binary abstraction",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a012b219640e875aa552b37dfdaf69336d5863c7"
+    },
+    {
+        "sha": "23be0aad9c5d8f3fed2a0894dacd9b0b588948d8",
+        "description": "radv: split radv_pipeline into radv_{graphics,compute,library}pipeline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fc3717df0c30a6d6918cb48f0b5a61aaae599902",
+        "description": "radv: cleanup using device/physical_device during pipeline creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fb48493144a8256f3f2d23d95ac5454972bde6d",
+        "description": "radv: move gs_table_depth to the physical_device",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6c44e25078a93f480e3e00ab2d08b1b356284117",
+        "description": "radv: remove unused radv_get_conservative_raster_mode() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1d3b80c5d797027deb41c67fdc8e6f317a395c7",
+        "description": "radv: remove couple of useless pCreateInfo pointers in the emit path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f75b80fd80c94da4b52a73ffb4c3fa09ba967f24",
+        "description": "radv: rename radv_pipeline_generate_XXX() to radv_pipeline_emit_XXX()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3825c7202b52e1fa2718f4e9ec8a941cc6f49ad1",
+        "description": "radv: constify radv_pipeline in more radv_pipeline_generate_XXX() helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "583a4210e5aaf4c3eeaca4f5f6aa9758407dbf50",
+        "description": "virgl/ci: Update virglrenderer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d12b97122ead40bc5092523720e974ec5da0de8e",
+        "description": "docs/asahi: Add initial driver docs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b7304f44b69704cb3cf899dddcd60c4b2d796ca",
+        "description": "asahi: Add wrap library",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d814711155a4ce17f49428bde72b15367202c076",
+        "description": "asahi: Guard against encoder overflows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d0d27aac771ed53a5198b8b4607d01c7dd2f176",
+        "description": "asahi: Allocate a larger segment list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac09dcd358bcbf9a87b489c4b98469d7e5f07ee9",
+        "description": "asahi: Handle RECT textures as 2D",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "689be69681c495163eb6c2164b5735508ce44705",
+        "description": "asahi: Fix pipeline decoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a1ee708a449390e7809d3eb5221b73224e5458e",
+        "description": "asahi: Improve render target dumping",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6eb62c5f502642c599b312d66a8e1542c9b37eac",
+        "description": "asahi: Sync some more unknown fields",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d8227f09d0dcc1e24ad2accca7135106b2d49a41",
+        "description": "asahi: Drop some unknowns",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03a3a7843e55e1efa01b98fbbcabdc6d5aff1414",
+        "description": "asahi: Identify suballocated size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "14d966734f62d866ea8ad883fd3c69b9349299d7",
+        "description": "asahi: Identify suballocation mechanism",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca9b1d48fe0ed9def257f3e9c06a9d2561da58dc",
+        "description": "asahi: Decode resource allocation requests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c120cf141844cc4cf7131b9b6da3d1a1bd530bd",
+        "description": "asahi: Decode resource allocation responses",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5e774ef9ebc36e74f3776f381c984cdd8e726b3",
+        "description": "asahi: Align segment list unknowns with Metal",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8da2fdc8890cd39a635f68d55bba60e450d8ee14",
+        "description": "asahi: Compute segment list length",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1e42e4a3903708afb19143e15c039457318c5cd8",
+        "description": "asahi: Validate segment list length",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "343f4f886faa9a0b4d1ff831b71623f49da2b5aa",
+        "description": "asahi: Split unknown field in segment list header",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b12292754d6acd399bf8a1c17f598d895347e63",
+        "description": "asahi: Add segment list pretty printer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db32b4a0641e8372aac15f01ea50bcd940ca00fc",
+        "description": "asahi: Sync some names with Project Zero",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6e59474cedafa325de18d8f1ebb8841960147541",
+        "description": "asahi: Identify partial render pipeline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65500b19dfea4eb5982256fc31e76155b347fdcf",
+        "description": "asahi: Implement polygon offset",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "666f307d41c6ba9a82e9dc79bd7298d322d3fcd7",
+        "description": "asahi: Add a depth bias structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb760a00c293dd52a72fdd909d450ab2595eb63f",
+        "description": "asahi: Identify depth bias enable bit",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a0c2204013cf35c274818ef3f88d0f3a70861ce",
+        "description": "asahi: Identify \"set depth bias index\" field",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff84c07b21cd230c78d264728cab6ccd2ee7613f",
+        "description": "asahi: Identify depth bias array",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a39fb009d2d1c15b239d754c89d9279f8fbf7063",
+        "description": "asahi: Note unknown field",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "baa54da7d6026b60ed796df67d5bb72311c9b48a",
+        "description": "asahi: Relax Draw \"command\" check",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d8541d52d254bb430ad34d039ddac38567be9fcb",
+        "description": "asahi: Add XML used for visibility tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46a7c10349752a837f86624ad88a0bba2779e061",
+        "description": "asahi: Dump \"unknown 4a\" structure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5e6a5e5856622e01e136f7fbccf8d586400b1d4",
+        "description": "asahi: Identify more depth pipeline fields",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6aadd72bd4d44386c4896d958dfcb8931aa1165f",
+        "description": "asahi: Account for every byte of the cmdbuf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c61e660323272d078abdf6f7a5bc9f06970538ef",
+        "description": "asahi: Handle 3rd deflake address",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3be0314e5affdf959052b7b484e9e91eb3ed51c7",
+        "description": "asahi: Flush on partial clears",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95a18d1c1c525249768b4d2008770a74563daf11",
+        "description": "asahi: Pass depth/stencil clear values to firmware",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43f6c08a3bf5ec3d0556e558da130da1b1f478d1",
+        "description": "asahi: Handle uncompressed Z32F depth buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c955dd726e6ff9f93ed457bafb67f35499baf353",
+        "description": "asahi: Don't store to unbound render targets",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a0fc622be584f232110fd5799effc6edc914511a",
+        "description": "asahi: Validate depth/stencil formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6c809d767c57ff3145df541387f1542cb8c5610",
+        "description": "asahi: Use z24_in_z32f lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ea174f38c349652630ccf256d6ce40d5562c691",
+        "description": "asahi: Run lower_blend for all fragment shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa32b96c51ffea32e7be40b2a12a2c5bd8d307f0",
+        "description": "turnip: fix assert for max xfb outputs",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a8e6a4d1afa8ecf99a860160177820b967c3557",
+        "description": "turnip: disable UBWC for SNORM formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d7dc27645efdbc45abd249257b1374078df34b2b",
+        "description": "egl: dereference XCB drawable pointers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd8c083ab54db0bcb9ee67ea60d0c1f4da385819",
+        "description": "clc: disable opaque pointers until they are supported",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b6ed3c6ea2b02f67ae3aa0512678e0492f8e4df2",
+        "description": "clc: fix compiler features_macro CTS Test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bcc2df489058f35fcb49f82c4069bcc756dfdd4e",
+        "description": "clc: speed up compilation by not relying on opencl-c.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e5a052f75fd84c13e3400db023c9e7399f68d075",
+        "description": "clc: drop parsingComplete check",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0cf7f578a907298fc4dc24e312d187eaaaa155c",
+        "description": "clc: parse localSize and localSizeHint",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8eb6d13a5d089be0c637407e4d10db19620c2ad",
+        "description": "turnip: fix tu6_pack_border_color for z24",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f2ddfa0acaa5fbe14f1458abc49328b4ef610de",
+        "description": "panfrost: Move patched_s out of the pan_blitter_views struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f1f39fa645c59617546522d99f8bd85e70b5655e",
+        "description": "panfrost: Increase the limit for blend shader variants",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "80404c8b640bdc24274b67561842ebf684e741f5",
+        "description": "panfrost: Copy blend constant into variant even when reusing it",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "bbff09b9521f17b40441885d06e089abf6c2e0b1"
+    },
+    {
+        "sha": "c81cd989c857a5b7384f534407b0ec1e9ddedf12",
+        "description": "zink: use dynamic rendering (most of the time)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b25b8027e5e38217c4fa23fc3dfd5ca2a058fd96",
+        "description": "zink: split out scissor flagging from framebuffer updating",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "91a9676a0c5d339c551836b608dc866fd3867a3c",
+        "description": "zink: lift some renderpass mechanics up a level in the api",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ec3a7323daf4aee536b552c16e4138bb1ac2d2a5",
+        "description": "zink: track whether there's any transient attachments bound",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2a33d364e4cd430310a3ab0865124ed462318d8",
+        "description": "zink: break out zs rt attrib analysis into util function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "728fa3606a5d8a93d6d4ff80e2e40a515742d5ea",
+        "description": "zink: break out color rt attrib analysis into util function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4769b4e61071d1b81ce93c9d0b4dbe81c33f6624",
+        "description": "zink: fix indentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69efe357b32f4600b8907f3295aa85037902ac87",
+        "description": "zink: pass rt attrib to zink_render_pass_attachment_get_barrier_info()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "079b95fc6abebd0887afcee6abfed965155bce0e",
+        "description": "zink: remove renderpass state flag for swapchain",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e107fa386bdafc03944d38c7ec56edb475e3784b",
+        "description": "zink: break up swapchain renderpass update to util function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "190ccf3324c97406de122f79cf62ff5477b12a64",
+        "description": "zink: break out sample location updating to separate function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ef8cdbab2202d0aaceca52d60baf103207121fd",
+        "description": "zink: use local variable for getting rt barrier info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37f9b8ef9b65aa9cb48120711694c3a93a25f693",
+        "description": "zink: remove fb rebind check during renderpass begin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d145ec7f1eaee0a3b77f41414df07271054da39",
+        "description": "zink: use global image rebind counter for dmabuf export",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b181080d9f5ff0a9d95e86ad7514f90b88a8d3f9",
+        "description": "zink: move renderpass handling to zink_render_pass.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4457a9388a3ea390c03e020f7a72f6b82dfcc8f8",
+        "description": "zink: use zink_batch_no_rp to end renderpasses",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e1cd9f6233a5d38e04ab9b488ffa60f1c4fc9f6",
+        "description": "zink: always use zink_batch_rp to init renderpass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9a03beb2e9cdca4ff73c2469ba078c7c8fc8b631",
+        "description": "zink: rename a fb surface variables",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "95d4e5435bf63239105a50370ebbbbdeb7fed2f8",
         "description": "radv: export implicit primitive ID in NIR for legacy VS or TES",
         "nominated": false,
