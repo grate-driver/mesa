@@ -564,7 +564,7 @@
         "description": "panfrost: Only write depth / stencil once if MRT is used",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "d37e901e35a9db2fc5f10558e44fbf8376a174f5"
     },
     {
