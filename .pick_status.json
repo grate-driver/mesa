@@ -643,7 +643,7 @@
         "description": "pan/mdg: Read base for combined stores",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b3d72727537ff1b40323148ac040f84cdbb575c1"
     },
