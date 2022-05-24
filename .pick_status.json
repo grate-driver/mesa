@@ -588,7 +588,7 @@
         "description": "nir: Add store_combined_output_pan BASE back",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "5c168f09eb92af8f12abdafe0f0b9de903330959"
     },
     {
