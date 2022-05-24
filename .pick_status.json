@@ -580,7 +580,7 @@
         "description": "pan/bi: Read base for combined stores",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "996645e4794acc84537b6b69680acfc46620bbcb"
     },
     {
