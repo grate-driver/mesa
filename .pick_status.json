@@ -1750,7 +1750,7 @@
         "description": "microsoft/spirv_to_dxil: Fix the push_constant UBO size calculation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "de1e941c59090c990b2c5e301bfb349ca126d789"
     },
