@@ -4783,7 +4783,7 @@
         "description": "ac/gpu_info: always retile DCC on gfx10 and newer chips",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "main_sha": null,
         "because_sha": "f8cf5ea982adc4e1d5b6a531f83eea938583c830"
     },
