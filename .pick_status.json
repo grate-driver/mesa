@@ -1480,7 +1480,7 @@
         "description": "radv: Fix handling of primitiveOffset",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0dad88b4694cf82664f633187442ec65c14f3812"
     },
