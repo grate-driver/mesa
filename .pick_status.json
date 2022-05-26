@@ -175,7 +175,7 @@
         "description": "llvmpipe: flush resources for kms swrast path.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6bbbe15a783a3b004d994057a96b91d5cf5d08da"
     },
