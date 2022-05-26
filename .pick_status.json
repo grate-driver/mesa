@@ -850,7 +850,7 @@
         "description": "zink: scalarize when rewriting explicit 64bit io",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "150d6ee97e374b5f520fc1ec3817a8a09c4b80fc"
     },
