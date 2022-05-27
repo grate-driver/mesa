@@ -4513,7 +4513,7 @@
         "description": "zink: fix framebuffer attachment usage asserts for dummy attachments",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "main_sha": null,
         "because_sha": "3892c133811f71d7f9eefda34bf282ccd1e6859b"
     },
