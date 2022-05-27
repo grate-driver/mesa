@@ -492,7 +492,7 @@
         "description": "glsl/nir: Stop leaking varyings_info",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "because_sha": "34b3b92bbee1f68a9c121cd26e30e113c8cd39a8"
     },
     {
