@@ -4279,7 +4279,7 @@
         "description": "nir: Consider PNTC to be a varying",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3528dcdfa18d688ec3fc69132095e93a8fe380c4"
     },
