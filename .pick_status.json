@@ -850,7 +850,7 @@
         "description": "aco: fix SMEM load_global_amd with non-zero offset",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3e9517c7577fe1764fef2c5559afa1acd1120134"
     },
