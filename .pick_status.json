@@ -292,7 +292,7 @@
         "description": "editorconfig: remove scons-ism",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6e6cd7d93cc54fc8c279377c2d552761f4457174"
     },
