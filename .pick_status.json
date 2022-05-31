@@ -247,7 +247,7 @@
         "description": "intel: remove stale makefile",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "134e750e16bfc53480e0bba6f0ae3e1d2a7fb87c"
     },
