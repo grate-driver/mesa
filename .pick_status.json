@@ -409,7 +409,7 @@
         "description": "nouveau/nv30: Make sure fsat is lowered in the VS.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ca1ec7272685bdadd4e339cb989ac503db0abd18"
     },
