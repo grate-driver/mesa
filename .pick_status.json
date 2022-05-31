@@ -274,7 +274,7 @@
         "description": "editorconfig: remove m4-rule",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "95aefc94a941701616fda0776a3bd15710c8c151"
     },
