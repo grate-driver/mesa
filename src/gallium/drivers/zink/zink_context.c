@@ -3347,16 +3347,6 @@ zink_flush(struct pipe_context *pctx,
    if (fence) {
       if (!(flags & (PIPE_FLUSH_DEFERRED | PIPE_FLUSH_ASYNC)))
          sync_flush(ctx, zink_batch_state(fence));
-
-      if (flags & PIPE_FLUSH_END_OF_FRAME && !(flags & TC_FLUSH_ASYNC) && !deferred) {
-         /* if the first frame has not yet occurred, we need an explicit fence here
-         * in some cases in order to correctly draw the first frame, though it's
-         * unknown at this time why this is the case
-         */
-         if (!ctx->first_frame_done)
-            zink_vkfence_wait(screen, fence, PIPE_TIMEOUT_INFINITE);
-         ctx->first_frame_done = true;
-      }
    }
 }
 
