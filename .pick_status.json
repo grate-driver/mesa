@@ -256,7 +256,7 @@
         "description": "freedreno: remove stale makefile",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "536f43cb96be91c95f6b4a88dfc8c2ba33dbda4d"
     },
