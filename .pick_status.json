@@ -526,7 +526,7 @@
         "description": "panfrost: Fix XML for AFBC header on v9",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c011ea6c265d6e907652e4e4105bf3bd8fc7c03a"
     },
