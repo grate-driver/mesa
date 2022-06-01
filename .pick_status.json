@@ -616,7 +616,7 @@
         "description": "va/surface: set the correct size in vaExportSurfaceHandle",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "13b79266e47ebd0e36b0c01531c0876c39841b7e"
     },
