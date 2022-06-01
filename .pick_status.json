@@ -1,5 +1,237 @@
 [
     {
+        "sha": "1c63a0beafefccec599ddbe355ec5a8b61df6438",
+        "description": "venus: resolve AHARDWAREBUFFER_FORMAT_Y8Cb8Cr8_420 to external format",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "bc4d42023dda81d3acddea35b6c0bfb6cdef48cc",
+        "description": "pan/bi: Respect swizzles in nir_op_pack_64_2x32_split",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "78315087406205df0252ed95a73b8470698a3f38",
+        "description": "panvk: Use vk_image_subresource_*_count for clears",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9ddfcbfbc6533d8538dd98087b80e99a61b313ad",
+        "description": "panfrost: Allow 2D AFBC on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "82d3eb7f1830fd302c27e959b7e5fa3e72735398",
+        "description": "panfrost: Handle texturing from AFBC on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9afa8cc555e8452081103f0d1258ece6c54d12ef",
+        "description": "panfrost: Support rendering to AFBC on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c2207d27c27ce6de93c3c0ad13c0246d537177fc",
+        "description": "panfrost: Add pan_afbc_compression_mode on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "87dcdbdad65e105c80b7f894cc975123b8daeaee",
+        "description": "panfrost: Pass arch instead of dev into afbc_format",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "2cc2f217d4e686538ba52f9a9062af5efaa13b49",
+        "description": "panfrost: Fix XML for AFBC header on v9",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "because_sha": "c011ea6c265d6e907652e4e4105bf3bd8fc7c03a"
+    },
+    {
+        "sha": "e596a0423b7a4fef6b3412fd51783a251e5420e6",
+        "description": "pan/mdg: Print outmods when printing IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "a099834b97e5561dca493b7c6b2368637c0ca9d7",
+        "description": "pan/mdg: Distinguish SSA vs reg when printing IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "520204ae1882834399ef1197cd8e67ef48c02861",
+        "description": "pan/mdg: Only print 1 source for moves",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "0ee24c46e0aad500a4ef90cc03cfd319e11cb342",
+        "description": "pan/mdg: Only print 2 sources for ALU",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "9c9db27e3c790a00afe1db36e882050fb7f046c6",
+        "description": "pan/mdg: Only print masked components of swizzle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "c9093554d06d401943faa278f7ebf1231e7d88a8",
+        "description": "pan/mdg: Use \"<<\" instead of \"lsl\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "8c11f4809b8c766902ad5ac36d2dd5c0536ce682",
+        "description": "pan/mdg: Remove uppercase write masks",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "9e4b45795866547a5debecd122d6e72af6a9c603",
+        "description": "pan/mdg: Scalarize with 64-bit sources",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "because_sha": null
+    },
+    {
+        "sha": "1d815548ab957124d1c015fcde1e778f1e6a46dd",
+        "description": "radv, aco: Packed usub_sat/isub_sat.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "aa9d2d88935eda7612aa02e1fc7dc0568dff766d",
+        "description": "radv: Enable VK_INTEL_shader_integer_functions2.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "55735ed728e130a57b2efb2232a178d7b998e3f7",
+        "description": "radv: Lower 8bit isub_sat/usub_sat.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "4e6667ea878660c30659e397513f5070a38ce4ef",
+        "description": "radv: Lower hadd/hradd.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "cc3f03b757af81b5cbdc47d5f7fe6ad8ee2037ae",
+        "description": "radv: Lower mul_32x16.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "bfc25d6ec9f34329792d74934cc588e9ad0563c7",
+        "description": "nir: Add optional lowering for mul_32x16.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "83f51212c1099bf675c0ef060a9c749b19614af5",
+        "description": "ac/llvm: Implement uclz.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "8671b866bf4b7909227f8d28307937eedfb347b9",
+        "description": "ac/llvm: Implement usub_sat and isub_sat.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "d404f1964cdb820c92216cc3590a23fc97255f0d",
+        "description": "aco: Implement isub_sat.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "faa2a894876a387c8945bb46f6ce71f495db1d44",
+        "description": "aco: Implement usub_sat.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "529ec3d7dc1dd74060bda205743e1e3ae4a88349",
+        "description": "aco: Implement uclz.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
+        "sha": "79e266fffc919bf9ef6ee0df71b6d02dbc873adc",
+        "description": "ir3: Force late-z if FS has global store/atomic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "because_sha": null
+    },
+    {
         "sha": "5067a26f4432ae5e9690e70ef2498ea24798593e",
         "description": "pan/bi: Use flow control lowering on Valhall",
         "nominated": false,
