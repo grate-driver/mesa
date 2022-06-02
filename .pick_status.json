@@ -2137,7 +2137,7 @@
         "description": "intel/compiler: Fix uncompaction of signed word immediates on Tigerlake",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "12d3b11908e0a033be4f3e8b92ae4a36ce910f36"
     },
