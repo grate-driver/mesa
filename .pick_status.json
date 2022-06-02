@@ -11767,7 +11767,7 @@
         "description": "radv: Use both aspects for depth/stencil blit destinations",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "42db5900061c80154652237347285fee703d4a7c"
     },
