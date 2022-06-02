@@ -653,16 +653,11 @@ bi_emit_fragment_out(bi_builder *b, nir_intrinsic_instr *instr)
         bool emit_blend = writeout & (PAN_WRITEOUT_C);
         bool emit_zs = writeout & (PAN_WRITEOUT_Z | PAN_WRITEOUT_S);
 
-        unsigned loc = ~0;
+        const nir_variable *var =
+                nir_find_variable_with_driver_location(b->shader->nir,
+                                                       nir_var_shader_out, nir_intrinsic_base(instr));
 
-        if (!combined) {
-                const nir_variable *var =
-                        nir_find_variable_with_driver_location(b->shader->nir,
-                                        nir_var_shader_out, nir_intrinsic_base(instr));
-                assert(var);
-
-                loc = var->data.location;
-        }
+        unsigned loc = var ? var->data.location : 0;
 
         bi_index src0 = bi_src_index(&instr->src[0]);
 
@@ -712,7 +707,7 @@ bi_emit_fragment_out(bi_builder *b, nir_intrinsic_instr *instr)
         }
 
         if (emit_blend) {
-                unsigned rt = combined ? 0 : (loc - FRAG_RESULT_DATA0);
+                unsigned rt = loc ? (loc - FRAG_RESULT_DATA0) : 0;
                 bool dual = (writeout & PAN_WRITEOUT_2);
                 bi_index color = bi_src_index(&instr->src[0]);
                 bi_index color2 = dual ? bi_src_index(&instr->src[4]) : bi_null();
@@ -2027,10 +2022,7 @@ bi_emit_alu(bi_builder *b, nir_alu_instr *instr)
                 return;
 
 
-        case nir_op_mov:
-        case nir_op_pack_32_2x16: {
-                unsigned src_comps = nir_src_num_components(instr->src[0].src);
-
+        case nir_op_mov: {
                 bi_index idx = bi_src_index(&instr->src[0].src);
                 bi_index unoffset_srcs[4] = { idx, idx, idx, idx };
 
@@ -2041,8 +2033,23 @@ bi_emit_alu(bi_builder *b, nir_alu_instr *instr)
                         comps > 3 ? instr->src[0].swizzle[3] : 0,
                 };
 
-                if (src_sz == 1) src_sz = 16;
-                bi_make_vec_to(b, dst, unoffset_srcs, channels, src_comps, src_sz);
+                bi_make_vec_to(b, dst, unoffset_srcs, channels, comps, src_sz);
+                return;
+        }
+
+        case nir_op_pack_32_2x16: {
+                assert(nir_src_num_components(instr->src[0].src) == 2);
+                assert(comps == 1);
+
+                bi_index idx = bi_src_index(&instr->src[0].src);
+                bi_index unoffset_srcs[4] = { idx, idx, idx, idx };
+
+                unsigned channels[2] = {
+                        instr->src[0].swizzle[0],
+                        instr->src[0].swizzle[1]
+                };
+
+                bi_make_vec_to(b, dst, unoffset_srcs, channels, 2, 16);
                 return;
         }
 

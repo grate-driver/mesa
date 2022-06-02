@@ -919,7 +919,12 @@ download_texture_compute(struct st_context *st,
    }
 
    /* Set up destination buffer */
-   unsigned img_stride = _mesa_image_image_stride(pack, width, height, format, type);
+   unsigned img_stride = src->target == PIPE_TEXTURE_3D ||
+                         src->target == PIPE_TEXTURE_2D_ARRAY ||
+                         src->target == PIPE_TEXTURE_CUBE_ARRAY ?
+                         /* only use image stride for 3d images to avoid pulling in IMAGE_HEIGHT pixelstore */
+                         _mesa_image_image_stride(pack, width, height, format, type) :
+                         _mesa_image_row_stride(pack, width, format, type) * height;
    unsigned buffer_size = (depth + (dim == 3 ? pack->SkipImages : 0)) * img_stride;
    {
       dst = pipe_buffer_create(screen, PIPE_BIND_SHADER_BUFFER, PIPE_USAGE_STAGING, buffer_size);
