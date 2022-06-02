@@ -1352,21 +1352,6 @@ anv_pipeline_compile_fs(const struct brw_compiler *compiler,
    fs_stage->num_stats = (uint32_t)fs_stage->prog_data.wm.dispatch_8 +
                          (uint32_t)fs_stage->prog_data.wm.dispatch_16 +
                          (uint32_t)fs_stage->prog_data.wm.dispatch_32;
-
-   if (fs_stage->key.wm.color_outputs_valid == 0 &&
-       !fs_stage->prog_data.wm.has_side_effects &&
-       !fs_stage->prog_data.wm.uses_omask &&
-       !fs_stage->key.wm.alpha_to_coverage &&
-       !fs_stage->prog_data.wm.uses_kill &&
-       fs_stage->prog_data.wm.computed_depth_mode == BRW_PSCDEPTH_OFF &&
-       !fs_stage->prog_data.wm.computed_stencil) {
-      /* This fragment shader has no outputs and no side effects.  Go ahead
-       * and return the code pointer so we don't accidentally think the
-       * compile failed but zero out prog_data which will set program_size to
-       * zero and disable the stage.
-       */
-      memset(&fs_stage->prog_data, 0, sizeof(fs_stage->prog_data));
-   }
 }
 
 static void
@@ -2015,15 +2000,25 @@ anv_pipeline_compile_graphics(struct anv_graphics_pipeline *pipeline,
 
 done:
 
-   if (pipeline->shaders[MESA_SHADER_FRAGMENT] &&
-       pipeline->shaders[MESA_SHADER_FRAGMENT]->prog_data->program_size == 0) {
-      /* This can happen if we decided to implicitly disable the fragment
-       * shader.  See anv_pipeline_compile_fs().
-       */
-      anv_shader_bin_unref(pipeline->base.device,
-                           pipeline->shaders[MESA_SHADER_FRAGMENT]);
-      pipeline->shaders[MESA_SHADER_FRAGMENT] = NULL;
-      pipeline->active_stages &= ~VK_SHADER_STAGE_FRAGMENT_BIT;
+   if (pipeline->shaders[MESA_SHADER_FRAGMENT] != NULL) {
+      struct anv_shader_bin *fs = pipeline->shaders[MESA_SHADER_FRAGMENT];
+      const struct brw_wm_prog_data *wm_prog_data =
+         brw_wm_prog_data_const(fs->prog_data);
+
+      if (wm_prog_data->color_outputs_written == 0 &&
+          !wm_prog_data->has_side_effects &&
+          !wm_prog_data->uses_omask &&
+          !wm_prog_data->uses_kill &&
+          wm_prog_data->computed_depth_mode == BRW_PSCDEPTH_OFF &&
+          !wm_prog_data->computed_stencil &&
+          fs->xfb_info == NULL) {
+         /* This can happen if we decided to implicitly disable the fragment
+          * shader.  See anv_pipeline_compile_fs().
+          */
+         anv_shader_bin_unref(pipeline->base.device, fs);
+         pipeline->shaders[MESA_SHADER_FRAGMENT] = NULL;
+         pipeline->active_stages &= ~VK_SHADER_STAGE_FRAGMENT_BIT;
+      }
    }
 
    pipeline_feedback.duration = os_time_get_nano() - pipeline_start;
