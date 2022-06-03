@@ -2092,7 +2092,7 @@
         "description": "pan/bi: Fix clper_xor on Mali-G31",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c00e7b729fe84d433e3c23e5c118a348e01ced87"
     },
