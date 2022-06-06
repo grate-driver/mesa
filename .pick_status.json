@@ -283,7 +283,7 @@
         "description": "panfrost: Fix inverted indirect dispatch condition",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "fd7b44882ce3c7604be592f484264097125dfa52"
     },
