@@ -1147,7 +1147,7 @@
         "description": "anv: Remove FS executables when applying the null FS optimization",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "73b3efcd59ade6b9dc8c4cce994d7fbe5c1f0cac"
     },
