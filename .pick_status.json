@@ -1021,7 +1021,7 @@
         "description": "anv: remove HDC flush from invalidate bits",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a49b145e8d59a7cdd6a16cc469c055f6746013f8"
     },
