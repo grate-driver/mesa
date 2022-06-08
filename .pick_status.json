@@ -11452,7 +11452,7 @@
         "description": "intel/fs: fixup scratch load/store handling on Gfx12.5+",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1e242785c3155e71fec2ffcc7a814392ef9c90fe"
     },
