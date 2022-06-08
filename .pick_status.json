@@ -4000,7 +4000,7 @@
         "description": "nir: Increase nir_variable_data::mode to 16 bits",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
