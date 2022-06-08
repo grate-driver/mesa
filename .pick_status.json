@@ -1093,7 +1093,7 @@
         "description": "gallium/u_blitter: Fix depth.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "26c6640835936a77d87030ce8e90f9b9f5be783e"
     },
