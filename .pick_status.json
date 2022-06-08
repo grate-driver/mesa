@@ -1381,7 +1381,7 @@
         "description": "zink: always create descriptor templates",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4e3768914d4ca226041e121b8b80b2daa7b5aa64"
     },
