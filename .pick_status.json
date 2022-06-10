@@ -1579,7 +1579,7 @@
         "description": "broadcom/compiler: disable flags optimization for loop conditions",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9909fe6bac53dc32c6599820387545f5019f8a85"
     },
