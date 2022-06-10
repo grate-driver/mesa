@@ -166,7 +166,7 @@
         "description": "panfrost: Disable CRC at <16x16 tile sizes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2e97d7c8350385dbf962a1d6caa5acae667d1c95"
     },
