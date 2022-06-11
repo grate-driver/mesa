@@ -1696,7 +1696,7 @@
         "description": "gallium/u_threaded: fix buffer busyness tracking",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e9c41b321488c23b7d8ec5744f68218bac753505"
     },
