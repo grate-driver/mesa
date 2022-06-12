@@ -490,7 +490,7 @@
         "description": "nir: Fix unused-variable compile warnings",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8492e78f9d14c187596c13725f6974816d02a0e9"
     },
