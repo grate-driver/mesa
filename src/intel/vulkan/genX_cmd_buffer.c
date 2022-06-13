@@ -1693,47 +1693,35 @@ genX(BeginCommandBuffer)(
          vk_get_command_buffer_inheritance_rendering_info(cmd_buffer->vk.level,
                                                           pBeginInfo);
 
-      /* We can't get this information from the inheritance info */
+      gfx->rendering_flags = inheritance_info->flags;
       gfx->render_area = (VkRect2D) { };
       gfx->layer_count = 0;
-      gfx->samples = 0;
+      gfx->samples = inheritance_info->rasterizationSamples;
+      gfx->view_mask = inheritance_info->viewMask;
       gfx->depth_att = (struct anv_attachment) { };
       gfx->stencil_att = (struct anv_attachment) { };
 
-      if (inheritance_info == NULL) {
-         gfx->rendering_flags = 0;
-         gfx->view_mask = 0;
-         gfx->samples = 0;
-         result = anv_cmd_buffer_init_attachments(cmd_buffer, 0, 0);
-         if (result != VK_SUCCESS)
-            return result;
-      } else {
-         gfx->rendering_flags = inheritance_info->flags;
-         gfx->view_mask = inheritance_info->viewMask;
-         gfx->samples = inheritance_info->rasterizationSamples;
-
-         uint32_t color_att_valid = 0;
-         uint32_t color_att_count = inheritance_info->colorAttachmentCount;
-         for (uint32_t i = 0; i < color_att_count; i++) {
-            VkFormat format = inheritance_info->pColorAttachmentFormats[i];
-            if (format != VK_FORMAT_UNDEFINED)
-               color_att_valid |= BITFIELD_BIT(i);
-         }
-         result = anv_cmd_buffer_init_attachments(cmd_buffer,
-                                                  color_att_count,
-                                                  color_att_valid);
-         if (result != VK_SUCCESS)
-            return result;
-
-         for (uint32_t i = 0; i < color_att_count; i++) {
-            gfx->color_att[i].vk_format =
-               inheritance_info->pColorAttachmentFormats[i];
-         }
-         gfx->depth_att.vk_format =
-            inheritance_info->depthAttachmentFormat;
-         gfx->stencil_att.vk_format =
-            inheritance_info->stencilAttachmentFormat;
+      uint32_t color_att_valid = 0;
+      uint32_t color_att_count = inheritance_info->colorAttachmentCount;
+      for (uint32_t i = 0; i < color_att_count; i++) {
+         VkFormat format = inheritance_info->pColorAttachmentFormats[i];
+         if (format != VK_FORMAT_UNDEFINED)
+            color_att_valid |= BITFIELD_BIT(i);
       }
+      result = anv_cmd_buffer_init_attachments(cmd_buffer,
+                                               color_att_count,
+                                               color_att_valid);
+      if (result != VK_SUCCESS)
+         return result;
+
+      for (uint32_t i = 0; i < color_att_count; i++) {
+         gfx->color_att[i].vk_format =
+            inheritance_info->pColorAttachmentFormats[i];
+      }
+      gfx->depth_att.vk_format =
+         inheritance_info->depthAttachmentFormat;
+      gfx->stencil_att.vk_format =
+         inheritance_info->stencilAttachmentFormat;
 
       /* Try to figure out the depth buffer if we can */
       if (pBeginInfo->pInheritanceInfo->renderPass != VK_NULL_HANDLE &&
