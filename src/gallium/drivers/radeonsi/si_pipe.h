@@ -1504,6 +1504,8 @@ void si_init_compute_functions(struct si_context *sctx);
 /* si_pipe.c */
 void si_init_compiler(struct si_screen *sscreen, struct ac_llvm_compiler *compiler);
 void si_init_aux_async_compute_ctx(struct si_screen *sscreen);
+struct si_context* si_get_aux_context(struct si_screen *sscreen);
+void si_put_aux_context_flush(struct si_screen *sscreen);
 
 /* si_perfcounters.c */
 void si_init_perfcounters(struct si_screen *screen);
