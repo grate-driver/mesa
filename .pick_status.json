@@ -1651,7 +1651,7 @@
         "description": "intel/fs: Add missing synchronization for WaW dependency",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b5fa43952aaf7a41385402ad2d21af5a17805615"
     },
