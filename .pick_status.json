@@ -1156,7 +1156,7 @@
         "description": "zink: don't print VK_EXT_shader_atomic_float warning for nir_intrinsic_image_deref_atomic_exchange",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
