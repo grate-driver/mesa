@@ -378,3 +378,26 @@ zink_get_framebuffer(struct zink_context *ctx)
 
    return fb;
 }
+
+/* same as u_framebuffer_get_num_layers, but clamp to lowest layer count */
+unsigned
+zink_framebuffer_get_num_layers(const struct pipe_framebuffer_state *fb)
+{
+   unsigned i, num_layers = UINT32_MAX;
+   if (!(fb->nr_cbufs || fb->zsbuf))
+      return MAX2(fb->layers, 1);
+
+   for (i = 0; i < fb->nr_cbufs; i++) {
+      if (fb->cbufs[i]) {
+         unsigned num = fb->cbufs[i]->u.tex.last_layer -
+         fb->cbufs[i]->u.tex.first_layer + 1;
+         num_layers = MIN2(num_layers, num);
+      }
+   }
+   if (fb->zsbuf) {
+      unsigned num = fb->zsbuf->u.tex.last_layer -
+      fb->zsbuf->u.tex.first_layer + 1;
+      num_layers = MIN2(num_layers, num);
+   }
+   return MAX2(num_layers, 1);
+}
