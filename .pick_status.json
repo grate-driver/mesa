@@ -373,7 +373,7 @@
         "description": "d3d12: Keep access masks up-to-date when removing vars in d3d12_disable_multisampling()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e5cf19fced6feff07bcd6b288f6370feb21a496f"
     },
