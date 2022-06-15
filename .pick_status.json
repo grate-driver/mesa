@@ -328,7 +328,7 @@
         "description": "nir: i32csel opcodes should compare with integer zero",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0f5b3c37c5d757f6ffe994bae24071c0462bb13f"
     },
