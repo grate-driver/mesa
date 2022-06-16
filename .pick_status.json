@@ -859,7 +859,7 @@
         "description": "pan/bi: Fix LD_BUFFER.i16 definition",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3dc2095b079f1ac890cbf6ca2f525841a2dab5ba"
     },
