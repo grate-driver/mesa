@@ -1435,7 +1435,7 @@
         "description": "aco: fix validation of SOP1 instructions without definitions",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
