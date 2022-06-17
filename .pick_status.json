@@ -1615,7 +1615,7 @@
         "description": "panfrost: Clear with a quad to avoid flushing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c138ca80d2390ce0d0fe640bc74aab2d2d0cb80d"
     },
