@@ -1,5 +1,608 @@
 [
     {
+        "sha": "2866ae32da0348caf71ad2d11c353321df626ff4",
+        "description": "mesa/main:  Correct alloca() use without #include \"c99_alloca.h\"",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "d231f955913e3265d9a560b45dba48ea6336ab90"
+    },
+    {
+        "sha": "45267d5181bb1819dbe6df285a2685d35584c318",
+        "description": "Android.mk: Fix c11-related build failures",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "48243965723e53f283d7c9fbfc801c1406795e31",
+        "description": "ci/valve: uprev boot2container",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "551442b53ebf531ab010dad2a3127ce41432ed4c",
+        "description": "ci: freedreno farm is down",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d27576563063b76031058c776ca71656e9111f86",
+        "description": "zink: print runtime warning on missing EXT_border_color_swizzle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "46b4017b37e1a89d20670c9ea00eca0769701912",
+        "description": "zink: use VK_EXT_border_color_swizzle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1effd3be67945713485c615408b7601f0642498e",
+        "description": "zink: hook up VK_EXT_border_color_swizzle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be4f120476cb2b537126d34949f497210cc4586a",
+        "description": "zink: be a little selective about BAR fallback memory type",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "575005043222d317070b4c24568cdd059730f176",
+        "description": "zink: move BAR allocation demotion up the stack",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d63e04e583a9fb90154954f7c304f7c8c5773b66",
+        "description": "zink: store and reuse memory heap flags for buffer placement",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ce5aa07db1091a83321229c802f256a44f37aded",
+        "description": "zink: fix buffer transfer flushes with offsets",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28d23c9e2614fef5b468674ca9cd6b430d869d95",
+        "description": "zink: use only the extents for buffer unmap flushes",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2645430b06dd19222468b09f874099754786ad54",
+        "description": "zink: unify actual map calls in buffer mapping",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd5d215c62e9a7127cea81b092d0d6b3b8986d02",
+        "description": "zink: rename a variable",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b37d97bb867b26f0619fba4786a700c80929bf20",
+        "description": "venus: resolve YV12 AHB to VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7911faa9501b7a32f366182e8a6ebc50cacb440",
+        "description": "gallivm: use enum types instead of unsigned in lp_bld_sample.[ch]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86c9f3f034233d92d1ef04ce048c23e9177ac864",
+        "description": "draw: asst. clean-up in draw_vbuf.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "63457cb63daef7ba552611a43c1690db5b15de6c",
+        "description": "draw: asst. clean-up in draw_pt_vsplit.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f0dfc05660c020464ed79cc6b1a68687cc5db359",
+        "description": "draw: asst. clean-up in draw_pt_util.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9586a38e39bbabe815a8924ced35f14cfd422bf4",
+        "description": "draw: asst. clean-up in draw_pt_fetch_shader_pipeline.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fcdbf7112c4d4e4cc43dd0ab456bd1c9ed81de58",
+        "description": "draw: asst. clean-up in draw_pt_fetch_shader_emit.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2eabffdd86cd41ce3fb84391cd6c798b5768d92e",
+        "description": "draw: asst. clean-up in draw_pt.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a8cb20339c8f1c8317f0bb5c7fe6ca0942daa7f9",
+        "description": "draw: asst. clean-up in draw_pt.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "824ccace17f2a2f760e4ff8e588ed532b0c23cf2",
+        "description": "draw: asst. clean-up in draw_private.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "91a21fb5190f8c14e6a8957e8063c17ca469e878",
+        "description": "draw: asst. clean-up in draw_pipe_validate.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "49a115e86c596d494b113aaedb14c129a7b726a3",
+        "description": "draw: asst. clean-up in draw_pipe.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e1a1e898a6503a0c366072b59ccb4c63fcdff27",
+        "description": "draw: asst. clean-up in draw_gs.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "14d4fe286ba738fd9807be15f901e24e4199be27",
+        "description": "draw: asst. clean-up in draw_context.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2d9be86275f52f7a278e1bffa0015964de6d92c",
+        "description": "draw: s/unsigned/enum pipe_prim_type/",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e20664cbc3e2ed1b4d60e3e8f383f715796e258f",
+        "description": "llvmpipe: asst. clean-ups in lp_state_fs.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5521d5af18e2bab4b04ca567a92dd898119f4fc",
+        "description": "gallivm: asst. clean-ups in lp_bld_logic.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eef5e6ac7c28bae2b0ae1df7486a19faf1803614",
+        "description": "llvmpipe: s/unsigned/enum pipe_compare_func/",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9c19ed1b88c9f4f2c441072e83334ca2beb39378",
+        "description": "llvmpipe: use enum blend types instead of unsigned",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cde8d3479e62589150ab60d2eaf95bafec8ce822",
+        "description": "llvmpipe: minor clean-up in lp_state_blend.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c00281903b7d72af60c1e8ddb5aeec31398b0123",
+        "description": "docs: Extend calendar entries for 22.1 by 3 releases.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "77c7caa6bbc6dc55c784d021d7a5dd139b3eb596",
+        "description": "docs: Add calendar entries for 22.2 release candidates.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8b5d4fa54bec2ca40554a7ecd8b0ca99964c3ddd",
+        "description": "docs: drop 22.1.4 calendar entry.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8987e266e42acf424060d13abd77378fc003b4ac",
+        "description": "kmsro: add error message on drm ioctl failure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c24d8ba3164e47365b4c8e9a9a26009c55eed792",
+        "description": "drisw: probe kms if fd is passed",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7a9617b869c2a5f5db7b395f152837a2a554a0fa",
+        "description": "dzn: Skip another test that times out occasionally",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6e5d126a657a790cfa58282e4b754c9ea1e2c47c",
+        "description": "llvmpipe: disable alpha test branch if multisample is enabled.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "18585cac04c72cf03978146c993c8d42e76dd835",
+        "description": "zink: radv baseline updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ada1baddceb6c27cd6bba7adf4bac7def6ceceb4",
+        "description": "docs: Update windows build requirement with Visual Studio",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d39553da10e9b9745fa2cbe3bcbc72f45fc8383c",
+        "description": "ci/vs2019: Upgrade Windows 10 SDK version to 20348",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c17a0d956a4d2bca56e29e2c7457b8b1f3283e93",
+        "description": "meson/clover: Getting clover can be built with no-rtti llvm in mingw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "86f87dbe2172f8fb529ca28a951d1af5f727ecd1",
+        "description": "meson/rtti: Using get_argument_syntax to check msvc compatible compiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2d934ac11008d4a287aa94fbceed550e64bd346a",
+        "description": "meson: Use cc.get_argument_syntax instead cc.get_id when possible.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1173c0f33ac22955705192e489fb82759c152656",
+        "description": "meson: Using get_argument_syntax as the `--compiler_id` option for gen_vs_module_defs.py",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "686e20afcd32cb80b96984c8eb4428e777fbce97",
+        "description": "CI: Lima farm is offline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2df90aa562dd549ad64335a71df2f28d41a51686",
+        "description": "ci/iris: disable Blender Diorama trace (incompatible with perf. traces)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d7f2e6c8d033de19a1d473df4fb1a46c7d365159",
+        "description": "venus: add fence feedback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f9d543b12d1679cb4c3750407cbef8f72b93413",
+        "description": "venus: renderer to store allow_vk_wait_syncs capset",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ecac4c063deac67080995a0b3841804bcd34415",
+        "description": "venus: create per queue family command pool for feedback cmd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a7632e54b428d4f443909e5574d58f6cc8c8e53",
+        "description": "venus: add NO_FENCE_FEEDBACK perf option and disable sparse resource",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "942ec179f3d9c74fcd14a58a623c039c494d9a7a",
+        "description": "venus: add event feedback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f2563788a1c348ecbc4417c2d0359b3472c1959c",
+        "description": "venus: add feedback check/set/reset helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e52da323b03c1f6a419f647f5a6ddfb25903b272",
+        "description": "venus: add vn_feedback_pool backed by coherent buffer (part 2)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27a24caf1661fd4a1a5656c12db8df4cfb428ea3",
+        "description": "venus: add vn_feedback_pool backed by coherent buffer (part 1)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d578f6c7278935c00e2c3d1349089e38abff66e0",
+        "description": "venus: let device track queue families used for device creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4cf87d88229bb9eb51b3037fceccfc258843c4cc",
+        "description": "venus: adjust device resources init order",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf55a3f70e1c64b05ce3d9117cfa19dde68eefc7",
+        "description": "venus: fix a missing mtx_destroy in vn_device_init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb8dfa496627c38c49dd747d3ea97d44b8dc9662",
+        "description": "venus: fix the queue init failure path",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "ddd753305598c8ac097542c0366508c47b423dce"
+    },
+    {
+        "sha": "01a0bfc3f994834318814328978eff05d27ac5a8",
+        "description": "venus: fix a bug on buffer cache init failure path",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "65abd1d4aed48365f0054279616dc31a817b2be0"
+    },
+    {
+        "sha": "b91511b9a895f1a8399c8f52712b2e50669c1f85",
+        "description": "docs: update calendar and link releases notes for 22.1.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1ba2bdf3da7e6ee729c022e235f227c8b69211e",
+        "description": "docs: add sha256sum to 22.1.2 notes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b5a73062bab16559c72257c5605bb1268ccb600",
+        "description": "docs: add release notes for 22.1.2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "16c47ad3474ecc9f1b76084d85a8f7aa2c6b3cc6",
+        "description": "radv: advertise VK_EXT_border_color_swizzle on GFX10+",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "09a7304d5abf5b847cf5feb2d97758bee1696566",
         "description": "zink: tu ci baseline update",
         "nominated": false,
