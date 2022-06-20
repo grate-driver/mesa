@@ -454,7 +454,7 @@
         "description": "virgl: overpropagate precise flags",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a4a34cd3234858dbfe990ede81d3a61edf95c9da"
     },
