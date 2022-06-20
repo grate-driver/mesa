@@ -616,7 +616,7 @@
         "description": "zink: fix kopper_acquire return value",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ab1941fc0e990d10e050d6e8a75fc1fa9fb75456"
     },
