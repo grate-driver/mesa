@@ -1057,7 +1057,7 @@
         "description": "vulkan/wsi: fix crash with debug names on swapchain",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cb1e0db23e3fa17562bb276b125aeab0b85582cb"
     },
