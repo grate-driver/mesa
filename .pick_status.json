@@ -499,7 +499,7 @@
         "description": "ttn: Set nir->info.separate_shader",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
