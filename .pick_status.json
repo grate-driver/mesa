@@ -364,7 +364,7 @@
         "description": "vc4: Propagate txf_ms's dest_type to the lowered txf.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "708c47e663be686b150c1dae33fee5b8323c8d1b"
     },
