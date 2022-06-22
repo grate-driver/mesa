@@ -337,7 +337,7 @@
         "description": "tu: Fix linemode for tessellation with isolines",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "542211676c58b0410662e1a959e259487c103e71"
     },
