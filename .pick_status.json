@@ -391,7 +391,7 @@
         "description": "egl/wayland: Don't try to access modifiers u_vector as dynarray",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b5848b2dac1464f5364dc2a76bd11cac0cb5769b"
     },
