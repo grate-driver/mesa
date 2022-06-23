@@ -5884,7 +5884,9 @@ fs_visitor::nir_emit_intrinsic(const fs_builder &bld, nir_intrinsic_instr *instr
       if (synchronous)
          emit_rt_lsc_fence(bld, LSC_FLUSH_TYPE_EVICT);
       fs_reg srcs[RT_LOGICAL_NUM_SRCS];
-      srcs[RT_LOGICAL_SRC_GLOBALS] = get_nir_src(instr->src[0]);
+
+      fs_reg globals = get_nir_src(instr->src[0]);
+      srcs[RT_LOGICAL_SRC_GLOBALS] = bld.emit_uniformize(globals);
       srcs[RT_LOGICAL_SRC_BVH_LEVEL] = get_nir_src(instr->src[1]);
       srcs[RT_LOGICAL_SRC_TRACE_RAY_CONTROL] = get_nir_src(instr->src[2]);
       srcs[RT_LOGICAL_SRC_SYNCHRONOUS] = brw_imm_ud(synchronous);

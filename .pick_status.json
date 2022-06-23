@@ -1732,7 +1732,7 @@
         "description": "intel/fs: ray query fix for global address",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bb40e999d114db361539cdc4ddb65ace37d76562"
     },
