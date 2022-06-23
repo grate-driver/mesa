@@ -283,7 +283,7 @@
         "description": "anv: disable non uniform indexing of UBOs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "710393b3aa4a99d446db0c41ef23eb44332332b4"
     },
