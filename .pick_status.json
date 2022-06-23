@@ -1,5 +1,1679 @@
 [
     {
+        "sha": "8ce7faab47a77377a6a1313a80580828b052f878",
+        "description": "vulkan: Add a vk_pipeline_shader_stage_to_nir helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "288c1c29fb47af0d515efdbd4442f5de5561daae",
+        "description": "vulkan/nir: Make spirv_data const in vk_spirv_to_nir",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "29a7d924c7a4f5d819b961c1cd3bd0c2060789a5",
+        "description": "pvr: csbgen: Make all generated enums unambiguous",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6cc0a3ed44d9dfd0cd9abcb3fb525515346bdc8d",
+        "description": "r300: only run merge_movs pass on R500",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "6c2959c0256167bc97ed338e12e0543a967f2fc3"
+    },
+    {
+        "sha": "b1df00cb7943c9869b1542c97ebb4eac81c0040c",
+        "description": "tu: Check dereferenced value of rop_reads_dst.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "94be0dd0b86cf7dcedd94e732d8ee91bd16d091d"
+    },
+    {
+        "sha": "7d706af76b2c41ee2d496efabcf96ac5c4a61de2",
+        "description": "ir3: Fix vectorizer condition for SSBOs",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "bf49d4a084be659b5aaded4e4f094fb5a049698e"
+    },
+    {
+        "sha": "6fc2622abd3c4d66742437e6fd4d8757ff65d74d",
+        "description": "aco: don't skip VS->TCS barrier if TCS output vertices doesn't match input",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "152092b8eaddd46a11f1a08514742e72ba1c195e"
+    },
+    {
+        "sha": "d4ce845a8db246b4f0f8a90dd3b654cf4dc571e2",
+        "description": "meson: Enable wgl tests on mingw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9e34d6d8e1f1424819e4d457463490b9234867b",
+        "description": "ci: Building all mesa functional with mingw on debian",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb53094ac1587b7f9d1a875eb1ea2f132dd4723f",
+        "description": "d3d12: Turn d3d12_format.h to include d3d12_common.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6cdebc11ad74b8a78610940fdfa8c641c04f481a",
+        "description": "ci: Trigger the new mingw/linux dockers to be build",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bbfd6dfe2ef901979590ca440d91c86c937e64c2",
+        "description": "ci: Prepare the container for building all mesa components with mingw under linux",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "20a236c75579e0c5563fc9ae65739cc214b7ea2f",
+        "description": "ci/x86_build: Getting pushd popd be paired, avoid using cd",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d52f280bd7b0c95b045c61f66fa8e2f7f4125eed",
+        "description": "dzn: Fixes incompatible pointer type error",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a387c9284a702a14d9009745a6a7158762d6c175",
+        "description": "microsoft/clc: Disable clc_compiler_test on non-windows platform",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1e94f8c81c4142b8ba53ad4cd054457be342d5d",
+        "description": "microsoft/clc: Fixes narrowing error in clc_compiler_test.cpp with mingw/gcc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7cb78a27d82a182b749c592b8749d0985a90b894",
+        "description": "d3d12: Fixes compiling error in d3d12/wgl/d3d12_wgl_framebuffer.cpp with gcc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "05097d1f6c366fe3384063782cf4a391219870bd",
+        "description": "d3d12: Convert #include <Windows.h> to #include <windows.h> for mingw on linux",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b181fe1b2e0c188d8a4175c91d31ab2420c6e7c",
+        "description": "d3d12: Use static_cast instead of dynamic_cast in d3d12_video_enc_h264.cpp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "deb36dc6c2e52a428db55b6d8fefbe1011288862",
+        "description": "turnip: Use the new border color helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "498a8e77dd9a437f0af48c6c4921e87057cf4d61",
+        "description": "lavapipe: Use the new border color helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b8882718b7fa9c4dc4d47ed99ab4801fe94ca530",
+        "description": "panvk: Use the new border color helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "981cf8a41d44b8e851b115d2e10535d93bd85ca2",
+        "description": "vulkan: Add some border color helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc42bbff4ce8bbfe45b0ae593cfeb218bc068200",
+        "description": "iris: Wa_14016820455 for GFX_VERx10 == 12.5",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5d05ffa465329ac0d804510e9882c245f9a12ee1",
+        "description": "anv: limit RT writes to number of color outputs",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a4f502de3228ec37dfcaa38225077ec3709d74ea"
+    },
+    {
+        "sha": "76981e5615fae277dd2f2ed0b6f2a455bd7d5fc1",
+        "description": "agx: Handle loop { if { loop { .. } } }",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "062e822e1b9d4329ab320a8771050230c7ca57dc",
+        "description": "ci/bare-metal: Collapse artifacts wget by default.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13bf36588d40f20ce196889320279cbff6f0e79c",
+        "description": "ci/bare-metal: Consolidate needs declarations in .baremetal-test-*.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1f9566cbb039ceddc416cc6851de3385bb40f0a1",
+        "description": "ci/bare-metal: Remove \"stage: test\" from .baremetal-test.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e13f04fcf09ceac5d79c879dd47d98e0271ae991",
+        "description": "zink: flag dmabufs for foreign queue transition on flush_resource call",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32c34e93aa767f5123968bef15092817211220b9",
+        "description": "zink: add flag to indicate if a resource is a dmabuf",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69cad6dcb71af13d6f390fb03137b2a820a6b11e",
+        "description": "ci/freedreno: Turn a530 back on by default and update expectations.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e3c51cbd8a2240a1d18fedad142b9c2ed9573fb",
+        "description": "freedreno/a5xx: Set the buffer bit appropriately in XS_CTRL_REG0.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6cf2b24eafe9335b9eb605f252b692dad6215dfe",
+        "description": "freedreno/ir3: Disable image/ssbo 16-bit conversion folding pre-a6xx.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "49dc60efa1df60563a7e992f5070ed10541ab8af"
+    },
+    {
+        "sha": "fd1f2d3b5a4a019c694d4e4f56b8e1ebd3d05630",
+        "description": "nir: Add and use algebraic property \"is selection\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a2a2fbc5101d6e6b5d18903c7a0bd84037dbdddc",
+        "description": "nir/algebraic: Fix NaN-unsafe fcsel patterns",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "0f5b3c37c5d757f6ffe994bae24071c0462bb13f"
+    },
+    {
+        "sha": "ccd18ec4f34b6f1407fb7c1671de8c789f33fa1f",
+        "description": "nir: i32csel opcodes should compare with integer zero",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "0f5b3c37c5d757f6ffe994bae24071c0462bb13f"
+    },
+    {
+        "sha": "d45583808104de6b904bbb8f9a53732ea100788a",
+        "description": "tu: Fix linemode for tessellation with isolines",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "542211676c58b0410662e1a959e259487c103e71"
+    },
+    {
+        "sha": "e812e8892a1572e3abaa29fe2ee4516cc2a743e3",
+        "description": "v3d: Drop workaround for u_blitter bug",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f1c1b9687e8d58b62df5bc563c784cffda325611",
+        "description": "tu: Do not expose storage image/buffer features for PACK16 formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4309e09d6feab01c11c88249389cc35c9fe595cc",
+        "description": "vc4: Propagate txf_ms's dest_type to the lowered txf.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "708c47e663be686b150c1dae33fee5b8323c8d1b"
+    },
+    {
+        "sha": "1de87497babead03036539f05dc83fa059dba61c",
+        "description": "ci/vc4: Turn on deqp-egl testing by default.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e9fad0b9aacc3cd12a15eeb7dc7b37590bf03e52",
+        "description": "ci/vc4: Merge quick_shader in with deqp-gles",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "872a1ae69ec31c63f2ff5dd6503c5ff5130bef5d",
+        "description": "zink: ci updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90586f812c9013b49b9c3a2b93664d4707828b9d",
+        "description": "mesa: explicitly disallow multiple pointsize exports from generating",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "096c5aa34a835d66b0cb5d83cc513980113a8e74",
+        "description": "mesa: enforce pointsize exports if pointsize is being clamped",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e2c132eb81b83bba932a6f60ec070ede5863b57",
+        "description": "mesa: skip pointsize exports if pointsize attenuation is enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "de732cf61b5e09970de7702ecf2faac0faf1910d",
+        "description": "mesa: rename PointSizeIsOne -> PointSizeIsSet",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2155a044d1ab1d511bb87da8534ad576a3f06b6",
+        "description": "mesa: break out PointSizeIsOne setting to util function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4830cc77cb8d1f9113b799b68fbaefc91dcc5344",
+        "description": "nir/lower_point_size: apply point size clamping",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42a126495113ff7f18be759e4606435d54b48fcc",
+        "description": "virgl: overpropagate precise flags",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "a4a34cd3234858dbfe990ede81d3a61edf95c9da"
+    },
+    {
+        "sha": "e1488d937430ac35e1e2fd0f4aa5bdbaddaa32f9",
+        "description": "radeon: Support shared memory user pointers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f871aa10a117168ed375bbe9e25ca3496fbb1569",
+        "description": "intel/compiler: assert that base is 0 for [load|store]_shared intrins",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e5970fe22a66bf1727d8b677f4e3c93fe2172a71",
+        "description": "nir/lower_task_shader: don't use base index for shared memory intrinsics",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "8aff8d3dd42ecc399f1d7d23ddd641e7e3fce777"
+    },
+    {
+        "sha": "49b8fffeed9dc9b6002d69cf16edffe059112daf",
+        "description": "nir/lower_task_shader: insert barrier before/after shared memory read/write",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "8aff8d3dd42ecc399f1d7d23ddd641e7e3fce777"
+    },
+    {
+        "sha": "c601ba332b4a106072cd3315b7886e9937d86212",
+        "description": "ir3/sched: Fix could_sched() determination",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a8671b2182b4bfb835355ef383b0ab0293d9462a",
+        "description": "meson/tu: Don't compile libdrm paths if KGSL is selected",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6ad7be1b36b43ef2445feb83bdaf9b7c9c7b8ef5",
+        "description": "meson/pps: Check if libdrm exists to compile pps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee6a0c675b1701df46ed9fc4eab1a5d48a47dd0f",
+        "description": "meson: Define _GNU_SOURCE for android host system",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ad3d6d9c6e3f96ec44573e8d9044a24988cc44e5",
+        "description": "radv/llvm: always emit a null export even if the FS doesn't discard",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "bdf3797aeb77a8346c1af6d86f77a7a834cca777"
+    },
+    {
+        "sha": "17645cb29c46e66f9ba58798142ceee0ed42ac6d",
+        "description": "llvmpipe: enable PIPE_CAP_FBFETCH_ZS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ccaa7920ef6534b6ce1cff7a48d5f84369cfc398",
+        "description": "llvmpipe: implement FB fetch for depth/stencil",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ba3e797ee2c354b0871eb108d1c77c667a7af1e",
+        "description": "llvmpipe: simplify early/late zs tests selection",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "443ef18f0c95af9c3c93a2e7d62362e8da6d3a8e",
+        "description": "llvmpipe: enable per-sample shading when FB fetch is used",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8788b175969c8adadb36921b4634d1e3db6aee06",
+        "description": "nir_to_tgsi: Don't count ZS fbfetch vars as outputs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "959b7480388aa499c00fa2bd531cba92b7799c94",
+        "description": "glsl: add language support for GL_ARM_shader_framebuffer_fetch_depth_stencil",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "41f22a1823a77183fb28e8a6dd312d723c3fda87",
+        "description": "gallium: add PIPE_CAP_FBFETCH_ZS and expose extension",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "68e89401140d1b3a17052899c54577de3f008b67",
+        "description": "glx/drisw: use xcb instead of X to query connection",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d3e723fb775ddad543d63f31e898458b7e77bcd8",
+        "description": "wsi/x11: add xcb_put_image support for larger transfers.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5dbb1139c5e5bff0dc52fc2e4c3c19da1cdb4bf",
+        "description": "egl/x11: add missing put_image cookie cleanups",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6082ac62e8aa5922820b219103659c3c4f2f53f",
+        "description": "egl/x11: split large put image requests to avoid server destroy",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e8fc5cca9039e7d4ea08cc6d99fe9c4f8cc49f8b",
+        "description": "zink: fix dual_src_blend driconf workaround",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ea005c9e0470adbaa167b6a1d2da5f04efe2035a",
+        "description": "glx/drisw: invalidate drawables upon binding context if flush extension exists",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23b63e536e54c00de9dc1b634265de3337318588",
+        "description": "glx/drisw: store the flush extension to the screen",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cee1c4fc7f35c74103af50d6b6ccfe46e3ccc384",
+        "description": "ci/lava: Filter out undesired messages",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64d074879b82f6bc694a626631de7b4ff305211a",
+        "description": "vulkan/wsi: Use HAVE_LIBDRM to detect DRM instead of !_WIN32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7127fbc4c9aefeb182fcd2d047b8e4438ef0896",
+        "description": "intel/tools: Print memory info in intel_dev_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eaf2a35a76e0a92936bd10a25349eeff29d73684",
+        "description": "iris/bufmgr: Use memory info from devinfo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1505f943976c4edba79bac133db1007288fcf7a9",
+        "description": "anv: Use memory info from devinfo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4289c9ec13c9dfdbcda8217c7fb4a87baec4868f",
+        "description": "intel/dev: add a fallback when memory regions are not available",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e727297e83572820f0a1a0db69877d55a36fb64",
+        "description": "intel/dev: add a helper to update memory info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4aecfbf0f4abd6932ae071c27bd8e6c3639b8dd1",
+        "description": "intel/dev: Add devinfo::mem to store i915 regions information",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1222c86e34fb7ba5085c598b7d1d073258d9fafc",
+        "description": "panfrost: Bump ESSL_FEATURE_LEVEL on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74460a5d7544d08b653957e2e283235d66ebf8af",
+        "description": "panfrost: Enable CAP_INDIRECT_TEMP_ADDR on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d84bb00dc4d75652e07d0a3d9f0663431f9bdc8",
+        "description": "panfrost: Enable more FP16 caps on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3fedf22b6089f0251426cd4c431363bbd0e4413a",
+        "description": "pan/bi: Tune lower_vars_to_scratch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd021a618f3aeb2148060774b018343f059f7d1e",
+        "description": "pan/va: Replace MKVEC.v4i8 with MKVEC.v2i8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c570693c19dd72c40b58e8345bc86c70674670e6",
+        "description": "pan/va: Pack MKVEC.v2i8 byte lanes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10301885abe83897da84b0f09e36a7a68d2c491d",
+        "description": "pan/bi: Constant fold MKVEC.v2i8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2833d0472af6ee29f25e863e765d85cadc33ad0a",
+        "description": "pan/bi: Model MKVEC.v2i8",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6792b15971fd9786ac18833242fd6b53c3b40d74",
+        "description": "pan/bi: Remove FRSCALE from IR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21bedd2c97194d3cf8281f99cc9bd337e1510816",
+        "description": "pan/va: Rename RSCALE to LDEXP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0da28ee2c71c0a3fcb36c6bf11b1ed7d50529400",
+        "description": "pan/va: Implement sample positions FAU packing",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9dd0bc92b588c37de2150b4cb9761188c3edce90",
+        "description": "pan/va: Lower FADD_RSCALE.f32 to FMA_RSCALE.f32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a882ecdab06d3cf3786698d23eb015c2baa332a",
+        "description": "pan/bi: Align accesses with packed TLS",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "6761dbf8915d16d1408ac9b3d85751d0991f542c"
+    },
+    {
+        "sha": "5ee1179c946a2710e6621192fe8f0cfbf49d368d",
+        "description": "pan/bi: Fix LD_BUFFER.i16 definition",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "3dc2095b079f1ac890cbf6ca2f525841a2dab5ba"
+    },
+    {
+        "sha": "40accfd3b71dc1c15e9b911f0f0e56b527e4e256",
+        "description": "pan/va: Unit test va_mark_last",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4b7e337b45da6ac773a4e210391c67ef7e426ab8",
+        "description": "pan/va: Mark last register reads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4377e12558be7e231a3346ee0fc1e316f190966",
+        "description": "pan/va: Use validate_register_pair for BLEND pack",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b48933d6411a379c128b31174474949046a6915c",
+        "description": "pan/va: Include BLEND for va_swap_12",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "738a1572d264be8bab8cb27301f842bcc4695b13",
+        "description": "pan/va: Move va_flow_is_wait_or_none to common",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b29a99b7bff6417f437147d44547b7a9c914c6e",
+        "description": "pan/va: Add header guards to valhall_enums.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5a87365523f4b5cb183e791937f48eb36391ec3",
+        "description": "pan/bi: Constify bi_is_staging_src argument",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2075bff4e84437b42154febdd9525f6193ce528d",
+        "description": "pan/bi: Mark bi_postra_liveness_ins as MUST_CHECK",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43d00c2971ae641f41c789edc7d8413c877dacab",
+        "description": "pan/va: Unit test barrier handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c6b9b9c9218cd115c3f3b9a1c6e56e6daa84fb4",
+        "description": "pan/va: Workaround quirk of barrier handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fa545528d02091447d9c70759cd2b377e9a2cad",
+        "description": "pan/va: Simplify insert flow tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35fcf8d3d7824877df1f75052ea52a6e54541992",
+        "description": "pan/va: Move VA_NUM_GENERAL_SLOTS to common",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d9c03df584b34e31ae35dec3ab5ba7816cbd9075",
+        "description": "ci: Remove the unused .test-manual",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f09b1ebe98840fec90e9f8a0ee8ea07a31c381b",
+        "description": "ci/bare-metal: Add test phase timeouts to all boards.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd3d9a7a92ae31a7ce47fb1a3fec7fff743eda7c",
+        "description": "ci/bare-metal: Add handling of netboot firmwares for servo boards.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3f8114d1e01aa49ab1b705084f8a9c2ea2fbbc2a",
+        "description": "ci/bare-metal: Get rid of servo's serial feed threads.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca453714aa4add8faec1e11a8f5866932ca8261a",
+        "description": "ci/bare-metal: Add per-boot-stage timeouts for fastboot and poe.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1e15ec1949f6724e75a6eaf6df4c0746279d2560",
+        "description": "ci/bare-metal: Apply autopep8 to our python scripts.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "909e7aaf57fc64e29dea5798387dd36c1bb6af6a",
+        "description": "tu: Reset xfb_used at the end of a renderpass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "086faecbba856b9ee4533db36a7fa930e72d6606",
+        "description": "turnip: Document some fields about resolves.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4c664a67029440a0d53d70e2387f87c6eba0453",
+        "description": "ci: Terminate capture-devcoredump before tarring up artifacts.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "efc398c722ae47afd01ed1abd83abb208bba9692",
+        "description": "vulkan/wsi: fix crash with debug names on swapchain",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "cb1e0db23e3fa17562bb276b125aeab0b85582cb"
+    },
+    {
+        "sha": "4f10eddf77f64fd942c7e9b5852becfa3569924e",
+        "description": "anv: fix index buffer emission",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21ea19d504bb96aea9f218fe6bfa5a9a40a72eb9",
+        "description": "zink: Always enable depth clamping, make depth clipping independent.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "82e08f6b1eb82b0665c612a2c62e9c8bd7a93daf",
+        "description": "zink: Enable the VK_EXT_depth_clip_enable extension.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "810135fb428a2505eba490b4d17a33629820e4e5",
+        "description": "gallium/u_blitter: Fix depth.",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "26c6640835936a77d87030ce8e90f9b9f5be783e"
+    },
+    {
+        "sha": "ee491967c3c9922e9be32df5c956388c6e006b43",
+        "description": "pvr: Update for firmware 1.17@6256262",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee9c3d2625428ac4cf4e15efb09741bb875ad7fe",
+        "description": "docs: set language to english",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "00cd1346bf056dfc0e7c7f75a9a4e64f3715930c"
+    },
+    {
+        "sha": "48540caec91af15c69cab1c09115be257bf9c987",
+        "description": "tu: Disable sample counting for 3d blits during occlusion query",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0c3fae4e6e65b83cd6c61375f7be50566ee27e7c",
+        "description": "virgl: Don't let ntt optimize the register allocation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "677a42378b2edff884a59558eb9d6d0ff8b161c1",
+        "description": "ci/radv: add a missing flake",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f86e12743c79fb5c83fbd32877c092beafb2c7ac",
+        "description": "ci/radv: move a test from the fail list to the flake list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d232f5a026072a6196908007773e23a6b15dea29",
+        "description": "dzn: Fix the 2DMSArray case in dzn_image_get_dsv_desc()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6cab999d6a2ed69782a8089e618f7b30aa54bfc4",
+        "description": "radv,aco: rename radv_prolog_binary/radv_shader_prolog to shader_part",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5cce02325cae6a927af57d1a425badc8e8985c51",
+        "description": "ir3: Create at least one thread for async shader compile",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3196bde9417d0cf578c6fea0c927574b4ab193b9",
+        "description": "freedreno: Wait for async compile jobs to finish",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "081b1eeacd64e02a2470af532e283578075efbed",
+        "description": "microsoft/compiler: Fix assert.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "afb64e10c1f19b7f76454e052c95d3b2bd2957ba"
+    },
+    {
+        "sha": "2b870731336bc128f309d20007efc56ad9c002d3",
+        "description": "radv: Remove unnecessary null check.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "779e09639b543958698c1e40a134b41631099197"
+    },
+    {
+        "sha": "9cf36089526af4ce23f8b33334f5feb33bd3dcde",
+        "description": "ci: Uprev apitrace to 790380e05854",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6cbb19110b4daa19e719228bdf2c1d7750ca0e4b",
+        "description": "r300: prefer old not native swizzle in constant folding",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b6a30b72ab32351beebe99a2014537d48cba2682",
+        "description": "panfrost: Implement provoking vertices on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9cdd32257fbeaa927668beec503ad130f86168e5",
+        "description": "panfrost: Add tristate_is_defined helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "950d27f9bf148a75eb9e4bdf79f678e3b075f160",
+        "description": "panfrost: Fix batch state changes on Valhall",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "3641dfe4367e37b3bbe125c9b18044a07e35e502"
+    },
+    {
+        "sha": "e9190c45d59695f64daf82a7ded0179851cfc397",
+        "description": "panfrost: Disable QUADS on Valhall",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "008163f3820eba5519cc80c31d660fa3de336f6d",
+        "description": "intel/compiler: vectorize task payload loads/stores",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97b53ad759b5f3b21edb4870779a7ca12e6bca52",
+        "description": "nir/opt_load_store_vectorize: handle task payloads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fad7e858f22c4e59ad8043200845d3a7323ed100",
+        "description": "pvr: Extend hard coding infra to allow per stage per device coding.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c6933cc9de7f648d06705754909ba7315c6bd19f",
+        "description": "pvr: Enable 33.15.11.3 (AXE-1-16M).",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "62cc9bba06a1a3479558267e70f46e321f73f486",
+        "description": "pvr: Add TI AM62 as a supported device.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "57ad38c2fc66b975c769356494f95dad56531a48",
+        "description": "ci/freedreno: disable non-existing trace",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0626a6bd25fe781c86dfa9b8f4f0172b1651748",
+        "description": "v3dv/ci: Update expected results",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1987fb00918f36de1de6a3c4957d56c061c6f31e",
+        "description": "ci/dzn: Move to a .toml description",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2bbb11eca233fa88b4281c29e2fd993982829bda",
+        "description": "ci/freedreno: smuggle myself into restricted traces access list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dfe9b856cb78b2b326eaf523778d98f8f66763fe",
+        "description": "ci/freedreno: update restricted traces to the brotli compressed version",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "11ac33c2a9326906d6c14d7f07a788cf1eed888d",
+        "description": "gallium/tools: fixes to option handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "50b21fb6e41c3d7f91c96c8c8d8e88ee434b7d78",
+        "description": "anv: Use sampleLocationsEnable for sample locations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "419b8c7f8d8d21e08ea22ddaf1d5ef6908c289af",
+        "description": "dzn: correct order of src_subres and dst_subres args",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "2d0798440b4f89068a855e1ff6d78f302ef3c93f"
+    },
+    {
+        "sha": "7afecd8ad8eb536d17679c2b19b5b645fe3115ba",
+        "description": "radv: Check descriptor pool entry count before allocating a new set.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ceb3ae2afb888579c761741b93ca1fa5a2e41bba",
+        "description": "radv: Remove redundant memset in radv_descriptor_set_create.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7c25c6f04ee17caf9d7b34504f805ac7d878dd17",
+        "description": "pvr: Add graphics pipeline hard coding infrastructure.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e47350a245ceff5e7c76b5aeb85a9b4b593d966b",
+        "description": "pvr: Remove unused output_selects from vertex shader state.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "66f4c9abc9d54ae76e107e824df9bb3f0051d493",
+        "description": "pvr: Change compute hard coding infrastructure.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e4ef72aac00c5e165de3d5823f2afb92e40a285",
+        "description": "intel/dev: fixup max_cs_workgroup_threads after hwconfig is read",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "d9ff9ea9c3315e9373a1fbdccd57fce571463cd5"
+    },
+    {
+        "sha": "5485bf7b1bd2f88ecb19c10777a09858a9624b1c",
+        "description": "aco: fix validation of SOP1 instructions without definitions",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6dd2699e9f9cfb482349afc582470a4f9709c5f7",
+        "description": "radv/amdgpu: do not add \"global\" BO to the virtual BO list",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4cc10b3427bdf1f172094f991c38c6ec94bbc19",
+        "description": "radv/amdgpu: make sure to reset the number of BO when there is no ranges",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "29f34cc8061f3dc2617b726f26c4b697ec3c49c6",
+        "description": "ci: uprev vkd3d-proton to 39d07dea2cef34bfb3ed39741f026bc637e3eec4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6072d5d8dccc1db44f29ce9128061222968a1781",
+        "description": "zink: ci updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "420270cb4f73da6251d4caec976358681f05c45c",
+        "description": "zink: relax zink_resource_buffer_needs_barrier checks",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f889bece4637928ae07d518fba3dd211de07d41e",
+        "description": "zink: don't short-circuit gfx stage finding during barrier generation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1fa3f03442bcf0ac0e8459ed48e3fd5d1371d32c",
+        "description": "zink: collect gfx stages for all bindings during barrier generation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9e3ed6532428c90a44fe1fd1bff5443f812404c5",
+        "description": "zink: add a #define for vk shader bits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "80569f9e5fb07c497cccce1407c3620eb34b893e",
+        "description": "zink: track image binds",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47361daffcbb589125b1b293c4dddf5221f02c16",
+        "description": "zink: rework buffer barrier generation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db0fda6f36990e72a604f7b8e73dd55f2c5912b5",
+        "description": "zink: track vertex buffer bind counts on resources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7b88dbfd785ae25fcea022290ab3b17eaea4cc94",
+        "description": "zink: move draw-time barrier generation down a little",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ca0c0b4b40831038cac027bd342b2405e0716db",
+        "description": "mesa/st: increment num_uniforms for hw accel select shaders",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "9b22ab4167e6c2c0cf8868a9109545fe2c0d164b"
+    },
+    {
+        "sha": "81557a4fdf1e780bef75ca4ba115395ec61aae18",
+        "description": "zink: unset PIPE_CAP_DITHERING",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "371660b877344df6ccc5f2c3bd0f286ae4f3650b",
+        "description": "mesa/st: add PIPE_CAP_DITHERING",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a9f7087a1464759760ad359210dc42fa1ebf540",
+        "description": "radv/ci: test vkd3d on kabini",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7ed0941c49c1cdbe4d26a90ea7856b0bc4b8e9e",
+        "description": "Revert \"ci/valve: uprev boot2container\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "48243965723e53f283d7c9fbfc801c1406795e31"
+    },
+    {
+        "sha": "7a8ec23c9de71c5a3c1b1e8830c200c4e9c94bec",
+        "description": "anv: Properly clamp attachment layer counts",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "858cd2797c64aa21dc912bf7f0a31d3d47915abb",
+        "description": "freedreno/fdl: use XYZW swap for PIPE_FORMAT_X24S8_UINT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d8803c724bcb83eb08e038984eb8cd6b5f3f64b8",
+        "description": "panfrost: Remove sync arguments from panfrost_batch_submit",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b538519bbcfdfadab443c045a09a130e07e17602",
+        "description": "panfrost: Use a macro for checking for a shared bind type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd04679a08c7c276a7cadad5ddb5ced540d95300",
+        "description": "mesa/st: Account for YUV color space and range.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5d09d7a0ac73ec1626be139a482f901c521a466",
+        "description": "nir: Account for YUV range.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "676acfe956be79adafb7552829948b8875b86c8d",
+        "description": "intel/fs: Add missing synchronization for WaW dependency",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "b5fa43952aaf7a41385402ad2d21af5a17805615"
+    },
+    {
+        "sha": "736a07155f131d8f7d801b9ca15ff5c922de4b02",
+        "description": "Revert \"ci: freedreno farm is down\"",
+        "nominated": false,
+        "nomination_type": 2,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "551442b53ebf531ab010dad2a3127ce41432ed4c"
+    },
+    {
+        "sha": "03e543a4221c27327266883a6fc0afb34eab7564",
+        "description": "intel/validator: validate dst/src types against devinfo support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "2866ae32da0348caf71ad2d11c353321df626ff4",
         "description": "mesa/main:  Correct alloca() use without #include \"c99_alloca.h\"",
         "nominated": false,
