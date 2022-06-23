@@ -175,7 +175,7 @@
         "description": "nir/serialize: Put dest last in packed_instr::tex",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "35655865cbde648f6dcfad38fa095d9ec0c4e45b"
     },
