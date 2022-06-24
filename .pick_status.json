@@ -1,5 +1,401 @@
 [
     {
+        "sha": "9527fbe596e2ace276c158f67a900c29aad6cdd0",
+        "description": "dzn: Fix CmdPushConstants()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5aeefe8d75345ae908e3f254249e06dfebd4b26f",
+        "description": "tu: Don't count 3d blits in QUERY_TYPE_PRIMITIVES_GENERATED",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97ef19e6ce19e5ac1a06fcb847fa87abf602182a",
+        "description": "tu: Use hw binning or sysmem with QUERY_TYPE_PRIMITIVES_GENERATED",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33641b2a26a4fa74d3e71f6a69d206955764a461",
+        "description": "aco: cleanup force-waitcnt output",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9116b9f00db78f7129d47000f41e4295137c85fd",
+        "description": "CODEOWNERS: evelikov renamed to xexaxo",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3163f2e0a68f07c3e0fbc9eb46e67e8e320e49b5",
+        "description": "CODEOWNERS: Update c11 code owners",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "318473eaf133e8ec332591c8eb234278b025f7e0",
+        "description": "intel/blorp/gen6: Set BLEND_STATEChange only if emitting the blend state",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb93ecacd77974e864bf28875bba6e3e41667c1e",
+        "description": "pvr: Rename loop iterator variable.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6e6e1e84067fa8ed5044198d5d656d0e318ceb27",
+        "description": "pvr: Fix off by 1 error in buffer_id for ubo pds program.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4240c83960b049d2b18f6912c51ece5df506fd0c",
+        "description": "pvr: Handle vdm degen_cull_enable.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7858c32550829e14fa665285fe41b8eb58462a37",
+        "description": "pvr: Fix physical device limits.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eac5a2fdfa288d7a5f5a42837987fbaf5eb268f5",
+        "description": "anv: make apply_pipeline_layout/compute_push_layout visible to NIR debug",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ed429af5864631b196c7299f17e725540544b213",
+        "description": "radv: Don't check if we need to copy immutable samplers for non push templates.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f075aa1c11c6a8630a81e7168f1ce20f42d378ec",
+        "description": "ci: add wrapper script for Valve's traces runner",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd2f529a6bca98f5949465ccff96f6ba13c955af",
+        "description": "ci: move b2c artifacts to its own directory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cec48994cc9b5653ee7cbab3399de47d29d26b74",
+        "description": "ci: upgrade to DXVK v1.10.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fe649b38c412a07c615eab890c2b252e26c4b559",
+        "description": "ci: upgrade gfxreconstruct build to v0.9.10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "433c436c32d68d48fb477a0a588e25d865bd90c2",
+        "description": "ci: add Linux build of apitrace",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "084cf578ef6a1751d1730c6ff58c9a75264f7756",
+        "description": "ci: fix shellcheck violations in the test-vk building script",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8756de2d8071baeba0a2763856eeeff39fd8f0e3",
+        "description": "ci: install gfxinfo-mupuf in the test-vk image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bf1362d7a4bc292ab3bb283736090d252e5c7c4f",
+        "description": "ci: install a more recent version of Wine in the test-vk image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "01a1af181988696951e09f1976adb638930afcf1",
+        "description": "radv/ci: update vkd3d-proton results for AMD's Kabini",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3f86344bd68935c7518c0ee88a28d894a609563b",
+        "description": "zink: use tracked barrier info for generated barriers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "50e764fa50d58054259cec1fc613a0aa6ef9d60f",
+        "description": "zink: track gfx/compute descriptor barrier info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74dd6e69b44f3301131961af53348c8cb96d844a",
+        "description": "zink: fix image bind counting",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d56912208fd00297ca2c002e5d505083beb090b",
+        "description": "zink: track overall samplerview bind counts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "49cc3696bddccea2855cd895211e5c3ce2ac3101",
+        "description": "zink: track ssbo bind counts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e38b2adb886c09dc8177eb454633e5ecc3143eb8",
+        "description": "zink: use the bigger of the variable type and interface type for bo sizing",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e060d98aac588247f195988b58c2dcb04fef4bb8",
+        "description": "util: use force_gl_map_buffer_synchronized workaround with RAGE",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f686bfc852e56ed7f688a8c3653ca68de04994b",
+        "description": "util: add dri config option to disable GL_MAP_UNSYNCHRONIZED_BIT",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b74d3e71be4f48c673516b2d70ea9eb914049e6a",
+        "description": "lavapipe: skip post-copy pNext checking during pipeline creation for composites",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8a92d28adc6208d8cb3c4a6d317acdb05149379",
+        "description": "lavapipe: add a pipeline library assert",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a69aeb9c1f2324ec5b988786152b52d6ea9cbc8",
+        "description": "lavapipe: fix renderpass info handling during pipeline creation",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7018b630edd90776029803c3b41df8dbdcaacd45",
+        "description": "lavapipe: copy more pNexts for pipeline creation",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3aaab4a232cbd377ac6e22295f70d41be4a9c56e",
+        "description": "lavapipe: zero out blend info if blend isn't enabled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9be88a84640ea371f18bd0713142c14e5b7241f7",
+        "description": "panfrost: Use u_default_clear_buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f32ac20862f16494403fd8ad31a57ffb84f9feef",
+        "description": "iris: Use u_default_clear_buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd21d32fe404311fe7edc49801513525c19993c0",
+        "description": "gallium: Add a u_default_clear_buffer helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9b11618dfa18230b01d5dc5ad773a34f2a568c56",
+        "description": "anv: disable perf queries on non RCS engines",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f00ebb913a80bd178b0b05231dd4ec883f997069",
+        "description": "u_blitter: Remove util_blitter_copy_buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21f5c6ea873bb767a14a9c1eb4e6907e8bd76d48",
+        "description": "r600g: Remove streamout-based buffer copy path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f367c5557356a18603fd7a18b8e3e1dd38a5faab",
+        "description": "microsoft/spirv_to_dxil: Fix discard semantics",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6689fa2ab4eae15fbd73bba250f42b3fe3b50a3f",
+        "description": "nir/range_analysis: Teach range analysis about fdot opcodes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f50fe9b0b6b108caa3334e4ddde1871b52ce9a31",
+        "description": "egl/wayland: Don't try to access modifiers u_vector as dynarray",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "b5848b2dac1464f5364dc2a76bd11cac0cb5769b"
+    },
+    {
         "sha": "8ce7faab47a77377a6a1313a80580828b052f878",
         "description": "vulkan: Add a vk_pipeline_shader_stage_to_nir helper",
         "nominated": false,
