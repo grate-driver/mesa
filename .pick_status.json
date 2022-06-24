@@ -688,7 +688,7 @@
         "description": "lima,panfrost: Do not ralloc contexts against the screen",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0fcf73bc2d4dc292895ef8930f4f445d933b1630"
     },
