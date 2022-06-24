@@ -103,7 +103,7 @@
         "description": "intel/blorp: Dirty depth bounds dynamic state bits after blorp",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "56ef501e3aa4b12f41c0520bbc5fa920b0efa0f8"
     },
