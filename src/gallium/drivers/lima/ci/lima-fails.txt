@@ -60,15 +60,6 @@ spec@arb_depth_texture@fbo-depth-gl_depth_component24-readpixels,Fail
 spec@arb_depth_texture@fbo-depth-gl_depth_component32-blit,Fail
 spec@arb_depth_texture@fbo-depth-gl_depth_component32-copypixels,Fail
 spec@arb_depth_texture@fbo-depth-gl_depth_component32-readpixels,Fail
-spec@arb_depth_texture@fbo-generatemipmap-formats,Fail
-spec@arb_depth_texture@fbo-generatemipmap-formats@GL_DEPTH_COMPONENT16,Fail
-spec@arb_depth_texture@fbo-generatemipmap-formats@GL_DEPTH_COMPONENT16 NPOT,Fail
-spec@arb_depth_texture@fbo-generatemipmap-formats@GL_DEPTH_COMPONENT24,Fail
-spec@arb_depth_texture@fbo-generatemipmap-formats@GL_DEPTH_COMPONENT24 NPOT,Fail
-spec@arb_depth_texture@fbo-generatemipmap-formats@GL_DEPTH_COMPONENT32,Fail
-spec@arb_depth_texture@fbo-generatemipmap-formats@GL_DEPTH_COMPONENT32 NPOT,Fail
-spec@arb_depth_texture@fbo-generatemipmap-formats@GL_DEPTH_COMPONENT,Fail
-spec@arb_depth_texture@fbo-generatemipmap-formats@GL_DEPTH_COMPONENT NPOT,Fail
 spec@arb_depth_texture@texdepth,Fail
 spec@arb_draw_elements_base_vertex@arb_draw_elements_base_vertex-negative-index,Fail
 spec@arb_draw_elements_base_vertex@arb_draw_elements_base_vertex-negative-index-user_varrays,Fail
