@@ -1,5 +1,761 @@
 [
     {
+        "sha": "58313f3257b338928a8ae4ea375eedb50accf2bb",
+        "description": "etnaviv: switch depth mode when linear PE is used",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "53445284a427f79e94607dc4ca2f8bd8ac293356"
+    },
+    {
+        "sha": "4b5f0d98fd57cbcd253b85291b7491aa5754a2eb",
+        "description": "tu: Overhaul LRZ, implement on-GPU dir tracking and LRZ fast-clear",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "70f1d70ddd785361d989fcc565a675df173a1d82",
+        "description": "freedreno: document GRAS_UNKNOWN_810A",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1cd91fdec389abb5d897a5eeaade2a26d18baa76",
+        "description": "freedreno: Document a650-specific CP_REG_WRITE flag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5592c366cf1aa09dcc84797a37d62855ad6591e3",
+        "description": "freedreno: Document rest of GRAS_LRZ_CNTL, clarify UNK_25 event",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "edc7f40a83169c16dfd4612f84515ec4c0c9f6f6",
+        "description": "meson: drop dladdr check on win32",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "2dcbe87271bea04d4572063f28af33bca32e12f1"
+    },
+    {
+        "sha": "3129520a73336d72284cd98412bb8d77ed8415de",
+        "description": "ci/dzn: Add pipeline cache tests to the include list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "91f1bd8f81dff866c769ea3bcc58450b9293b1a4",
+        "description": "dzn: Cache pipeline info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d8b686783ef9605195c8d85df7f6fa6176e8602b",
+        "description": "dzn: Cache DXIL shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "52e2ca084af74ec3d00fa1e4d9546093289071a0",
+        "description": "dzn: Caculate a binding translation hash",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "276c73580d20e277e17a0fbac061bc4aca3152b5",
+        "description": "dzn: Cache NIR shaders",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "66764904b3a4c17f5c904c3986fccd5b9265a5d3",
+        "description": "dzn: Move the compute shader compilation logic to a sub-function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6236d1eead45825de9c21d9ec3a5af2e13e1b56c",
+        "description": "dzn: Drop unneeded goto statement in dzn_compute_pipeline_create()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4630b703d23821ac57e52e9b9b58307029aa404",
+        "description": "dzn: Add a generic cached blob wrapper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "06f37025f14a3f4b3a4effb45c22cb343ed32e2a",
+        "description": "dzn: Hash pipeline layout stages",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "391d3251fa2e17dc7dd8eef3069337e71b9cf1af",
+        "description": "dzn: Don't delegate binding translation to dxil_spirv_nir_passes()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7b43711f386b732e35d4754e47399be0c3a2d71",
+        "description": "dzn: Save a few indentation levels in graphics_pipeline_compile_shaders()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "84770a90bb3d32a9c2f71cd299edeec1cf702f37",
+        "description": "dzn: Use vk_to_mesa_shader_stage()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4a96675ec41185c90521b1e3e1d573361160b6c",
+        "description": "dzn: Fix potential nir_shader leak",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "af83f104da6d57c140752b7c1ddb790cf9e668e5",
+        "description": "dzn: Let dzn_pipeline_init() initialize the root signature in the stream",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "301fb478feeacc0303832dcd0f050391fbf64287",
+        "description": "dzn: Drop unused allocator passed to dzn_graphics_pipeline_create()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b886619313f46fe10ecf4ba26c9b1d4d603d31f7",
+        "description": "dzn: Drop useless while(link_mask != 0)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "31357f3cf4fb47f87caf21a60caf3167cefe613f",
+        "description": "dzn: Pass the maximum stream size to d3d12_pipeline_state_stream_new_desc()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4e531732b5f6417ae89e4ef099ff5c0ee47ad43",
+        "description": "dzn: Use d3d12_compute_pipeline_state_stream_new_desc() in the compute path",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "9feda65a83c7916562fa55596c8384c4b65fd6b3"
+    },
+    {
+        "sha": "d3e6ef195a2e55ee2f765153a210c7179b9476ee",
+        "description": "dzn: Fix assertion in d3d12_pipeline_state_stream_new_desc()",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "9feda65a83c7916562fa55596c8384c4b65fd6b3"
+    },
+    {
+        "sha": "26ca9a43441cb69f6934d62fa009317e7e902066",
+        "description": "dzn: Add missing D3D12_CACHED_PIPELINE_STATE to MAX_COMPUTE_PIPELINE_STATE_STREAM_SIZE",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "9feda65a83c7916562fa55596c8384c4b65fd6b3"
+    },
+    {
+        "sha": "c66caa1d589e052b5a472fd97ef11503a1e22f67",
+        "description": "dzn: Drop dzn_pipeline_cache.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b59abbe3d57488e7d86d6c71631647f073839957",
+        "description": "dzn: Initialize UUIDs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be019e69e2c4df7ab2db17a0320b00cf0c6518d8",
+        "description": "dzn: Fix indentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aab5d176b83fe8d5bbf5502c38c4aa0a8558a22f",
+        "description": "pytracediff: implement pager ('less') invocation internally",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95fc0e1b7c5f8c8df7b4b3c719597e595d331725",
+        "description": "pytracediff: change how 'junk' calls are handled",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf4d1c1fed71d9d59e5432163d242c347d907385",
+        "description": "pytracediff: make -M (\"method only\") option print arguments for differing calls",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8819d372e5df93389bd72d2281a9119e8d402366",
+        "description": "pytracediff: add per-line difference highlighting for blocks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3421d9ecade49ac892776f366853c5d0600855f6",
+        "description": "gallium/tools: reimplement tracediff completely in Python",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f70a1cd140fbf7752678d1bfc5fa972da4120bf",
+        "description": "gallium/tools: add option for ignoring junk calls in trace dumper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f00b54873b50113448bf2bffd9208eaf378a671",
+        "description": "trace: Allow to control nir dumping via an environment variable.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5ddb959532309d0a23dc018e6205c5b3f08173f",
+        "description": "trace: Bring state dump up to speed.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0296050c0eaaccdcea3cc03cd16a1a5da89dfaf1",
+        "description": "trace: Parse character data more efficiently.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69fbcdb568ab029ae10c10b919ad9b45f0a1f245",
+        "description": "trace: Dump NIR.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "382c6d395c94f64758e51b287e684fe24a1dfb0a",
+        "description": "lavapipe: Prevent mapping buffers beyond their size.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b78caa7f7d65050c1f2e9d05652a446868a1565d",
+        "description": "trace: Fix framebuffer state serialization.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0371b1707b2ff1b5c60fa2248a1eeea79d977544",
+        "description": "dzn: Hook-up device-lost detection",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6a491d16284ca7387eb47e41f53eccba2c14a760",
+        "description": "radv: Use vk_pipeline_hash_shader_stage()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2bb3b11e5fc044b4bdf4b10501fa88638df9ad6",
+        "description": "radv: Kill unused fs_m local var in radv_create_shaders()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "02384ca13cde7d2b20423054d88f796643de065a",
+        "description": "tu: Use vk_pipeline_hash_shader_stage()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a8cd159538b2087fc4fd8894a4d415722d0d55fa",
+        "description": "v3dv: Use vk_pipeline_hash_shader_stage()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "863b6317a3ac0b398ea7231a2bd87fe1473e1362",
+        "description": "v3dv: Fix nir_shader leaks in v3dv_meta_{clear,copy}()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "17dff363ce4cad7b936f64f843500d94803185d7",
+        "description": "anv: Use vk_pipeline_hash_shader_stage()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "542538cf0212c4e24db01cda59b9ece55f51615e",
+        "description": "vulkan: Add a vk_pipeline_hash_shader_stage() helper",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5e5b54c9d1c3e724507f0f2fbd7d5e6381c1225e",
+        "description": "nir/serialize: Silence integer-overflow false positive",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "370ca07482a29847b1de60bd71963b307de4f48b",
+        "description": "nir/serialize: Support texop >= 16",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "603e6ba972dae06fe0a198fc00b6aa4a0a33d479"
+    },
+    {
+        "sha": "cfccd93efc95277a739a202a036cbea36fde85f4",
+        "description": "broadcom/compiler: don't predicate postponed spills",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98420408d0bd0d339c723d6de544a668b2b8f9b6",
+        "description": "broadcom/compiler: fix postponed TMU spills with multiple writes",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0bc65b1d81f1064a1ef14a6afbeab2dc46e2329b",
+        "description": "v3dv: fix leak",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1951065a1613bc64351e6ff461677fe9f301b772",
+        "description": "zink: delete zink_resource_object::dt_has_data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "314a24998af914f13df4bcbff30a4d5b793a3aba",
+        "description": "zink: use kopper_displaytarget type directly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6786e508a292fb184affbe5968ae890c7e00636b",
+        "description": "zink: acquire swapchain images on image map",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b400f1defc83be535a8f45998e465c9745d606ea",
+        "description": "zink: no-op pixmap frontbuffer flush calls",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c5ab9e173cb0fafca4f03c6f9a3a657f6f59a4f",
+        "description": "zink: delete zink_resource_object::acquire",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ab8b729d6576772c1ea49c9351bcf696f498ca2",
+        "description": "zink: ensure pending present flushes are handled during frontbuffer flush",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fbaca89cd9ed4ca774938372752e71507126a66b",
+        "description": "zink: flag batch as having work during frontbuffer flush",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8606e5cff8f28e10eef8aa9a5916777eaf7891f9",
+        "description": "zink: improve no-op acquire detection",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "49d9a3605bc5b7b69a4549b4b6c57620a621d75d",
+        "description": "zink: remove unnecessary code in kopper readback acquire",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cb306a0adb50426311d3f585c018235590647ac1",
+        "description": "zink: remove broken kopper assert",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9625e99110c831df533a1cea00d57feee1ff3a44",
+        "description": "zink: use better determination for handling swapchain acquire submits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "92228a6d283c763aa80b955d68420dec293bdd4b",
+        "description": "zink: move 'acquired' flag onto swapchain struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c47378fb0fd4334c7c38cf8dd9a4a3505ec76ef9",
+        "description": "zink: move to AoS for storing swapchain struct data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "983dcda16ad969bf6f59f8873966635903f19104",
+        "description": "zink: track whether current swapchain has data",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c1ce1889db94385a1584ee45481a099bcf229ab8",
+        "description": "zink: fix kopper_acquire return value",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "ab1941fc0e990d10e050d6e8a75fc1fa9fb75456"
+    },
+    {
+        "sha": "24be0119016f6181f5a39e6405f17ad199bd695c",
+        "description": "lima: wire up MSAA 4x support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f93bee19d9c9275c7dffa19fc9d4c795950b4359",
+        "description": "ci/turnip: Trim the a630 VK run a bit.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "523ed9521b897676c383cbf511ff42a3bd026d97",
+        "description": "ci/turnip: Test traces on turnip using zink.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e53194f44a3aa1ae07eabd4a046c49f063d644f",
+        "description": "ci/freedreno: Add vulkan+gl integration testing in piglit.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9090bb1fbd601516756c0830c8b6c57bb2c3bd40",
+        "description": "ci/traces: Drop ZINK_USE_LAVAPIPE ICD override.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "83709ac3cfb0bdd3d4770b509ec278a04fa22bca",
+        "description": "ci/traces: GC unused code for DXVK trace replay.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67bbe79d35d111506744b4f0330a211bc8300445",
+        "description": "lavapipe: always set point_tri_clip",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f18492faa9f692d62cee774066ef182d3e279eec",
+        "description": "lima,panfrost: Do not ralloc contexts against the screen",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "0fcf73bc2d4dc292895ef8930f4f445d933b1630"
+    },
+    {
+        "sha": "a530b90cd3d9fe38da4a94b15adeafa5652eb0b3",
+        "description": "zink: remove swizzle from fbfetch lowering",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "31b04e420b0eb080084c6323066ea0b83929d59e",
+        "description": "glx/dri: Fix DRI drawable release at MakeCurrent time",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59944831a794e3797839fd7066e34c802c69d43e",
+        "description": "microsoft/clc: Add a unit test for unused image kernel args",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ca23a4af6734afb3056c095761d8554f38bd4d70",
+        "description": "microsoft/clc: Remove dead image vars",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd37959680725e0b3f96a4e91757bcc0d8d60e7e",
+        "description": "microsoft/clc: Fix test double free in the case of compilation failure",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d69e258e8e6238204bbadb876e3760219280bbd6",
+        "description": "microsoft/clc: Enable tests that pass on server 2022",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2dcbe87271bea04d4572063f28af33bca32e12f1",
+        "description": "util/disk_cache: Implement disk_cache_get_function_identifier for Windows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "9d7d1c0637529301d3e319ec5f1c883c5f249783",
         "description": "intel/clc: enable fp16 & subgroups for GRL",
         "nominated": false,
