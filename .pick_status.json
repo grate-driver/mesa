@@ -5602,7 +5602,7 @@
         "description": "nir: fix nir_xfb_info buffer_to_stream length",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "19064b8c3a8e0f7b9081a0564f1c7c79a1953d0b"
     },
