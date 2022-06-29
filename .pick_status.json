@@ -1282,7 +1282,7 @@
         "description": "aco/ra: update register file when updating phi definition",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "302cb5c90015e2d3e139d575b3c7165519a21228"
     },
