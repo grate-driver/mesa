@@ -5278,7 +5278,7 @@
         "description": "zink/ci: update list of failures again",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "b240be28e3193e83632848bb32eb1013bddfc285"
     },
