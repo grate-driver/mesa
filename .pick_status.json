@@ -1,5 +1,464 @@
 [
     {
+        "sha": "c017dfec62e448fea9ad9d16c575086b0de19b3b",
+        "description": "ci: Remove -Wno-error=maybe-uninitialized",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37b4c8dbcac2b217e635b90a3ff58610566e0281",
+        "description": "svga: Clear query before usage",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4922c0dfbb6dd11d09d523a4a4eaba272d50fef",
+        "description": "r600: Switch to unreachable(..)",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "828793cb82bab35f32028d86545514be1ca8b8e5",
+        "description": "gtest: Fix maybe-uninitialized compiler warning",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d06335ed7642fbed617a2ebd6200399d038ffad0",
+        "description": "vulkan: Depend on vk_pipeline_layout in vk_cmd_enqueue",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa40a04ad94956e39f8f8b2f027f08df30d56886",
+        "description": "dzn: Use the vk_pipeline_layout base struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "88f287a1d0424204b2780d03acb4820a73af1f35",
+        "description": "dzn: Use the vk_descriptor_set_layout base struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73eecffabdd37fc2a181dfe38e35e4240812611e",
+        "description": "panvk: Use the vk_pipeline_layout base struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f66f37a99e556f761349c7d3552d7ec9fcaff71c",
+        "description": "panvk: Use the vk_descriptor_set_layout base struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a579d33352c4cea4fe28288675aa463debe5982f",
+        "description": "lavapipe: Use the vk_pipeline_layout base struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "003f40134235d620615f3cee5333a9cfb37d245f",
+        "description": "lavapipe: Use the vk_descriptor_set_layout base struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e6c75bcd9c549721a6717ffdf7026e80e6f153dc",
+        "description": "vulkan: Add a common implementation of pipeline layouts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "949ce92f056f7171399437e5db6da4db64659c60",
+        "description": "vulkan: Add a base struct for descriptor set layouts",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d46db2e5a60bd182324def30437556051d844cdd",
+        "description": "vulkan: Fix a comment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bd3556a669b883129fff1d9acfdc58de3832a895",
+        "description": "util/xmlconfig: fix -Wmaybe-uninitialized warning",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4290c3d5b5f765c125ce529fcc870c735a774bd6",
+        "description": "dzn: Fix -Wswitch warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "804da0806d3ac127cf607588a25ca2b8d73fdf09",
+        "description": "dzn: Fix {back,front}_wr_uses_ref assignment",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da493e144fdecf4f985595740c7aa6f7edc3aee6",
+        "description": "dzn: Fix printf() format in dxgi_get_factory() error message",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1715875e1f1004254292b131b42b0ab58cb2a08",
+        "description": "dzn: Fix 'statement with no effect' warning",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97dbebb55873a8d899b5b858fdf4a25d6f7a5e6f",
+        "description": "dzn: Fix unused var warnings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb8ca4bafe2199fb4a9584042ed0748d2b9b2dfa",
+        "description": "dzn: Fix copies of block-based formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e3cf48e8f596096263cd97f52e61ebc8aebbee78",
+        "description": "dzn: Allow shaders to read from depth/stencil attachments",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d07befe4f821eda14ae94aa02a9fe64235ed97c9",
+        "description": "dzn: Introduce dzn_cmd_buffer_queue_image_range_state_transition()",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "35356b1173ee62638d3b4c2397144f0e6c936fef"
+    },
+    {
+        "sha": "ed78cf307b5da5f769a7912b54bad7ff56e96e72",
+        "description": "dzn: Rename dzn_cmd_buffer_queue_image_subres_range_transition()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9eb70b5dcf0f21d97f500f5860562040534dc173",
+        "description": "dzn: Don't call dzn_cmd_buffer_queue_transition_barriers() prematurely",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "037e7e8066c70139e03604e7042fdb1f94be9753",
+        "description": "v3d/ci: Add flake test",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35356b1173ee62638d3b4c2397144f0e6c936fef",
+        "description": "dzn: Cache and pack transition barriers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d2e769c1b60d99e7383b305cea84721329536b7a",
+        "description": "turnip: fix wrong size for lrz cs when lrz_track_quirk is enabled.",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "4b5f0d98fd57cbcd253b85291b7491aa5754a2eb"
+    },
+    {
+        "sha": "6d063ec900f449b08e6d9b934c16bb1996ff8171",
+        "description": "anv: remove device features handling now in runtime",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7c7b9007105e54cce70003297f16a180646b2f78",
+        "description": "lima: fix buffer overallocation for index, vertex and constant buffers",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "24be0119016f6181f5a39e6405f17ad199bd695c"
+    },
+    {
+        "sha": "00cc5ec5cf775425dbb0a7c8c3e6ea8cb54e0a5f",
+        "description": "radv: do not emit SQTT user data packets on the SDMA queue",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e247cd05f30b963027bd5e9ffcadf2cfa27ff5b",
+        "description": "anv: disable non uniform indexing of UBOs",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "710393b3aa4a99d446db0c41ef23eb44332332b4"
+    },
+    {
+        "sha": "afe47bf0641d2a7b4ed857eeab454d059e6b7338",
+        "description": "draw/cliptest: add support for guard band + full Z",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "202bbedc55ab17ceb859d0c20817fb07d74bdb46",
+        "description": "lavapipe: streamline xfb shader setup",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f18d97e0bcb393d2d801c7b4a446477d0f10989f",
+        "description": "lavapipe: break out part of shader optimization into function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4cb3043b535992fa00e2be7db846e70790f0e863",
+        "description": "zink: set PIPE_RESOURCE_FLAG_DONT_MAP_DIRECTLY for device-local resources",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "75724fe1190582eabfb10ae7d451a2a72938a721",
+        "description": "mesa/st: Fix border color type for stencil sampling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8183a728a201f9d4b66a0b371f196b64e432484f",
+        "description": "tu: Fix stencil border color with has_z24uint_s8uint",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "74d09cac98fc9980b0c16907369397d51a7282e6",
+        "description": "freedreno/a6xx: Fix border color with Z24UINT_S8UINT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e135c0344695a7f435ae0b64a6f0b4e81a32a583",
+        "description": "freedreno/fdl: Note border color constraints",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4901a8f86ee3219f04355534cbc58c647129af76",
+        "description": "freedreno/a6xx: Use fdl format swizzle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39c64a4b537a7e919d959369c2c0cdd19447a251",
+        "description": "freedreno/a6xx: Fix border color swizzling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a928ae32587ee85894cc2fd7591a4555cf4c224",
+        "description": "freedreno/a6xx: Document border color/swizzle interaction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9af897b9ed97c1e23c0d621b074ddb663fe769bd",
+        "description": "glsl: merge lower_buffer_access with lower_shared_reference",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9a7a20318c1381488154540a1db62d7cfd53658",
+        "description": "d3d12: Fix debug_printf format strings for cross platform builds",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d4f7f21fa558e5a9e6e1f80050ddc9d965d1a476",
+        "description": "vulkan_entrypoints_gen: For Windows ARM64EC, prefix symbols with '#'",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6c4cc0abc6036a688415093c1f4d15600487dff6",
+        "description": "ci: traces: switch to brotli compressed traces",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "098b5804a0923df29eae8e11e11f510f8b8c10ac",
+        "description": "radv: Refactor lower_rt_derefs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9196fd3e1f551328f2d47a18471aa4fcbffee683",
+        "description": "radv: Fix the t comparison for triangles",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ec7e51997a23d9574035cf07927abe0b605335a",
+        "description": "radv: Introduce an enum for the any hit status",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b8d10d270413a1f49ccce5563c1e4e96e10b6ef",
+        "description": "ci/lava: Improve result parsing regex",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "58313f3257b338928a8ae4ea375eedb50accf2bb",
         "description": "etnaviv: switch depth mode when linear PE is used",
         "nominated": false,
