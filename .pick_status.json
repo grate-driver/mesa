@@ -634,7 +634,7 @@
         "description": "radeonsi: fix random PS wave size",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b3b2f97f2e25b2c4c72e5f04c945ce9c48ce6cd6"
     },
