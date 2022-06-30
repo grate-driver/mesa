@@ -1,5 +1,77 @@
 [
     {
+        "sha": "8ab1e9826db5936ff287bef7b428ebee27ada507",
+        "description": "zink: don't increment screen->num_contexts for copy context",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8af9caa506e8f12b803399fb5704928792753694",
+        "description": "zink: store context flags",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c86563c29efaa3598c36d31bdb4015f0d88ec970",
+        "description": "nv50/ir/ra: Fix copying compound for moves",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6d145df51f74b8a3fc79e07b6b5e21495a99d1df",
+        "description": "zink: remove the workaround for depth_clip_enable on turnip",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4b72fa26da2f2796c2a4e4fe1765e06483c5a9b",
+        "description": "turnip: keep the depth_clip_disable state at the pipeline builder.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6cb41c51884c2488194f74e2ce637b950c835620",
+        "description": "freedreno,ir3: rename Z_CLAMP_ENABLE to Z_CLIP_DISABLE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e7863c3b025042d7e41b5c9f73a6b7f788a87a3",
+        "description": "nir/types: fix glsl_matrix_type_is_row_major() assert",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c702de7484832c1e0413120fb8e4445f95d40601",
+        "description": "zink: workaround depth sampler border color when z24 is z32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "c017dfec62e448fea9ad9d16c575086b0de19b3b",
         "description": "ci: Remove -Wno-error=maybe-uninitialized",
         "nominated": false,
