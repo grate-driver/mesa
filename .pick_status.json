@@ -679,7 +679,7 @@
         "description": "panfrost: Respect buffer offset for OpenCL",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "80b90a0f2b83291da69f7eef38395e61e919ab97"
     },
