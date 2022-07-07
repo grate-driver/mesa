@@ -302,7 +302,6 @@ wsi_x11_connection_create(struct wsi_device *wsi_dev,
             free(error);
          }
       }
-      free(shm_reply);
    }
 
    free(dri3_reply);
@@ -310,6 +309,8 @@ wsi_x11_connection_create(struct wsi_device *wsi_dev,
    free(randr_reply);
    free(amd_reply);
    free(nv_reply);
+   if (wsi_dev->sw)
+      free(shm_reply);
 
    return wsi_conn;
 }

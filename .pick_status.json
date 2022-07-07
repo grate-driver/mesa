@@ -1984,7 +1984,7 @@
         "description": "vulkan/wsi/x11: Don't leak shm_reply if we don't have dri3 or present",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b5c390c113d3f23af49f8bf5a601474620ae4eb1"
     },
