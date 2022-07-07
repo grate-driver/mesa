@@ -2182,7 +2182,7 @@
         "description": "nir: fix documentation for uadd_carry and usub_borry opcodes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b0d4ee520e20444172d088d11260e656fc1cf12d"
     },
