@@ -4180,7 +4180,7 @@
         "description": "aco: fix assertion in insert_exec_mask",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d068eb53e84ca1e44ad96c31dab63476880b3c72"
     },
