@@ -472,7 +472,7 @@
         "description": "aco: fix packed 16bit fneg/fsat optimization",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b03be30e07546b813acc1156407b964e68892beb"
     },
