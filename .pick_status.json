@@ -517,7 +517,7 @@
         "description": "r300: Keep rc_rename_regs() from overflowing RC_REGISTER_MAX_INDEX",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
