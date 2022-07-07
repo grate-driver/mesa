@@ -1561,7 +1561,7 @@
         "description": "radeonsi: check last_dirty_buf_counter and dirty_tex_counter",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
