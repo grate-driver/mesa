@@ -5422,7 +5422,7 @@
         "description": "u_atomic: Fix MSVC p_atomic_add_return",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
