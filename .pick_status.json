@@ -6025,7 +6025,7 @@
         "description": "spirv: switch to uint64 for rayquery internal type",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4c703686dba59976a09985281a4893412800d420"
     },
