@@ -1948,7 +1948,7 @@
         "description": "panfrost: Only emit images when they are present",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "dc85f65e059d3c603210bc3a0d93c34bdcdd6d17"
     },
