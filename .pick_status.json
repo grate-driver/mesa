@@ -6187,7 +6187,7 @@
         "description": "nine: replace ulimit with sysconf call",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
