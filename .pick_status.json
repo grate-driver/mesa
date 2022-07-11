@@ -4,7 +4,7 @@
         "description": "zink: Do the timestamp-to-ns math in a double to have better precision.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7a40b734ee2ba7da7975ac858022b6f175ddcb5a"
     },
