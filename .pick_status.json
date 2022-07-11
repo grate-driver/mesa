@@ -193,7 +193,7 @@
         "description": "lavapipe: don't overwrite entire VkFormatProperties3 struct",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f72d5a930b17fb287a58b1ecbc4ec1356e36160b"
     },
