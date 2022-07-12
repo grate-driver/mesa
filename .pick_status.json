@@ -6286,7 +6286,7 @@
         "description": "intel: protect against empty invalidate ranges",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b91971c240d3b8391f2105337579a0e14116769c"
     },
