@@ -5278,7 +5278,7 @@
         "description": "mesa: update GL_CLAMP emulation when binding/unbinding textures",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e8f71f6ac48c14d3ec923e3cc819d79095a43070"
     },
@@ -5899,7 +5899,7 @@
         "description": "anv: ensure tile flush before streamout writes",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
