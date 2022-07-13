@@ -406,10 +406,40 @@ threaded_context_flush(struct pipe_context *_pipe,
    }
 }
 
+/* Must be called before TC binds, maps, invalidates, or adds a buffer to a buffer list. */
+static void tc_touch_buffer(struct threaded_context *tc, struct threaded_resource *buf)
+{
+   const struct threaded_context *first_user = buf->first_user;
+
+   /* Fast path exit to avoid additional branches */
+   if (likely(first_user == tc))
+      return;
+
+   if (!first_user)
+      first_user = p_atomic_cmpxchg_ptr(&buf->first_user, NULL, tc);
+
+   /* The NULL check might seem unnecessary here but it's actually critical:
+    * p_atomic_cmpxchg will return NULL if it succeeds, meaning that NULL is
+    * equivalent to "we're the first user" here. (It's equally important not
+    * to ignore the result of the cmpxchg above, since it might fail.)
+    * Without the NULL check, we'd set the flag unconditionally, which is bad.
+    */
+   if (first_user && first_user != tc && !buf->used_by_multiple_contexts)
+      buf->used_by_multiple_contexts = true;
+}
+
+static bool tc_is_buffer_shared(struct threaded_resource *buf)
+{
+   return buf->is_shared || buf->used_by_multiple_contexts;
+}
+
 static void
 tc_add_to_buffer_list(struct threaded_context *tc, struct tc_buffer_list *next, struct pipe_resource *buf)
 {
-   uint32_t id = threaded_resource(buf)->buffer_id_unique;
+   struct threaded_resource *tbuf = threaded_resource(buf);
+   tc_touch_buffer(tc, tbuf);
+
+   uint32_t id = tbuf->buffer_id_unique;
    BITSET_SET(next->buffer_list, id & TC_BUFFER_ID_MASK);
 }
 
@@ -417,7 +447,10 @@ tc_add_to_buffer_list(struct threaded_context *tc, struct tc_buffer_list *next, 
 static void
 tc_bind_buffer(struct threaded_context *tc, uint32_t *binding, struct tc_buffer_list *next, struct pipe_resource *buf)
 {
-   uint32_t id = threaded_resource(buf)->buffer_id_unique;
+   struct threaded_resource *tbuf = threaded_resource(buf);
+   tc_touch_buffer(tc, tbuf);
+
+   uint32_t id = tbuf->buffer_id_unique;
    *binding = id;
    BITSET_SET(next->buffer_list, id & TC_BUFFER_ID_MASK);
 }
@@ -675,6 +708,8 @@ threaded_resource_init(struct pipe_resource *res, bool allow_cpu_storage)
 {
    struct threaded_resource *tres = threaded_resource(res);
 
+   tres->first_user = NULL;
+   tres->used_by_multiple_contexts = false;
    tres->latest = &tres->b;
    tres->cpu_storage = NULL;
    util_range_init(&tres->valid_buffer_range);
@@ -1996,7 +2031,9 @@ tc_call_replace_buffer_storage(struct pipe_context *pipe, void *call, uint64_t *
    return call_size(tc_replace_buffer_storage);
 }
 
-/* Return true if the buffer has been invalidated or is idle. */
+/* Return true if the buffer has been invalidated or is idle.
+ * Note that callers must've called tc_touch_buffer before calling
+ * this function. */
 static bool
 tc_invalidate_buffer(struct threaded_context *tc,
                      struct threaded_resource *tbuf)
@@ -2017,7 +2054,7 @@ tc_invalidate_buffer(struct threaded_context *tc,
    struct pipe_resource *new_buf;
 
    /* Shared, pinned, and sparse buffers can't be reallocated. */
-   if (tbuf->is_shared ||
+   if (tc_is_buffer_shared(tbuf) ||
        tbuf->is_user_ptr ||
        tbuf->b.flags & (PIPE_RESOURCE_FLAG_SPARSE | PIPE_RESOURCE_FLAG_UNMAPPABLE))
       return false;
@@ -2062,6 +2099,8 @@ tc_invalidate_buffer(struct threaded_context *tc,
    return true;
 }
 
+/* Note that callers must've called tc_touch_buffer first before
+ * calling tc_improve_map_buffer_flags. */
 static unsigned
 tc_improve_map_buffer_flags(struct threaded_context *tc,
                             struct threaded_resource *tres, unsigned usage,
@@ -2174,6 +2213,14 @@ tc_buffer_map(struct pipe_context *_pipe,
     * this shouldn't normally be necessary because glthread only uses large buffers.
     */
    if (usage & PIPE_MAP_THREAD_SAFE)
+      tc_buffer_disable_cpu_storage(resource);
+
+   tc_touch_buffer(tc, tres);
+
+   /* CPU storage relies on buffer invalidation never failing. With shared buffers,
+    * invalidation might not always be possible, so CPU storage can't be used.
+    */
+   if (tc_is_buffer_shared(tres))
       tc_buffer_disable_cpu_storage(resource);
 
    usage = tc_improve_map_buffer_flags(tc, tres, usage, box->x, box->width);
@@ -2478,7 +2525,10 @@ tc_buffer_unmap(struct pipe_context *_pipe, struct pipe_transfer *transfer)
       assert(tres->cpu_storage);
 
       if (tres->cpu_storage) {
-         tc_invalidate_buffer(tc, tres);
+         /* Invalidations shouldn't fail as long as CPU storage is allowed. */
+         ASSERTED bool invalidated = tc_invalidate_buffer(tc, tres);
+         assert(invalidated);
+
          tc_buffer_subdata(&tc->base, &tres->b,
                            PIPE_MAP_UNSYNCHRONIZED |
                            TC_TRANSFER_MAP_UPLOAD_CPU_STORAGE,
@@ -2591,6 +2641,8 @@ tc_buffer_subdata(struct pipe_context *_pipe,
 
    if (!size)
       return;
+
+   tc_touch_buffer(tc, tres);
 
    usage |= PIPE_MAP_WRITE;
 
@@ -3854,7 +3906,10 @@ tc_invalidate_resource(struct pipe_context *_pipe,
    struct threaded_context *tc = threaded_context(_pipe);
 
    if (resource->target == PIPE_BUFFER) {
-      tc_invalidate_buffer(tc, threaded_resource(resource));
+      /* This can fail, in which case we simply ignore the invalidation request. */
+      struct threaded_resource *tbuf = threaded_resource(resource);
+      tc_touch_buffer(tc, tbuf);
+      tc_invalidate_buffer(tc, tbuf);
       return;
    }
 
