@@ -3928,7 +3928,7 @@
         "description": "zink: Fix spirv stream 0 vertex emit for multistream shaders",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "35e346f42808428661d95a7b8df3a414661136bc"
     },
