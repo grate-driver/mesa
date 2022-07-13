@@ -4054,7 +4054,7 @@
         "description": "radv: fix vbo_bound_mask indexing",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1b8bdecf6e071759f96cecc5662a3d4592491535"
     },
