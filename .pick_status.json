@@ -5332,7 +5332,7 @@
         "description": "zink: use right glsl length getter for ntv partial stores",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "31ba19ff681224208943787cedd0b1ada11329e2"
     },
