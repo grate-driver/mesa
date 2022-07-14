@@ -4360,7 +4360,7 @@
         "description": "v3dv: stop tracking push constant buffer references",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ea3223e7a4690571583f3a0f2d7c9580952e67d8"
     },
