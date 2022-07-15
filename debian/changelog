@@ -1,3 +1,9 @@
+mesa (22.1.3-2) UNRELEASED; urgency=medium
+
+  * control: Fix mesa-opencl-icd depends. (Closes: #1014840)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 15 Jul 2022 11:16:44 +0300
+
 mesa (22.1.3-1) unstable; urgency=medium
 
   * New upstream release.
