@@ -1066,7 +1066,7 @@
         "description": "intel/nir/rt: spill/fill the entire ray query data",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c78be5da300ae386a12b91a22efb064335e2043a"
     },
