@@ -679,7 +679,7 @@
         "description": "nir: Fix qsort comparator function",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "523a28d3fe0dd371ae01b7353f263a6541480d89"
     },
