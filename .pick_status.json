@@ -2731,7 +2731,7 @@
         "description": "vulkan/nir: Don't remove dead XFB outputs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "21b405fbbc539666f83bd881011c9d7333d6b060"
     },
