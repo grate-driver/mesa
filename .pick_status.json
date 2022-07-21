@@ -1039,7 +1039,7 @@
         "description": "meson: Microsoft / maybe Intel CLC need the all-targets workaround just like clover",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1506ea2ecb8d017dbe1bbe7bec03294619683e13"
     },
