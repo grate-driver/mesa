@@ -5944,7 +5944,7 @@
         "description": "meson: Only draw with llvm depends on native directly Tests, softpipe or AMD drivers don't depend on it directly",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3955dd077b61ad4f39d7ecbfaa78b183c2142269"
     },
