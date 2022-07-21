@@ -220,7 +220,7 @@
         "description": "aco: fix LdsBranchVmemWARHazard with 2+ branch chains",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c037ba1bb7aba99bd15e063bbdbc6d4c68cf2384"
     },
