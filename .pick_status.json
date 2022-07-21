@@ -472,7 +472,7 @@
         "description": "vulkan/runtime: don't lookup the pipeline disk cache if disabled",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "591da9877900c56434f9e23e0ad0058b118b0be8"
     },
