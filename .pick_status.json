@@ -1201,7 +1201,7 @@
         "description": "zink: fix EXT_color_write_enable check",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "49a20e0981c21ffbbf91654fd34a44a6d01d60ac"
     },
