@@ -2434,7 +2434,7 @@
         "description": "llvmpipe: fix aniso cube map arrays.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ce2b711c0a5d2c1d595f783e7a7bc92388cef4e7"
     },
