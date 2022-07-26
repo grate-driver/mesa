@@ -166,7 +166,7 @@
         "description": "tu: Don't preload variable-count descriptors",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d9fcf5de55a7104037823e62284ace8a206c8898"
     },
