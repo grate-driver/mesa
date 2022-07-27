@@ -535,7 +535,7 @@
         "description": "zink: force flush clears on fb change if fb geometry changes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "66ceea7ed9a46b83a1ffbc4b2d9cd17c4bef4570"
     },
