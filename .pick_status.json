@@ -787,7 +787,7 @@
         "description": "zink: use modifier feature flags during surface creation when necessary",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
