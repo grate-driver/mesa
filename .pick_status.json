@@ -526,7 +526,7 @@
         "description": "zink: force a new framebuffer for clear_depth_stencil if the clear region is big",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f1f08e3529de26953e243d3e2e99fa89bbcbe619"
     },
