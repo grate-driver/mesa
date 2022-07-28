@@ -210,6 +210,8 @@ struct zink_screen {
       bool color_write_missing;
       bool depth_clip_control_missing;
       bool implicit_sync;
+      unsigned z16_unscaled_bias;
+      unsigned z24_unscaled_bias;
    } driver_workarounds;
 };
 
