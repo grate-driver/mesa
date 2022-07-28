@@ -904,7 +904,7 @@
         "description": "frontend/nine: Fix ff position_t fallback when w = 0",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
