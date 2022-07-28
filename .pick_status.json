@@ -472,7 +472,7 @@
         "description": "zink: fix return for PIPE_CAP_DEPTH_CLIP_DISABLE",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "21ea19d504bb96aea9f218fe6bfa5a9a40a72eb9"
     },
