@@ -931,7 +931,7 @@
         "description": "frontend/nine: Fix ATOC handling",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1272640d55243105bb192a5dd460dc70fc7a77a6"
     },
