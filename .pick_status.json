@@ -211,7 +211,7 @@
         "description": "d3d12/dzn/spirv2dxil: Require version library",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b8328c9664ed3f11924be37a243464236812a3a2"
     },
