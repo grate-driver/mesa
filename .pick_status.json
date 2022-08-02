@@ -391,7 +391,7 @@
         "description": "zink: use modifier_aspect to check for modifier plane in zink_resource_get_param",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
