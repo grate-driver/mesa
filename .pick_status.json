@@ -85,7 +85,7 @@
         "description": "svga: fix mksstats build",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ed77ac1eef7c6f4126149ea2e492a243ba8449e5"
     },
