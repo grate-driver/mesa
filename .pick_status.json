@@ -310,7 +310,7 @@
         "description": "gallivm: fix printf hook for cached shaders.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "333ee94285ac453b9d75ce93b01bc26e48bf96d7"
     },
