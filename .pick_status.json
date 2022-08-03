@@ -661,7 +661,7 @@
         "description": "agx: Fix packing of samplers in texture instrs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9f5553883428e0f393e40d6254c9b33bd64d19eb"
     },
