@@ -301,7 +301,7 @@
         "description": "Revert \"radeon: add EFC support to only VCN2.0 devices\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "23e5b910c57158030ba246530c57ab13a51245f3"
     },
