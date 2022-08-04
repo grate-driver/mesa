@@ -9886,7 +9886,7 @@
         "description": "radv: fix 16-bit support in radv_lower_vs_input",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b366fef091d33e7d5307f292b2320267c841e350"
     },
