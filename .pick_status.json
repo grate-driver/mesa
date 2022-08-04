@@ -409,7 +409,7 @@
         "description": "Revert \"nir: Preserve offsets in lower_io_to_scalar_early\"",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a1bc1523408a305b14a8c297ea93a28bb12cee5d"
     },
