@@ -211,7 +211,7 @@
         "description": "r600/sfn: Schedule shift instruction on R600 in t-slot",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "33765aa92aa5c150873fc210e9d6c1fe22cf8646"
     },
