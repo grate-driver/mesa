@@ -274,7 +274,7 @@
         "description": "vc4: properly restore vc4 debug option",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c3f5d276317f9f8c77336ec78f6e72b640f61081"
     },
