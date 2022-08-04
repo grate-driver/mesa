@@ -1021,7 +1021,7 @@
         "description": "freedreno/drm: Fix potential bo cache vs export crash",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f3cc0d2747568a186dba433ac94af607c38fa024"
     },
