@@ -9877,7 +9877,7 @@
         "description": "aco: fix 16-bit VS inputs",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3fba5bb9cc49aa526ce9b108229aa7e01349275d"
     },
