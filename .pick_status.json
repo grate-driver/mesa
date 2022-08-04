@@ -202,7 +202,7 @@
         "description": "radeonsi: don't assume that TC_ACTION_ENA invalidates L1 cache on gfx9",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4056e953fe43bd667e1812c1c7075285d24b42c2"
     },
