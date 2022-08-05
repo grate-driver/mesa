@@ -904,7 +904,7 @@
         "description": "virgl: Fix unmapping of blob resources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3b54e5837a15236407f5ea0c98dfe3f23c6fe7b1"
     },
