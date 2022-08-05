@@ -1012,7 +1012,7 @@
         "description": "freedreno/gmem: Fix col0 calc",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "81d85be9a5cfb5860ba5d15f2bf6f1a4946e411e"
     },
