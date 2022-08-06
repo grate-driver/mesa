@@ -10903,7 +10903,7 @@
         "description": "venus: avoid feedback for external fence",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d7f2e6c8d033de19a1d473df4fb1a46c7d365159"
     },
