@@ -985,7 +985,7 @@
         "description": "util: Fixes invalid assumption that return non null by function util_format_fetch_rgba_func",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e342081c3769214024c22fb394ac506008c1fd37"
     },
