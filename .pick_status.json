@@ -10921,7 +10921,7 @@
         "description": "venus: fix external memory ext filtering",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "390722620e139047c6b94f394caebb4c5676e6ce"
     },
