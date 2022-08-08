@@ -292,7 +292,7 @@
         "description": "zink: Make sure that we keep the existing ici pNext chain on inserts.",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "28ee911ad67192bc7a0683b6061b89e372482faf"
     },
