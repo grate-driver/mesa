@@ -598,7 +598,7 @@
         "description": "nir/lower_gs_intrinsics: fix primitive count for points",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2be99012e95bd8b0b17b5c06b31723738aaecbd1"
     },
