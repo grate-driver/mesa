@@ -418,7 +418,7 @@
         "description": "radv: Fix stack size calculation with stage ids",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c39cccec9c5a6d027457e625e34db5f0092c076b"
     },
