@@ -373,7 +373,7 @@
         "description": "glthread: unbind framebuffers in glDeleteFramebuffers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e48f676835d110f907e5cd55d659dae511e4af2d"
     },
