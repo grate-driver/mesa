@@ -1,5 +1,176 @@
 [
     {
+        "sha": "c67e60ae8fefaeadbe06bf0cbd8ad2ee267a6c0e",
+        "description": "meson: clc compiler test only works on win32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e95531e101f0ba61d28195fe38414e411bf418b3",
+        "description": "radv: fix gathering XFB info if there is dead outputs",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a35742c434e6c4bd7834521061df9ed8410b2d6e",
+        "description": "radv/ci: Put one more board to run the CTS on Stoney Ridge",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d1b16ce35b658c97b85b7910c09030c3e8b07b85",
+        "description": "radeonsi/ci: Move libva and piglit jobs to Raven Ridge boards",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "379f2b641e486531d24a7d90ea4deb79af489502",
+        "description": "radeonsi: print radeon_bo_flag when AMD_DEBUG=vm is used",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22a8b7f589c0ad5905c323103fda29729db14d8a",
+        "description": "radeonsi: allocate BIND_RENDER_TARGET as tmz instead of SCANOUT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a693fbf64b84ed6364984c45dc3255b71063c6dc",
+        "description": "amdgpu/bo: update uses_secure_bos when importing buffers",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "90b98c06493f8a9759e5496d5ec91fb60edf7b92"
+    },
+    {
+        "sha": "1d64308fe95b00c7f7aa1a8059cf8a0623a9bcdc",
+        "description": "gallium/dri2: make protected buffer checks opt-in",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1862923849caaa7bfe225ef92ef1398b0c8be78d",
+        "description": "ci/windows: Disable Windows builds while the runner is offline again",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ea0ec4697d7de7caf738edac72afd05ee434ad9",
+        "description": "docs/ci: show how to run traces locally",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d00c55e9eabae65e1bc1fa8b360288763976931",
+        "description": "radv/ci: bump the console activity timeout of VanGogh to 3 minutes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1db0b5660973f885cffc835935f3c1b22e6bde0e",
+        "description": "radv/ci: skip host_write_transfer_src.1048576 on renoir",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e091e56fc16639e6fdc121e702e5c85f7b55642b",
+        "description": "radv/ci: add more tests to the flake list of vega10",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6bbe3c6d36c455e1073b1e26741ff13430be36cb",
+        "description": "radv/ci: move some tests from the vega10 fail to its flake list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3f8a356bd35fbb741f81284c856a2f455a451958",
+        "description": "radv/ci: document a recent regression",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "401d03e1e947279306a9cccc8b86996c940ef91b",
+        "description": "freedreno: Cap reported video memory by VA size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2bc1d08c48bd3b309eb9b65db5ac1d7749f512cd",
+        "description": "freedreno/drm: Add FD_VA_SIZE param",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32d0dfc4627d294ae249a525f6e043d63cbde787",
+        "description": "dzn: Use D3D12 constants instead of naked numbers for device limits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d48ce281f80f821f61084bd85dda9ed7b3695692",
+        "description": "dzn: Disable extensions that require multi-view",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "1a3b086b06c6c1ff63a4abe3752ca0a7a854dc77",
         "description": "docs: fixup link to virgl docs",
         "nominated": true,
