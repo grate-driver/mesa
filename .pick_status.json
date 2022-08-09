@@ -22,7 +22,7 @@
         "description": "aco: fix hash statistic",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "897561b7b98ebbabe0ee68761ccb9302ddc8991f"
     },
