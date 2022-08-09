@@ -157,7 +157,7 @@
         "description": "anv: emit scissors when the pipeline changes",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7d25c04236be85eac56ff88470be7199664b3aa8"
     },
