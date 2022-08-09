@@ -256,7 +256,7 @@
         "description": "v3dv: Enable sync_fd importing/exporting on Android",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "316728a55bc8fe398be1ac2796a22f8c91fb886c"
     },
