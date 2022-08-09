@@ -364,7 +364,7 @@
         "description": "glthread: call _mesa_glthread_DeleteBuffers unconditionally",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4fa24747b9089bda0453051e5fd5188e6fce6996"
     },
