@@ -400,7 +400,7 @@
         "description": "mesa/st: fix reference to nir->info after nir_to_tgsi",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "580f1ac4736eec90e2e7dbe67ba76cac4d0e5319"
     },
