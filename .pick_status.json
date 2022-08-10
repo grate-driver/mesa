@@ -292,7 +292,7 @@
         "description": "isl: fix bug where sb.MOCS is not being set",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c27fcb1d3bac4282978529d947f3a143ae4a311f"
     },
