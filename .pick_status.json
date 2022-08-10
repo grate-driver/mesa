@@ -1,5 +1,329 @@
 [
     {
+        "sha": "70891edd9728e7dd73115171fdb03622ce6450ba",
+        "description": "nir: add a nir_opt_if_options enum",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ca0d2d4507ca3f9ce31f8a35fe4e3f44008451e",
+        "description": "llvmpipe: Double number of SSBOs",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bd40e1b0127ffdb337667c9f524ab42999b875c9",
+        "description": "aco: fix hash statistic",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "897561b7b98ebbabe0ee68761ccb9302ddc8991f"
+    },
+    {
+        "sha": "0b312dc343f5402f48d82996571f5100713be62b",
+        "description": "radeonsi-raven/ci: Move spec@arb_timer_query@timestamp-get to flakes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "82fd379d9efbb87c67a4a7cb5466f47f03641c9b",
+        "description": "amd/common: move ac_memory_ops_per_clock into ac_gpu_info.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3340dea1941885e85087bd35b6261dfee8148722",
+        "description": "zink: do not use VK_FORMAT_D32_SFLOAT_S8_UINT without checking",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "71c1ca3c67bc64ba1d74841fa664b0ee0e045c11",
+        "description": "zink: add have_D32_SFLOAT_S8_UINT boolean",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37dfa4e3f3c669af16a53aa6c0401989a26099a1",
+        "description": "radv: fix cleaning the meta query state if an error occured",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "1a95d43e5508e91d2fc88ad6fce34f202aeab923"
+    },
+    {
+        "sha": "5b5d5554f6687477d5bad646de8472434e19984f",
+        "description": "radv: respect the render area for depth/stencil resolves",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa5d4062e8b359fb11f35816d87fd2f4fd4b778a",
+        "description": "svga: fix mksstats build",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "ed77ac1eef7c6f4126149ea2e492a243ba8449e5"
+    },
+    {
+        "sha": "26a1e93f7ecbb2d59fec7f5ad0fdcada9e1f10da",
+        "description": "ci/windows: Setup proper MESA_IMAGE_TAG for Windows build/test image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9921f5cf0c767e2bb60f647b70b7c36329d3cad4",
+        "description": "ci/windows: Install Graphics-Tools package on the base image",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47526556494f18cd2c02f978bccac7e2ba73adcd",
+        "description": "egl/x11: implement ANGLE_sync_control_rate",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "94cfa50dc67e264e621d3003030c0ed40c8a2802",
+        "description": "egl/x11: Split declaration of dri2_format_for_depth into header platform_x11.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "eebea558b7b598359e6364f7a965216fea0fe9b2",
+        "description": "egl: wire up ANGLE_sync_control_rate",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5bb9dd738ace274c97507adea073b6c609469b2",
+        "description": "egl: Remove eglextchromium.h and import eglext_angle.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3a9d3ac9c1c3a3df0cf4135f3c18efede46446b4",
+        "description": "ci/windows: Windows runner is back online",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fbd41337354326354739042368989535d79f1640",
+        "description": "anv: emit scissors when the pipeline changes",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "7d25c04236be85eac56ff88470be7199664b3aa8"
+    },
+    {
+        "sha": "dd7cae2a9960db528f65036e85412c3f51afd6a0",
+        "description": "ci/lavapipe: wine flakes, switch to manual for now",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2f4b9b7a9505f61877ccd51157cab590a5fe3b24",
+        "description": "gallium/u_blitter: make the bilinear filter for MSAA resolving conformant",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c7ad4757bef25fd040993d15b3d87ad6f4c82ea",
+        "description": "gallium/u_blitter: make nearest filtering emulation using TXF conformant",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a41386a0530df35dbbe9f17a5e7189f398cbe908",
+        "description": "gallium/u_blitter: clean up IMMs in util_make_fs_blit_msaa_gen",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0397db1d8119d7875ecb54c943fb649450985c0e",
+        "description": "gallium/u_blitter: treat Z scaling as scaled blits",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "854fb27275c7744ea022ef9a2eb6320b59388834",
+        "description": "gallium/u_blitter: fix the has_txf support condition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "20575169221bf3ce7bd4bcfee4d23d452cf96063",
+        "description": "gallium/u_blitter: remove unused code for integer MSAA resolve",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd7a968c36a11217db144241baaa2527130ca967",
+        "description": "gallivm: initialize texture_unit_offset in emit_size_query",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "60272d7db41f207b4653941610cd3ec69f46cbf6",
+        "description": "gallivm: fix TXQ crash with MSAA samplers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7e155628db61495e6475d3a896e639965b73196",
+        "description": "ttn: set the correct sampler declaration type in the presense of txs and lod",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23a2698e7578b170ff665d6a22dc9f936c07f960",
+        "description": "ci/tu+zink: Re-enable the traces that were asserting about UBWC compatibility.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "149d4e4b6d193f07f6709e62f340c3b3337242c0",
+        "description": "tu: Use the format list to decide whether we can do UBWC with MUTABLE.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f6bd494cfac760384807fb558a511db3ff9d495d",
+        "description": "tu: Treat viewFormatCount==0 as no format list.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "41280ba2895fc6fafd02d7f2ba4490215aa0914a",
+        "description": "tu: Move the vkCreateImage format list checks to helper functions.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8dda0a01bb3ea5a618a73ea4e506cb61e68e6d0c",
+        "description": "zink: Make sure that we keep the existing ici pNext chain on inserts.",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "28ee911ad67192bc7a0683b6061b89e372482faf"
+    },
+    {
+        "sha": "6a933b7f539426442418f8d875ea17631ac4a979",
+        "description": "c11: Fixes the declaration of timespec_get in time.h for macOS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0dd2eabaaca939883a6c9b73ea7bfc476907e36",
+        "description": "util: open_memstream also support on MacOS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ecfda9a0fa02a12a8f5b22f5682d5db45a6f5a27",
+        "description": "microsoft/clc: Fixes compiling errors with clang/mingw64 in clc/clc_compiler_test.cpp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "c67e60ae8fefaeadbe06bf0cbd8ad2ee267a6c0e",
         "description": "meson: clc compiler test only works on win32",
         "nominated": false,
