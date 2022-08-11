@@ -11443,7 +11443,7 @@
         "description": "iris: Drop extra file-descriptor dup in iris_drm_screen_create()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a99e85db9ebd83c41d3606568db8e8d81ca0205c"
     },
