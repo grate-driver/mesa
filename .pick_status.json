@@ -364,7 +364,7 @@
         "description": "microsoft/compiler: Fix PSV struct when numthreads is 0",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d9e575d4d7d33157b696c4b71fbe8a1a5dc22822"
     },
