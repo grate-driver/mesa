@@ -391,7 +391,7 @@
         "description": "aco: Force tex operand to have the correct sub dword size before packing.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f5f73db846ec4a93a02aeecc1e209794c8076ae2"
     },
