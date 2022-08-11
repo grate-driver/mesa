@@ -940,7 +940,7 @@
         "description": "frontend/nine: Fix buffer tracking out of bounds",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "380c2bf8876496183af50fa5bc59145f311962e0"
     },
