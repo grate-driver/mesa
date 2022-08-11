@@ -1,5 +1,626 @@
 [
     {
+        "sha": "a3bf0da1cbd4b10043c80bf44609a3024b5fcc36",
+        "description": "microsoft/compiler: Change calls to NIR_INSTR_UNSUPPORTED to log to dxil_logger instead",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97902a9ef8bcf22cbb110c8a5978a5b7034b58ee",
+        "description": "nir: add nir_instr_as_str",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55b3980e789e8391458b2a5cdf05d5849f2b6872",
+        "description": "microsoft/compiler: Add dxil_logger type and parameter to nir_to_dxil",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "58bf84044bbad292057bdc95c13bb030b57eb7c5",
+        "description": "radv: copy the sample locations only if the state isn't dynamic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ca33a6c0d409aa5d49794b6f4d8018c634fb0fb",
+        "description": "radv: copy line stipple factor/pattern only if the state isn't dynamic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d92ab921b1b033c4722338cf77a6a0fa6e09445",
+        "description": "radv: remove unecessary radv_pipeline::uses_dynamic_stride",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56bb29cb93accf9d78c29332db52314bcb4b7670",
+        "description": "anv: don't return incorrect error code for vkCreateDescriptorPool",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc7edc1c7a446e442154dbd2b068eba83182b7b6",
+        "description": "radv: force inlining on another draw function",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "64395f0d85ae7f74ec386ed6f0c2f09ae20b2a56",
+        "description": "radv: remove stupid conditional from draw path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "50e6a80b5ea5ca8eae364b00642bc47f1fcc0e08",
+        "description": "radeonsi/tests: cosmetic changes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7d7275dd886dcf028a03c8266d2d8f7f1462f1be",
+        "description": "radeonsi/tests: update navi21 expected results",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4b7162e2345c142ae32ed393ac7871132ffdf26",
+        "description": "radeonsi/tests: update raven expected results",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4d7637bb73b61beda07d37933084b8534094934b",
+        "description": "radeonsi/tests: add testing of the khr-single tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "62d3f799de738ac31c1736309002ccdd5b79dac4",
+        "description": "radeonsi/tests: remove left-over debug print",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6b5aecb19558200fd39fda46db08456ba7acc180",
+        "description": "virgl: add support for hardware video acceleration",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "15c210649d3547689be286af2a0707be7ec3cdf4",
+        "description": "gallium/util: add a new helper function pipe_buffer_size()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e2199651b83c6842842dabd9261491481f4a3df1",
+        "description": "vl: change vl_video_buffer_destroy() to non-static",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a7366d68ae551763acc8cd481ff64af04e7a7cd9",
+        "description": "gallium: add key size to the structure pipe_picture_desc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "04d192fccbded86bfaac0e8f661a9f66c496dc01",
+        "description": "pvr: Fix bo mapping on alloc with PVR_BO_ALLOC_FLAG_CPU_ACCESS.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e9cce39d3f0ccd2a1aaff9bdcd10de32aa14698",
+        "description": "nouveau: implement and enable PIPE_CAP_QUERY_MEMORY_INFO",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "17eda68df3b88e5ed02cf180411491b28be1e6d5",
+        "description": "egl/wgl: Fix some awkward sizeof formatting",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "3415bf0268884bf3c16d495a4e1afd30d67bc71d"
+    },
+    {
+        "sha": "efd2ae6c0c87b8eca3bf0a476a008a16c00c51a2",
+        "description": "egl/wgl: Delete unused variables/code",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "3415bf0268884bf3c16d495a4e1afd30d67bc71d"
+    },
+    {
+        "sha": "35e9c7e082d10c960c9cf1409d14744bd48e6ee9",
+        "description": "wgl: Use pfi instead of iPixelFormat more often",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aeb3147a96dca44a3a6d99595c6e7f35b2a2df79",
+        "description": "egl/wgl: Support sync objects",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e08d2dde2200ef3c38e1de01c70d418e0788ce98",
+        "description": "egl/wgl: Support EGL_MESA_query_driver",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "52e663959edd6085adadd66931efc9f61ae56333",
+        "description": "egl/wgl: Hook up image validate/get in smapi",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c512b68816bfe525828f65035b4ff6053f3df373",
+        "description": "egl/wgl: Use a per-display st_manager",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "250bdcbfbee2ac086931db89954d9e0c6eacbaee",
+        "description": "wgl: Pass smapi explicitly to framebuffer creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f5b1824ce3cebf5e5ef4bcdb9ca3266aa93600a6",
+        "description": "wgl: Pass smapi explicitly to context creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d57a4abcf86bd9fd3cc377cf9c1aa0de79badc84",
+        "description": "egl,wgl: Support eglCreateImageKHR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "76756ea4c6477b834e5d1e25cb9c7a341173f0bc",
+        "description": "egl/wgl: Support eglWaitNative",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e8271b27a711b655516e192b74b1aee174913e7",
+        "description": "egl/wgl: Support eglWaitClient",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d9e0a4ab0ef5a7c3b471e7cb4979b60f19265e7",
+        "description": "egl/wgl: Support eglSwapInterval",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "501154b4edc06efcf39e99f61373750bee3c0e3e",
+        "description": "wgl: Allow per-framebuffer swap interval overrides",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0f533b3640e97da51357d6844846786c9a9d4850",
+        "description": "egl/wgl: Implement bind/release texture buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d0757e2e361f0f5faa6e3e52279940123247795",
+        "description": "egl/wgl: Set YInvert attribute to always true",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "87931cdb1f7a6fc8934bf697e12f9dbdc804574b",
+        "description": "egl/wgl: Implement PBuffer surfaces",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c205641ccf4a53a70860f5151092b5d4799379a5",
+        "description": "wgl: Split pbuffer creation into two functions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "11ee16493da3116cb24d52c193db12403fcc4ebd",
+        "description": "egl/wgl: Implement QuerySurface",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8cab2ae2405b77ab21546c920fd5e6a6073a5582",
+        "description": "egl/wgl: Don't require a native display to support window surfaces",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e7b4af434b30250118b790aed75572e93a1f4689",
+        "description": "c11: Implement and use of thrd_current properly on win32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "125a952b661eba478f36ae95956945cc7d75493a",
+        "description": "c11: call impl_tss_dtor_invoke with tls callback for win32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e819f713794108f3b34d6b503396bd72b6315b33",
+        "description": "c11: It's should detect PTHREAD_DESTRUCTOR_ITERATIONS when define TSS_DTOR_ITERATIONS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c37c6ac613b17ae34978065871f90fe16d154da4",
+        "description": "nir/validate: add some (light) validation for sampler type matching",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b7eda568a4acf8b3d551e22b6ef72689663f9550",
+        "description": "nir/validate: clamp unsized tex dests to 32bit",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "632e1b66f5cb4f0e20fcd1645ffc386c3214d591",
+        "description": "radv: fix return type for meta resolve shaders",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "524f173c0379e6aad723b2bfa5d5f798685ae543",
+        "description": "radv: explain why radv_invariant_geom is still needed for SotTR DX",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95232bf2619045629993ef5e8177763db3e006e6",
+        "description": "radv: remove radv_invariant_geom workarounds for DX games",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "95b0b2bea0b98a12d320288aa8b6ce950460ec99",
+        "description": "venus: Enable VK_EXT_texture_compression_astc_hdr",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56f331951984e698e4b947d2ad6e34a8444bd62c",
+        "description": "venus/pipeline: Fix ignore rules for VK_EXT_extended_dynamic_state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e643173cc5b7d416702cb3284d2a646a24dab3d1",
+        "description": "venus/pipeline: Fix ignore rules for VK_KHR_dynamic_rendering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "33e791bc02ab53d2182076ab7021b991cfb22542",
+        "description": "venus/pipeline: Ignore basePipelineHandle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d39e202dac8a00a803d8b93724115c5090caabb0",
+        "description": "venus/pipeline: Ignore pViewportState::pScissors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d6f2915ae549c6256afcfd146b44c61a8f833f52",
+        "description": "venus/pipeline: Ignore pViewportState::pViewports",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4ab3b40f2e26856895f6a3902d0a463a0f33dd74",
+        "description": "venus/pipeline: Fix ignore rule for pColorBlendState",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "661fc52c905f4bf0a1f57047ba491f47c210dd2d",
+        "description": "venus/pipeline: Fix ignore rule for pDepthStencilState",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f70e08ed72973862d299c5c946527c7c64ad824",
+        "description": "venus/pipeline: Split ignore rules for pViewportState, pMultisampleState",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf6099e42542a033b9527e6c4832be41b75e6456",
+        "description": "venus/pipeline: Add pipeline state bools for ignore rules",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "063a13d67e8ac6169fef884dab7a05251664716a",
+        "description": "venus/pipeline: Refactor vn_fix_graphics_pipeline_create_info",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0369fdbe94efcbcc6a21c5b692e06d90c24d9e7f",
+        "description": "venus: Track subpass properties",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b3619743c0c701b7f8bf7aa467dfd7d8b5892b03",
+        "description": "venus: Drop vn_present_src_attachment::acquire",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7cc3f046e0d6354747338de578fcaef883690e73",
+        "description": "venus: Remove cryptic pointer arithmetic on present attachments",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2937c100e19e37c92e6b998d9bef77f15b1a90c9",
+        "description": "svga: fix SetConstantBufferOffset command opcode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bea050345ec54993a8954fd5b2e6f5d8643314b6",
+        "description": "radv: do not set registers for PSO states that are dynamic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "42803c70ef46d19184c189f163ba8c26fc817dda",
+        "description": "radv: simplify dynamic states uses when determining NGG culling settings",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2a96521bb40770d62c5e7d2e0b629811db9ed831",
+        "description": "radv: remove one useless check about line width and dynamic state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "101f9dd8cf3adb0b97566e8f6f083409d57b807b",
+        "description": "radv: properly ignore PSO states that are dynamic",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fdab8fef7aff0270ec173cbdca33d434a43ac8ab",
+        "description": "iris: return failure if iris_resource_configure_main fail",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "001779a33d80861d4bdabc3d0c7c78f75dee113f",
+        "description": "lavapipe: Remove st_shader_stage_to_ptarget",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "70891edd9728e7dd73115171fdb03622ce6450ba",
         "description": "nir: add a nir_opt_if_options enum",
         "nominated": true,
