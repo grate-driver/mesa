@@ -1,5 +1,446 @@
 [
     {
+        "sha": "24b9ad7cd5ebc7cfa5d03cf0f243ea4841c971b9",
+        "description": "meson: Enable graw tests on mingw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f5d9bd9a05038044526ea6cc2a1146bbb2aeddb",
+        "description": "zink: stop skipping bunch of GLESx tests",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c3ca94261af44e1e80012e838f1b179cf54b188a",
+        "description": "zink: Use DETECT_OS_WINDOWS instead of 'WIN32'",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "007d979dbe6a90dd8a6b489600be7284f7aa4019",
+        "description": "util: Enable tests that disabled for msvc/mingw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dec40ea4da130f84f374271dcc7ddf5d4d687ca9",
+        "description": "util: Use `DETECT_OS_WINDOWS` instead `WIN32` in u_process.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d85295e6a9c957fb9871cd3b0daeb64c05f00992",
+        "description": "util: Implement os_get_available_system_memory on Win32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b2bf20e28fc659df215f94a055497471168e9158",
+        "description": "util: Fixes typo in function os_get_total_physical_memory",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dc7a61aa17e786ceeadf5eb6f854372630456267",
+        "description": "util: Implement util_thread_get_time_nano on win32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c68c36f890c2f798144f24c93c85c9f353c0121e",
+        "description": "mesa/st: simplify sampler border color swizzling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e00bb6cb98b0fb5fac46bde0331e98f8e2882eea",
+        "description": "mesa/st: use tracked samplerview swizzle values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0ccc0f7b503205b85517f80914b608bab572f0ad",
+        "description": "mesa: track gl_texture_object swizzle internally",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "383b39f3130009d5a73e5f7f348f1b3e932a29d3",
+        "description": "mesa/st: use pre-calculated format swizzle for samplerviews",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e713a9a98219fb09a31e46785c577d1ffc451944",
+        "description": "mesa: track format swizzles on teximage objects",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "206aad7c5c702dceaa80fcc259c1ceda991471e2",
+        "description": "zink: add a driver workaround for broken L4A4 on nvidia",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d49586cfae34f4320f9eb56d79b2e62f5c0676d4",
+        "description": "zink: support emulating alpha formats using new border color quirk",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d5bf01e214c2398c21da28de06e1739c60183952",
+        "description": "zink: handle emulated alpha format clears",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "89c41a77508ae300d9ebd411da311121bdef336c",
+        "description": "zink: reject native blits for emulated alpha formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "88390404b8bfa4b32be4f1137a9cd9fae53caf32",
+        "description": "zink: add some format functions for emulating alpha formats",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3b27632abc65d2a07ce1e3302e6a0c6de4016638",
+        "description": "zink: stop modifying samplerview swizzle on base struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a5b272589491e850b092af543f4c8c76e8eebfc5",
+        "description": "util/format: handle SRGB in util_format_luminance_to_red()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "55ef65d4f44cabd525e3ce021ed2b452dd8b8698",
+        "description": "gallium: add PIPE_QUIRK_TEXTURE_BORDER_COLOR_SWIZZLE_ALPHA_NOT_W",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "03b893acb34e9ac0d41ddf000aeb995d771b4357",
+        "description": "gallium: convert PIPE_QUIRK_TEXTURE_BORDER_COLOR_SWIZZLE to enum",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1341d7aa84ef188f537954682ce0c45068a3dd8f",
+        "description": "mesa/st: use plumbed value for srgb_skip_decode in sampler conversion",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1c172cdbccd6aeae6a0660514b8fef5e550f1ca4",
+        "description": "mesa/st: plumb glsl130_or_later through sampler creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d1e33fa3456d174e6c47c20abc466fd06936ac58",
+        "description": "mesa/st: add ignore_srgb_decode param to st_convert_sampler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28d033b34fe3c52f4720235449a0a1fd5fe683b0",
+        "description": "mesa: require render target bind for A/L/I in format selection",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f28e2827c9ccc26dc608a870209b4deab7b5882",
+        "description": "mesa: fix blending when using luminance/intensity emulation",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3eec931e9b851fb399d3b00ef1f2f9f855910692",
+        "description": ".mailmap: change spelling for Constantine Kharlamov",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db11e300e92d28fb9c220d0dcdfe36b33403157e",
+        "description": "meson: remove source_root() call in main meson.build",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "91362340f33eabf95d64c6116a813d7c88ff802f",
+        "description": "meson: remove source_root() call in nir compiler path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ef611696a5a7768343f4df5fb1dc5533d44ae802",
+        "description": "loader/dri3: remove a no-op free call",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f572961d6937c0adceab39dd883cb53cfa965dc2",
+        "description": "loader/dri3: simplify check for reply",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "861167f41d17e1c8d114cb511a817308491327c1",
+        "description": "isl: fix bug where sb.MOCS is not being set",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c27fcb1d3bac4282978529d947f3a143ae4a311f"
+    },
+    {
+        "sha": "a3a04ed6f3617ab7891f827fae8a9dd8e67596bf",
+        "description": "glsl: add check for too large atomic counter buffer offset",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd28984f84af64ecb59851c4ea56324dd5a1cbc4",
+        "description": "pvr: fix memleak in error paths",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c69ba3159a6e65a2108cbffefda25a2bf4e09e4f",
+        "description": "Android.mk: Disable lmsensors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f81d4b76492497ee2beb2c360df849bd7a292294",
+        "description": "util/xmlconfig: allow drivers to override option values",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7361b67f92eeef47107062313bbf2a4372e17827",
+        "description": "glthread: add missing code for GL_ARB_sparse_texture",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "983684d763325a7b5f92cbebdf488a06ab41969d",
+        "description": "glthread: track glBindFramebufferEXT, not just glBindFramebuffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f9b0dc9377913d2745f6fb89912e94ce22d64681",
+        "description": "glthread: track GL_READ_FRAMEBUFFER bindings too",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "28e351673ef8c22c5ae0585f40e1cbd2b15eda5c",
+        "description": "glthread: call _mesa_glthread_DeleteBuffers unconditionally",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "4fa24747b9089bda0453051e5fd5188e6fce6996"
+    },
+    {
+        "sha": "eb4036ea5b9a55c1d965e0917d21c502c8635b47",
+        "description": "glthread: unbind framebuffers in glDeleteFramebuffers",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "e48f676835d110f907e5cd55d659dae511e4af2d"
+    },
+    {
+        "sha": "a9b64bd7ad725fdf8ea0da522e1d47215cfb2f84",
+        "description": "glsl: allow image*Shadow keywords on ES and GLSL >= 420",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "00d8fcee10385dc711b1197c3098b2c2fc7effa9",
+        "description": "intel/drm-shim: update shim to support DG2",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4393be8291ff3f39ff37a61133b6e5b0fa3e9698",
+        "description": "mesa/st: fix reference to nir->info after nir_to_tgsi",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "580f1ac4736eec90e2e7dbe67ba76cac4d0e5319"
+    },
+    {
+        "sha": "74266753634a6928d7c8497783dcd315d5667eec",
+        "description": "svga: compare graphics shader stages against COMPUTE",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "9bbf235fd9d4ddc82583672bea4e299e4d69206c"
+    },
+    {
+        "sha": "2d39227a90440e5b911f5ac6c0fb5ac04c433565",
+        "description": "radv: Fix stack size calculation with stage ids",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "c39cccec9c5a6d027457e625e34db5f0092c076b"
+    },
+    {
+        "sha": "1f6bd6ece99c92a492b896713799bba642b687cd",
+        "description": "etnaviv: fix standalone compiler to work without a tgsi backend",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b85544db19a75a939b13aa246fd7305a7bef8a4c",
+        "description": "etnaviv: skip disk cache initialization on standalone compiler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "a3bf0da1cbd4b10043c80bf44609a3024b5fcc36",
         "description": "microsoft/compiler: Change calls to NIR_INSTR_UNSUPPORTED to log to dxil_logger instead",
         "nominated": false,
