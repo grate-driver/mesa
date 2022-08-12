@@ -850,7 +850,7 @@
         "description": "vk/device-select-layer: fix .sType of VkPhysicalDeviceGroupProperties",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c196ffaca6d927e213d1c39ec9eed611fd01e2e1"
     },
