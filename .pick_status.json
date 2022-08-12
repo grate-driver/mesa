@@ -292,7 +292,7 @@
         "description": "intel/compiler: fix mesh urb write regression",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "349a040f684cc5c6b80d40a4edbefa410e91034d"
     },
