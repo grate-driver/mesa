@@ -805,7 +805,7 @@
         "description": "nir_to_tgsi_info: drop const_buffers_declared",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
