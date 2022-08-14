@@ -12010,7 +12010,7 @@
         "description": "anv: fixup assertions on lowered storage formats",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a9edc268b9b12db49a3fef599cf13443224dca7e"
     },
