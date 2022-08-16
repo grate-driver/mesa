@@ -544,7 +544,7 @@
         "description": "svga: support TGSI_SEMANTIC_TEXCOORD in swtnl draw context",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e73443b7a502c06637d2eac0e8ef1c5cf449a341"
     },
