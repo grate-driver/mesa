@@ -148,7 +148,7 @@
         "description": "r600: Don't use SB with R600 style scratch reads",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1d871aa6268159cdc63ef846599456d9ba567206"
     },
