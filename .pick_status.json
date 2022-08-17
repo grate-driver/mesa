@@ -85,7 +85,7 @@
         "description": "panfrost: Don't segfault on unknown models",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "96d65b47c715155bb0403f3e0b5555b348d68539"
     },
