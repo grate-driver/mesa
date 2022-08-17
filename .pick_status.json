@@ -229,7 +229,7 @@
         "description": "glsl: dont lower precision for textureGatherOffsets",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b83f4b9fa23dc3d94ebb885897c19590c750cb83"
     },
