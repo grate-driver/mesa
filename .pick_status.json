@@ -418,7 +418,7 @@
         "description": "llvmpipe: Add some missing locking",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a680fd078c0a7574b60fbf9a7e5c9f42c97a744e"
     },
