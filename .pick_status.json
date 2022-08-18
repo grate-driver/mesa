@@ -76,7 +76,7 @@
         "description": "vk/render_pass: don't deref null resolve attachments",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d2990b659978c2cce6668ee6ceb2570592c81f32"
     },
