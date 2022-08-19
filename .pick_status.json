@@ -12838,7 +12838,7 @@
         "description": "pan/bi: Don't reorder image loads across stores",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "569e5dc7450620e7286aec036f34d02f02cdd2c4"
     },
