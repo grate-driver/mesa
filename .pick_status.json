@@ -4576,7 +4576,7 @@
         "description": "vulkan: Dirty VP_VIEWPORTS/SCISSORS when copying viewports/scissors",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "fcedb1250bb8f05ef047b8b477169d70af9ef27d"
     },
