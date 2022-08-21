@@ -11380,7 +11380,7 @@
         "description": "radeonsi: fix tcs_out_lds_offsets arg alignment",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7598bfd768f02d1d77007ebc07990db9c83a6fb4"
     },
