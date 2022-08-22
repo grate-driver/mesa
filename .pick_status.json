@@ -11965,7 +11965,7 @@
         "description": "iris: Always initialize shader compilation queue ready fence",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "42c34e1ac8da3a000087c02cfd9f6fcb83e84fbc"
     },
