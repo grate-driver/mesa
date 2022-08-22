@@ -12046,7 +12046,7 @@
         "description": "zink: ignore nir_texop_lod for tex dest matching",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3a47576687624e1ed4661d7f5b6c0e54998ada48"
     },
