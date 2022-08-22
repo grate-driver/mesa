@@ -11956,7 +11956,7 @@
         "description": "anv: fix assert to build with shader cache disabled",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7f1e82306c9b59fe534b9712d85f9324b0bfb5a4"
     },
