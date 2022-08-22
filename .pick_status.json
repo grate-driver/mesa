@@ -12379,7 +12379,7 @@
         "description": "wsi/x11: fix memleak in wsi_x11_connection_create()",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bbdf7e45b15f6345c5e509827770aec8a8bdfe7c"
     },
