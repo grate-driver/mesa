@@ -7465,7 +7465,7 @@
         "description": "pan/mdg: Print 3 sources for CSEL",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0ee24c46e0aad500a4ef90cc03cfd319e11cb342"
     },
