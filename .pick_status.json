@@ -11011,7 +11011,7 @@
         "description": "winsys/amdgpu: fix non-page-aligned sparse buffer creation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "667da4eaed37de143681711344aba19373bee1d0"
     },
