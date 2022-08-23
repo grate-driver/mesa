@@ -10273,7 +10273,7 @@
         "description": "r600/sfn: Use a low number for unused target register",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "79ca456b4837b3bc21cf9ef3c03c505c4b4909f6"
     },
