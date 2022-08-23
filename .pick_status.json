@@ -10327,7 +10327,7 @@
         "description": "r600/sfn: Handle color0 writes all on R700 like on EG",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "069f3869ac3a140898224c8c37d5b3b6349361a4"
     },
