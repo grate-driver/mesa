@@ -10561,7 +10561,7 @@
         "description": "iris: Use linear for exported resources if we can't convey tiling",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e6588354360d102f3bfbfdfd484490a6ae296142"
     },
