@@ -6196,7 +6196,7 @@
         "description": "spirv: Mark phis as mediump instead of directly lowering them to 16 bit.",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6f25d45877a1e1a7ac6250a7d051d33485e0cba7"
     },
