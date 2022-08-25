@@ -1120,7 +1120,7 @@
         "description": "aco: fix VMEMtoScalarWriteHazard s_waitcnt mitigation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "bcf94bb933e8ccc0b91305ed8189a35e8938abbf"
     },
