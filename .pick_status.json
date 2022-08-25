@@ -7537,7 +7537,7 @@
         "description": "virgl: when reading back wait first, then do the transfer",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e87186fc679c146c5d521139bb79c8eafa0a22f0"
     },
@@ -8293,7 +8293,7 @@
         "description": "gallium/u_threaded: buffer sharedness tracking",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e9c41b321488c23b7d8ec5744f68218bac753505"
     },
