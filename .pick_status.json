@@ -10255,7 +10255,7 @@
         "description": "intel/pci_ids: Add 0x468b ADL-S PCI-id",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d399c3e861a7c459501413e8d675db8ca1a40712"
     },
