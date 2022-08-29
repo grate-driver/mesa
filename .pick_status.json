@@ -1867,7 +1867,7 @@
         "description": "amd/common: some ASICs with gfx9 use compute rings for render",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "983223de5dc01f50227b1b1fe20149ae56f611f6"
     },
