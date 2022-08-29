@@ -22558,7 +22558,7 @@
         "description": "d3d12: Implement cap PIPE_VIDEO_SUPPORTS_CONTIGUOUS_PLANES_MAP",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a585d95803ca38d42b893603a85bf6442a54838a"
     },
