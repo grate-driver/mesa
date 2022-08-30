@@ -7672,7 +7672,7 @@
         "description": "venus: allow no external memory handle when renderers lacks support",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9c5a7ffbd8a696182647135ef32bddb347c277f2"
     },
