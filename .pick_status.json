@@ -5548,7 +5548,7 @@
         "description": "pan/bi: Fix out-of-bounds write in va_lower_split_64bit",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b48933d6411a379c128b31174474949046a6915c"
     },
