@@ -6970,7 +6970,7 @@
         "description": "aco: Fix p_init_scratch for task shaders.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d2d94b62f2a4f8686c17b7c33ae02aa2b2029a27"
     },
