@@ -3190,7 +3190,7 @@
         "description": "nv50: properly flush the TSC cache on 3D",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ba6ba8c9900eb1f8db14da3ebd77369b07e60857"
     },
