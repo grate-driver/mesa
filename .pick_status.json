@@ -5593,7 +5593,7 @@
         "description": "pan/bi: Fix dual texturing with uniforms",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a4d3a2964771c3d26967ecab4d7c187a8b2d8002"
     },
