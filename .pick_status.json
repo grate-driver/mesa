@@ -6160,7 +6160,7 @@
         "description": "zink: only add srgb mutable for images with modifiers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "28ee911ad67192bc7a0683b6061b89e372482faf"
     },
