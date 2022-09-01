@@ -6529,7 +6529,7 @@
         "description": "tu/lrz: Fix multiple subpass case with secondaries",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "4b5f0d98fd57cbcd253b85291b7491aa5754a2eb"
     },
