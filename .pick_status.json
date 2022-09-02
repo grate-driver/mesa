@@ -3388,7 +3388,7 @@
         "description": "intel/pci_ids: Drop non-upstream dg2 pci-ids",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "398a9be94b44ba1063c41e6aa6558a05d797d876"
     },
