@@ -5908,7 +5908,7 @@
         "description": "intel/pci_ids: Add dg2 0x5698 pci-id",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ad565f6b70d9c4f2af34fe531d01ecf0eaa08500"
     },
