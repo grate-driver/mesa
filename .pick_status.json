@@ -5584,7 +5584,7 @@
         "description": "llvmpipe: don't assume pipe_context is always available in flush_frontbuffer",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "91dcadf95690c658b34b20cf5dbf77f79c1cf297"
     },
