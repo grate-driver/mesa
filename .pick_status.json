@@ -3253,7 +3253,7 @@
         "description": "tu: Clamp priority in DRM submitqueue creation",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0c6fbfca0c91ef012e8ab767a317c07f1f6dc5e6"
     },
