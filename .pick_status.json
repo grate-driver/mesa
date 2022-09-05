@@ -193,7 +193,7 @@
         "description": "ir3: Prevent reordering movmsk with kill",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b1b80c06a78e62b2d8477b07f12b0153435b66a8"
     },
