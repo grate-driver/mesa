@@ -3406,7 +3406,7 @@
         "description": "anv: pipelineStageCreationFeedbackCount is allowed to be 0",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6601e5d6fc68cd9f8305508c650289170fef71ff"
     },
