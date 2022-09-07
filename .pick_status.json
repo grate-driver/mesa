@@ -3001,7 +3001,7 @@
         "description": "nir/gather_info: Clear cross-invocation output mask.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "112a856813eb2649ea7ff81768bab594033ce00a"
     },
