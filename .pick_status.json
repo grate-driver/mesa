@@ -2569,7 +2569,7 @@
         "description": "aco/optimizer_postRA: Fix logical control flow handling.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2e56e2342094e8ec90afa5265b1c43503f662939"
     },
