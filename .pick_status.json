@@ -15862,7 +15862,7 @@
         "description": "virgl: Report CONSTANT_BUFFER_SIZE according to GL_MAX_UNIFORM_BLOCK_SIZE",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5b683ba19ac77d6c7dfd8de478678d0b90ba764f"
     },
