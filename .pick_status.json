@@ -5359,7 +5359,7 @@
         "description": "zink: fix atomic ssbo indexing with non-32bit values",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5a95c6b3282ed540ee42a5bfc1924168b0b3e3b2"
     },
