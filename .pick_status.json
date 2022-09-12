@@ -1030,7 +1030,7 @@
         "description": "docs/zink: document rgtc requirement",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d50e8554b997338d709e526a8e7c6cd7e970f68c"
     },
@@ -1453,7 +1453,7 @@
         "description": "Revert \"pvr: Make pvr_cmd_pack() macro clearly internal\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "27c57b86500ce48154533d78b74350c31152b2f3"
     },
