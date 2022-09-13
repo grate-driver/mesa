@@ -454,7 +454,7 @@
         "description": "venus: ignore pInheritanceInfo if not secondary command buffer",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6f5289df53302ca3ca64c0bd6ce775b80a92c457"
     },
