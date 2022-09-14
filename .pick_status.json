@@ -346,7 +346,7 @@
         "description": "freedreno: We really don't need aligned vbo's",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "60912f1ebd36c2bb235856ae7de9b1c3d66ef719"
     },
