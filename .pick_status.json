@@ -238,7 +238,7 @@
         "description": "broadcom: fix dependencies in static_library() calls",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1ae8018a6af81eec4832a57d9d0346aa3dd98d28"
     },
