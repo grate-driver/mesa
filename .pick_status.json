@@ -1,5 +1,491 @@
 [
     {
+        "sha": "3d4c36a3bcc51ed441b2667d92291bea30ef7449",
+        "description": "d3d12: d3d12_video_buffer_create_impl make resident after checking for resource creation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2003d2d9284b8c98155c60d72ab4985394028d65",
+        "description": "d3d12: Add VPBlit processor check for D3D12_FEATURE_VIDEO_PROCESS_MAX_INPUT_STREAMS",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0325a2a1a363e79023067fbab40f83147d170ddd",
+        "description": "d3d12: Allow video processing for formats other than NV12",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07bb5951fcc6fa1e0bfe5691ed9677d02918976b",
+        "description": "d3d12: Allow formats other than NV12 in d3d12_video_buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd8457580968f1cf6c75a494875a3eeccfb0b84c",
+        "description": "d3d12: Add support for importing d3d12_video_buffer from handle",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "59c45e1ed738a55d9fee02095a75371e354c1eca",
+        "description": "d3d12: Fix leak in d3d12_resource_from_resource and usage in d3d12 video dec, enc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cdd83c6110c7f73191489791cd300578c3b6cfb3",
+        "description": "d3d12: Fix winsys displaytarget leak in d3d12_resource",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cd036433092a7aea8eea0d7672c639c06a3fd3d5",
+        "description": "d3d12: Fix leak in d3d12_video_proc when re-creating ID3D12VideoProcessor",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0e1548844273123f2b8070cb5c06ecd5511a1ed",
+        "description": "d3d12: Fill feedback in d3d12_video_encoder_encode_bitstream so vaSyncSurface properly populates buf->coded_size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d672cc39ba9e4d46d249c436e0d505dcdff401bc",
+        "description": "d3d12: Avoid heap allocations on hot path d3d12_video_decoder_dxva_picparams_from_pipe_picparams_hevc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d3f0733d1de1eaabbf534820fbe707e35b485aeb",
+        "description": "d3d12: Avoid local allocations for D3D12_RESOURCE_BARRIER on hot paths",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5c2ec8efc813dedb1c150254d8645cb765986697",
+        "description": "d3d12: Avoid extra allocation, copies when generating DXVA_Slice_Hxxx_Short arrays",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da11684e9db9eaba6477155dde4a210f6564b6b6",
+        "description": "d3d12: Add HEVC Decode/Encode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f2d172a8be0f141d4c35384a342fac4dbf2547cf",
+        "description": "gallium/vl: Rename s_addr variable in vl_idct.c as it conflicts with windows existing inaddr.h keyword definition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e0b732e506c74328bc48dd6e595dd849bbfc4395",
+        "description": "gallium/vl: Allow vl_zscan.h to be included from C++",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8e92c76c34da3da753f260fef4936f1af1d13f6e",
+        "description": "d3d12/va: Name convention rename PIPE_VIDEO_SUPPORTS_CONTIGUOUS_PLANES_MAP to PIPE_VIDEO_CAP_SUPPORTS_CONTIGUOUS_PLANES_MAP",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "427135ea6dd9fbb6c10545c6add3132414b86ca2",
+        "description": "frontends/va: Support HEVC caps regarding features, block sizes, prediction direction",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "267075696598bb0ef432c2c8b96f8979ce0ce151",
+        "description": "frontends/va: Extend single to multiple L0-L1 references for HEVC Encode",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "56684b85e9bc32976f5ff287c762bc67b8333224",
+        "description": "frontends/va: Add HEVC Encode support multi slice and extend pipe args",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "52f23f923ecabf11a42ef921d5c173cb34722ad4",
+        "description": "frontends/va: Mark IsLongTerm in HEVC decode args",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ee62f4d614eceb5b39f360fc9dd16d0dacd00811",
+        "description": "frontends/omx: Fill HEVC Decode param IntraPicFlag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5efd4bbf7fb6768e57b55daee165481b26d04122",
+        "description": "frontends/vdpau: Fill HEVC Decode param IntraPicFlag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7acd6788e9fd404777cd06178ad6b3a99946c10",
+        "description": "frontends/va: Add HEVC decode args: IntraPicFlag, no_pic_reordering_flag, no_bipred_flag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6e32bf15bc611cc02799db6038d3f8f14a1150e",
+        "description": "frontends/va: Add HEVC decode slice descriptors",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2aa4ed16e22efff340a65cd597a19359b1939dac",
+        "description": "radv/ci: move some tests from the renoir fail to its flake list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba7e87a03d6796e4c677164fee42fe7eb9927618",
+        "description": "panfrost: do not fake rgtc-support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "df58342f61060a3472c772c59b26b766a6537a62",
+        "description": "mesa/st: enable rgtc extension with fallback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f25875ce180573fccd46dcc693c4331c80b51401",
+        "description": "mesa/st: do not fall back to uncompressed for rgtc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1735053de5fe77413df63a68382a9e381a525ee7",
+        "description": "mesa/st: implement fallback for rgtc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "091e6e37c207ff18c54f2837975b515735a588b2",
+        "description": "mesa/main: add _mesa_unpack_rgtc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6ed406d9fd044dafcd87ae45b1906a04edb325e",
+        "description": "util/format: implement rgtc -> r8 / r8g8 unpack",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dfbcd94041f5bdeab78298df161d2232dc7f5a68",
+        "description": "util/format: allow unpacking less than a block from rgtc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6e1c3e98cda23a80217888ef1d80b27476324ae7",
+        "description": "util/format: fix broken indentation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bb7d193ab2fc49540a905c9bd16e13c73ea35362",
+        "description": "mesa: add format-helper for rgtc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d33696a31c9272859b6be7867a0bf87a382d9958",
+        "description": "mesa/st: add context-flag for rgtc",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "efd8d0f6e7ccd6c278779a3ca2f260d9099a7c1b",
+        "description": "radv/ci: cleanup lists of failures/flakes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "65f1baf6c6d6febf68f1c7d66c2d3a630bd2e11d",
+        "description": "turnip: use vk_descriptor_set_layout",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43430fe2407636af0bf36b6b5f2edd2be72f8a4c",
+        "description": "turnip: use vk_buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2664d59aeec72da8608611860ab6a9e2d944922a",
+        "description": "freedreno: We really don't need aligned vbo's",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "60912f1ebd36c2bb235856ae7de9b1c3d66ef719"
+    },
+    {
+        "sha": "76fbc8be6d484e35995121eeb90b01daa89b4343",
+        "description": "freedreno/drm/virtio: Handle read after upload",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8c8e13e3b55716cbaf6adcecb94486fe5312312a",
+        "description": "freedreno/drm/virtio: Don't prefer upload for mapped buffers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e71b0d31aaa7bd42fa2ca651024ccd19b9a10813",
+        "description": "freedreno/virtio: Don't upload if we have valid range",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "696747c96bdfccaed101b428f894496572a9222f",
+        "description": "mesa: Lower mediump temps and CS shared when the driver supports FP16+INT16.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7e986e5f045a0e9da3ee64970a89d89907d0fcb4",
+        "description": "nir/lower_mediump_vars: Don't lower mediump shared vars with atomic access.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a1c765a44c032fe505e4863297b6bbefa0ce426c",
+        "description": "freedreno/ir3: Consistently lower mediump inputs to 16-bit (when we can).",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f4857591e1dcbf305c8c7bb4ee6d1fc292077f89",
+        "description": "intel/compiler/fs: Use DF to load constants when has_64bit_int is not supported",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "daf0b67bc23c419513fbb9de629eaa9b74acc9e9",
+        "description": "intel/compiler/fs: Fix compilation of shaders with SHADER_OPCODE_SHUFFLE of float64 type",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "731116da1abce807cb31a5899ffe7d3f96a2149b",
+        "description": "radv: stop checking for NULL pipelines in radv_CmdBindPipeline()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "949d76d174b1a492d1d7206f5aee820f034695c5",
+        "description": "radv: stop dirtying the graphics pipeline when restoring it",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "73f1155193917c6b9cf2c242107dd2047e16c040",
+        "description": "radv: reset the compute pipeline when the saved one was NULL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3cceaaf5cd2ecc43c6d7b8f0214ef31b3acc8e82",
+        "description": "radv: do not bind NULL graphics pipeline when restoring the meta state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9ebaa62a34a1a3fc13d937e1cb1d2607c80d680e",
+        "description": "radv: stop setting redundant viewport/scissor for internal operations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4031c9428f386109bed00068023e395d0f9f7502",
+        "description": "drm-shim: Allow drm-shim to work with glibc fortify.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e2eb1d083c9ac5df9e1b62e499b0c3dade4b090b",
+        "description": "ci/panvk: Skip dEQP-VK.api.object_management.max_concurrent.query_pool",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "baf24dea943202b3a92cad0c9f9648597040955a",
         "description": "ci/traces: remove first line with YAML version to prevent failure",
         "nominated": false,
