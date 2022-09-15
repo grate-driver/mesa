@@ -5692,7 +5692,7 @@
         "description": "drm-shim: drop gnu99 override",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "45fb815a75669b32f6317ba6d53ec9465a4b0ae0"
     },
