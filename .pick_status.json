@@ -5161,7 +5161,7 @@
         "description": "r600/sfn: Handle shifts on Cayman",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "00599f6e7161065c51812174ca18427b9867f63f"
     },
