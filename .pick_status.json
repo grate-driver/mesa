@@ -2578,7 +2578,7 @@
         "description": "aco/optimizer_postRA: Don't assume all operand registers were written by same instr.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0e4747d3fb7ec15f8c1d6b971b1352249e7d95c6"
     },
