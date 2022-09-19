@@ -4162,7 +4162,7 @@
         "description": "zink: fix atomic ssbo fadd offsets",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "99a4a9c6ff09f4a326341432ca75f18ddcdc0bf8"
     },
