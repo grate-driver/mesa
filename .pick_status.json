@@ -2551,7 +2551,7 @@
         "description": "turnip: Fix the \"written stencil is unmodified\" check.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b2a60c157e4d6cc62c55d8fe8777f7cbd548a722"
     },
