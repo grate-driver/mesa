@@ -2767,7 +2767,7 @@
         "description": "radeonsi: don't flush asynchronously for fence_server_signal",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "21b3a234048a270e7999f8e70e25091c599dd3eb"
     },
