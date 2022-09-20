@@ -1894,7 +1894,7 @@
         "description": "mesa/st: always use normalized coords for samplers",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ed0e9862c56d13381f0414b5a835fd31960edfe6"
     },
