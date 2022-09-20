@@ -1309,7 +1309,7 @@
         "description": "zink: fix/improve handling for multi-component bitfield ops",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8e97f51c6767d6ecf8dff8712b2975f84243887c"
     },
