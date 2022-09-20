@@ -3442,7 +3442,7 @@
         "description": "intel/compiler: remove second shading rate lowering for mesh",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9acb30c8c40a86e6f92810e1d149fbf2faeb655b"
     },
