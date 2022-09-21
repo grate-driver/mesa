@@ -1,6 +1,8 @@
 mesa (22.2.0-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * nv50-ir-fix-OP_UNION-resolving-when-used-for-vector.diff: Dropped,
+    upstream.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 21 Sep 2022 11:51:01 +0300
 
