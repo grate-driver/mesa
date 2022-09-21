@@ -4,7 +4,7 @@
         "description": "zink: set layouts before possibly reordering image copies",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "731d7be3756c3ab5944c5755f4504e093d149f53"
     },
