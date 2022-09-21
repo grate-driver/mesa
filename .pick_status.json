@@ -1633,7 +1633,7 @@
         "description": "turnip: Fix busy-waiting on syncobjs with OS_TIMEOUT_INFINITE.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "0a82a26a1854a63d8248e85c0e3b137d44ce7542"
     },
