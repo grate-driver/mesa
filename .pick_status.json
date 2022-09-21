@@ -697,7 +697,7 @@
         "description": "zink: always run optimize_nir after lower_64bit_vars",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "5b2f850425e4c841529ff8339a1fbc5a26e9ff8c"
     },
