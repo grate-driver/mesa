@@ -1687,7 +1687,7 @@
         "description": "mesa/st: fix a set_sampler_views call parameter order",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "e7b95619596167025d26f07efb04dc5bfd5e9aee"
     },
