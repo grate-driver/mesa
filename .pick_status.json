@@ -1381,7 +1381,7 @@
         "description": "ir3/analyze_ubo_ranges: Account for reserved consts",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d3b7681df28e89311c4149708311de546e0a58cc"
     },
