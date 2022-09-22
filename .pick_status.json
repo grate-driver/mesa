@@ -859,7 +859,7 @@
         "description": "radeonsi/gfx11: don't set VERTS_PER_SUBGRP to 0",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "25a66477d0268181121c0436f62b2100b72df068"
     },
