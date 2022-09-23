@@ -922,7 +922,7 @@
         "description": "nouveau: treat DRM_FORMAT_INVALID as implicit modifier",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "129d83cac2accc4a66eae50c19ac245b864dc98c"
     },
