@@ -67,7 +67,7 @@
         "description": "tc: don't use CPU storage for glBufferData",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a5a8e197413ec0189435139006a7c7026840efc2"
     },
