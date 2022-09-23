@@ -1266,6 +1266,8 @@ zink_destroy_screen(struct pipe_screen *pscreen)
       VKSCR(DestroyDebugUtilsMessengerEXT)(screen->instance, screen->debugUtilsCallbackHandle, NULL);
    }
 
+   util_vertex_state_cache_deinit(&screen->vertex_state_cache);
+
    u_transfer_helper_destroy(pscreen->transfer_helper);
 #ifdef ENABLE_SHADER_CACHE
    if (screen->disk_cache) {
