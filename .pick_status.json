@@ -571,7 +571,7 @@
         "description": "mesa/st: emit string marker based on PIPE_CAP_STRING_MARKER",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "10ac88b72fac70eb3fa698179d48378600f59f74"
     },
