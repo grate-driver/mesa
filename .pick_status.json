@@ -607,7 +607,7 @@
         "description": "zink: always unset var->data.explicit_xfb_buffer",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6d40db84c9d507768f118fe20fc4437cbfa6be41"
     },
