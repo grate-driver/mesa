@@ -508,7 +508,7 @@
         "description": "lavapipe: handle view mask layer count properly for begin rendering.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8a6160a35428264fa3b4722d8c72b9c8aa4b8256"
     },
