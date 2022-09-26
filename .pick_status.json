@@ -49,7 +49,7 @@
         "description": "ir3/analyze_ubo_ranges: Account for reserved consts better",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "8cb1deded60e4b8d101e4a3055078f9434aa7d8f"
     },
