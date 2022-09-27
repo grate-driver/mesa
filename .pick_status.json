@@ -4774,7 +4774,7 @@
         "description": "Revert \"radv/rt: use derefs for the traversal stack\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "3750663c72b01d8668c13eed44f40863af588ba4"
     },
