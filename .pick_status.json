@@ -18229,7 +18229,7 @@
         "description": "st/mesa: fix potential use-after-free in draw_bitmap_quad",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "feda6e9c5d101c9a5654a026090e2f8a11980e91"
     },
@@ -18247,7 +18247,7 @@
         "description": "Revert \"mesa: implement a display list / glBitmap texture atlas\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b26ddda12fe7dbb6a4e6af3b47c1e837cc7ebb03"
     },
