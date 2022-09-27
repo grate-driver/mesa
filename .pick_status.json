@@ -19183,7 +19183,7 @@
         "description": "radeonsi: r600: d3d12: st: Use NIR lowering for tg4 offset arrays instead of GLSL lowering",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "main_sha": null,
         "because_sha": "640f9098621448340378a519be7b9894afd9e390"
     },
