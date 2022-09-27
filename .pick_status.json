@@ -1282,7 +1282,7 @@
         "description": "freedreno: Fix graphic glitches on a4xx and a5xx",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f68c6951b86ac38ebdb89bc6b5a6285433e684a6"
     },
