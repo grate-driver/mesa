@@ -20929,7 +20929,7 @@
         "description": "zink: try to reuse swapchain modifier for dmabuf export",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "247b8f2924b7832d8520e890cff6891217f5a860"
     },
