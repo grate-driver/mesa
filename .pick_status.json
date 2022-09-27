@@ -427,7 +427,7 @@
         "description": "gallium: Do not include offscreen winsys if glx is disabled",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "31dcb39615a5d1541a7e5b27e19566b48aac381d"
     },
