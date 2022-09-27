@@ -1282,7 +1282,7 @@
         "description": "pipe-loader: fix zink driinfo header path",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "d760a9151b73d1998fceff38fb1c642e4d77bf67"
     },
