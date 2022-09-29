@@ -1,5 +1,464 @@
 [
     {
+        "sha": "e5631add0d1c97da4686f474735d45705facd308",
+        "description": "ci/virgl: Enable virgl-iris-traces",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f7a64df0e7434a9b8f4de09de8b201c6c16da063",
+        "description": "ci: Update virgl-iris-traces checksums",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "498186e0d9b0b3ee8a532edc831605cbc42abbcb",
+        "description": "ci: Bump crosvm version",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "240346820270199827ee7aeb61e26c6503346e97",
+        "description": "venus/ci: remove redundant crosvm patch",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c8765c5244ac194e1c85d2a88dde76c5d92a8111",
+        "description": "radv: ignore shader stages that don't need to be imported with GPL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bc0ff36885d6b773cb48ecf7eaf0630e70ed8763",
+        "description": "radv: fix initializing the blend state for NULL render pass with GPL",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6000e3f53406056b83405b4755e08815f196dc06",
+        "description": "radv: fix initializing the attribute mask for VS input state and GPL",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "0feab7b9cfa6a229a6a064f73f5f0c59a0d0e61b"
+    },
+    {
+        "sha": "56fb25806428506469982e35ee5076b981023c92",
+        "description": "zink: replace mixed_zs with zs feedback loops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5bc19dd5f7d329b786d005e9166ca59544347ce9",
+        "description": "zink: add a draw barrier when unbinding a sampler-bound fb surface",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b685dc3509f3a84676546830fa08ea8a8a0beec",
+        "description": "virgl: Add nir_lower_tex pass",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "086b620793c7d0b4350a110a2ebfdefb09778c19",
+        "description": "virgl: Add TEXTURE_SHADOW_LOD capability support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a63a31a47b5e196bf32217f0a2c52f33530a68ed",
+        "description": "radv: remove NULL checks when binding a graphics pipeline",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ca893084503933452fa066f79a824ae628db22d",
+        "description": "tu: Fix setting RB_DEPTH_CNTL::Z_CLAMP_ENABLE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0b131b3e99c292d43df6f592e2cff312371bd26c",
+        "description": "freedreno/a6xx, tu: GRAS_CL_CNTL::UNK5 is Z_CLAMP_ENABLE",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5af6dad179dc4140964ab444a2a7f8cf8d16c561",
+        "description": "Revert \"freedreno,ir3: rename Z_CLAMP_ENABLE to Z_CLIP_DISABLE\"",
+        "nominated": true,
+        "nomination_type": 2,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "6cb41c51884c2488194f74e2ce637b950c835620"
+    },
+    {
+        "sha": "73089969219f95017060f51f5136efcbb6d31e9f",
+        "description": "lavapipe: dynamic state3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "092be5a32905989f620ff1926c2e3056fc4fea39",
+        "description": "vulkan: Add more dynamic color blend states",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1deb83fb86d22227a3553f43873b4d4ff9180214",
+        "description": "vulkan: Add more dynamic multisample states",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1fee04d8ffd899c20886c282d389a662337d0c67",
+        "description": "vulkan: Add dynamic state for tessellation domain origin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9d0ed9cbcc01b31a71037fcb35742fc8b77f09fe",
+        "description": "vulkan: Add more dynamic rasterizer state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "effd9962d98e82452919c2c8f1d975a4d2e9d13d",
+        "description": "vulkan: Add a dynamic state for vp.depth_clip_negative_one_to_one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "10bc2cd3ae03bff1c1c8e026b21df7937e2cc44c",
+        "description": "vulkan: Rename viewport_state::negative_one_to_one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "76a4d5ce8978ae5c0cfb0caf92c78bf1b0b011ec",
+        "description": "vulkan: Update the XML and headers to 1.3.230",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "691ec624520d44f6c0aa7b003895e817b878f8d3",
+        "description": "vulkan: Use altlen when available for array lengths",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a0378819557c75db5a2a659ff0b209739affd21",
+        "description": "gallium: avoid using float based conditions in loops",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5650d672429b01729799c0420ab2a85b1d7b2683",
+        "description": "zink: pass actual screen->threaded to zink_tc_context_unwrap()",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "267d715efb218f9d6d94744b599765bcb4adbfcc",
+        "description": "zink: hook up VK_EXT_depth_clamp_zero_one",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d4c8b55e8853ff97d14737a6fc1c0344f564358",
+        "description": "zink: move create_pipeline_lib to zink_program.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "21360476249122b8f5f016a80c78818f7ef93084",
+        "description": "zink: rework ZINK_PIPELINE_LIBRARY_FORCE into ZINK_DEBUG flag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e1314e682eece0dd360316329fb3c3039124f03f",
+        "description": "zink: move zink_screen_get_pipeline_cache() calls out to callers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2044f2910ca496f67d0de7aebb194e3714877da8",
+        "description": "vulkan/wsi: Add a supports_scanout flag",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "15fca5ca7e79138e8a5dab849e44bb4cd02520fd",
+        "description": "vulkan/wsi: Add a typedef for memory type select callbacks",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39f81564aba706d28943b3a8ce7595d753e8ee1e",
+        "description": "vulkan/wsi: Don't expose as many image configure helpers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "43c1c2b88850e7f0f9d1f2fe78580f39b5971f82",
+        "description": "vulkan/wsi: Always configure images in wsi_swapchain_init()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5424049e66299220fd60a43a7d5a4a4e1cba6da4",
+        "description": "vulkan/wsi/win32: Configure images via params passed to wsi_swapchain_init()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "76d15717e37659fd0b46ef553152df669b952c1b",
+        "description": "vulkan/wsi/display: Configure images via params passed to wsi_swapchain_init()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c315e20d619849091595450ce416e55369770234",
+        "description": "vulkan/wsi/wayland: Configure images via params passed to wsi_swapchain_init()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8775f08bf11fbe3a51f8d9affddb11bb945d6278",
+        "description": "vulkan/wsi/x11: Configure images via params passed to wsi_swapchain_init()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "29e3fc8eb1e6dbf1f95eb95130dabeeafb48a189",
+        "description": "vulkan/wsi: Support configuring swapchain images as part of swapchain init",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bfa08a1681b56fa6c3051610871448c7df792b02",
+        "description": "llvmpipe/cs: move compute code to explicit pointer types",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1d6819bf5b32fb0a193ced7e6692cdf46dc1a4bb",
+        "description": "llvmpipe/setup: move setup code to explicit pointers.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "977476bb050ee904fda8fa5871dc04c52a465836",
+        "description": "llvmpipe/fs: fix invocations access for opaque ptrs.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "98efdc449d1d0c6794372308ba5d454ea4862b93",
+        "description": "llvmpipe/cs: convert cs thread data to opaque friendly api",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "dd60813657bc7cb753afb62ab45d3dfc68e632da",
+        "description": "llvmpipe/cs: convert cs context to opaque friendly api",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a8bd993809a13959b9da9b4c8c55b1849c20d479",
+        "description": "llvmpipe/fs: convert linear context to opaque pointers friendly",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f0e9d3e497ec40448d7553c7b0b71455914d23c1",
+        "description": "llvmpipe/fs: convert thread data ptr to opaque ptr friendly apis",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1a7250ad9660b34684420d6312bd7ecfbb0396cd",
+        "description": "llvmpipe/fs: start passing explicit context pointer type.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ae201bcd42a7b5efe5b21270e081d242d2a97aad",
+        "description": "gallium: Do not include offscreen winsys if glx is disabled",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "31dcb39615a5d1541a7e5b27e19566b48aac381d"
+    },
+    {
+        "sha": "521da0360a040e39cb20a0112dec935e373af86e",
+        "description": "docs/rusticl: Document minimum required bindgen version",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "13016d22c57f787c78b644a87c58ae37c15af71a",
+        "description": "rusticl/bindgen: Use `allowlist-*` instead of `whitelist-*` switches",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5537f778a06c73cb98a294fe4d10aa38cb063e1f",
+        "description": "gallivm: avoid the use of an uninitialized value",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "3ed712f7483791aa0a256472d276ff5a83c643bc",
         "description": "zink: set layouts before possibly reordering image copies",
         "nominated": true,
