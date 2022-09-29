@@ -130,7 +130,7 @@
         "description": "Revert \"freedreno,ir3: rename Z_CLAMP_ENABLE to Z_CLIP_DISABLE\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "6cb41c51884c2488194f74e2ce637b950c835620"
     },
