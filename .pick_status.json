@@ -193,7 +193,7 @@
         "description": "radv/llvm: fix GS shaders on GFX8/9",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6698753cdb6d001669f51e23d42fec65d74e6b58"
     },
