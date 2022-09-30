@@ -103,7 +103,7 @@
         "description": "nir_lower_to_source_mods: Don't sneek in an abs modifier from parent",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "cd73b6174b093b75f581c3310bf784bed7c74c1f"
     },
