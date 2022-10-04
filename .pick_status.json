@@ -454,7 +454,7 @@
         "description": "Revert \"r300: be less agresive with copy propagate in loops\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "2bdffe7eb212ddc10f2ed9ef51095886a55109b4"
     },
