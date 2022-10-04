@@ -1318,7 +1318,7 @@
         "description": "turnip: Don't use the dynamic color write enable during non-dynamic.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "169e03800d0f0e8b66999bd2cf13d40ae4f6e782"
     },
