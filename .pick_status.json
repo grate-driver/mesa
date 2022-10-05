@@ -805,7 +805,7 @@
         "description": "gallium/u_threaded_context: remove stale comment",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "620c5e9dd05c57c253fa1e56218e88fe7bd23d86"
     },
