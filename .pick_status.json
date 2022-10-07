@@ -526,7 +526,7 @@
         "description": "tu: Reset whether there is DS resolve for dynamic subpass",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ed125e6cca188275631641784fcf3ddcbcfef193"
     },
