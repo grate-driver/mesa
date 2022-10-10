@@ -2344,7 +2344,7 @@
         "description": "nir: Fix ifind_msb_rev constant folding.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a5747f8ab357ff00c630b937b221e5fb59d90289"
     },
