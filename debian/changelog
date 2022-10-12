@@ -6,6 +6,7 @@ mesa (22.2.1-1) UNRELEASED; urgency=medium
   [ Timo Aaltonen ]
   * control: Bump build-dep on directx-headers-dev.
   * New upstream release.
+  * control, rules: Migrate to llvm-15.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 05 Oct 2022 10:56:54 +0300
 
