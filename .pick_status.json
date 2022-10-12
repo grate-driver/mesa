@@ -733,7 +733,7 @@
         "description": "zink: clamp line_stipple_factor to 1 if stipple is disabled",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
