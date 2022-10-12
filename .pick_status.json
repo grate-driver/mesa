@@ -1,5 +1,581 @@
 [
     {
+        "sha": "c4482a3c1a973975eb27ac284a18bebca24f7876",
+        "description": "radeonsi/vcn: enable multi-slice encoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4bcd5ee5b20a6e24c8c07533362382f2a80381f5",
+        "description": "radeonsi/vcn: enable dbk in avc encoding",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "afc9f488586f38c2f4904fbb0e843fa7d555f45b",
+        "description": "frontends/va: add h264 dbk enc parameters",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3d30bf44cef665400d525f0223660f79dc230b94",
+        "description": "gallium/pipe/video: add data struct for dbk in avc encoding.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f00b54bc9e70e49f546ac2efeceb59540ff4a6fd",
+        "description": "radv: Rework modification detection of the meta cache.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8231f7eaa1247316da11bdd59a461b8aabb3b2b7",
+        "description": "radv: Use a VkPipelineCache handle for meta shaders.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "911455a0d6306bc58425f3183a2720d4febe650e",
+        "description": "radv: Constify entry_size.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e00ce790030569ec3822780f40e8bcbe2227744e",
+        "description": "radv: use SHA1_DIGEST_LENGTH in the pipeline cache",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db62b13ddd82b7dc7914d5c5f5053a277a0d0015",
+        "description": "radv: move the disk cache to the vk_physical_device struct",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3e22f957d5d82e09448f8304a127054a27e45704",
+        "description": "radv: Remove create_accel_build_shader",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ddc5c3048992debc3cedd22b0f2ff2ca27e8d7e4",
+        "description": "zink: handle global and scratch vars",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "19a74229c9f5a26a3e51e5780fc36eca657323c9",
+        "description": "zink: add some bda handling",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5cf959393c16775d98542a10fa279285ec6942d7",
+        "description": "zink: add a safety assert in descriptor updates",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d13bae858d4cfd84e63d0b17c44bcbe58186706e",
+        "description": "zink: move descriptor layout/pool stuff to screen object",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "20ad1678ab154732960f204a2757fdc9fbde21e2",
+        "description": "docs: update calendar and link releases notes for 22.2.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b860a2b802f2c2319c4e51302b3f18dfc440754d",
+        "description": "docs: Add sha256 sum for 22.2.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7406a3e89f47d12ec07441eaaf8e6c8d6d26db09",
+        "description": "docs: add release notes for 22.2.1",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "69c22dd81736ee825d345078ffb252b39190e89d",
+        "description": "zink: fix isNan mismatch between NIR and SPIR-V",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a730b1bb0a43c9bf8b57269744a12b8fbdbd460f",
+        "description": "zink: stop enabling minmax filtering when not supported",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b87c08b3bf707f25df2b788260381aea161d5dd8",
+        "description": "zink: fix invalid Offset set for variables which do not need an offset",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6eadd6d1698ae4b27e4b1a6f0321a80313a7e976",
+        "description": "radv/rra: Calculate bvh size requirements recursively",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4283d857b826f6b71e0d076a7ece6282f400491",
+        "description": "radv/rra: Handle box16 nodes",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7754f208ceaea817425c09561996605d9ff348e6",
+        "description": "radv: Use half floats for box16 coords",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "266f0ae9486091a4343c91e2594f3e3cea2383bf",
+        "description": "radv: Add radv_bvh_node_box16",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5f859f805b79cc74bfa13844fcbbd006601f367e",
+        "description": "radv: Rename node_internal to node_box32",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da856af2c92633cf62c5af1d13ce2bdfac4e2b7b",
+        "description": "draw: s/start_or_maxelt/start/ in llvm VS code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4c73a503e3ea7eeeada116555605623a992c3c16",
+        "description": "draw: move vs_slot var in tgsi/llvm_fetch_gs_input()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "717572e5be31e1b82a82e96cc3bee6e0403983b7",
+        "description": "draw: fix some const-correctness in draw_vbo()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a809fca6191c559798847106dd594548a938ce9",
+        "description": "draw: make draw_geometry_shader_run() return void",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8d8683ab1d02bcc400d73ec9b86302e0e475c25a",
+        "description": "draw: replace double conditional expression with if/else",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "645a3d24a1b34fe28f8ea0f319b38324519476fb",
+        "description": "draw: asst. clean-ups in draw_pt_fetch_shade_pipeline_llvm.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "baee3c62f710cc5d0a5cc039c69743384d5e5842",
+        "description": "draw: asst. clean-ups in draw_private.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bfaed9dd63ea6ade7c8075187dde00e5a5ebbcdc",
+        "description": "draw: clean-up count assignment in draw_pt_arrays()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e4552632aabbfc8f4fcafff216be50acfa928fa8",
+        "description": "draw: asst. clean-ups in draw_pt.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "529707d4effc45906dcb77a696f0b4ff8571396a",
+        "description": "draw: asst. clean-ups in draw_split_tmp.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "39a42c48e3ef2be96860c5e44b0ed024f3864393",
+        "description": "draw: asst. clean-ups in draw_pt_vsplit_tmp.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a340419cb4e8223075fbd4c874d78c74a439614",
+        "description": "draw: asst. clean-ups in draw_pipe.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f83e284543cbf5d8951a221a9b3fa8d316071b0b",
+        "description": "draw: asst. clean-ups in draw_prim_assembler.[ch]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8613316a31ca72cb33033d6a3cc073f0e376f61d",
+        "description": "draw: asst. clean-ups in draw_gs.[ch]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "490f7a14f616db48ca337f900aca261e528a9129",
+        "description": "draw: asst. clean-ups in draw_cliptest_tmp.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0d27e3b917a39eae3482f4a788b8e90d21d70226",
+        "description": "draw: asst. clean-ups in draw_llvm.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4e6a32219b3b8e724ef681ee524ed10a4e7f1cd6",
+        "description": "draw: asst. clean-ups in draw_pipe_aapoint.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6af739bb9efe7ab6e88c4ba82410f7f69f1007c5",
+        "description": "draw: asst. clean-ups in draw_pt_so_emit.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9daf8531e559bc0d946b0c66f041f928e530e68c",
+        "description": "draw: asst. clean-ups in draw_vertex.[ch]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3ac0b2115c5c436305e89c2fddca7d9a53106450",
+        "description": "draw: asst. clean-ups in draw_pipe_wide_point.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "07e2ecd0cff53899235257b0436ad2c85e055372",
+        "description": "draw: asst. clean-ups in draw_pipe_wide_line.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0a31e24d22d6da2de9ae440c18f473a269c53008",
+        "description": "draw: asst. clean-ups in draw_pipe_util.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8a3b365b920e5d5ae2627236b9c2ada6ab230b37",
+        "description": "draw: asst. clean-ups in draw_pipe_user_cull.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7488f0fe2743e74ce8b89167537c2a456340f6c1",
+        "description": "draw: asst. clean-ups in draw_pipe_unfilled.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "49705deb679b011af58754d389abac4178e5ca5a",
+        "description": "draw: asst. clean-ups in draw_pipe_twoside.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "aa2eabbc2de950f8299437fe714c3c32f1fbb7d0",
+        "description": "draw: asst. clean-ups in draw_pipe_pstipple.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c1cba7038af0f5818dae95d1f6fbc7208b9b572",
+        "description": "draw: asst. clean-ups in draw_pipe_offset.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d6541640419d6069cbd08e2c715b4546c52b3cc3",
+        "description": "draw: asst. clean-ups in draw_pipe_flatshade.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ff329ac1e029e033f34e6a54bbfeef7540dd86b9",
+        "description": "draw: asst. clean-ups in draw_pipe_clip.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "230584fed53e619524fa7b9178a82403bd2062c2",
+        "description": "draw: asst. clean-ups in draw_pipe_cull.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b813bab889992d9085d0dea0c7591d3f24a30aee",
+        "description": "draw: asst. clean-ups in draw_pt_post_vs.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "6f1b99ab06e5fc7cd5e5f2fe91a514c554ad1940",
+        "description": "draw: asst. clean-ups in draw_pt_fetch.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "da2932c6345ed5caf52be5006fd5a14445ed2e8f",
+        "description": "draw: asst. clean-ups in draw_pipe.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "67ee7ddfb7d50005e63f4c939b36d15210a2b124",
+        "description": "draw: remove unused draw_has_llvm()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7178d30a5281300a7ce8200d8ed6fe19c23bf6e6",
+        "description": "draw: remove goto in llvm_pipeline_generic()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f058873832e7a63762229ead8c24ef18e72724f2",
+        "description": "draw: asst. clean-ups in draw_vs.[ch]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c5ddbc6ba761b506adf29fe09adaedc6189ed4e5",
+        "description": "draw: asst. clean-ups in draw_vs_variant.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "327742c2c90aa9c20b1e8a0f40d15b4dd76586ef",
+        "description": "draw: asst. clean-ups in draw_vs_llvm.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "32218eabdb5d577ed9e661db6d5ec6a56ace7988",
+        "description": "draw: asst. clean-ups in draw_context.[ch]",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "243aa6b2ec0c2626b1333ba666a6d6d60ede8505",
         "description": "radv: Consider inactive internal nodes never in the tree.",
         "nominated": false,
