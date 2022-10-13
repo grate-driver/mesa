@@ -832,7 +832,7 @@
         "description": "glthread: fix matrix stack depth tracking",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6febe2b880e79ac2b5347412ffdf6502ac47e5be"
     },
