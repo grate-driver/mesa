@@ -94,7 +94,7 @@
         "description": "nir: Fix nir_fmax_abs_vec_comp",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "272e927d0e9fed6e791d706ff5d895b6c2036fc0"
     },
