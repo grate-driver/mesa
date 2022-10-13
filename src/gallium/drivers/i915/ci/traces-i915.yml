@@ -1,5 +1,5 @@
 traces-db:
-  download-url: "https://minio-packet.freedesktop.org/mesa-tracie-public/"
+  download-url: "https://s3.freedesktop.org/mesa-tracie-public/"
 
 # glmark2 looks like maybe it fails due to wanting an xserver, but we don't have
 # Xorg in the x86 docker images we're using.
