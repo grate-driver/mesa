@@ -94,7 +94,7 @@
         "description": "glthread: leave dlist dispatch in place for Begin/End",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7f1cac7ba682410214289084dcc272167ca44e6b"
     },
