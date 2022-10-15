@@ -220,7 +220,7 @@
         "description": "util: Turn -DWINDOWS_NO_FUTEX to be pre_args",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c002bbeb2f7a1bf2d5c020abdddcf25909c447b6"
     },
