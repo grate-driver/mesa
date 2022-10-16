@@ -22,7 +22,7 @@
         "description": "pan/mdg: Fix 16-bit alignment with spiller",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "129d390bd8cc50f55b748ae6e95bed8c6074a488"
     },
