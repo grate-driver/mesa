@@ -25375,7 +25375,7 @@
         "description": "nir: spirv: Allow 32-bit version of nir_intrinsic_is_sparse_texels_resident",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "main_sha": null,
         "because_sha": "4cbdf9ec4d454c4df157570387edeeaf45847b8a"
     },
