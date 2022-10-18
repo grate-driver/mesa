@@ -355,7 +355,7 @@
         "description": "mesa,gallium: Revert \"Make point coord origin a CAP\"",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "e749f67f8989874f6795d95422c1f3eb4d2706ba"
     },
