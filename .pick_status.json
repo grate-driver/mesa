@@ -1,5 +1,131 @@
 [
     {
+        "sha": "b02e9ef35a0446019cda9473e4c355c7cc4bb24d",
+        "description": "anv: fill AlphaToCoverageEnable lazily from state",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9f7535564345396de07ce59dcced593e885e15ec",
+        "description": "anv: move emit_shading_rate to gfx8_cmd_buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "83ebd637d516d5fbb2d4d998bd5a124993a4f6a8",
+        "description": "d3d10ump: No need define snprintf anymore in InputAssembly.cpp",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9da108c6b511cb74bfd89a4ce7658ffae288fd7",
+        "description": "nir: No need redefine snprintf anymore in nir.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1ee21139e84815f75389bb9b633bfecc1917d533",
+        "description": "gallium: delete graw",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ac7f4e0942de2576feda085d5fd165323753f950",
+        "description": "glsl/glsl_to_nir: remove unreachable code",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c7e92686583f45617aa017f30f93d156f2a74a2c",
+        "description": "radv: fix setting results for initialization failures in thread trace and trap handler",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "0e782d96095aecfbc43233b9358e8bf915b26062",
+        "description": "radeonsi: Inherit the old modifier when reallocating the texture.",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5bc52a9103d2de45353056734ca1a9e94e9f6e94",
+        "description": "anv: fix FTBFS on grl due to changes in clang 15",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c7be4d4212a7b6c50523285b412d5747231323e",
+        "description": "nir: Usher nir_normalize_cubemap_coords into 2022",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fc5c671e8785c89cf986181e0e3e7fa8742c4dce",
+        "description": "nir: Fix nir_fmax_abs_vec_comp",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "272e927d0e9fed6e791d706ff5d895b6c2036fc0"
+    },
+    {
+        "sha": "6fbb87851cda10cde7bf42fb8d391420cf3657b1",
+        "description": "d3d12: HEVC Set D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_FLAG_USE_ASYMETRIC_MOTION_PARTITION when required by caps",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8f654b90005b75a74796d36d980676ce1d739d12",
+        "description": "d3d12: Fix HEVC wrong caps detection due to bad parenthesis in condition",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "be7e2e5525b89fbd532b5fa7ef36bbd72b72956e",
+        "description": "d3d12: HEVC Encode workaround for edge case in caps reporting not contemplated by upper layer interface",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "3eed5931edf6e5f45378b013ca21f98f17af2b34",
         "description": "tu: Fix the size of patch control points state",
         "nominated": false,
