@@ -2416,7 +2416,7 @@
         "description": "nir/opt_phi_precision: Fix missing swizzles when narrowing phi srcs.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c7b935962b27667fd4730b53c5fd3ec45d2773c3"
     },
