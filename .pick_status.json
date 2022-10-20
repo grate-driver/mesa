@@ -1957,7 +1957,7 @@
         "description": "radeonsi: zero init using the correct components count",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ae4379d81e42dec4f93983dfa9f31cf30384789f"
     },
