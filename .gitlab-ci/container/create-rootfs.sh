@@ -96,7 +96,7 @@ apt-get -y install --no-install-recommends \
 
 # Needed for ci-fairy, this revision is able to upload files to
 # MinIO and doesn't depend on git
-pip3 install git+http://gitlab.freedesktop.org/freedesktop/ci-templates@34f4ade99434043f88e164933f570301fd18b125
+pip3 install git+http://gitlab.freedesktop.org/freedesktop/ci-templates@ffe4d1b10aab7534489f0c4bbc4c5899df17d3f2
 
 apt-get purge -y \
         $INSTALL_CI_FAIRY_PACKAGES
