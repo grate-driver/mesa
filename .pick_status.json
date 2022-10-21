@@ -2398,7 +2398,7 @@
         "description": "panfrost: Lower MAX_BLOCK_SIZE on Midgard",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "9b19104a30bba35c4025833d5022c8ddc6c1ccd0"
     },
