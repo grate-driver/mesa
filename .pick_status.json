@@ -2452,7 +2452,7 @@
         "description": "meson: with_glx never assigned to 'gallium-xlib', so need add with_glx == 'xlib' for dep_glproto",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "76791db0882b3715cd7d0a47fd14e1f784901b09"
     },
