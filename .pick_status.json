@@ -1255,7 +1255,7 @@
         "description": "gallivm: Fix LLVM optimization with the new pass manager",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "2037c34f245e72de4fd58224c0aa7ae3a7427620"
     },
