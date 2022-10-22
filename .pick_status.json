@@ -1687,7 +1687,7 @@
         "description": "aco: Don't use opsel for p_insert.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "54292e99c7844500314bfd623469c65adef954c5"
     },
