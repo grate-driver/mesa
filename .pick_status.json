@@ -4,7 +4,7 @@
         "description": "etnaviv: properly reference flush_resources",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7b9d8d1936d72af6fd1bfd30afed354bb76b4c0c"
     },
