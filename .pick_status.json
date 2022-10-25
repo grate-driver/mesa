@@ -301,7 +301,7 @@
         "description": "r600: Account for color and clipvertex when evaluating LDS space",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3340c7ce359252ad09b3e4d338837944482fb248"
     },
