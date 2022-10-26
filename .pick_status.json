@@ -463,7 +463,7 @@
         "description": "glsl: fix buffer texture type",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3ace6b968b3254cb83c5e6ffef9864d300265339"
     },
