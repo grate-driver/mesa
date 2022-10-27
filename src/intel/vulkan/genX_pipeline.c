@@ -2180,6 +2180,7 @@ emit_task_state(struct anv_graphics_pipeline *pipeline)
       tc.TaskShaderEnable = true;
       tc.ScratchSpaceBuffer =
          get_scratch_surf(&pipeline->base, MESA_SHADER_TASK, task_bin);
+      tc.MaximumNumberofThreadGroups = 511;
    }
 
    const struct intel_device_info *devinfo = &pipeline->base.device->info;
@@ -2236,8 +2237,7 @@ emit_mesh_state(struct anv_graphics_pipeline *pipeline)
       mc.MeshShaderEnable = true;
       mc.ScratchSpaceBuffer =
          get_scratch_surf(&pipeline->base, MESA_SHADER_MESH, mesh_bin);
-
-      /* TODO(mesh): MaximumNumberofThreadGroups. */
+      mc.MaximumNumberofThreadGroups = 511;
    }
 
    const struct intel_device_info *devinfo = &pipeline->base.device->info;
