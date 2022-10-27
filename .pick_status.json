@@ -2128,7 +2128,7 @@
         "description": "intel/dev: Set display_ver = 13 on all ADL/RPL/DG2",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "c746bf4c5c811d7d5614ca13504e6412ac13e911"
     },
