@@ -2740,7 +2740,7 @@
         "description": "v3dv: drop layout refs for all allocated sets from a pool on destroy / reset",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7f6ecb8667c6c756109954ad23f8c2c0ae0a9bf8"
     },
