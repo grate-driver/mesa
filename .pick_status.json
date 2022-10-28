@@ -463,7 +463,7 @@
         "description": "nir/lower_int64: Fix float16 to int64 conversions.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "936c58c8fcceee086d3c492712595555afe82266"
     },
