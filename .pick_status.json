@@ -508,7 +508,7 @@
         "description": "anv: program 3DSTATE_MESH_DISTRIB with the recommended values",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f083df87108231005889b7af92f0cad7c61e1f81"
     },
