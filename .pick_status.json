@@ -2065,7 +2065,7 @@
         "description": "panfrost: Replace resource shadowing flush",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "988d5aae74d61d1416b369172ef286b4aac933d0"
     },
