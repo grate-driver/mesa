@@ -1786,7 +1786,7 @@
         "description": "radv: Make the compute scratch waves per SE as well.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "278e533ec9c29d68b661bc27cbfbe6bca4f57094"
     },
