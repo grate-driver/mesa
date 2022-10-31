@@ -15,7 +15,7 @@ variables:
    DEBIAN_X86_TEST_VK_TAG: "2022-10-20-bindgen-zlib-cve"
 
    FEDORA_X86_BUILD_TAG: "2022-04-24-spirv-tools-5"
-   KERNEL_ROOTFS_TAG: "2022-10-20-bindgen-zlib-cve"
+   KERNEL_ROOTFS_TAG: "2022-11-03-piglit"
 
    WINDOWS_X64_VS_PATH: "windows/x64_vs"
    WINDOWS_X64_VS_TAG: "2022-06-15-vs-winsdk"
