@@ -166,7 +166,7 @@
         "description": "nir: Don't reorder volatile intrinsics",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "729df14e4528b70e63332e4255571729253e9791"
     },
