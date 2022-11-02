@@ -2243,6 +2243,8 @@ wsi_ReleaseDisplayEXT(VkPhysicalDevice physicalDevice,
       wsi->fd = -1;
    }
 
+   wsi_display_connector_from_handle(display)->active = false;
+
 #ifdef VK_USE_PLATFORM_XLIB_XRANDR_EXT
    wsi_display_connector_from_handle(display)->output = None;
 #endif
