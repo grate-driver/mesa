@@ -148,7 +148,7 @@
         "description": "zink: do not read is_generated unless in tcs shader",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "a9d2b86c2c80b94281b6f0cfc1f73adde8e0e294"
     },
