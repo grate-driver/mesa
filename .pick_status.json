@@ -544,7 +544,7 @@
         "description": "radeonsi/gfx11: fix compute scratch buffer - WAVES is always per SE",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "ba02ed91a60839f2a6dc6a89fd9de1144b0788aa"
     },
