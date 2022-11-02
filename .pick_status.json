@@ -571,7 +571,7 @@
         "description": "Revert \"gallium/clover: pass -no-opaque-pointers to Clang\", opaque pointers are now implemented",
         "nominated": true,
         "nomination_type": 2,
-        "resolution": 0,
+        "resolution": 2,
         "main_sha": null,
         "because_sha": "06e9607478b780c9bcc6e08d69cfbe9020b4602c"
     },
