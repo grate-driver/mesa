@@ -859,7 +859,7 @@
         "description": "radv: invalidate L2 instead of only writeback L2 when using DCC stores",
         "nominated": true,
         "nomination_type": 0,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": null
     },
