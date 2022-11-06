@@ -382,7 +382,7 @@
         "description": "etnaviv: Use old set of state registers for PE configuration on GC880",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "7c46a4883625a20691a78170f8da783dc9b8a9c6"
     },
