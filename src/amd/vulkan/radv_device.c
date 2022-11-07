@@ -761,6 +761,12 @@ radv_physical_device_try_create(struct radv_instance *instance, drmDevicePtr drm
    device->local_fd = fd;
    device->ws->query_info(device->ws, &device->rad_info);
 
+   if (device->rad_info.gfx_level >= GFX11) {
+      result = vk_errorf(instance, VK_ERROR_INCOMPATIBLE_DRIVER,
+                          "This version of RADV does not support RDNA3 yet.");
+      goto fail_wsi;
+   }
+
    device->use_llvm = instance->debug_flags & RADV_DEBUG_LLVM;
 #ifndef LLVM_AVAILABLE
    if (device->use_llvm) {
@@ -908,9 +914,7 @@ radv_physical_device_try_create(struct radv_instance *instance, drmDevicePtr drm
 fail_perfcounters:
    ac_destroy_perfcounters(&device->ac_perfcounters);
    disk_cache_destroy(device->disk_cache);
-#ifdef ENABLE_SHADER_CACHE
 fail_wsi:
-#endif
    device->ws->destroy(device->ws);
 fail_base:
    vk_physical_device_finish(&device->vk);
