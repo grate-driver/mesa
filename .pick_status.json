@@ -454,7 +454,7 @@
         "description": "docs: remove stale envvar-reference",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "231ccb6100e3559782834d1c290e6439a37a7ca8"
     },
