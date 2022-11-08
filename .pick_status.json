@@ -247,7 +247,7 @@
         "description": "vulkan: Unconditionally add barriers for missing external subpass deps",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "1d726940d2881395994751078dad3bda0cabbdfb"
     },
