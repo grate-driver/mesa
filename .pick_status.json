@@ -1,5 +1,248 @@
 [
     {
+        "sha": "def56b531c86f529bc32d1834ccb479457717db7",
+        "description": "tu: Support GMEM with layered rendering and multiview",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a9ab53fbe227acee971a5fb67d4ca91526100ec4",
+        "description": "radv: stop emulating number of generated primitives by GS on GFX11",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "97b3dd34c1aa11d98df7e26b4aae50be0bd62cf0",
+        "description": "anv: fix missing VkPhysicalDeviceExtendedDynamicState3PropertiesEXT handling",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "13c422e1b2ede25410034fdaf29a632061990fc0"
+    },
+    {
+        "sha": "2a6003752348d0c3dda619bcb40adea104db722f",
+        "description": "crocus: enable NV_alpha_to_coverage_dither_control",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "3c84809ca68e5ab65afc13188192016c8160dea7",
+        "description": "iris: enable NV_alpha_to_coverage_dither_control",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "bff6a38ed9b2a852fb909f121b9fb7a917027554",
+        "description": "radv: advertise extendedDynamicState3ColorWriteMask",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a92d1d13c5d57a26a537476b5b62fa6b27a55bcc",
+        "description": "radv: add support for dynamic color write mask",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "22d8ed84b809a9c641e3d8ea5df0fa545c25de3e",
+        "description": "intel/compiler: Remove unused fs_visitor::emit_percomp()",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90861e6fea90b0f31ecfa6d9d7cacba2be8e5d26",
+        "description": "intel/compiler: Remove various unused function declarations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "48506a90296c5ec6216d3e775331e491491168c5",
+        "description": "intel/compiler: Remove unused data members",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "7fe5fec74723cb66d909b4bc3a167104a9da4b00",
+        "description": "util: Remove os/os_thread.h and replace #include \"os/os_thread.h\" with #include \"util/u_thread.h\"",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a72d57fe260bde3fd57de192a93dca6ae11401d7",
+        "description": "util: cleanup os_thread.h",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1129537e4c1c6849fea03affb15b99a837c4b659",
+        "description": "util: Move pipe_semaphore to u_thread.h and rename it to util_semaphore",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b732064f9ed78951fb19763a5eed341d88d8ca1e",
+        "description": "gallium/util: Remove the EMBEDDED_DEVICE macro because nobody use it",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9abeb3d73937bf4956ab2c8e0314f9f8afe080a9",
+        "description": "intel/fs: Optimize integer multiplication of large constants by factoring",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "5ec75ca10d3dbffb94582cfb7663a2ad1bca53d5",
+        "description": "intel/compiler: Teach signed integer range analysis about imax and imin",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "1b0da3a765abe63e0f49f7457af84f80f9261026",
+        "description": "intel/compiler: Signed integer range analysis for imul_32x16 generation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f90d71055be5ff6381479095448a606ec4018b93",
+        "description": "intel/compiler: Add and use a pass to generate imul_32x16 instructions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "9479e3a19b9e08b8525ba8b91a891b8cff03ace3",
+        "description": "intel/fs: Allow constant copy prop from DW to W",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "90d267b2d147cb7acef711da5f17a75c014f23eb",
+        "description": "intel/fs: Fix bounds checking for integer multiplication lowering",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db204121686726c74dd0aba2d1c1790d40e7baba",
+        "description": "intel/fs: Fix constant propagation into 32x16 integer multiplication",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "de6c0f848797d26d28223bcad25da03654461874"
+    },
+    {
+        "sha": "3194fe93629100b3f370a8a789f70a2a168253de",
+        "description": "wgl: fix reference to wgl(Create|Delete)Context function pointers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4f599dc3a5b135e374515023f9f3fb0e344e5e67",
+        "description": "r600: Fix some border color swizzles on Evergreen",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "923d635357f6f8600c72fd9c972c6ec0c0b700ac",
+        "description": "r600: fix some border color swizzles on CAYMAN",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "196499d75e5a2e99cdd6e6ebc6ee969839875121",
+        "description": "docs: update calendar and link releases notes for 22.2.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "616635909edeee833a3a067916fdc80415e01c0d",
+        "description": "docs: Add sha256 sum for 22.2.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2fe1aab18f8d8bc06e4688389a7b2a949455cda9",
+        "description": "docs: add release notes for 22.2.3",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "fd8ec189e575d5220d8b4c30647fa6de57928e07",
         "description": "Android.mk: Fix gnu++14 related build failures",
         "nominated": true,
