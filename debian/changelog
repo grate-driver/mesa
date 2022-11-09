@@ -1,3 +1,9 @@
+mesa (22.2.3-2) UNRELEASED; urgency=medium
+
+  * rules: Enable building lima drivers on riscv64. (LP: #1995137)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 09 Nov 2022 19:55:50 +0200
+
 mesa (22.2.3-1) unstable; urgency=medium
 
   * New upstream release. (Closes: #1022730)
