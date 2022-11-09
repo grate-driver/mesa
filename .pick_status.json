@@ -1,5 +1,374 @@
 [
     {
+        "sha": "4ca61b5420ed26683891664aa35dc5f1a3bad063",
+        "description": "rusticl/nir: copy alignment info when lowering kernel input loads",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ba78af66c6c484f6e485ea65d7463c0097716097",
+        "description": "docs: use ext-role for GL / VK extensions",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f69560bdcb96ea0fc0e7ec21c1e267afaace5b0c",
+        "description": "docs: add ext-role for spec extension links",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d20bfeaa89e2adf49b114ba310f8c4294a323c52",
+        "description": "docs: drop rogue backtick",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "24372e4882a50d59d4a14797ee1f6da8324c064f",
+        "description": "docs: NV_gpu_shader4 -> NV_gpu_program4",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b51d1af1c13bafc872c2ca8de604004c49af3000",
+        "description": "docs: feeddback -> feedback",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fd0af2bb4d1367066b83801fec58d79e548272c0",
+        "description": "panfrost: DRY buffer range special case",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "f8553ef44cf8e9e45d7aa220cd3db490bf26a965",
+        "description": "panfrost: Remove out-of-band CRC support",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cf7a3906b0629b2b6aadd3b18a39eae06b10fd6a",
+        "description": "panfrost: Copy resources when necessary",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "0b26a9f773956fc00a77b0d4a7aafee5795ce935"
+    },
+    {
+        "sha": "59cc628c06a8e2f3f3654978e1438442ea7ae33c",
+        "description": "radv: use radv_max_descriptor_set_size() for Vulkan 1.2 properties",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d40af879098bea90176619dc11facbd68c555f32",
+        "description": "panfrost: Fix build with Perfetto (again)",
+        "nominated": false,
+        "nomination_type": 1,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": "6a4532cbabf7770b71d63db24714fc07efb280cf"
+    },
+    {
+        "sha": "81b4af28494c065c5646e3f61a72afd829d978c6",
+        "description": "ci: Fixes macos.yml",
+        "nominated": true,
+        "nomination_type": 0,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4d058a7034c24594637de72563456ce7882b9bc8",
+        "description": "meson: -DVK_ENABLE_BETA_EXTENSIONS at a single place",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "560b3276960abd6955e72e85f44c110386274a06",
+        "description": "radv/ci: add more subtests to VanGogh's flakes list",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "293d8eb20e90020ad26a864fb387f53b8c51cc86",
+        "description": "docs: use c:expr role shorthand",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4be9600ccb4ec2147914be364eb55b65f7803e87",
+        "description": "docs: remove needless c:expr roles",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "4bc1d3e79c35bef81f2edb6ce310fcbd233b8b21",
+        "description": "docs: make c:expr the default-role",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "35d0d30a0e48d88a258a148f2ffb1c83552472a2",
+        "description": "radv/rra: Fix node type validation",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "8ab628ab2e4d4f460e2eabdb11876997c0ab13bc",
+        "description": "nir: Don't reorder volatile intrinsics",
+        "nominated": true,
+        "nomination_type": 1,
+        "resolution": 0,
+        "main_sha": null,
+        "because_sha": "729df14e4528b70e63332e4255571729253e9791"
+    },
+    {
+        "sha": "10b0a5dc34d95d2c381ad1141e53af322feb5213",
+        "description": "freedreno/a6xx: set chroma offsets to MIDPOINT",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "cbf68450f85f7bf18186cd8792948e0855c654d7",
+        "description": "freedreno/a6xx: set CHROMA_LINEAR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d61ac94658499bbea3fbff4fb087e766a648a35e",
+        "description": "c11: Remove _MTX_INITIALIZER_NP for windows",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "37d79e38e96acd840bf6e839866493cc9b361c49",
+        "description": "egl: Remove the need of _MTX_INITIALIZER_NP by using simple_mtx_t/SIMPLE_MTX_INITIALIZER in egllog.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "23e6a4ccdafd820dee843af2c1234129e7b1f4a4",
+        "description": "nir: Remove the need of _MTX_INITIALIZER_NP by using simple_mtx_t/SIMPLE_MTX_INITIALIZER in nir/nir_validate.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e518ff4fd5bf973891b38ea09f01d2830a1fd3d5",
+        "description": "glsl: Remove the need of _MTX_INITIALIZER_NP by using simple_mtx_t/SIMPLE_MTX_INITIALIZER",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "db708b7e9cdc60e227881f4e603cd971ea3b48a7",
+        "description": "llvmpipe: Remove the need of _MTX_INITIALIZER_NP by using simple_mtx_t/SIMPLE_MTX_INITIALIZER in lp_texture.c",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "fb979a19b0a0b28e7cda00e88093e96bdaf1a4b4",
+        "description": "vulkan/device-select-layer: Remove the need of call_once by using simple_mtx_t instead mtx_t",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c0fc8d5046a097c265c730e391c9bfb5412f79f2",
+        "description": "freedreno/a6xx: Switch to global bcolor buffer",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "27b2496bae5702d271f5caf49f754aacb3ae03ac",
+        "description": "freedreno/a6xx: Rename tex cache key/equals fxns",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "c8cf786976bc0c1c41ab312ba5b7496467d161b1",
+        "description": "freedreno/a6xx: Move bcolor entry setup",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "755e3ff0ee10c0d2b5a7e9f552b37d44bf8dc586",
+        "description": "freedreno/ci: Update a5xx expectations",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "ed9152e2c1a2474a3cd89cabd50ec0fcd4f2ace5",
+        "description": "freedreno: Use our border-color quirk",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "26e742c661c792a73a6cf8f251e37d2ccbe40690",
+        "description": "ci/bare-metal: remove consolidations leftovers",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "e090e313fa8d9e0da8302a93ca6cb5011be28d96",
+        "description": "freedreno/ir3: Reduce compiler thread pool size",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "a6e4f8d03f2ae750a4ecdbdd0dd9a439de99ae82",
+        "description": "util/disk_cache: Add some blob cache traces",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "d831fd40c873a7acfe47e449874df5c92599e312",
+        "description": "util/disk_cache: Add compression in blob cb path",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2fdc3846e715d3cd822c6d778e78cf069714428d",
+        "description": "vulkan/wsi/wayland: return VK_ERROR_NATIVE_WINDOW_IN_USE_KHR",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "b4921b5d7a7e39a4a55117bc4036c1b473650a86",
+        "description": "ci: run shaderdb on vc4 as well",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "83b1cb936e757194010d77322fe60a999ed02605",
+        "description": "vc4: add DRM_VC4_CREATE_SHADER_BO support to drm-shim",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "2c5b1d0e3b111708f0a660b687fbc0231b4d19f3",
+        "description": "nv50/ir: Support fmulz and ffmaz",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
+        "sha": "47251d28527371aeb82f9db7592cff5e78bfcd55",
+        "description": "nv50/ir: add prefer_nir flag for getting compiler options",
+        "nominated": false,
+        "nomination_type": null,
+        "resolution": 4,
+        "main_sha": null,
+        "because_sha": null
+    },
+    {
         "sha": "def56b531c86f529bc32d1834ccb479457717db7",
         "description": "tu: Support GMEM with layered rendering and multiview",
         "nominated": false,
