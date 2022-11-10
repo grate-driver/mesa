@@ -679,7 +679,7 @@
         "description": "anv: setup stage bitmask for Wa_22011440098",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "40b66a44998407c0a91bf6a1d762d204a56b81a0"
     },
