@@ -526,7 +526,7 @@
         "description": "nir: fix typo in lower_double options handling",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "3749a6ecd282cf8c801cda948260fd6d521b92ac"
     },
