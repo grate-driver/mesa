@@ -100,6 +100,7 @@ libopencl = shared_library(
     dep_clock, dep_dl, dep_unwind, dep_elf, dep_clang, dep_version
   ],
   version : '@0@.0.0'.format(opencl_version),
+  soversion : host_machine.system() == 'windows' ? '' : opencl_version,
   install : true,
 )
 
