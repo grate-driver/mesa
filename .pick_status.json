@@ -643,7 +643,7 @@
         "description": "ac/llvm: fix gfx11 fs input load for 16bit varying",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "b07204d7804496445ddaa293ed3a2b90d170b1db"
     },
