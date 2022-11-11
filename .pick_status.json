@@ -625,7 +625,7 @@
         "description": "v3dv: fix debug dump on BO free",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "44fa8304d45e775050a42f2fc85c02ad5ddb63bd"
     },
