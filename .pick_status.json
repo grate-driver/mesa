@@ -598,7 +598,7 @@
         "description": "etnaviv: switch to late Z when linear PE is used",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "53445284a427f79e94607dc4ca2f8bd8ac293356"
     },
