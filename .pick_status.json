@@ -742,7 +742,7 @@
         "description": "gallivm: add coro malloc hooks earlier and always.",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f511d2a553377a58b5eea6c6d1170fcc4972237a"
     },
