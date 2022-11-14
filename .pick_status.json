@@ -2191,7 +2191,7 @@
         "description": "intel: Don't cross DWORD boundaries with byte scratch load/store",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 3,
         "main_sha": null,
         "because_sha": "fd04f858b0aa9f688f5dfb041ccb706da96f862a"
     },
