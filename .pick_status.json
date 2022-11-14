@@ -949,7 +949,7 @@
         "description": "intel/compiler: Fix missing tie-breaker in brw_nir_analyze_ubo_ranges() ordering code",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "6d28c6e52cfd76855c1368560dd90f12493e2580"
     },
