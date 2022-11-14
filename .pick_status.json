@@ -4,7 +4,7 @@
         "description": "intel/compiler: Fix dynarray usage in intel_clc",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "77e929a52734456237f5e0171a4844d6f9be027e"
     },
