@@ -499,7 +499,7 @@
         "description": "docs: do not mention EGL_MESA_drm_display",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "f3e23ead536e66940053265216b3886fef69d891"
     },
