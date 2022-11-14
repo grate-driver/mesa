@@ -661,7 +661,7 @@
         "description": "ac/nir/ngg: fix nogs culling with nuw add",
         "nominated": true,
         "nomination_type": 1,
-        "resolution": 0,
+        "resolution": 1,
         "main_sha": null,
         "because_sha": "75dbb404393a5ae99adb90a156fa5a084aa79c4d"
     },
