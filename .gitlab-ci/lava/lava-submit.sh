@@ -23,8 +23,7 @@ KERNEL_IMAGE_BASE_URL="https://${BASE_SYSTEM_HOST_PATH}" \
 	artifacts/ci-common/generate-env.sh > results/job-rootfs-overlay/set-job-env-vars.sh
 
 tar zcf job-rootfs-overlay.tar.gz -C results/job-rootfs-overlay/ .
-ci-fairy minio login --token-file "${CI_JOB_JWT_FILE}"
-ci-fairy minio cp job-rootfs-overlay.tar.gz "minio://${JOB_ROOTFS_OVERLAY_PATH}"
+ci-fairy s3cp --token-file "${CI_JOB_JWT_FILE}" job-rootfs-overlay.tar.gz "https://${JOB_ROOTFS_OVERLAY_PATH}"
 
 touch results/lava.log
 tail -f results/lava.log &

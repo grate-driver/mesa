@@ -755,7 +755,7 @@ struct anv_fixed_size_state_pool {
 };
 
 #define ANV_MIN_STATE_SIZE_LOG2 6
-#define ANV_MAX_STATE_SIZE_LOG2 21
+#define ANV_MAX_STATE_SIZE_LOG2 22
 
 #define ANV_STATE_BUCKETS (ANV_MAX_STATE_SIZE_LOG2 - ANV_MIN_STATE_SIZE_LOG2 + 1)
 
@@ -2759,6 +2759,17 @@ struct anv_cmd_state {
     * last command buffer to the primary (if known).
     */
    enum anv_depth_reg_mode                      depth_reg_mode;
+
+   /**
+    * Whether RHWO optimization is enabled (Wa_1508744258).
+    */
+   bool                                         rhwo_optimization_enabled;
+
+   /**
+    * Pending state of the RHWO optimization, to be applied at the next
+    * genX(cmd_buffer_apply_pipe_flushes).
+    */
+   bool                                         pending_rhwo_optimization_enabled;
 
    bool                                         conditional_render_enabled;
 

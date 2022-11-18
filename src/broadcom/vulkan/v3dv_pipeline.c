@@ -2501,6 +2501,8 @@ pipeline_compile_graphics(struct v3dv_pipeline *pipeline,
     */
    pipeline->shared_data =
       v3dv_pipeline_shared_data_new_empty(pipeline->sha1, pipeline, true);
+   if (!pipeline->shared_data)
+      return VK_ERROR_OUT_OF_HOST_MEMORY;
 
    pipeline->vs->feedback.flags |=
       VK_PIPELINE_CREATION_FEEDBACK_VALID_BIT;
@@ -3203,6 +3205,8 @@ pipeline_compile_compute(struct v3dv_pipeline *pipeline,
    pipeline->shared_data = v3dv_pipeline_shared_data_new_empty(pipeline->sha1,
                                                                pipeline,
                                                                false);
+   if (!pipeline->shared_data)
+      return VK_ERROR_OUT_OF_HOST_MEMORY;
 
    p_stage->feedback.flags |= VK_PIPELINE_CREATION_FEEDBACK_VALID_BIT;
 

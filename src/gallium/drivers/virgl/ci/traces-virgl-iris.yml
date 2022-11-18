@@ -1,5 +1,5 @@
 traces-db:
-  download-url: "https://minio-packet.freedesktop.org/mesa-tracie-public/"
+  download-url: "https://s3.freedesktop.org/mesa-tracie-public/"
 
 traces:
 # Crash in crosvm: ../src/dispatch_common.c:858: epoxy_get_proc_address: Assertion `0 && "Couldn't find current GLX or EGL context.\n"' failed.

@@ -2325,6 +2325,21 @@ genX(emit_apply_pipe_flushes)(struct anv_batch *batch,
 void
 genX(cmd_buffer_apply_pipe_flushes)(struct anv_cmd_buffer *cmd_buffer)
 {
+#if GFX_VERx10 == 120
+   /* If we're changing the state of the RHWO optimization, we need to have
+    * sb_stall+cs_stall.
+    */
+   const bool rhwo_opt_change =
+      cmd_buffer->state.rhwo_optimization_enabled !=
+      cmd_buffer->state.pending_rhwo_optimization_enabled;
+   if (rhwo_opt_change) {
+      anv_add_pending_pipe_bits(cmd_buffer,
+                                ANV_PIPE_STALL_AT_SCOREBOARD_BIT |
+                                ANV_PIPE_END_OF_PIPE_SYNC_BIT,
+                                "change RHWO optimization");
+   }
+#endif
+
    enum anv_pipe_bits bits = cmd_buffer->state.pending_pipe_bits;
 
    if (unlikely(cmd_buffer->device->physical->always_flush_cache))
@@ -2354,6 +2369,19 @@ genX(cmd_buffer_apply_pipe_flushes)(struct anv_cmd_buffer *cmd_buffer)
                                     cmd_buffer->device,
                                     cmd_buffer->state.current_pipeline,
                                     bits);
+
+#if GFX_VERx10 == 120
+   /* Wa_1508744258 handling */
+   if (rhwo_opt_change) {
+      anv_batch_write_reg(&cmd_buffer->batch, GENX(COMMON_SLICE_CHICKEN1), c1) {
+         c1.RCCRHWOOptimizationDisable =
+            !cmd_buffer->state.pending_rhwo_optimization_enabled;
+         c1.RCCRHWOOptimizationDisableMask = true;
+      }
+      cmd_buffer->state.rhwo_optimization_enabled =
+         cmd_buffer->state.pending_rhwo_optimization_enabled;
+   }
+#endif
 
    if (trace_flush) {
       trace_intel_end_stall(&cmd_buffer->trace, bits,
@@ -2512,6 +2540,8 @@ cmd_buffer_alloc_push_constants(struct anv_cmd_buffer *cmd_buffer)
     */
    if (intel_device_info_is_dg2(&cmd_buffer->device->info)) {
       anv_batch_emit(&cmd_buffer->batch, GENX(3DSTATE_CONSTANT_ALL), c) {
+         /* Update empty push constants for all stages (bitmask = 11111b) */
+         c.ShaderUpdateEnable = 0x1f;
          c.MOCS = anv_mocs(cmd_buffer->device, NULL, 0);
       }
    }
