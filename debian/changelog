@@ -1,5 +1,6 @@
-mesa (22.2.3-2) UNRELEASED; urgency=medium
+mesa (22.2.4-1) UNRELEASED; urgency=medium
 
+  * New upstream release.
   * rules: Enable building lima drivers on riscv64. (LP: #1995137)
   * rules: Disable building llvmpipe on riscv64. (Closes: #1004039)
 
