@@ -75,12 +75,7 @@ grate_vs_tgsi_transform(const struct tgsi_token *tokens_in)
    ctx.base.transform_instruction = grate_vs_tgsi_transform_instruction;
    ctx.next_temp = info.file_max[TGSI_FILE_TEMPORARY] + 1;
 
-   struct tgsi_token *new_tokens = tgsi_alloc_tokens(new_len);
-   if (!new_tokens)
-      return NULL;
-
-   tgsi_transform_shader(tokens_in, new_tokens, new_len, &ctx.base);
-   return new_tokens;
+   return tgsi_transform_shader(tokens_in, new_len, &ctx.base);
 }
 
 
