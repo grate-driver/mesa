@@ -122,8 +122,8 @@ void drm_tegra_bo_cache_cleanup(struct drm_tegra *drm, time_t time)
 			continue;
 
 		while (!list_is_empty(&bucket->list)) {
-			bo = LIST_ENTRY(struct drm_tegra_bo,
-					bucket->list.next, bo_list);
+			bo = list_entry(bucket->list.next,
+					struct drm_tegra_bo, bo_list);
 
 			delta = time - bo->free_time;
 
@@ -201,7 +201,7 @@ static struct drm_tegra_bo *find_in_bucket(struct drm_tegra_bo_bucket *bucket,
 	 * (MRU, since likely to be in GPU cache), rather than head (LRU)..
 	 */
 	if (!list_is_empty(&bucket->list)) {
-		bo = LIST_ENTRY(struct drm_tegra_bo, bucket->list.next,
+		bo = list_entry(bucket->list.next, struct drm_tegra_bo,
 				bo_list);
 		/* TODO check for compatible flags? */
 		if (is_idle(bo)) {
