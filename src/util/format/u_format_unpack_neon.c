@@ -30,6 +30,7 @@
  */
 #ifdef PIPE_ARCH_ARM
 #pragma GCC target ("fpu=neon")
+#pragma clang attribute push (__attribute__((target("fpu=neon"))), apply_to=function)
 #endif
 
 #include <arm_neon.h>
