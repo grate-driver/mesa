@@ -103,7 +103,6 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 
    case PIPE_CAP_FRAGMENT_SHADER_TEXTURE_LOD:
    case PIPE_CAP_FRAGMENT_SHADER_DERIVATIVES:
-   case PIPE_CAP_VERTEX_SHADER_SATURATE: 
       return 1; /* well, not quite. but perhaps close enough? */
 
    case PIPE_CAP_MAX_STREAM_OUTPUT_BUFFERS:
@@ -128,7 +127,7 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_SHADER_STENCIL_EXPORT:
       return 0; /* ??? */
 
-   case PIPE_CAP_TGSI_INSTANCEID:
+   case PIPE_CAP_VS_INSTANCEID:
    case PIPE_CAP_VERTEX_ELEMENT_INSTANCE_DIVISOR:
       return 0;
 
@@ -197,7 +196,7 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
 
    case PIPE_CAP_TEXTURE_BUFFER_OBJECTS:
    case PIPE_CAP_TEXTURE_BUFFER_OFFSET_ALIGNMENT:
-   case PIPE_CAP_MAX_TEXTURE_BUFFER_SIZE:
+   case PIPE_CAP_MAX_TEXEL_BUFFER_ELEMENTS_UINT:
       return 0;
 
    case PIPE_CAP_TGSI_TEXCOORD:
@@ -232,7 +231,7 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
       return 0;
 
    case PIPE_CAP_DRAW_INDIRECT:
-   case PIPE_CAP_TGSI_FS_FINE_DERIVATIVE:
+   case PIPE_CAP_FS_FINE_DERIVATIVE:
       return 0;
 
    case PIPE_CAP_VENDOR_ID:
@@ -269,7 +268,7 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_TEXTURE_FLOAT_LINEAR:
    case PIPE_CAP_TEXTURE_HALF_FLOAT_LINEAR:
    case PIPE_CAP_DEPTH_BOUNDS_TEST:
-   case PIPE_CAP_TGSI_TXQS:
+   case PIPE_CAP_TEXTURE_QUERY_SAMPLES:
       return 0;
 
    case PIPE_CAP_SHAREABLE_SHADERS:
@@ -278,13 +277,13 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_COPY_BETWEEN_COMPRESSED_AND_PLAIN_FORMATS:
    case PIPE_CAP_CLEAR_TEXTURE: /* might be possible */
    case PIPE_CAP_DRAW_PARAMETERS:
-   case PIPE_CAP_TGSI_PACK_HALF_FLOAT:
+   case PIPE_CAP_SHADER_PACK_HALF_FLOAT:
    case PIPE_CAP_MULTI_DRAW_INDIRECT:
    case PIPE_CAP_MULTI_DRAW_INDIRECT_PARAMS:
       return 0;
 
-   case PIPE_CAP_TGSI_FS_POSITION_IS_SYSVAL:
-   case PIPE_CAP_TGSI_FS_FACE_IS_INTEGER_SYSVAL:
+   case PIPE_CAP_FS_POSITION_IS_SYSVAL:
+   case PIPE_CAP_FS_FACE_IS_INTEGER_SYSVAL:
       return 0; /* not really sure about these */
 
    case PIPE_CAP_SHADER_BUFFER_OFFSET_ALIGNMENT:
@@ -296,7 +295,7 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_FRAMEBUFFER_NO_ATTACHMENT: /* not sure */
    case PIPE_CAP_ROBUST_BUFFER_ACCESS_BEHAVIOR: /* probably not */
    case PIPE_CAP_CULL_DISTANCE: /* don't know */
-   case PIPE_CAP_TGSI_VOTE:
+   case PIPE_CAP_SHADER_GROUP_VOTE:
    case PIPE_CAP_MAX_WINDOW_RECTANGLES:
       return 0;
 
@@ -310,18 +309,17 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
       return 1; /* can't see why not... */
 
    case PIPE_CAP_STREAM_OUTPUT_INTERLEAVE_BUFFERS:
-   case PIPE_CAP_GLSL_OPTIMIZE_CONSERVATIVELY:
    case PIPE_CAP_FBFETCH: /* supported, but let's enable later */
    case PIPE_CAP_TEXTURE_GATHER_OFFSETS:
    case PIPE_CAP_DOUBLES:
    case PIPE_CAP_INT64:
    case PIPE_CAP_INT64_DIVMOD:
-   case PIPE_CAP_TGSI_CAN_READ_OUTPUTS:
+   case PIPE_CAP_SHADER_CAN_READ_OUTPUTS:
    case PIPE_CAP_TGSI_TEX_TXF_LZ:
-   case PIPE_CAP_TGSI_CLOCK:
+   case PIPE_CAP_SHADER_CLOCK:
    case PIPE_CAP_POLYGON_MODE_FILL_RECTANGLE:
    case PIPE_CAP_SPARSE_BUFFER_PAGE_SIZE:
-   case PIPE_CAP_TGSI_BALLOT:
+   case PIPE_CAP_SHADER_BALLOT:
    case PIPE_CAP_NATIVE_FENCE_FD:
    case PIPE_CAP_CAN_BIND_CONST_BUFFER_AS_VERTEX:
    case PIPE_CAP_ALLOW_MAPPED_BUFFERS_DURING_EXECUTION:
@@ -348,6 +346,14 @@ grate_screen_get_paramf(struct pipe_screen *pscreen,
                         enum pipe_capf param)
 {
    switch (param) {
+   case PIPE_CAPF_MIN_LINE_WIDTH:
+   case PIPE_CAPF_MIN_LINE_WIDTH_AA:
+   case PIPE_CAPF_MIN_POINT_SIZE:
+   case PIPE_CAPF_MIN_POINT_SIZE_AA:
+      return 1;
+   case PIPE_CAPF_POINT_SIZE_GRANULARITY:
+   case PIPE_CAPF_LINE_WIDTH_GRANULARITY:
+      return 0.1f;
    case PIPE_CAPF_MAX_LINE_WIDTH:
    case PIPE_CAPF_MAX_LINE_WIDTH_AA:
    case PIPE_CAPF_MAX_POINT_SIZE:
@@ -373,8 +379,8 @@ grate_screen_get_paramf(struct pipe_screen *pscreen,
 
 static int
 grate_screen_get_shader_param(struct pipe_screen *pscreen,
-                              unsigned int shader,
-                              enum pipe_shader_cap param)
+                           enum pipe_shader_type shader,
+                           enum pipe_shader_cap param)
 {
    switch (shader) {
    case PIPE_SHADER_VERTEX:
@@ -392,7 +398,7 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
          return 0;
 
       case PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH:
-      case PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED:
+      case PIPE_SHADER_CAP_CONT_SUPPORTED:
       case PIPE_SHADER_CAP_SUBROUTINES:
          return 0;
 
@@ -400,7 +406,7 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
       case PIPE_SHADER_CAP_MAX_OUTPUTS:
          return 16;
 
-      case PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE:
+      case PIPE_SHADER_CAP_MAX_CONST_BUFFER0_SIZE:
       case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
          return 1024;
 
@@ -423,17 +429,13 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
       case PIPE_SHADER_CAP_TGSI_SQRT_SUPPORTED:
          return 1;
 
-      case PIPE_SHADER_CAP_TGSI_DROUND_SUPPORTED:
-      case PIPE_SHADER_CAP_TGSI_DFRACEXP_DLDEXP_SUPPORTED:
-      case PIPE_SHADER_CAP_TGSI_FMA_SUPPORTED:
+      case PIPE_SHADER_CAP_DROUND_SUPPORTED:
+      case PIPE_SHADER_CAP_DFRACEXP_DLDEXP_SUPPORTED:
       case PIPE_SHADER_CAP_MAX_SHADER_BUFFERS:
          return 0;
 
       case PIPE_SHADER_CAP_TGSI_ANY_INOUT_DECL_RANGE:
          return 0;
-
-      case PIPE_SHADER_CAP_MAX_UNROLL_ITERATIONS_HINT:
-         return INT_MAX;
 
       case PIPE_SHADER_CAP_SUPPORTED_IRS:
          return 1 << PIPE_SHADER_IR_TGSI;
@@ -441,13 +443,7 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
       case PIPE_SHADER_CAP_PREFERRED_IR:
          return PIPE_SHADER_IR_TGSI;
 
-      case PIPE_SHADER_CAP_LOWER_IF_THRESHOLD:
-         return INT_MAX;
-
-      case PIPE_SHADER_CAP_TGSI_SKIP_MERGE_REGISTERS:
-          return 0;
-
-      case PIPE_SHADER_CAP_TGSI_LDEXP_SUPPORTED:
+      case PIPE_SHADER_CAP_LDEXP_SUPPORTED:
           return 0;
 
       case PIPE_SHADER_CAP_MAX_HW_ATOMIC_COUNTERS:
@@ -482,7 +478,7 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
 
       /* no control flow */
       case PIPE_SHADER_CAP_MAX_CONTROL_FLOW_DEPTH:
-      case PIPE_SHADER_CAP_TGSI_CONT_SUPPORTED:
+      case PIPE_SHADER_CAP_CONT_SUPPORTED:
       case PIPE_SHADER_CAP_SUBROUTINES:
          return 0;
 
@@ -490,7 +486,7 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
       case PIPE_SHADER_CAP_MAX_OUTPUTS:
          return 16;
 
-      case PIPE_SHADER_CAP_MAX_CONST_BUFFER_SIZE:
+      case PIPE_SHADER_CAP_MAX_CONST_BUFFER0_SIZE:
       case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
          return 32;
 
@@ -512,21 +508,11 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
       case PIPE_SHADER_CAP_MAX_SAMPLER_VIEWS:
          return 16;
 
-      case PIPE_SHADER_CAP_TGSI_SQRT_SUPPORTED:
-         return 1;
-
-      case PIPE_SHADER_CAP_TGSI_DROUND_SUPPORTED:
-      case PIPE_SHADER_CAP_TGSI_DFRACEXP_DLDEXP_SUPPORTED:
+      case PIPE_SHADER_CAP_DROUND_SUPPORTED:
          return 0;
-
-      case PIPE_SHADER_CAP_TGSI_FMA_SUPPORTED:
-         return 0; /* might really be true, but need more testing to be sure */
 
       case PIPE_SHADER_CAP_TGSI_ANY_INOUT_DECL_RANGE:
          return 0;
-
-      case PIPE_SHADER_CAP_MAX_UNROLL_ITERATIONS_HINT:
-         return INT_MAX;
 
       case PIPE_SHADER_CAP_MAX_SHADER_BUFFERS:
          return 0;
@@ -537,13 +523,7 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
       case PIPE_SHADER_CAP_PREFERRED_IR:
          return PIPE_SHADER_IR_TGSI;
 
-      case PIPE_SHADER_CAP_LOWER_IF_THRESHOLD:
-         return INT_MAX;
-
-      case PIPE_SHADER_CAP_TGSI_SKIP_MERGE_REGISTERS:
-          return 0;
-
-      case PIPE_SHADER_CAP_TGSI_LDEXP_SUPPORTED:
+      case PIPE_SHADER_CAP_LDEXP_SUPPORTED:
           return 0;
 
       case PIPE_SHADER_CAP_MAX_HW_ATOMIC_COUNTERS:
