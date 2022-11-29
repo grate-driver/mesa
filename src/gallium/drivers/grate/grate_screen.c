@@ -243,8 +243,14 @@ grate_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
    case PIPE_CAP_ACCELERATED:
       return 1;
 
-   case PIPE_CAP_VIDEO_MEMORY:
-      return 0;
+   case PIPE_CAP_VIDEO_MEMORY: {
+      uint64_t system_memory;
+
+      if (!os_get_total_cma(&system_memory))
+         return 0;
+
+      return (int)(system_memory >> 20);
+   }
 
    case PIPE_CAP_UMA:
       return 1;

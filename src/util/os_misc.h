@@ -102,6 +102,12 @@ bool
 os_get_available_system_memory(uint64_t *size);
 
 /*
+ * Get the total amount of CMA available on the system.
+ */
+bool
+os_get_total_cma(uint64_t *size);
+
+/*
  * Size of a page
  */
 bool

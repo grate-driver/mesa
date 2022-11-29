@@ -323,6 +323,42 @@ os_get_available_system_memory(uint64_t *size)
 }
 
 /**
+ * Return the size of the total CMA.
+ * \param size returns the size of the total CMA
+ * \return true for success, or false on failure
+ */
+bool
+os_get_total_cma(uint64_t *size)
+{
+#if DETECT_OS_LINUX
+   char *meminfo = os_read_file("/proc/meminfo", NULL);
+   if (!meminfo)
+      return false;
+
+   char *str = strstr(meminfo, "CmaTotal:");
+   if (!str) {
+      free(meminfo);
+      return false;
+   }
+
+   uint64_t kb_cma_total;
+   if (sscanf(str, "CmaTotal: %" PRIu64, &kb_cma_total) == 1) {
+      free(meminfo);
+      *size = kb_cma_total << 10;
+      if (kb_cma_total == 0) {
+        return false;
+      }
+      return true;
+   }
+
+   free(meminfo);
+   return false;
+#else
+   return false;
+#endif
+}
+
+/**
  * Return the size of a page
  * \param size returns the size of a page
  * \return true for success, or false on failure
