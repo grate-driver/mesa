@@ -349,6 +349,10 @@ grate_draw_vbo(struct pipe_context *pcontext,
       offset = draws->start;
 
    switch (info->index_size) {
+   case 0:
+      index_size = 0;
+      break;
+
    case 1:
       index_size = 1;
       break;
