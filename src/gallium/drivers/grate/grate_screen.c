@@ -514,7 +514,11 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
       case PIPE_SHADER_CAP_MAX_SAMPLER_VIEWS:
          return 16;
 
+      case PIPE_SHADER_CAP_TGSI_SQRT_SUPPORTED:
+         return 1;
+
       case PIPE_SHADER_CAP_DROUND_SUPPORTED:
+      case PIPE_SHADER_CAP_DFRACEXP_DLDEXP_SUPPORTED:
          return 0;
 
       case PIPE_SHADER_CAP_TGSI_ANY_INOUT_DECL_RANGE:
