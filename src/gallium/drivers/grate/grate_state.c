@@ -123,7 +123,7 @@ grate_set_viewport_states(struct pipe_context *pcontext,
                           const struct pipe_viewport_state *viewports)
 {
    struct grate_context *context = grate_context(pcontext);
-   static const float zeps = 0.0000004768f ; // powf(2.0f, -21.0f);
+   const float zeps = powf(2.0f, -21.0f);
    unsigned int hw_scale;
 
    if (context->tegra114)
