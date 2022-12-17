@@ -2614,8 +2614,6 @@ mesa (10.1.0~rc2-1) experimental; urgency=medium
   * libgbm1.symbols: try to avoid listing private symbols.
   * Enable radeon/r200/r300/r600/radeonsi on kfreebsd (closes: #732337).
     Thanks, Robert Millan!
-  * gallium: fix build failure on powerpcspe (closes: #695746).  Thanks, Roland
-    Stigge!
 
  -- Julien Cristau <jcristau@debian.org>  Sun, 02 Mar 2014 20:22:47 +0100
 
