@@ -413,11 +413,13 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
          return 16;
 
       case PIPE_SHADER_CAP_MAX_CONST_BUFFER0_SIZE:
-      case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
          return 1024;
 
+      case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
+         return 1; /* only constant-buffer slot zero is implemented */
+
       case PIPE_SHADER_CAP_MAX_TEMPS:
-         return 64 * 4; /* 64 vec4s */
+         return 64; /* number of vec4 temporary registers, not scalars */
 
       /* cannot index attributes, varyings nor GPRs */
       case PIPE_SHADER_CAP_INDIRECT_INPUT_ADDR:
@@ -493,8 +495,10 @@ grate_screen_get_shader_param(struct pipe_screen *pscreen,
          return 16;
 
       case PIPE_SHADER_CAP_MAX_CONST_BUFFER0_SIZE:
-      case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
          return 32;
+
+      case PIPE_SHADER_CAP_MAX_CONST_BUFFERS:
+         return 1; /* only constant-buffer slot zero is implemented */
 
       case PIPE_SHADER_CAP_MAX_TEMPS:
          return 16; /* scalars */
@@ -575,7 +579,12 @@ grate_screen_is_format_supported(struct pipe_screen *pscreen,
                                  unsigned storage_sample_count,
                                  unsigned usage)
 {
-   if (usage & (PIPE_BIND_RENDER_TARGET | PIPE_BIND_DEPTH_STENCIL)) {
+   /* Reject unsupported sampler formats too: texture upload may use a
+    * temporary RGB8 sampler resource and then ask GR2D to convert it.
+    * The current GR2D blit only supports equal pixel depths.
+    */
+   if (usage & (PIPE_BIND_RENDER_TARGET | PIPE_BIND_DEPTH_STENCIL |
+                PIPE_BIND_SAMPLER_VIEW)) {
       if (grate_pixel_format(format) < 0)
          return false;
    }

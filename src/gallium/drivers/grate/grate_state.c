@@ -613,19 +613,28 @@ static void
 emit_vs_uniforms(struct grate_context *context)
 {
    struct grate_stream *stream = &context->gr3d->stream;
-   struct pipe_constant_buffer *constbuf = &context->constant_buffer[PIPE_SHADER_VERTEX];
-   int len;
-
-   if (constbuf->user_buffer != NULL) {
-      assert(constbuf->buffer_size % sizeof(uint32_t) == 0);
-
-      len = constbuf->buffer_size / 4;
-      assert(len < 256 * 4);
-
-      grate_stream_push(stream, host1x_opcode_imm(TGR3D_VP_UPLOAD_CONST_ID, 0));
-      grate_stream_push(stream, host1x_opcode_nonincr(TGR3D_VP_UPLOAD_CONST, len));
-      grate_stream_push_words(stream, constbuf->user_buffer, len, 0);
+   const struct pipe_constant_buffer *buffer = &context->constant_buffer[PIPE_SHADER_VERTEX];
+   const struct grate_vertex_shader_state *vs = context->vshader;
+   uint32_t data[GRATE_VP_MAX_CONST_REGS * 4] = { 0 };
+   unsigned count = 0;
+   if (buffer->user_buffer) {
+      assert(buffer->buffer_size % sizeof(uint32_t) == 0);
+      count = buffer->buffer_size / sizeof(uint32_t);
+      assert(count <= GRATE_VP_MAX_CONST_REGS * 4);
+      memcpy(data, buffer->user_buffer, buffer->buffer_size);
    }
+   if (vs->num_immediates) {
+      unsigned offset = vs->immediate_base * 4;
+      unsigned words = vs->num_immediates * 4;
+      assert(offset >= count && offset <= GRATE_VP_MAX_CONST_REGS * 4);
+      assert(words <= GRATE_VP_MAX_CONST_REGS * 4 - offset);
+      memcpy(data + offset, vs->immediates, words * sizeof(uint32_t));
+      count = offset + words;
+   }
+   if (!count) return;
+   grate_stream_push(stream, host1x_opcode_imm(TGR3D_VP_UPLOAD_CONST_ID, 0));
+   grate_stream_push(stream, host1x_opcode_nonincr(TGR3D_VP_UPLOAD_CONST, count));
+   grate_stream_push_words(stream, data, count, 0);
 }
 
 static void

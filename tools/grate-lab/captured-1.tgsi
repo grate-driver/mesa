@@ -1,0 +1,29 @@
+VERT
+PROPERTY NEXT_SHADER VERT
+DCL OUT[0], POSITION
+DCL OUT[1], COLOR
+DCL CONST[0][0..12]
+DCL TEMP[0..3]
+IMM[0] FLT32 {    0.0000,   128.0000,  -128.0000,     0.0000}
+  0: MUL TEMP[0], CONST[0][9].xxxx, CONST[0][5]
+  1: MAD TEMP[0], CONST[0][9].yyyy, CONST[0][6], TEMP[0]
+  2: MAD TEMP[0], CONST[0][9].zzzz, CONST[0][7], TEMP[0]
+  3: MAD OUT[0], CONST[0][9].wwww, CONST[0][8], TEMP[0]
+  4: DP3 TEMP[0].x, CONST[0][10].xyzx, CONST[0][10].xyzx
+  5: RSQ TEMP[0].x, TEMP[0].xxxx
+  6: MUL TEMP[0].xyz, CONST[0][10], TEMP[0].xxxx
+  7: DP3 TEMP[1].x, TEMP[0].xyzx, CONST[0][11].xyzx
+  8: DP3 TEMP[0].x, TEMP[0].xyzx, CONST[0][12].xyzx
+  9: MAX TEMP[2].x, TEMP[1].xxxx, IMM[0].xxxx
+ 10: MIN TEMP[3].x, CONST[0][0].xxxx, IMM[0].yyyy
+ 11: MAX TEMP[3].x, TEMP[3].xxxx, IMM[0].zzzz
+ 12: MAX TEMP[0].x, TEMP[0].xxxx, IMM[0].xxxx
+ 13: POW TEMP[0].x, TEMP[0].xxxx, TEMP[3].xxxx
+ 14: SGE TEMP[1].x, IMM[0].xxxx, TEMP[1].xxxx
+ 15: CMP TEMP[0].x, -TEMP[1].xxxx, IMM[0].xxxx, TEMP[0].xxxx
+ 16: ADD TEMP[1].xyz, CONST[0][2], CONST[0][1]
+ 17: MAD TEMP[1].xyz, TEMP[2].xxxx, CONST[0][3].xyzx, TEMP[1].xyzx
+ 18: MAD TEMP[0].xyz, TEMP[0].xxxx, CONST[0][4].xyzx, TEMP[1].xyzx
+ 19: MOV TEMP[0].w, CONST[0][1].wyzw
+ 20: MOV_SAT OUT[1], TEMP[0]
+ 21: END

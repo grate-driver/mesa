@@ -1,4 +1,6 @@
+#include "grate_diagnostics.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "util/format/u_format.h"
 #include "util/u_inlines.h"
@@ -25,6 +27,32 @@
  */
 #include "frontend/drm_driver.h"
 
+
+/* Diagnostic-only: stop the client before unsupported DMA or CPU writes. */
+static void
+check_box(struct grate_resource *res, unsigned level,
+          const struct pipe_box *box, const char *operation)
+{
+   uint32_t size = 0, handle = 0;
+   unsigned cpp = util_format_get_blocksize(res->b.format);
+   int error = drm_tegra_bo_get_size(res->bo, &size);
+   drm_tegra_bo_get_handle(res->bo, &handle);
+   if (grate_diagnostics_enabled()) fprintf(stderr, "GRATE_DIAG %s handle=%u size=%u format=%s cpp=%u pitch=%u level=%u box=%d,%d,%d/%d,%d,%d resource=%ux%u last_level=%u\n",
+           operation, handle, size, util_format_name(res->b.format), cpp,
+           res->pitch, level, box->x, box->y, box->z,
+           box->width, box->height, box->depth, res->b.width0,
+           res->b.height0, res->b.last_level);
+   if (error || level || box->x < 0 || box->y < 0 || box->z ||
+       box->width <= 0 || box->height <= 0 || box->depth != 1 ||
+       (uint64_t)box->x + box->width > res->b.width0 ||
+       (uint64_t)box->y + box->height > res->b.height0 ||
+       ((uint64_t)box->x + box->width) * cpp > res->pitch ||
+       ((uint64_t)box->y + box->height - 1) * res->pitch +
+        ((uint64_t)box->x + box->width) * cpp > size) {
+      fprintf(stderr, "GRATE_DIAG STOP: unsupported level or buffer range\n");
+      abort();
+   }
+}
 
 static bool
 grate_resource_get_handle(struct pipe_screen *pscreen,
@@ -84,6 +112,8 @@ grate_resource_transfer_map(struct pipe_context *pcontext,
    void *ret = NULL;
    struct pipe_transfer *ptrans;
 
+   check_box(resource, level, box, "MAP");
+
    if (usage & PIPE_MAP_DIRECTLY)
       return NULL;
 
@@ -91,8 +121,10 @@ grate_resource_transfer_map(struct pipe_context *pcontext,
    if (!ptrans)
       return NULL;
 
-   if (drm_tegra_bo_map(resource->bo, &ret))
+   if (drm_tegra_bo_map(resource->bo, &ret)) {
+      slab_free(&context->transfer_pool, ptrans);
       return NULL;
+   }
 
    memset(ptrans, 0, sizeof(*ptrans));
 
@@ -200,6 +232,10 @@ grate_screen_resource_create(struct pipe_screen *pscreen,
    }
 
    size = resource->pitch * height;
+   if (grate_diagnostics_enabled()) fprintf(stderr, "GRATE_DIAG CREATE format=%s width=%u height=%u depth=%u array=%u last_level=%u pitch=%u size=%u bind=0x%x\n",
+           util_format_name(template->format), template->width0,
+           template->height0, template->depth0, template->array_size,
+           template->last_level, resource->pitch, size, template->bind);
 
    err = drm_tegra_bo_new(&resource->bo, screen->drm, flags, size);
    if (err < 0) {
@@ -278,6 +314,16 @@ grate_blit(struct pipe_context *pcontext, const struct pipe_blit_info *info)
 
    dst = grate_resource(info->dst.resource);
    src = grate_resource(info->src.resource);
+   check_box(src, info->src.level, &info->src.box, "BLIT_SRC");
+   check_box(dst, info->dst.level, &info->dst.box, "BLIT_DST");
+   if (info->src.format != info->dst.format ||
+       src->b.format != info->src.format || dst->b.format != info->dst.format ||
+       info->src.box.width != info->dst.box.width ||
+       info->src.box.height != info->dst.box.height ||
+       info->scissor_enable || info->alpha_blend) {
+      fprintf(stderr, "GRATE_DIAG STOP: unsupported blit conversion, scaling or state\n");
+      abort();
+   }
 
    err = grate_stream_begin(&gr2d->stream);
    if (err < 0) {
@@ -365,6 +411,9 @@ fill(struct grate_channel *gr2d,
 {
    uint32_t value;
    int err;
+   struct pipe_box box = { .x = dstx, .y = dsty, .z = 0,
+                          .width = width, .height = height, .depth = 1 };
+   check_box(dst, 0, &box, "FILL");
 
    err = grate_stream_begin(&gr2d->stream);
    if (err < 0) {

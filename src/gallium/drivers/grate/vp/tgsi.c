@@ -19,6 +19,7 @@ src_undef()
 static struct vp_src_operand
 attrib(int index, const enum vp_swz swizzle[4], bool negate, bool absolute)
 {
+   assert(index >= 0 && index < 16);
    struct vp_src_operand ret = {
       .file = VP_SRC_FILE_ATTRIB,
       .index = index,
@@ -32,6 +33,7 @@ attrib(int index, const enum vp_swz swizzle[4], bool negate, bool absolute)
 static struct vp_src_operand
 uniform(int index, const enum vp_swz swizzle[4], bool negate, bool absolute)
 {
+   assert(index >= 0 && index < 256);
    struct vp_src_operand ret = {
       .file = VP_SRC_FILE_UNIFORM,
       .index = index,
@@ -45,6 +47,7 @@ uniform(int index, const enum vp_swz swizzle[4], bool negate, bool absolute)
 static struct vp_src_operand
 src_temp(int index, const enum vp_swz swizzle[4], bool negate, bool absolute)
 {
+   assert(index >= 0 && index < 64);
    struct vp_src_operand ret = {
       .file = VP_SRC_FILE_TEMP,
       .index = index,
@@ -84,6 +87,7 @@ emit_output(struct grate_vp_shader *vp, int index,
 static struct vp_dst_operand
 dst_temp(int index, unsigned int write_mask, bool saturate)
 {
+   assert(index >= 0 && index < 64);
    struct vp_dst_operand ret = {
       .file = VP_DST_FILE_TEMP,
       .index = index,
@@ -159,6 +163,8 @@ GEN_V_BINOP(DP3)
 GEN_V_BINOP(DP4)
 GEN_V_BINOP(SLT)
 GEN_V_BINOP(MAX)
+GEN_V_BINOP(MIN)
+GEN_V_BINOP(SGE)
 
 static struct vp_vec_instr
 emit_vMAD(struct vp_dst_operand dst, struct vp_src_operand src0,
@@ -196,6 +202,9 @@ emit_s ## OP (struct vp_dst_operand dst, struct vp_src_operand src) \
 }
 
 GEN_S_UNOP(RSQ)
+GEN_S_UNOP(RCP)
+GEN_S_UNOP(LG2)
+GEN_S_UNOP(EX2)
 
 static struct vp_instr *
 emit_packed(struct vp_vec_instr vec, struct vp_scalar_instr scalar)
@@ -245,8 +254,8 @@ tgsi_src_to_vp(struct grate_vp_shader *vp, const struct tgsi_src_register *src)
       return src_temp(src->Index, swizzle, negate, absolute);
 
    case TGSI_FILE_IMMEDIATE:
-      /* HACK: allocate uniforms from the top for immediates; need to actually record these */
-      return uniform(1023 - src->Index, swizzle, negate, absolute);
+      assert(src->Index < vp->num_immediates);
+      return uniform(vp->immediate_base + src->Index, swizzle, negate, absolute);
 
    default:
       unreachable("unsupported input!");
@@ -299,6 +308,33 @@ tgsi_to_vp(struct grate_vp_shader *vp, const struct tgsi_full_instruction *inst)
                                    tgsi_src_to_vp(vp, &inst->Src[1].Register)),
                          emit_sNOP());
 
+   case TGSI_OPCODE_MIN:
+      return emit_packed(emit_vMIN(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register),
+                                   tgsi_src_to_vp(vp, &inst->Src[1].Register)),
+                         emit_sNOP());
+
+   case TGSI_OPCODE_SGE:
+      return emit_packed(emit_vSGE(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register),
+                                   tgsi_src_to_vp(vp, &inst->Src[1].Register)),
+                         emit_sNOP());
+
+   case TGSI_OPCODE_RCP:
+      return emit_packed(emit_vNOP(),
+                         emit_sRCP(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register)));
+
+   case TGSI_OPCODE_LG2:
+      return emit_packed(emit_vNOP(),
+                         emit_sLG2(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register)));
+
+   case TGSI_OPCODE_EX2:
+      return emit_packed(emit_vNOP(),
+                         emit_sEX2(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
+                                   tgsi_src_to_vp(vp, &inst->Src[0].Register)));
+
    case TGSI_OPCODE_MAD:
       return emit_packed(emit_vMAD(tgsi_dst_to_vp(vp, &inst->Dst[0].Register, saturate),
                                    tgsi_src_to_vp(vp, &inst->Src[0].Register),
@@ -321,10 +357,34 @@ grate_tgsi_to_vp(struct grate_vp_shader *vp, struct tgsi_parse_context *tgsi)
 {
    list_inithead(&vp->instructions);
    vp->output_mask = 0;
+   vp->immediate_base = 0;
+   vp->num_immediates = 0;
 
    while (!tgsi_parse_end_of_tokens(tgsi)) {
       tgsi_parse_token(tgsi);
       switch (tgsi->FullToken.Token.Type) {
+      case TGSI_TOKEN_TYPE_DECLARATION: {
+         const struct tgsi_full_declaration *decl = &tgsi->FullToken.FullDeclaration;
+         if (decl->Declaration.File == TGSI_FILE_CONSTANT) {
+            assert(vp->num_immediates == 0);
+            assert(decl->Range.Last < GRATE_VP_MAX_CONST_REGS);
+            unsigned next = decl->Range.Last + 1;
+            if (next > vp->immediate_base) vp->immediate_base = next;
+         }
+         break;
+      }
+      case TGSI_TOKEN_TYPE_IMMEDIATE: {
+         const struct tgsi_full_immediate *imm = &tgsi->FullToken.FullImmediate;
+         assert(imm->Immediate.DataType == TGSI_IMM_FLOAT32);
+         assert(imm->Immediate.NrTokens >= 1 && imm->Immediate.NrTokens <= 5);
+         assert(vp->immediate_base < GRATE_VP_MAX_CONST_REGS);
+         assert(vp->num_immediates < GRATE_VP_MAX_CONST_REGS - vp->immediate_base);
+         uint32_t *values = vp->immediates[vp->num_immediates++];
+         memset(values, 0, 4 * sizeof(*values));
+         for (unsigned i = 0; i < imm->Immediate.NrTokens - 1; i++)
+            memcpy(&values[i], &imm->u[i].Float, sizeof(values[i]));
+         break;
+      }
       case TGSI_TOKEN_TYPE_INSTRUCTION:
          if (tgsi->FullToken.FullInstruction.Instruction.Opcode != TGSI_OPCODE_END) {
             struct vp_instr *instr = tgsi_to_vp(vp, &tgsi->FullToken.FullInstruction);

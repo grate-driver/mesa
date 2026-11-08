@@ -1,3 +1,4 @@
+#include "../grate_diagnostics.h"
 /*
  * Copyright (C) 2016 Rob Clark <robclark@freedesktop.org>
  *
@@ -24,6 +25,7 @@
  *    Rob Clark <robclark@freedesktop.org>
  */
 
+#include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
 #include <pthread.h>
@@ -224,7 +226,16 @@ void drm_tegra_reset_bo(struct drm_tegra_bo *bo, uint32_t flags,
 
 	if (set_flags) {
 		/* XXX: Error handling? */
-		drm_tegra_bo_set_flags(bo, flags);
+		/* GEM_CREATE and GEM_SET_FLAGS use different bit positions. */
+		uint32_t gem_flags = (flags & DRM_TEGRA_GEM_CREATE_BOTTOM_UP) ?
+			DRM_TEGRA_GEM_BOTTOM_UP : 0;
+		int error = drm_tegra_bo_set_flags(bo, gem_flags);
+		if (grate_diagnostics_enabled()) fprintf(stderr, "GRATE_DIAG BO_RESET handle=%u size=%u create_flags=%u set_flags=%u result=%d\n",
+			bo->handle, bo->size, flags, gem_flags, error);
+		if (error) {
+			fprintf(stderr, "GRATE_DIAG STOP: BO flags reset failed\n");
+			abort();
+		}
 	}
 
 	if (bo->custom_tiling) {

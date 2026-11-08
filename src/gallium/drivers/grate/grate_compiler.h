@@ -7,9 +7,14 @@
 
 struct tgsi_parse_context;
 
+#define GRATE_VP_MAX_CONST_REGS 256
+
 struct grate_vp_shader {
    struct list_head instructions;
    uint16_t output_mask;
+   unsigned immediate_base;
+   unsigned num_immediates;
+   uint32_t immediates[GRATE_VP_MAX_CONST_REGS][4];
 };
 
 struct grate_fp_info {

@@ -5,6 +5,7 @@
 #include "util/u_memory.h"
 
 #include "tgsi/tgsi_dump.h"
+#include "tgsi/tgsi_lowering.h"
 #include "tgsi/tgsi_parse.h"
 #include "tgsi/tgsi_scan.h"
 #include "tgsi/tgsi_transform.h"
@@ -25,24 +26,29 @@ struct grate_vs_tgsi_transform_context {
 };
 
 static void
-grate_vs_tgsi_transform_instruction(struct tgsi_transform_context *ctx,
+grate_vs_tgsi_emit_native(struct tgsi_transform_context *ctx,
                                     struct tgsi_full_instruction *inst)
 {
    struct grate_vs_tgsi_transform_context *gctx =
       (struct grate_vs_tgsi_transform_context *)ctx;
 
    int const_index = -1;
+   int const_file = -1;
    for (unsigned i = 0; i < inst->Instruction.NumSrcRegs; i++) {
-      if (inst->Src[i].Register.File != TGSI_FILE_CONSTANT)
+      if (inst->Src[i].Register.File != TGSI_FILE_CONSTANT &&
+          inst->Src[i].Register.File != TGSI_FILE_IMMEDIATE)
          continue;
 
-      if (const_index < 0)
+      if (const_index < 0) {
          const_index = inst->Src[i].Register.Index;
-      else if (inst->Src[i].Register.Index != const_index) {
+         const_file = inst->Src[i].Register.File;
+      } else if (inst->Src[i].Register.Index != const_index ||
+                 inst->Src[i].Register.File != const_file) {
          /* We already have a constant-reads in this instruction,
           * add extra instructions in order to read more
           */
          unsigned temp = gctx->next_temp++;
+         assert(temp < 64);
          tgsi_transform_temp_decl(ctx, temp);
          /* insert MOV to temp */
          tgsi_transform_op1_inst(ctx, TGSI_OPCODE_MOV,
@@ -50,23 +56,75 @@ grate_vs_tgsi_transform_instruction(struct tgsi_transform_context *ctx,
                                  TGSI_FILE_TEMPORARY, temp,
                                  TGSI_WRITEMASK_XYZW,
                                  /* src reg */
-                                 TGSI_FILE_CONSTANT,
+                                 inst->Src[i].Register.File,
                                  inst->Src[i].Register.Index);
 
          /* rewrite instruction */
 	 tgsi_transform_src_reg_xyzw(&inst->Src[i], TGSI_FILE_TEMPORARY, temp);
 	 inst->Src[i].Register.File = TGSI_FILE_TEMPORARY;
          inst->Src[i].Register.Index = temp;
+         inst->Src[i].Register.Dimension = 0;
       }
    }
 
    ctx->emit_instruction(ctx, inst);
 }
 
+static void
+grate_vs_tgsi_transform_instruction(struct tgsi_transform_context *ctx,
+                                     struct tgsi_full_instruction *inst)
+{
+   if (inst->Instruction.Opcode != TGSI_OPCODE_CMP) {
+      grate_vs_tgsi_emit_native(ctx, inst);
+      return;
+   }
+   struct grate_vs_tgsi_transform_context *gctx =
+      (struct grate_vs_tgsi_transform_context *)ctx;
+   unsigned predicate = gctx->next_temp++, selected = gctx->next_temp++;
+   assert(gctx->next_temp <= 64);
+   tgsi_transform_temp_decl(ctx, predicate);
+   tgsi_transform_temp_decl(ctx, selected);
+   unsigned mask = inst->Dst[0].Register.WriteMask;
+   struct tgsi_full_instruction op = tgsi_default_full_instruction();
+   op.Instruction.NumDstRegs = 1;
+   op.Instruction.NumSrcRegs = 2;
+   op.Instruction.Opcode = TGSI_OPCODE_SLT;
+   tgsi_transform_dst_reg(&op.Dst[0], TGSI_FILE_TEMPORARY, predicate, mask);
+   op.Src[0] = inst->Src[0]; op.Src[1] = inst->Src[0];
+   op.Src[1].Register.Negate = !op.Src[1].Register.Negate;
+   grate_vs_tgsi_emit_native(ctx, &op);
+
+   op = tgsi_default_full_instruction();
+   op.Instruction.NumDstRegs = 1; op.Instruction.NumSrcRegs = 2;
+   op.Instruction.Opcode = TGSI_OPCODE_MUL;
+   tgsi_transform_dst_reg(&op.Dst[0], TGSI_FILE_TEMPORARY, selected, mask);
+   tgsi_transform_src_reg_xyzw(&op.Src[0], TGSI_FILE_TEMPORARY, predicate);
+   op.Src[1] = inst->Src[1];
+   grate_vs_tgsi_emit_native(ctx, &op);
+
+   op = tgsi_default_full_instruction();
+   op.Instruction.NumDstRegs = 1; op.Instruction.NumSrcRegs = 3;
+   op.Instruction.Opcode = TGSI_OPCODE_MAD;
+   tgsi_transform_dst_reg(&op.Dst[0], TGSI_FILE_TEMPORARY, predicate, mask);
+   tgsi_transform_src_reg_xyzw(&op.Src[0], TGSI_FILE_TEMPORARY, predicate);
+   op.Src[0].Register.Negate = 1;
+   op.Src[1] = inst->Src[2]; op.Src[2] = inst->Src[2];
+   grate_vs_tgsi_emit_native(ctx, &op);
+
+   op = tgsi_default_full_instruction();
+   op.Instruction.NumDstRegs = 1; op.Instruction.NumSrcRegs = 2;
+   op.Instruction.Opcode = TGSI_OPCODE_ADD;
+   op.Instruction.Saturate = inst->Instruction.Saturate;
+   op.Dst[0] = inst->Dst[0];
+   tgsi_transform_src_reg_xyzw(&op.Src[0], TGSI_FILE_TEMPORARY, selected);
+   tgsi_transform_src_reg_xyzw(&op.Src[1], TGSI_FILE_TEMPORARY, predicate);
+   grate_vs_tgsi_emit_native(ctx, &op);
+}
+
 static struct tgsi_token *
 grate_vs_tgsi_transform(const struct tgsi_token *tokens_in)
 {
-   const unsigned new_len = tgsi_num_tokens(tokens_in) + 100;
+   const unsigned new_len = tgsi_num_tokens(tokens_in) * 8 + 256;
 
    struct tgsi_shader_info info;
    tgsi_scan_shader(tokens_in, &info);
@@ -97,7 +155,11 @@ grate_create_vs_state(struct pipe_context *pcontext,
       fprintf(stderr, "\n");
    }
 
-   struct tgsi_token *new_tokens = grate_vs_tgsi_transform(template->tokens);
+   struct tgsi_lowering_config lowering = { .lower_POW = 1 };
+   struct tgsi_shader_info lowered_info;
+   const struct tgsi_token *lowered = tgsi_transform_lowering(&lowering, template->tokens, &lowered_info);
+   struct tgsi_token *new_tokens = grate_vs_tgsi_transform(lowered ? lowered : template->tokens);
+   FREE((void *)lowered);
    if (!new_tokens)
       return NULL;
 
@@ -132,6 +194,9 @@ grate_create_vs_state(struct pipe_context *pcontext,
    so->blob.commands = commands;
    so->blob.num_commands = num_commands;
    so->output_mask = vp.output_mask;
+   so->immediate_base = vp.immediate_base;
+   so->num_immediates = vp.num_immediates;
+   memcpy(so->immediates, vp.immediates, vp.num_immediates * sizeof(vp.immediates[0]));
 
    return so;
 }
