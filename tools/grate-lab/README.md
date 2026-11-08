@@ -16,7 +16,9 @@ manager with cleanup.
 
 Validated: context creation/destruction, one RGB texture upload using Mesa's CPU
 format conversion, and illuminated, depth-tested engine geometry on GR3D.
-Not validated/implemented: general texture sampling, mipmap storage/addressing,
+Explicit eight-level RGBA8 mip uploads/readbacks also pass on both softpipe
+and Tegra. This validates allocation and CPU transfers, not mip sampling.
+Not validated/implemented: general texture sampling, GPU mip addressing,
 bitmap text, arbitrary applications, NaN/Inf correctness of arithmetic CMP
 lowering, full GL conformance, long-running stability or other devices.
 
@@ -149,3 +151,24 @@ Arithmetic CMP lowering currently targets the finite lighting subset. Review
 its non-finite semantics and the abort-based diagnostic guards before treating
 this as a general or merge-ready driver. The accompanying PR should remain a
 draft until those limitations and upstream branch selection are resolved.
+
+## Explicit mip storage regression
+
+`grate_mipmap.h` computes separate offsets, pitches and sizes with overflow and
+box-range checks. Uncompressed singleton 2D textures and buffers are supported.
+Nonzero-level render surfaces and hardware blits remain unsupported; copies use
+the Gallium CPU helper. Imported resources are level-zero only.
+
+Run the standalone layout test on the build host:
+
+```sh
+cc -std=c99 -g -fsanitize=address,undefined \
+  -Isrc/gallium/drivers/grate tools/grate-lab/mipmap-layout-test.c -o /tmp/grate-mipmap-test
+/tmp/grate-mipmap-test
+```
+
+On the device, the isolated R5 probe uploaded distinct RGBA values at every
+level from 128x128 to 1x1 and checked every pixel with glGetTexImage, with no
+GL errors. Both softpipe and Tegra passed. No drawing, texture sampling or
+glGenerateMipmap was involved. All 149 protected system-file entries stayed
+unchanged and no new kernel faults were recorded.

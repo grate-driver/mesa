@@ -7,6 +7,7 @@
 #include "util/u_memory.h"
 #include "util/u_pack_color.h"
 #include "util/u_transfer.h"
+#include "util/u_surface.h"
 #include "util/u_inlines.h"
 
 #include "grate_common.h"
@@ -42,13 +43,9 @@ check_box(struct grate_resource *res, unsigned level,
            res->pitch, level, box->x, box->y, box->z,
            box->width, box->height, box->depth, res->b.width0,
            res->b.height0, res->b.last_level);
-   if (error || level || box->x < 0 || box->y < 0 || box->z ||
-       box->width <= 0 || box->height <= 0 || box->depth != 1 ||
-       (uint64_t)box->x + box->width > res->b.width0 ||
-       (uint64_t)box->y + box->height > res->b.height0 ||
-       ((uint64_t)box->x + box->width) * cpp > res->pitch ||
-       ((uint64_t)box->y + box->height - 1) * res->pitch +
-        ((uint64_t)box->x + box->width) * cpp > size) {
+   if (error || box->z || box->depth != 1 ||
+       !grate_mip_box_valid(&res->mip, level, res->b.width0, res->b.height0,
+                            cpp, box->x, box->y, box->width, box->height, size)) {
       fprintf(stderr, "GRATE_DIAG STOP: unsupported level or buffer range\n");
       abort();
    }
@@ -133,12 +130,12 @@ grate_resource_transfer_map(struct pipe_context *pcontext,
    ptrans->level = level;
    ptrans->usage = usage;
    ptrans->box = *box;
-   ptrans->stride = resource->pitch;
-   ptrans->layer_stride = ptrans->stride;
+   ptrans->stride = resource->mip.pitch[level];
+   ptrans->layer_stride = resource->mip.size[level];
    *transfer = ptrans;
 
-   return (uint8_t *)ret +
-          box->y * resource->pitch +
+   return (uint8_t *)ret + resource->mip.offset[level] +
+          box->y * resource->mip.pitch[level] +
           box->x * util_format_get_blocksize(presource->format);
 }
 
@@ -231,7 +228,18 @@ grate_screen_resource_create(struct pipe_screen *pscreen,
       resource->format = format;
    }
 
-   size = resource->pitch * height;
+   unsigned alignment = (template->bind & PIPE_BIND_DEPTH_STENCIL) ? 256 : 32;
+   if (template->target == PIPE_BUFFER) alignment = 1;
+   if ((template->target != PIPE_BUFFER && template->target != PIPE_TEXTURE_2D) ||
+       template->depth0 != 1 || template->array_size != 1 ||
+       !grate_mip_layout_init(&resource->mip, template->width0, template->height0,
+                              util_format_get_blocksize(template->format),
+                              template->last_level + 1, alignment)) {
+      FREE(resource);
+      return NULL;
+   }
+   resource->pitch = resource->mip.pitch[0];
+   size = resource->mip.total;
    if (grate_diagnostics_enabled()) fprintf(stderr, "GRATE_DIAG CREATE format=%s width=%u height=%u depth=%u array=%u last_level=%u pitch=%u size=%u bind=0x%x\n",
            util_format_name(template->format), template->width0,
            template->height0, template->depth0, template->array_size,
@@ -273,7 +281,18 @@ grate_screen_resource_from_handle(struct pipe_screen *pscreen,
       return NULL;
    }
 
+   if (template->last_level || template->depth0 != 1 || template->array_size != 1 ||
+       (uint64_t)handle->stride * template->height0 > UINT32_MAX ||
+       (uint64_t)template->width0 * util_format_get_blocksize(template->format) > handle->stride) {
+      drm_tegra_bo_unref(resource->bo);
+      FREE(resource);
+      return NULL;
+   }
    resource->pitch = handle->stride;
+   resource->mip.levels = 1;
+   resource->mip.pitch[0] = handle->stride;
+   resource->mip.size[0] = handle->stride * template->height0;
+   resource->mip.total = resource->mip.size[0];
 
    format = grate_pixel_format(template->format);
    assert(format >= 0);
@@ -301,7 +320,8 @@ grate_resource_copy_region(struct pipe_context *pcontext,
                            unsigned int src_level,
                            const struct pipe_box *box)
 {
-   unimplemented();
+   util_resource_copy_region(pcontext, dst, dst_level, dstx, dsty, dstz,
+                             src, src_level, box);
 }
 
 static void
@@ -312,6 +332,10 @@ grate_blit(struct pipe_context *pcontext, const struct pipe_blit_info *info)
    struct grate_channel *gr2d = context->gr2d;
    struct grate_resource *dst, *src;
 
+   if (info->src.level || info->dst.level) {
+      fprintf(stderr, "GRATE_DIAG STOP: mip-level hardware blit not implemented\n");
+      abort();
+   }
    dst = grate_resource(info->dst.resource);
    src = grate_resource(info->src.resource);
    check_box(src, info->src.level, &info->src.box, "BLIT_SRC");
