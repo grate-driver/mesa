@@ -15,12 +15,19 @@ struct grate_vertex_shader_state {
    struct pipe_shader_state base;
    struct grate_shader_blob blob;
    uint16_t output_mask;
+   unsigned immediate_base;
+   unsigned num_immediates;
+   uint32_t immediates[GRATE_VP_MAX_CONST_REGS][4];
 };
 
 struct grate_fragment_shader_state {
    struct pipe_shader_state base;
    struct grate_shader_blob blob;
    struct grate_fp_info info;
+   struct grate_shader_blob blend_blob[3];
+   struct grate_shader_blob biased_blob[4];
+   bool uses_texture;
+   bool bias_uniform_conflict;
 };
 
 void

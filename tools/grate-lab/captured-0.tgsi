@@ -1,0 +1,23 @@
+VERT
+PROPERTY NEXT_SHADER VERT
+DCL OUT[0], POSITION
+DCL OUT[1], COLOR
+DCL CONST[0][0..11]
+DCL TEMP[0..2]
+IMM[0] FLT32 {    0.0000,     0.0000,     0.0000,     0.0000}
+  0: MUL TEMP[0], CONST[0][9].xxxx, CONST[0][5]
+  1: MAD TEMP[0], CONST[0][9].yyyy, CONST[0][6], TEMP[0]
+  2: MAD TEMP[0], CONST[0][9].zzzz, CONST[0][7], TEMP[0]
+  3: MAD OUT[0], CONST[0][9].wwww, CONST[0][8], TEMP[0]
+  4: DP3 TEMP[0].x, CONST[0][10].xyzx, CONST[0][10].xyzx
+  5: RSQ TEMP[0].x, TEMP[0].xxxx
+  6: MUL TEMP[0].xyz, CONST[0][10], TEMP[0].xxxx
+  7: DP3 TEMP[0].x, TEMP[0].xyzx, CONST[0][11].xyzx
+  8: MAX TEMP[1].x, IMM[0].xxxx, TEMP[0].xxxx
+  9: SLT TEMP[0].x, IMM[0].xxxx, TEMP[0].xxxx
+ 10: ADD TEMP[2].xyz, CONST[0][2], CONST[0][1]
+ 11: MAD TEMP[1].xyz, TEMP[1].xxxx, CONST[0][3].xyzx, TEMP[2].xyzx
+ 12: MAD TEMP[0].xyz, TEMP[0].xxxx, CONST[0][4].xyzx, TEMP[1].xyzx
+ 13: MOV TEMP[0].w, CONST[0][1].wyzw
+ 14: MOV_SAT OUT[1], TEMP[0]
+ 15: END

@@ -4,12 +4,18 @@
 #include "util/list.h"
 
 #include <stdint.h>
+#include <stdbool.h>
 
 struct tgsi_parse_context;
+
+#define GRATE_VP_MAX_CONST_REGS 256
 
 struct grate_vp_shader {
    struct list_head instructions;
    uint16_t output_mask;
+   unsigned immediate_base;
+   unsigned num_immediates;
+   uint32_t immediates[GRATE_VP_MAX_CONST_REGS][4];
 };
 
 struct grate_fp_info {
@@ -20,9 +26,16 @@ struct grate_fp_info {
    int num_inputs;
    int color_input;
    int max_tram_row;
+   bool unverified_uniform_texcoords;
 };
 
 struct grate_fp_shader {
+   unsigned simple_coord_mask;
+   unsigned simple_uniform_coord_mask;
+   int simple_tex_temp;
+   unsigned simple_tex_alpha_one;
+   unsigned simple_num_immediates;
+   uint32_t simple_immediate[4];
    struct list_head fp_instructions;
    struct list_head alu_instructions;
    struct list_head mfu_instructions;

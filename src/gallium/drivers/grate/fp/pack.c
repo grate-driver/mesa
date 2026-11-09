@@ -52,6 +52,7 @@ grate_fp_pack_alu(uint32_t *dst, struct fp_alu_instr *instr)
       uint32_t words[2];
    } tmp = {
       .opcode = instr->op,
+      .rD_enable = instr->multiply_addend,
       .dst_reg = instr->dst.index,
       .saturate_result = instr->dst.saturate,
 
@@ -59,14 +60,26 @@ grate_fp_pack_alu(uint32_t *dst, struct fp_alu_instr *instr)
       .write_high_sub_reg = instr->dst.write_high_sub_reg,
 
       .rA_reg_select = instr->src[0].index,
+      .rA_scale_by_two = instr->src[0].scale_by_two,
+      .rA_negate = instr->src[0].negate,
+      .rA_absolute_value = instr->src[0].absolute_value,
+      .rA_minus_one = instr->src[0].minus_one,
       .rA_fixed10 = instr->src[0].datatype != FP_DATATYPE_FP20,
       .rA_sub_reg_select_high = instr->src[0].sub_reg_select_high,
 
       .rB_reg_select = instr->src[1].index,
+      .rB_scale_by_two = instr->src[1].scale_by_two,
+      .rB_negate = instr->src[1].negate,
+      .rB_absolute_value = instr->src[1].absolute_value,
+      .rB_minus_one = instr->src[1].minus_one,
       .rB_fixed10 = instr->src[1].datatype != FP_DATATYPE_FP20,
       .rB_sub_reg_select_high = instr->src[1].sub_reg_select_high,
 
       .rC_reg_select = instr->src[2].index,
+      .rC_scale_by_two = instr->src[2].scale_by_two,
+      .rC_negate = instr->src[2].negate,
+      .rC_absolute_value = instr->src[2].absolute_value,
+      .rC_minus_one = instr->src[2].minus_one,
       .rC_fixed10 = instr->src[2].datatype != FP_DATATYPE_FP20,
       .rC_sub_reg_select_high = instr->src[2].sub_reg_select_high,
 

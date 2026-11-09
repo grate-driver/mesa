@@ -1,0 +1,4 @@
+{
+  "exit": 0,
+  "stdout": "PASS draw planning: 593610 independently compared primitives, strip winding/joins, 7050-index nonzero-start command capture for all index widths and user/resource ownership, empty draws and BO overflow guards"
+}

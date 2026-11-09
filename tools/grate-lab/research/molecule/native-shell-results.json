@@ -1,0 +1,53 @@
+{
+  "revision": "R27",
+  "runtime": "unchanged R25",
+  "overall_pass": false,
+  "process_series_completed": true,
+  "visual_correctness": false,
+  "visual_observation": "GPU shells are opaque and occlude atom labels; software shells are transparent. Poses differ, but this is a qualitative rendering failure, not a pixel-aligned comparison.",
+  "next_investigation": "Varying COLOR alpha, shell depth/blend state and ordering. No root cause assigned yet.",
+  "protected_manifest_unchanged": true,
+  "steps": [
+    {
+      "test": "softpipe-opaque",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "softpipe",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 5.135,
+        "fault_marker": false,
+        "renderer_confirmed": true,
+        "captured": true,
+        "frames": 9,
+        "quit_sender_exit": 0,
+        "diagnostic_stop": false,
+        "completed": true
+      }
+    },
+    {
+      "test": "grate-opaque",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "grate",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 5.423,
+        "fault_marker": false,
+        "renderer_confirmed": true,
+        "captured": true,
+        "frames": 77,
+        "quit_sender_exit": 0,
+        "diagnostic_stop": false,
+        "completed": true
+      },
+      "new_kernel_faults": []
+    }
+  ],
+  "health_exit": 0,
+  "integrity_collection_exit": 0,
+  "auth_cleanup_exit": 0,
+  "power_hold_exit": 0,
+  "logs_collection_exit": 0,
+  "process_check_exit": 0
+}

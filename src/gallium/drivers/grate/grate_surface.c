@@ -11,6 +11,9 @@ grate_create_surface(struct pipe_context *context,
                      const struct pipe_surface *template)
 {
    unsigned int level = template->u.tex.level;
+   /* Storage/map support does not yet implement rendering into a mip level. */
+   if (level || template->u.tex.first_layer || template->u.tex.last_layer)
+      return NULL;
    struct grate_surface *surface = CALLOC_STRUCT(grate_surface);
    if (!surface)
       return NULL;

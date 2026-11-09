@@ -39,6 +39,12 @@ struct grate_context {
    struct grate_vertexbuf_state vbs;
    struct pipe_constant_buffer constant_buffer[PIPE_SHADER_TYPES];
 
+   struct pipe_sampler_view *fragment_sampler_view;
+   struct pipe_sampler_state *fragment_sampler;
+
+   struct pipe_blend_state *blend;
+   unsigned blend_mode;
+   bool sampler_bias_active;
    struct grate_zsa_state *zsa;
    struct grate_rasterizer_state *rast;
 

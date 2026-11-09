@@ -1,0 +1,27 @@
+#!/bin/sh
+# Per-process launcher; no system libraries or desktop settings are changed.
+set -eu
+task_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ -n "${GRATE_LAB_PREFIX:-}" ]; then
+    task_prefix=$GRATE_LAB_PREFIX
+else
+    IFS= read -r task_prefix < "$task_dir/prefix-path"
+fi
+test -x "$task_prefix/bin/grate-lab"
+unset LD_PRELOAD LIBGL_ALWAYS_INDIRECT LIBGL_ALWAYS_SOFTWARE GALLIUM_DRIVER LIBGL_DEBUG GRATE_DEBUG
+export LD_LIBRARY_PATH="$task_prefix/lib"
+export LIBGL_DRIVERS_PATH="$task_prefix/lib/dri"
+export MESA_SHADER_CACHE_DISABLE=true GRATE_DIAGNOSTICS=0
+export MESA_LOADER_DRIVER_OVERRIDE=tegra
+if [ "${1:-}" = "--software" ]; then
+    shift
+    export LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=softpipe MESA_LOADER_DRIVER_OVERRIDE=swrast
+    echo 'CPU reference: softpipe'
+else
+    task_info=$(glxinfo -B)
+    case "$task_info" in
+        *'OpenGL renderer string: Tegra'*) echo 'Hardware renderer verified: Tegra' ;;
+        *) printf '%s\n' "$task_info" >&2; echo 'Expected Tegra; refusing to label software rendering as hardware.' >&2; exit 2 ;;
+    esac
+fi
+exec timeout -s TERM -k 2 35 "$task_prefix/bin/grate-lab" --seconds 20 "$@"

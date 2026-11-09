@@ -54,6 +54,7 @@ struct fp_alu_instr {
 
    enum fp_alu_op op;
    enum fp_scale scale;
+   bool multiply_addend;
 
    struct fp_alu_dst_operand dst;
    struct fp_alu_src_operand src[4];
@@ -146,7 +147,8 @@ struct fp_sched {
 
 struct fp_instr {
    struct list_head link;
-   // TODO: PSEQ
+   uint32_t tex_word;
+   uint32_t pseq_word;
    struct fp_sched mfu_sched;
    // TODO: TEX
    struct fp_sched alu_sched;

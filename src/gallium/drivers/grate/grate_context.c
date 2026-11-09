@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "util/u_memory.h"
+#include "util/u_inlines.h"
 #include "util/u_upload_mgr.h"
 
 #include "indices/u_primconvert.h"
@@ -63,9 +64,14 @@ grate_context_destroy(struct pipe_context *pcontext)
 {
    struct grate_context *context = grate_context(pcontext);
 
+   pipe_sampler_view_reference(&context->fragment_sampler_view, NULL);
+
    if (context->primconvert)
       util_primconvert_destroy(context->primconvert);
 
+   if (context->base.const_uploader != context->base.stream_uploader)
+      u_upload_destroy(context->base.const_uploader);
+   u_upload_destroy(context->base.stream_uploader);
    slab_destroy_child(&context->transfer_pool);
 
    grate_channel_delete(context->gr3d);
@@ -117,7 +123,8 @@ grate_screen_context_create(struct pipe_screen *pscreen,
 
    context->base.destroy = grate_context_destroy;
    context->base.flush = grate_context_flush;
-   context->base.stream_uploader = u_upload_create_default(&context->base);
+   context->base.stream_uploader = u_upload_create(&context->base, 16 * 1024,
+                                                  0, PIPE_USAGE_STREAM, 0);
    context->base.const_uploader = context->base.stream_uploader;
 
    grate_context_resource_init(&context->base);

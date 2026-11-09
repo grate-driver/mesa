@@ -1,0 +1,110 @@
+{
+  "completed": true,
+  "health_exit": 0,
+  "integrity_collection_exit": 0,
+  "auth_cleanup_exit": 0,
+  "power_hold_exit": 0,
+  "logs_collection_exit": 0,
+  "process_check_exit": 0,
+  "revision": "R26",
+  "runtime": "unchanged R25",
+  "protected_manifest_unchanged": true,
+  "visual_inspection": "Lit red oxygen, two white hydrogens, H1/H2/O labels, yellow title and H2O formula all present. Independent poses differ from software.",
+  "steps": [
+    {
+      "test": "softpipe-opaque",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "softpipe",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 5.406,
+        "fault_marker": false,
+        "renderer_confirmed": true,
+        "captured": true,
+        "frames": 12,
+        "quit_sender_exit": 0,
+        "diagnostic_stop": false,
+        "completed": true
+      }
+    },
+    {
+      "test": "grate-self",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "grate",
+        "phase": "self",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 1.022,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      "new_kernel_faults": []
+    },
+    {
+      "test": "grate-blend",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "grate",
+        "phase": "blend",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 0.565,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      "new_kernel_faults": []
+    },
+    {
+      "test": "grate-mip",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "grate",
+        "phase": "mip",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 0.467,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      "new_kernel_faults": []
+    },
+    {
+      "test": "grate-bias",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "grate",
+        "phase": "bias",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 0.974,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      "new_kernel_faults": []
+    },
+    {
+      "test": "grate-opaque",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "grate",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 5.257,
+        "fault_marker": false,
+        "renderer_confirmed": true,
+        "captured": true,
+        "frames": 104,
+        "quit_sender_exit": 0,
+        "diagnostic_stop": false,
+        "completed": true
+      },
+      "new_kernel_faults": []
+    }
+  ]
+}

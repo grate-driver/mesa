@@ -1,3 +1,4 @@
+#include "grate_diagnostics.h"
 /*
  * Copyright (c) 2016-2017 Dmitry Osipenko <digetx@gmail.com>
  * Copyright (C) 2012-2013 NVIDIA Corporation.
@@ -112,7 +113,10 @@ grate_stream_flush(struct grate_stream *stream)
       goto cleanup;
    }
 
+   if (grate_diagnostics_enabled()) fprintf(stderr, "GRATE_DIAG SUBMIT stream=%p class=0x%x\n",
+           (void *)stream, stream->class_id);
    result = drm_tegra_job_submit(stream->job, &fence);
+   if (grate_diagnostics_enabled()) fprintf(stderr, "GRATE_DIAG SUBMIT_RESULT result=%d\n", result);
    if (result != 0) {
       ErrorMsg("drm_tegra_job_submit() failed %d\n", result);
       result = -1;
@@ -120,6 +124,7 @@ grate_stream_flush(struct grate_stream *stream)
    }
 
    result = drm_tegra_fence_wait_timeout(fence, 1000);
+   if (grate_diagnostics_enabled()) fprintf(stderr, "GRATE_DIAG WAIT_RESULT result=%d\n", result);
    if (result != 0) {
       ErrorMsg("drm_tegra_fence_wait_timeout() failed %d\n", result);
       result = -1;

@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "stdout": "PASS source-over IR and packed D-enable: 12312 component comparisons across both output register banks and three blend modes\nPASS observed native Molecule shader compiles with valid schedules and remains guarded for unverified uniform coordinates\nPASS fragment PIPE-stage selection and exact FP20 upload (vertex sentinel isolated)\nPASS TEX/TXP input/constant coordinates: 2560 finite trials, MFU encoding and schedule bounds\n",
+  "stderr": ""
+}
