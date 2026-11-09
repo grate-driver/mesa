@@ -1,0 +1,96 @@
+{
+  "completed": true,
+  "health_exit": 0,
+  "integrity_collection_exit": 0,
+  "auth_cleanup_exit": 0,
+  "power_hold_exit": 0,
+  "logs_collection_exit": 0,
+  "process_check_exit": 0,
+  "revision": "R25",
+  "driver_base": "25f0fda62755b6c2b57adb4ff0ddd5cd5788ca7c",
+  "steps": [
+    {
+      "test": "softpipe-draw",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "softpipe",
+        "phase": "draw",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 1.656,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      }
+    },
+    {
+      "test": "softpipe-opaque",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "softpipe",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 5.167,
+        "fault_marker": false,
+        "renderer_confirmed": true,
+        "captured": true,
+        "frames": 49,
+        "quit_sender_exit": 0,
+        "diagnostic_stop": false,
+        "completed": true
+      }
+    },
+    {
+      "test": "grate-self",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "grate",
+        "phase": "self",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 0.925,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      "new_kernel_faults": []
+    },
+    {
+      "test": "grate-draw",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "grate",
+        "phase": "draw",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 0.628,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      "new_kernel_faults": []
+    },
+    {
+      "test": "grate-opaque",
+      "ssh_exit": 0,
+      "result": {
+        "mode": "grate",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 5.218,
+        "fault_marker": false,
+        "renderer_confirmed": true,
+        "captured": true,
+        "frames": 171,
+        "quit_sender_exit": 0,
+        "diagnostic_stop": false,
+        "completed": true
+      },
+      "new_kernel_faults": []
+    }
+  ],
+  "visual_inspection": "Captured frame shows lit red oxygen and two white hydrogen atoms; independent poses differ from software.",
+  "protected_manifest_unchanged": true,
+  "draw_cases": 49,
+  "draw_rgba_components": 2248724
+}

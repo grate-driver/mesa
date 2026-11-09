@@ -272,7 +272,7 @@ test checks actual emitted descriptors and the unchanged level-zero path.
 
 [INDEX.md](INDEX.md) links the driver lab, showcase, machine-readable device
 results, the later 20-second display run and historical TXP/compatibility
-snapshots. The current driver includes the R21/R22 implementation below;
+snapshots. The current driver includes the R25 implementation below;
 historical cumulative patches must only be applied to their documented base.
 
 
@@ -302,8 +302,11 @@ additive premultiplied, straight, and straight-RGB/separate-ONE-alpha modes,
 full RGBA mask and one render target; unsupported combinations are rejected.
 Fragment cache invalidation prevents stale destinations across GR2D clears.
 
-The unmodified XScreenSaver Molecule now passes its +0.25 font sampler and
-submits geometry, but **still aborts before its first frame** at the existing
-draw-count guard (`count > 0 && count < 2048`). Labels, shells, general shader
-coverage, large/empty draw handling and long-running reliability are not
-validated. All tests remain isolated per process; no system Mesa switch.
+R25 now renders complete native Molecule frames, with lit red oxygen and two
+white hydrogens confirmed by readback. A bounded indexed-draw implementation
+handles the previous 7050-index blocker. The independent 49-case draw probe
+passes 2,248,724 RGBA components on both Tegra and softpipe. Native labels and
+titles also render correctly in R26. R27 shells render incorrectly as opaque;
+general shader coverage and
+long-running reliability remain unvalidated. All tests remain isolated per
+process; no system Mesa switch. See the [native results and limitations](research/molecule/README.md).

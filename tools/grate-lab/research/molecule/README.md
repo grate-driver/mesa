@@ -1,6 +1,6 @@
 # Native Molecule compatibility investigation
 
-The current branch driver includes the R21/R22 implementation and builds it
+The current branch driver includes the R25 implementation and builds it
 normally in the isolated lab configuration. The cumulative patches below are
 **historical snapshots**, not extra patches to apply to the current source.
 Full Molecule compatibility and complete OpenGL support remain unfinished.
@@ -10,9 +10,66 @@ XScreenSaver 6.15 `molecule` executable. The private test loads a three-atom
 water PDB at 640x480 with labels, titles and electron shells disabled. A
 diagnostic preload reports the real EGL renderer, counts swaps and reads
 back frame 3; it does not suppress application features or GL calls.
-Softpipe renders the actual red oxygen and white hydrogen atoms. Hardware
-still has not reached its first complete native frame; R22 advances
-past font/bias setup and submits geometry before hitting a draw-count guard.
+Softpipe renders the actual red oxygen and white hydrogen atoms. Hardware now renders complete frames with the R25 draw fix. The captured third
+frame shows the expected lit red oxygen and two white hydrogen atoms. The
+five-second diagnostic run recorded 171 swaps; this is not a paired performance
+benchmark. Labels, titles and shells were disabled in that run.
+R26 then enables labels and titles: the captured image confirms H1/H2/O labels,
+the yellow title and H₂O formula, in addition to the lit atoms. It recorded 104
+Tegra swaps versus 12 softpipe swaps in short diagnostic runs, with different
+poses and diagnostic overhead; these are not a controlled performance benchmark.
+The self/blend/mip/bias regressions all pass again. See
+[native-label-results.json](native-label-results.json) and the
+[hardware capture](native-water-labels-grate.png) /
+[software capture](native-water-labels-softpipe.png).
+
+R27 also enables electron shells. The application exits normally and produces
+77 Tegra swaps, but **visual validation fails**: the GPU shells are opaque and
+occlude labels, while the software control shows transparency. This is a
+remaining rendering bug; a successful process exit/readback is insufficient.
+The root cause is not assigned. The next targeted tests should isolate varying
+COLOR alpha, shell depth/blend state and draw ordering. See
+[native-shell-results.json](native-shell-results.json),
+[failed hardware image](native-water-shells-grate.png) and
+[software control](native-water-shells-softpipe.png). No new kernel faults or
+protected system changes occurred, and authorization/inhibitor/process cleanup
+passed. Native correctness claims above apply to `--no-shells` only.
+
+## Indexed draw batching (R23–R25)
+
+The previous native blocker was a UINT32-indexed triangle draw with start 7806
+and count 7050. R25 splits supported large primitives at an even 2046 elements,
+using Mesa's topology split helper to preserve line-strip joins and triangle-strip
+winding. It copies each selected index slice into bounded scratch storage before
+uploading it at a 64-byte aligned pointer; indexed primitive offset and FIRST
+are zero. The R24 attempt to align a resource pointer and encode the remaining
+index offset produced wrong pixels and was rejected.
+
+Verified GR3D index modes are UINT8 and UINT16. UINT32 input is converted without
+loss only when each referenced index fits UINT16; larger values abort before
+submission. This is restricted compatibility, not general 32-bit vertex
+rebasing. Nonindexed starts use DRAW_PRIMITIVES_OFFSET. Empty draws return before
+shader access, source ranges and upload ranges are checked, caller draw records
+are not mutated, and the upload reference is released after synchronous submit.
+Indirect, instanced, primitive-restart and nonzero base-vertex draws remain
+guarded. Large fans/loops also remain guarded; there is no topology truncation.
+The legacy source-buffer take-ownership contract still needs a separate review.
+
+`draw-probe.c` independently checks 49 GL cases and **2,248,724 RGBA components**
+on softpipe and Tegra: nonzero VBO/index starts, client/resource UINT8/16/32,
+counts around 2047 and multiple batches through 12345, and 9000-vertex culled
+triangle strips. Poison prefixes/padding expose addressing mistakes. GPU and
+software pass every case, with tolerance 3/255. `draw-regression.c` includes the
+actual driver emitter and compares 593,610 primitive tuples, command fields,
+upload contents/references, empty draws, byte-range overflow and UINT32 narrowing
+boundaries under ARM/QEMU. Select it with `check-cpu.py --draw` and the same build
+arguments used for the other regression modes. `build-draw-probe.sh` uses the
+same CC/sysroot conventions as the other probe scripts. See
+[draw-results.json](draw-results.json) and
+[draw-cpu-results.json](draw-cpu-results.json). All experiments use isolated
+libraries, bounded processes, a kernel watcher, private X authorization and a
+temporary sleep inhibitor; the 149-entry protected baseline remained unchanged.
+
 
 ## Snapshot reproduction
 

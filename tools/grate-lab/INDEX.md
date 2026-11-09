@@ -8,7 +8,7 @@
 - [Native Molecule, source-over blending and cache investigation](research/molecule/README.md)
 - [Archived, unfinished TXP investigation](research/txp/README.md)
 
-The current experimental driver includes the R21/R22 source-over, trilinear
-sampler and LOD-bias implementation, with explicit guards and recorded result
+The current experimental driver includes the R25 source-over, trilinear
+sampler, LOD-bias and bounded indexed-draw implementation, with explicit guards and recorded result
 tests. Historical cumulative patches are documentation artifacts against their
 stated older base; do not apply them over the current implementation.

@@ -5,12 +5,15 @@
 #include "util/u_bitcast.h"
 #include "util/u_draw.h"
 #include "util/u_helpers.h"
+#include "util/u_inlines.h"
 #include "util/u_prim.h"
 #include "indices/u_primconvert.h"
 
 #include "grate_common.h"
+#include "grate_diagnostics.h"
 #include "grate_context.h"
 #include "grate_draw.h"
+#include "grate_draw_limits.h"
 #include "grate_program.h"
 #include "grate_resource.h"
 #include "grate_state.h"
@@ -293,27 +296,91 @@ grate_draw_vbo(struct pipe_context *pcontext,
    int err;
    uint32_t value;
    struct grate_context *context = grate_context(pcontext);
-   struct grate_stream *stream = &context->gr3d->stream;
-   uint16_t out_mask = context->vshader->output_mask;
+   struct grate_stream *stream;
+   uint16_t out_mask;
    unsigned int index_size;
 
+   if (!num_draws || (!indirect && !info->instance_count)) return;
+   if (indirect || info->instance_count != 1 || info->start_instance ||
+       info->primitive_restart) {
+      fprintf(stderr,"GRATE_DIAG STOP: unsupported indirect/instanced/restart draw\n");
+      abort();
+   }
    if (num_draws > 1) {
       util_draw_multi(pcontext, info, drawid_offset, indirect, draws, num_draws);
       return;
    }
 
-   if (!indirect && (!draws[0].count || !info->instance_count))
-      return;
-
+   if (!draws[0].count) return;
+   struct pipe_draw_start_count_bias draw = draws[0];
+   if ((uint64_t)draw.start + draw.count > UINT_MAX) {
+      fprintf(stderr,"GRATE_DIAG STOP: draw range overflows start/count\n");
+      abort();
+   }
+   if (info->index_size && ((info->index_size != 1 && info->index_size != 2 &&
+                            info->index_size != 4) ||
+                           (info->has_user_indices && !info->index.user))) {
+      fprintf(stderr,"GRATE_DIAG STOP: invalid index type/pointer\n");
+      abort();
+   }
+   if (info->index_size && ((uint64_t)draw.start+draw.count)*info->index_size>UINT_MAX) {
+      fprintf(stderr,"GRATE_DIAG STOP: index byte range overflows address space\n");
+      abort();
+   }
+   if (info->index_size && draw.index_bias != 0) {
+      fprintf(stderr,"GRATE_DIAG STOP: nonzero indexed base vertex is unverified\n");
+      abort();
+   }
+   if (info->index_size && !info->has_user_indices) {
+      if (!info->index.resource) abort();
+      struct grate_resource *indices = grate_resource(info->index.resource);
+      uint32_t size = 0;
+      if (drm_tegra_bo_get_size(indices->bo,&size) ||
+          !grate_index_range_valid(draw.start,draw.count,info->index_size,
+                                   indices->b.width0,size)) {
+         fprintf(stderr,"GRATE_DIAG STOP: index range exceeds resource/BO\n");
+         abort();
+      }
+   }
+   if (!info->index_size && (uint64_t)draw.start + draw.count >
+       (uint64_t)TGR3D_DRAW_PRIMITIVES_OFFSET__MASK + 1) {
+      fprintf(stderr,"GRATE_DIAG STOP: nonindexed start exceeds command field\n");
+      abort();
+   }
    if (info->mode >= PIPE_PRIM_QUADS) {
       // the HW can handle non-trimmed sizes, but pimconvert can't
-      if (!u_trim_pipe_prim(info->mode, (unsigned*)&draws[0].count))
+      if (!u_trim_pipe_prim(info->mode, &draw.count))
          return;
 
       util_primconvert_save_rasterizer_state(context->primconvert, &context->rast->base);
-      util_primconvert_draw_vbo(context->primconvert, info, drawid_offset, indirect, draws, num_draws);
+      util_primconvert_draw_vbo(context->primconvert, info, drawid_offset, indirect, &draw, 1);
       return;
    }
+
+   if (!u_trim_pipe_prim(info->mode,&draw.count)) return;
+   if (draw.count > GRATE_DRAW_LIMIT) {
+      unsigned remaining=draw.count,start=draw.start;
+      while (remaining) {
+         unsigned count,step;
+         if (!grate_next_draw_chunk(info->mode,remaining,&count,&step)) {
+            fprintf(stderr,"GRATE_DIAG STOP: large primitive needs index conversion\n");
+            abort();
+         }
+         struct pipe_draw_start_count_bias part=draw;
+         part.start=start; part.count=count;
+         grate_draw_vbo(pcontext,info,drawid_offset,NULL,&part,1);
+         remaining-=step; start+=step;
+      }
+      return;
+   }
+   draws=&draw;
+   stream=&context->gr3d->stream;
+   out_mask=context->vshader->output_mask;
+
+   if (grate_diagnostics_enabled()) fprintf(stderr,
+      "GRATE_DIAG DRAW mode=%s(%u) start=%u count=%u index_size=%u user_indices=%u instances=%u indirect=%u index_bias=%d\n",
+      u_prim_name(info->mode),info->mode,draws->start,draws->count,
+      info->index_size,info->has_user_indices,info->instance_count,indirect!=NULL,draws->index_bias);
 
    err = grate_stream_begin(stream);
    if (err < 0) {
@@ -333,24 +400,61 @@ grate_draw_vbo(struct pipe_context *pcontext,
    grate_stream_push(stream, ((uint32_t)context->vs->mask << 16) | out_mask);
 
    struct pipe_resource *index_buffer = NULL;
+   bool uploaded_indices = false;
    unsigned offset = 0;
+   unsigned index_bytes = info->index_size;
    if (info->index_size > 0) {
       unsigned index_offset = 0;
+      struct pipe_draw_info upload_info=*info;
+      struct pipe_draw_start_count_bias upload_draw=*draws;
+      uint8_t copied[GRATE_DRAW_LIMIT*4];
+      /* Copy before allocating/unmapping: the source may alias the uploader. */
+      size_t source_offset = (size_t)draws->start * info->index_size;
+      size_t source_bytes = (size_t)draws->count * info->index_size;
       if (info->has_user_indices) {
-         if (!util_upload_index_buffer(pcontext, info, draws, &index_buffer, &index_offset, 64)) {
-            fprintf(stderr, "util_upload_index_buffer() failed\n");
-            return;
+         memcpy(copied, (const uint8_t *)info->index.user + source_offset,
+                source_bytes);
+      } else {
+         struct grate_resource *source=grate_resource(info->index.resource);
+         void *map=NULL;
+         if (drm_tegra_bo_map(source->bo,&map)) abort();
+         memcpy(copied,(uint8_t*)map+source_offset,source_bytes);
+         if (drm_tegra_bo_unmap(source->bo)) abort();
+      }
+      if (index_bytes == 4) {
+         if (!grate_index32_to_16(copied, draws->count)) {
+            fprintf(stderr,"GRATE_DIAG STOP: 32-bit index exceeds verified UINT16 range\n");
+            abort();
          }
-      } else
-         index_buffer = info->index.resource;
-
-      index_offset += draws->start * info->index_size;
+         index_bytes = 2;
+      }
+      upload_info.has_user_indices=true;
+      upload_info.index_size=index_bytes;
+      upload_info.index.user=copied;
+      upload_draw.start=0;
+      if (!util_upload_index_buffer(pcontext,&upload_info,&upload_draw,
+                                     &index_buffer,&index_offset,64)) {
+         fprintf(stderr,"GRATE_DIAG STOP: index upload failed\n");
+         abort();
+      }
+      uploaded_indices=true;
+      uint64_t pointer=(uint64_t)index_offset+(uint64_t)upload_draw.start*index_bytes;
+      uint64_t end=pointer+(uint64_t)draws->count*index_bytes;
+      uint32_t size=0;
+      if (pointer>UINT_MAX || (pointer&63u) || end>index_buffer->width0 ||
+          drm_tegra_bo_get_size(grate_resource(index_buffer)->bo,&size) || end>size) {
+         fprintf(stderr,"GRATE_DIAG STOP: uploaded index range exceeds/alignment BO\n");
+         abort();
+      }
+      index_offset=(unsigned)pointer;
+      /* The pointer is the first selected index; the primitive offset is zero. */
+      offset=0;
       grate_stream_push(stream, host1x_opcode_incr(TGR3D_INDEX_PTR, 1));
       grate_stream_push_reloc(stream, grate_resource(index_buffer)->bo, index_offset);
    } else
       offset = draws->start;
 
-   switch (info->index_size) {
+   switch (index_bytes) {
    case 0:
       index_size = 0;
       break;
@@ -361,10 +465,6 @@ grate_draw_vbo(struct pipe_context *pcontext,
 
    case 2:
       index_size = 2;
-      break;
-
-   case 4:
-      index_size = 3;
       break;
 
    default:
@@ -384,7 +484,7 @@ grate_draw_vbo(struct pipe_context *pcontext,
    value  = TGR3D_VAL(DRAW_PARAMS, INDEX_MODE, index_size);
    value |= context->rast->draw_params;
    value |= TGR3D_VAL(DRAW_PARAMS, PRIMITIVE_TYPE, grate_primitive_type(info->mode));
-   value |= TGR3D_VAL(DRAW_PARAMS, FIRST, draws->start);
+   value |= TGR3D_VAL(DRAW_PARAMS, FIRST, 0);
    value |= 0xC0000000; /* flush input caches? */
 
    grate_stream_push(stream, host1x_opcode_incr(TGR3D_DRAW_PARAMS, 1));
@@ -396,9 +496,12 @@ grate_draw_vbo(struct pipe_context *pcontext,
    grate_stream_push(stream, host1x_opcode_incr(TGR3D_DRAW_PRIMITIVES, 1));
    grate_stream_push(stream, value);
 
-   grate_stream_end(stream);
-
-   grate_stream_flush(stream);
+   if (grate_stream_end(stream) || grate_stream_flush(stream)) {
+      fprintf(stderr,"GRATE_DIAG STOP: draw submission failed\n");
+      abort();
+   }
+   /* Submission waits synchronously: drop only the upload's owned reference. */
+   if (uploaded_indices) pipe_resource_reference(&index_buffer,NULL);
 }
 
 void
