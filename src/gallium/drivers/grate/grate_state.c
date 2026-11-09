@@ -717,7 +717,7 @@ static void
 emit_fs_uniforms(struct grate_context *context)
 {
    const struct pipe_constant_buffer *buffer =
-      &context->constant_buffer[MESA_SHADER_FRAGMENT];
+      &context->constant_buffer[PIPE_SHADER_FRAGMENT];
    if (!buffer->user_buffer)
       return;
 

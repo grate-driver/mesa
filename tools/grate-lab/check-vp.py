@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Build/run CPU-only ARM shader regression using an existing Meson cross build."""
 import argparse,json,os,pathlib,shlex,subprocess
-p=argparse.ArgumentParser();p.add_argument('--build-dir',type=pathlib.Path,required=True);p.add_argument('--sysroot',type=pathlib.Path,required=True);p.add_argument('--qemu',type=pathlib.Path,required=True);p.add_argument('--runtime-lib',type=pathlib.Path,required=True);p.add_argument('--grate-archive',type=pathlib.Path);p.add_argument('--ninja',default='ninja');a=p.parse_args()
-lab=pathlib.Path(__file__).resolve().parent;source=lab.parents[1];build=a.build_dir.resolve();out=build/'grate-cpu-regression';out.mkdir(exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--build-dir',type=pathlib.Path,required=True);p.add_argument('--sysroot',type=pathlib.Path,required=True);p.add_argument('--qemu',type=pathlib.Path,required=True);p.add_argument('--runtime-lib',type=pathlib.Path,required=True);p.add_argument('--grate-archive',type=pathlib.Path);p.add_argument('--ninja',default='ninja');p.add_argument('--uniforms',action='store_true');a=p.parse_args()
+lab=pathlib.Path(__file__).resolve().parent;source=lab.parents[1];build=a.build_dir.resolve();out=build/('grate-uniform-cpu-regression' if a.uniforms else 'grate-cpu-regression');out.mkdir(exist_ok=True)
 db=json.loads((build/'compile_commands.json').read_text());e=next(e for e in db if pathlib.Path(e['file']).name=='grate_program.c');args=shlex.split(e['command']);clean=[];i=0
 while i<len(args):
  x=args[i]
  if x in ['-o','-MF','-MQ']:i+=2;continue
  if x=='-MD':i+=1;continue
- if x==e['file']:x=str(lab/'vp-regression.c')
+ if x==e['file']:x=str(lab/('uniform-regression.c' if a.uniforms else 'vp-regression.c'))
  x=x.replace('../source/src/gallium/drivers/grate',str(source/'src/gallium/drivers/grate'))
  clean.append(x);i+=1
 clean+=['-I'+str(source/'src/gallium/drivers/grate'),'-o',str(out/'regression.o')]
@@ -23,7 +23,10 @@ while i<len(args):
  link.append(x);i+=1
 link[link.index('-o')+1]=str(out/'regression');subprocess.run(link,cwd=build,check=True)
 results=[]
-for shader in [lab/'passthrough.tgsi']+sorted(lab.glob('captured-*.tgsi')):
- r=subprocess.run([str(a.qemu.resolve()),'-L',str(a.sysroot.resolve()),'-E','LD_LIBRARY_PATH='+str(a.runtime_lib.resolve())+':'+str(a.sysroot.resolve()/'usr/lib'),str(out/'regression'),str(shader)],capture_output=True,text=True,timeout=30)
- results.append({'shader':shader.name,'exit':r.returncode,'stdout':r.stdout,'stderr':r.stderr})
+cases=[None] if a.uniforms else [lab/'passthrough.tgsi']+sorted(lab.glob('captured-*.tgsi'))
+for shader in cases:
+ command=[str(a.qemu.resolve()),'-L',str(a.sysroot.resolve()),'-E','LD_LIBRARY_PATH='+str(a.runtime_lib.resolve())+':'+str(a.sysroot.resolve()/'usr/lib'),str(out/'regression')]
+ if shader is not None:command.append(str(shader))
+ r=subprocess.run(command,capture_output=True,text=True,timeout=30)
+ results.append({'shader':shader.name if shader else 'fragment-uniforms','exit':r.returncode,'stdout':r.stdout,'stderr':r.stderr})
 (out/'results.json').write_text(json.dumps(results,indent=2)+'\n');print(json.dumps(results,indent=2));raise SystemExit(any(x['exit'] for x in results))

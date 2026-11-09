@@ -204,3 +204,23 @@ Mesa GL headers/library and target X11 library (`-lGL -lX11`). Run each with
 argument `texture` and the private per-process environment above, under the
 external deadline and fault monitor. They write `texture-readback.rgba` in the
 working directory, so use a separate writable directory for every run.
+
+## Fragment constant-buffer stage regression
+
+Mesa22.2.4 uses PIPE_SHADER_FRAGMENT=1 for Gallium callbacks, while
+MESA_SHADER_FRAGMENT=4 is a different enum. The fragment uniform emitter
+previously read the wrong array slot and skipped the actual upload. It now
+uses PIPE_SHADER_FRAGMENT, matching set_constant_buffer.
+
+Run `check-vp.py --uniforms` with the same build/sysroot/QEMU/runtime/archive
+arguments as the vertex regression. This invokes the actual binding callback
+and upload emitter with a mock stream, checks five exact command words for
+(0.25,0.75,0,1), and verifies that a separate vertex-buffer sentinel is ignored.
+It performs no GPU calls.
+
+The on-device `uniform-color-probe.c` passed12,544 framebuffer pixel checks
+(on softpipe and Tegra; one-byte tolerance for color conversion). It checks
+a direct GLSL uniform color, not texture projection. Constant-coordinate TXP
+is still incorrect in the separate development revision; that TXP work is
+not included here. No full desktop switch to these experimental GL libraries
+has been made.
