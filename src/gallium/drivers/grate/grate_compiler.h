@@ -28,6 +28,10 @@ struct grate_fp_info {
 };
 
 struct grate_fp_shader {
+   int simple_tex_temp;
+   unsigned simple_tex_alpha_one;
+   unsigned simple_num_immediates;
+   uint32_t simple_immediate[4];
    struct list_head fp_instructions;
    struct list_head alu_instructions;
    struct list_head mfu_instructions;

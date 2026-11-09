@@ -146,6 +146,7 @@ struct fp_sched {
 
 struct fp_instr {
    struct list_head link;
+   uint32_t tex_word;
    // TODO: PSEQ
    struct fp_sched mfu_sched;
    // TODO: TEX

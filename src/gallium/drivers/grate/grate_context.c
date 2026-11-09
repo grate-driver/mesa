@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "util/u_memory.h"
+#include "util/u_inlines.h"
 #include "util/u_upload_mgr.h"
 
 #include "indices/u_primconvert.h"
@@ -62,6 +63,8 @@ static void
 grate_context_destroy(struct pipe_context *pcontext)
 {
    struct grate_context *context = grate_context(pcontext);
+
+   pipe_sampler_view_reference(&context->fragment_sampler_view, NULL);
 
    if (context->primconvert)
       util_primconvert_destroy(context->primconvert);

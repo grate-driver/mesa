@@ -94,7 +94,8 @@ emit_vMOV(struct grate_fp_shader *fp, const struct tgsi_dst_register *dst,
    list_inithead(&inst->link);
 
    struct fp_mfu_instr *mfu = NULL;
-   if (src->File == TGSI_FILE_INPUT) {
+   if (src->File == TGSI_FILE_INPUT ||
+       list_is_empty(&fp->mfu_instructions)) {
       mfu = CALLOC_STRUCT(fp_mfu_instr);
       list_inithead(&mfu->link);
    }
@@ -109,6 +110,12 @@ emit_vMOV(struct grate_fp_shader *fp, const struct tgsi_dst_register *dst,
    struct fp_alu_instr_packet *alu = CALLOC_STRUCT(fp_alu_instr_packet);
    int alu_instrs = 0;
    list_inithead(&alu->link);
+
+   /* Unused ALU slots must write zero to the discard register. */
+   struct fp_alu_dst_operand nop_dst = { .index = 31 };
+   for (int i = 0; i < 4; ++i)
+      alu->slots[i] = fp_alu_sMOV(nop_dst, fp_alu_src_zero());
+
    for (int i = 0; i < 4; ++i) {
       if ((dst->WriteMask & (1 << i)) == 0)
          continue;
@@ -121,8 +128,12 @@ emit_vMOV(struct grate_fp_shader *fp, const struct tgsi_dst_register *dst,
          mfu->var[i].tram_row = src->Index;
          fp->info.max_tram_row = MAX2(fp->info.max_tram_row, src->Index);
          src0 = fp_alu_src_row(comp);
-      } else
+      } else if (src->File == TGSI_FILE_CONSTANT) {
+         assert(src->Index * 4 + comp < 32);
+         src0.index = 32 + src->Index * 4 + comp;
+      } else {
          src0 = fp_alu_src_reg(src->Index + comp);
+      }
 
       alu->slots[alu_instrs++] = fp_alu_sMOV(fp_alu_dst(dst, i, saturate), src0);
    }
@@ -131,7 +142,7 @@ emit_vMOV(struct grate_fp_shader *fp, const struct tgsi_dst_register *dst,
 
    if (mfu != NULL) {
       inst->mfu_sched.num_instructions = 1;
-      inst->mfu_sched.address = list_length(&fp->fp_instructions);
+      inst->mfu_sched.address = list_length(&fp->mfu_instructions);
       list_addtail(&mfu->link, &fp->mfu_instructions);
    }
 
@@ -147,14 +158,166 @@ emit_vMOV(struct grate_fp_shader *fp, const struct tgsi_dst_register *dst,
 }
 
 static void
+emit_simple_tex(struct grate_fp_shader *fp,
+                const struct tgsi_full_instruction *inst)
+{
+   const struct tgsi_dst_register *dst = &inst->Dst[0].Register;
+   const struct tgsi_src_register *coord = &inst->Src[0].Register;
+   const struct tgsi_src_register *sampler = &inst->Src[1].Register;
+
+   assert((dst->File == TGSI_FILE_OUTPUT ||
+           dst->File == TGSI_FILE_TEMPORARY) &&
+          dst->Index == 0 && dst->WriteMask == 0xf);
+   assert(fp->simple_tex_temp == -1);
+   assert(coord->File == TGSI_FILE_INPUT && coord->Index == 0 &&
+          coord->SwizzleX == TGSI_SWIZZLE_X &&
+          coord->SwizzleY == TGSI_SWIZZLE_Y);
+   assert(sampler->File == TGSI_FILE_SAMPLER &&
+          sampler->Index == 0);
+
+   struct fp_instr *out = CALLOC_STRUCT(fp_instr);
+   struct fp_mfu_instr *mfu = CALLOC_STRUCT(fp_mfu_instr);
+   assert(out && mfu);
+   list_inithead(&out->link);
+   list_inithead(&mfu->link);
+
+   mfu->var[0].op = FP_VAR_OP_FP20;
+   mfu->var[0].tram_row = coord->Index;
+   mfu->var[1].op = FP_VAR_OP_FP20;
+   mfu->var[1].tram_row = coord->Index;
+   out->mfu_sched.num_instructions = 1;
+   out->mfu_sched.address = list_length(&fp->mfu_instructions);
+   list_addtail(&mfu->link, &fp->mfu_instructions);
+
+   out->tex_word = 0x00000400; /* TEX enable, sampler 0, r0/r1 */
+   out->dw.enable = dst->File == TGSI_FILE_OUTPUT;
+   out->dw.index = 1;
+   out->dw.src_regs = FP_DW_REGS_R0_R1;
+   if (dst->File == TGSI_FILE_TEMPORARY)
+      fp->simple_tex_temp = dst->Index;
+   list_addtail(&out->link, &fp->fp_instructions);
+}
+
+
+static void
+emit_simple_tex_mul(struct grate_fp_shader *fp,
+                    const struct tgsi_full_instruction *inst)
+{
+   const struct tgsi_dst_register *dst = &inst->Dst[0].Register;
+   const struct tgsi_src_register *tex = &inst->Src[0].Register;
+   const struct tgsi_src_register *factor = &inst->Src[1].Register;
+
+   /* Initial implementation: texture result times a uniform. */
+   assert(fp->simple_tex_temp == 0);
+   assert(list_length(&fp->fp_instructions) == 1);
+   assert(list_is_empty(&fp->alu_instructions));
+   assert(dst->File == TGSI_FILE_OUTPUT &&
+          dst->Index == 0 && dst->WriteMask == 0xf);
+   assert(tex->File == TGSI_FILE_TEMPORARY && tex->Index == 0 &&
+          tex->SwizzleX == TGSI_SWIZZLE_X &&
+          tex->SwizzleY == TGSI_SWIZZLE_Y &&
+          tex->SwizzleZ == TGSI_SWIZZLE_Z &&
+          tex->SwizzleW == TGSI_SWIZZLE_W &&
+          !tex->Negate && !tex->Absolute);
+   assert(factor->File == TGSI_FILE_CONSTANT &&
+          !factor->Negate && !factor->Absolute);
+
+   struct fp_instr *batch =
+      list_first_entry(&fp->fp_instructions, struct fp_instr, link);
+   struct fp_alu_instr_packet *alu = CALLOC_STRUCT(fp_alu_instr_packet);
+   assert(alu);
+   list_inithead(&alu->link);
+
+   unsigned swizzle[4] = {
+      factor->SwizzleX, factor->SwizzleY,
+      factor->SwizzleZ, factor->SwizzleW
+   };
+
+   for (unsigned i = 0; i < 4; i++) {
+      unsigned component = i < 3 ? 2 - i : 3;
+      unsigned uniform_index = factor->Index * 4 + swizzle[i];
+      assert(uniform_index < 32);
+
+      struct fp_alu_src_operand sample = {
+         .index = component / 2,
+         .datatype = FP_DATATYPE_FIXED10,
+         .sub_reg_select_high = component % 2
+      };
+      if (i == 3 && fp->simple_tex_alpha_one)
+         sample = fp_alu_src_one();
+
+
+      struct fp_alu_src_operand scale = {
+         .index = 32 + uniform_index,
+         .datatype = FP_DATATYPE_FP20
+      };
+
+      alu->slots[i] = (struct fp_alu_instr) {
+         .op = FP_ALU_OP_MAD,
+         .dst = fp_alu_dst(dst, i, inst->Instruction.Saturate != 0),
+         .src = { sample, scale, fp_alu_src_zero(), fp_alu_src_one() }
+      };
+   }
+
+   batch->alu_sched.address = 0;
+   batch->alu_sched.num_instructions = 1;
+   batch->dw.enable = 1;
+   batch->dw.index = 1;
+   batch->dw.src_regs = FP_DW_REGS_R2_R3;
+   list_addtail(&alu->link, &fp->alu_instructions);
+   fp->simple_tex_temp = -1;
+}
+
+
+static void
+emit_simple_tex_mov(struct grate_fp_shader *fp,
+                    const struct tgsi_full_instruction *inst)
+{
+   const struct tgsi_dst_register *dst = &inst->Dst[0].Register;
+   const struct tgsi_src_register *src = &inst->Src[0].Register;
+
+   assert(dst->File == TGSI_FILE_TEMPORARY &&
+          dst->Index == fp->simple_tex_temp);
+   assert(!inst->Instruction.Saturate &&
+          !src->Negate && !src->Absolute);
+
+   if (dst->WriteMask == 0x7 &&
+       src->File == TGSI_FILE_TEMPORARY &&
+       src->Index == fp->simple_tex_temp &&
+       src->SwizzleX == TGSI_SWIZZLE_X &&
+       src->SwizzleY == TGSI_SWIZZLE_Y &&
+       src->SwizzleZ == TGSI_SWIZZLE_Z) {
+      /* RGB self-copy leaves the sampled channels unchanged. */
+      return;
+   }
+
+   assert(dst->WriteMask == 0x8 &&
+          src->File == TGSI_FILE_IMMEDIATE &&
+          src->Index == 0 &&
+          fp->simple_num_immediates == 1);
+   assert(fp->simple_immediate[src->SwizzleW] == 0x3f800000u);
+   fp->simple_tex_alpha_one = 1;
+}
+
+static void
 emit_tgsi_instr(struct grate_fp_shader *fp, const struct tgsi_full_instruction *inst)
 {
    bool saturate = inst->Instruction.Saturate != 0;
 
    switch (inst->Instruction.Opcode) {
    case TGSI_OPCODE_MOV:
+      if (fp->simple_tex_temp >= 0) {
+         emit_simple_tex_mov(fp, inst);
+         break;
+      }
       emit_vMOV(fp, &inst->Dst[0].Register, saturate,
                     &inst->Src[0].Register);
+      break;
+   case TGSI_OPCODE_TEX:
+      emit_simple_tex(fp, inst);
+      break;
+   case TGSI_OPCODE_MUL:
+      emit_simple_tex_mul(fp, inst);
       break;
 
    default:
@@ -205,6 +368,9 @@ grate_tgsi_to_fp(struct grate_fp_shader *fp, struct tgsi_parse_context *tgsi)
    list_inithead(&fp->alu_instructions);
    list_inithead(&fp->mfu_instructions);
 
+   fp->simple_tex_temp = -1;
+   fp->simple_tex_alpha_one = 0;
+   fp->simple_num_immediates = 0;
    fp->info.num_inputs = 0;
    fp->info.color_input = -1;
    fp->info.max_tram_row = 1;
@@ -216,10 +382,53 @@ grate_tgsi_to_fp(struct grate_fp_shader *fp, struct tgsi_parse_context *tgsi)
          emit_tgsi_declaration(fp, &tgsi->FullToken.FullDeclaration);
          break;
 
+      case TGSI_TOKEN_TYPE_IMMEDIATE: {
+         const struct tgsi_full_immediate *imm =
+            &tgsi->FullToken.FullImmediate;
+         assert(fp->simple_num_immediates == 0);
+         assert(imm->Immediate.DataType == TGSI_IMM_FLOAT32 &&
+                imm->Immediate.NrTokens == 5);
+         for (unsigned i = 0; i < 4; i++)
+            fp->simple_immediate[i] = imm->u[i].Uint;
+         fp->simple_num_immediates = 1;
+         break;
+      }
+
       case TGSI_TOKEN_TYPE_INSTRUCTION:
          if (tgsi->FullToken.FullInstruction.Instruction.Opcode != TGSI_OPCODE_END)
             emit_tgsi_instr(fp, &tgsi->FullToken.FullInstruction);
          break;
+      }
+   }
+
+   /*
+    * Keep two output ALU packets in one pipeline batch when the
+    * second packet needs no MFU or texture operation.
+    */
+   if (list_length(&fp->fp_instructions) == 2) {
+      struct fp_instr *a = NULL, *b = NULL;
+      list_for_each_entry(struct fp_instr, instr,
+                          &fp->fp_instructions, link) {
+         if (!a)
+            a = instr;
+         else
+            b = instr;
+      }
+
+      if (a && b &&
+          !a->tex_word && !b->tex_word &&
+          a->dw.enable && b->dw.enable &&
+          a->dw.index == b->dw.index &&
+          a->dw.src_regs == b->dw.src_regs &&
+          a->alu_sched.num_instructions == 1 &&
+          b->alu_sched.num_instructions == 1 &&
+          a->alu_sched.address == 0 &&
+          b->alu_sched.address == 1 &&
+          b->mfu_sched.num_instructions == 0) {
+         a->alu_sched.num_instructions = 2;
+         a->dw = b->dw;
+         list_del(&b->link);
+         FREE(b);
       }
    }
 

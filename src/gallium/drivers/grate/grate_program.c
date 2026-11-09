@@ -288,10 +288,10 @@ grate_create_fs_state(struct pipe_context *pcontext,
       PUSH(words[1]);
    }
 
-   // TODO: emit actual instructions here
    PUSH(host1x_opcode_nonincr(TGR3D_FP_UPLOAD_TEX_INST, num_fp_instrs));
-   for (int i = 0; i < num_fp_instrs; ++i)
-      PUSH(0x00000000);
+   list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link) {
+      PUSH(instr->tex_word);
+   }
 
    PUSH(host1x_opcode_nonincr(TGR3D_FP_UPLOAD_ALU_SCHED, num_fp_instrs));
    list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link) {

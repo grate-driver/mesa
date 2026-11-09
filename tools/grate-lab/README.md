@@ -18,6 +18,8 @@ Validated: context creation/destruction, one RGB texture upload using Mesa's CPU
 format conversion, and illuminated, depth-tested engine geometry on GR3D.
 Explicit eight-level RGBA8 mip uploads/readbacks also pass on both softpipe
 and Tegra. This validates allocation and CPU transfers, not mip sampling.
+A narrow single-texture GLSL TEX path and an opaque glyph atlas also pass
+framebuffer checks; see below.
 Not validated/implemented: general texture sampling, GPU mip addressing,
 bitmap text, arbitrary applications, NaN/Inf correctness of arithmetic CMP
 lowering, full GL conformance, long-running stability or other devices.
@@ -172,3 +174,33 @@ level from 128x128 to 1x1 and checked every pixel with glGetTexImage, with no
 GL errors. Both softpipe and Tegra passed. No drawing, texture sampling or
 glGenerateMipmap was involved. All 149 protected system-file entries stayed
 unchanged and no new kernel faults were recorded.
+
+## Restricted GLSL texture and opaque-text probes
+
+The fragment backend and sampler-state port builds on the Surface RT patch in
+[#19](https://github.com/grate-driver/mesa/pull/19). The Mesa22.2.4 sampler-view
+ownership API is handled explicitly and context cleanup releases the view.
+The supported experiment is a single linear four-byte-per-pixel 2D texture,
+level zero, a matching natural row pitch, and sampler0. Min/mag nearest and
+GLSL texture2D with input0 coordinates were tested. This is not a general
+fragment-shader compiler; other shader shapes can still abort.
+
+`texture-probe.c` renders a four-quadrant RGBA8 image through a GLSL1.20 TEX
+shader and checks12,544 interior framebuffer pixels with glReadPixels.
+`text-atlas-probe.c` builds five opaque5x7 glyphs spelling GRATE in an RGBA8
+atlas and checks14,400 framebuffer pixels through the same shader. Each passed
+on private softpipe and Tegra; the hardware logs show a GR3D class0x60 submit
+and wait success. No new SMMU/EMEM faults were recorded.
+
+These are correctness checks, not FPS benchmarks. The text probe does not
+implement glBitmap, transparent text, blending, discard or a font API.
+The earlier fixed-function GL_REPLACE probe stopped on unsupported TXP
+(projective texture sampling), before a texture draw. That failure remains
+unfixed: the explicit GLSL probe tests TEX directly rather than hiding TXP
+limitations. Mip-filtered sampling and automatic mip generation are untested.
+
+Compile the probes with your ARM cross compiler/sysroot, using the private
+Mesa GL headers/library and target X11 library (`-lGL -lX11`). Run each with
+argument `texture` and the private per-process environment above, under the
+external deadline and fault monitor. They write `texture-readback.rgba` in the
+working directory, so use a separate writable directory for every run.
