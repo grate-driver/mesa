@@ -1,0 +1,28 @@
+--- a/src/gallium/drivers/grate/grate_program.c
++++ b/src/gallium/drivers/grate/grate_program.c
+@@ -243,16 +243,22 @@
+    util_dynarray_init(&buf, NULL);
+ 
+ #define PUSH(x) util_dynarray_append(&buf, uint32_t, (x))
++   int num_fp_instrs = list_length(&fp.fp_instructions);
++   assert(num_fp_instrs < 64);
++
+    PUSH(host1x_opcode_incr(TGR3D_ALU_BUFFER_SIZE, 1));
+-   PUSH(0x58000000);
++   PUSH(num_fp_instrs > 1 ? 0x4a000000 : 0x58000000);
++   if (num_fp_instrs > 1) {
++      /* OpenTegra's matching one-row ALU buffer / recirculation setup. */
++      PUSH(host1x_opcode_incr(0x501, 1));
++      PUSH(0x223212cf);
++   }
+ 
+    PUSH(host1x_opcode_imm(TGR3D_FP_PSEQ_QUAD_ID, 0));
+    PUSH(host1x_opcode_imm(TGR3D_FP_UPLOAD_INST_ID_COMMON, 0));
+    PUSH(host1x_opcode_imm(TGR3D_FP_UPLOAD_MFU_INST_ID, 0));
+    PUSH(host1x_opcode_imm(TGR3D_FP_UPLOAD_ALU_INST_ID, 0));
+ 
+-   int num_fp_instrs = list_length(&fp.fp_instructions);
+-   assert(num_fp_instrs < 64);
+ 
+    PUSH(host1x_opcode_incr(TGR3D_FP_PSEQ_ENGINE_INST, 1));
+    PUSH(0x20006000 | num_fp_instrs);

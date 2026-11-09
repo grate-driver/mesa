@@ -1,0 +1,200 @@
+{
+  "platform": {
+    "device": "ASUS Google Nexus 7 (2012), grouper E1565",
+    "soc": "NVIDIA Tegra30",
+    "abi": "ARMv7 hard-float musl",
+    "os": "postmarketOS 26.06",
+    "kernel": "7.0.1-postmarketos-grate",
+    "private_mesa": "22.2.4 + GRATE lab patches",
+    "system_mesa": "26.1.6, unchanged",
+    "window": "760x1000"
+  },
+  "suite": {
+    "completed": true,
+    "runs": [
+      {
+        "mode": "softpipe",
+        "phase": "texture",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 1.409,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      {
+        "mode": "softpipe",
+        "phase": "text",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 1.388,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      {
+        "mode": "softpipe",
+        "phase": "depth",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 1.488,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      {
+        "mode": "softpipe",
+        "phase": "mipmap",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 1.561,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      {
+        "mode": "softpipe",
+        "phase": "self",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 1.462,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      {
+        "mode": "softpipe",
+        "phase": "demo",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 7.297,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      {
+        "mode": "grate",
+        "phase": "texture",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 0.85,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      {
+        "mode": "grate",
+        "phase": "text",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 0.84,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      {
+        "mode": "grate",
+        "phase": "depth",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 0.992,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      {
+        "mode": "grate",
+        "phase": "mipmap",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 0.965,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      {
+        "mode": "grate",
+        "phase": "self",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 0.999,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      },
+      {
+        "mode": "grate",
+        "phase": "demo",
+        "exit": 0,
+        "reason": "natural",
+        "seconds": 6.582,
+        "fault_marker": false,
+        "completed": true,
+        "diagnostic_stop": false
+      }
+    ],
+    "framebuffer_samples": {
+      "texture": 10816,
+      "opaque_font_atlas": 175,
+      "depth_occlusion": 2,
+      "implicit_mip_lod": 8,
+      "combined": 11001
+    },
+    "mip_upload_readback": "all pixels at all eight explicit levels passed",
+    "hardware_mip_draws_gr3d_class_0x60": 8
+  },
+  "launcher_check": {
+    "mode": "grate",
+    "phase": "launcher",
+    "exit": 0,
+    "reason": "natural",
+    "seconds": 2.792,
+    "fault_marker": false,
+    "completed": true,
+    "diagnostic_stop": false
+  },
+  "hardware_followup_20_seconds": {
+    "mode": "grate",
+    "phase": "launcher",
+    "exit": 0,
+    "reason": "natural",
+    "seconds": 20.936,
+    "fault_marker": false,
+    "completed": true,
+    "diagnostic_stop": false
+  },
+  "safety": {
+    "new_kernel_faults": false,
+    "protected_files_unchanged": 149,
+    "complete_recorded_manifest_unchanged": true,
+    "system_graphics_or_boot_configuration_changed": false,
+    "remaining_test_processes": 0,
+    "reboot_tested": false
+  },
+  "limitations": [
+    "Opaque RGBA text atlas; no glBitmap or transparent-text claim",
+    "Mip levels generated explicitly on CPU; no glGenerateMipmap claim",
+    "Restricted POT RGBA8 nearest-mipmap sampler; no general sampler conformance claim",
+    "Short uncontrolled performance intervals; not a benchmark of system llvmpipe"
+  ],
+  "performance": {
+    "paired_quiet_intervals": {
+      "tegra": {
+        "frames": 149,
+        "seconds": 6.025,
+        "fps": 24.73
+      },
+      "softpipe": {
+        "frames": 5,
+        "seconds": 6.342,
+        "fps": 0.788
+      }
+    },
+    "hardware_only_followup": {
+      "frames": 580,
+      "seconds": 20.022,
+      "fps": 28.968
+    },
+    "note": "One capture in each short paired interval. Clocks and temperature uncontrolled. Do not pair the later hardware-only interval with the earlier software interval."
+  }
+}

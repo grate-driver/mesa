@@ -1,0 +1,16 @@
+RENDERER softpipe direct=1
+CHECK PASS texture pixels
+CHECK PASS opaque OpenGL font atlas
+CHECK PASS depth occlusion
+MIP LOD PASS level=0 footprint=128
+MIP LOD PASS level=1 footprint=64
+MIP LOD PASS level=2 footprint=32
+MIP LOD PASS level=3 footprint=16
+MIP LOD PASS level=4 footprint=8
+MIP LOD PASS level=5 footprint=4
+MIP LOD PASS level=6 footprint=2
+MIP LOD PASS level=7 footprint=1
+CHECK PASS mip storage and implicit GPU LOD 8/8
+SELFTEST PASS pixels=11001
+DEMO DONE frames=5 seconds=6.342 fps=0.788
+APP DONE exit=0

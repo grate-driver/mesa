@@ -1,0 +1,19 @@
+--- a/src/gallium/drivers/grate/grate_program.c
++++ b/src/gallium/drivers/grate/grate_program.c
+@@ -257,8 +257,15 @@
+    PUSH(host1x_opcode_incr(TGR3D_FP_PSEQ_ENGINE_INST, 1));
+    PUSH(0x20006000 | num_fp_instrs);
+ 
++   unsigned exec = 0, dw_exec = 0;
++   list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link) {
++      exec++;
++      if (instr->dw.enable)
++         dw_exec = exec;
++   }
++   assert(dw_exec && dw_exec <= (unsigned)num_fp_instrs);
+    PUSH(host1x_opcode_incr(TGR3D_FP_PSEQ_DW_CFG, 1));
+-   PUSH(0x00000040);
++   PUSH(TGR3D_VAL(FP_PSEQ_DW_CFG, PSEQ_TO_DW_EXEC_NB, dw_exec));
+ 
+    if (context->tegra114) {
+       /* XXX: maybe not needed */

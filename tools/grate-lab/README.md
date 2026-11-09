@@ -255,3 +255,9 @@ sysroot, QEMU, runtime and archive arguments as the vertex test. The resource
 test exercises actual create/map/copy code with guarded mock BOs; the sampler
 test checks actual emitted descriptors and the unchanged level-zero path.
 `captured-demo.tgsi` adds the actual MVP vertex program to the vertex fixtures.
+
+## Complete source and validation index
+
+[INDEX.md](INDEX.md) links the driver lab, showcase, machine-readable device
+results, the later 20-second display run and an archive of unfinished TXP
+experiments. Archived patches are not applied to the validated driver.
