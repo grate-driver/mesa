@@ -178,7 +178,7 @@ unchanged and no new kernel faults were recorded.
 ## Restricted GLSL texture and opaque-text probes
 
 The fragment backend and sampler-state port builds on the Surface RT patch in
-[#19](https://github.com/grate-driver/mesa/pull/19). The Mesa22.2.4 sampler-view
+[#19](https://github.com/grate-driver/mesa/pull/19). The Mesa 22.2.4 sampler-view
 ownership API is handled explicitly and context cleanup releases the view.
 The supported experiment is a single linear four-byte-per-pixel 2D texture,
 level zero, a matching natural row pitch, and sampler0. Min/mag nearest and
@@ -207,7 +207,7 @@ working directory, so use a separate writable directory for every run.
 
 ## Fragment constant-buffer stage regression
 
-Mesa22.2.4 uses PIPE_SHADER_FRAGMENT=1 for Gallium callbacks, while
+Mesa 22.2.4 uses PIPE_SHADER_FRAGMENT=1 for Gallium callbacks, while
 MESA_SHADER_FRAGMENT=4 is a different enum. The fragment uniform emitter
 previously read the wrong array slot and skipped the actual upload. It now
 uses PIPE_SHADER_FRAGMENT, matching set_constant_buffer.
@@ -215,10 +215,10 @@ uses PIPE_SHADER_FRAGMENT, matching set_constant_buffer.
 Run `check-vp.py --uniforms` with the same build/sysroot/QEMU/runtime/archive
 arguments as the vertex regression. This invokes the actual binding callback
 and upload emitter with a mock stream, checks five exact command words for
-(0.25,0.75,0,1), and verifies that a separate vertex-buffer sentinel is ignored.
+(0.25, 0.75, 0, 1), and verifies that a separate vertex-buffer sentinel is ignored.
 It performs no GPU calls.
 
-The on-device `uniform-color-probe.c` passed12,544 framebuffer pixel checks
+The on-device `uniform-color-probe.c` passed 12,544 framebuffer pixel checks
 (on softpipe and Tegra; one-byte tolerance for color conversion). It checks
 a direct GLSL uniform color, not texture projection. Constant-coordinate TXP
 is still incorrect in the separate development revision; that TXP work is
@@ -228,7 +228,7 @@ has been made.
 ## Existing Xfce desktop path
 
 [DESKTOP.md](DESKTOP.md) documents a separate XRender transparency/text test
-and per-taskGPU trace proving actualGR2D/GR3D submissions by the unchanged
-systemXorg. This helps distinguish desktopEXA compositing from llvmpipe
-reported for a defaultOpenGL context. No experimentalMesa desktop switch
+and per-task GPU trace proving actual GR2D/GR3D submissions by the unchanged
+system Xorg. This helps distinguish desktop EXA compositing from llvmpipe
+reported for a default OpenGL context. No experimental Mesa desktop switch
 was needed for that result.
