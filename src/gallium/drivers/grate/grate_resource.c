@@ -229,6 +229,8 @@ grate_screen_resource_create(struct pipe_screen *pscreen,
    }
 
    unsigned alignment = (template->bind & PIPE_BIND_DEPTH_STENCIL) ? 256 : 32;
+   if (!(template->bind & PIPE_BIND_DEPTH_STENCIL) && template->last_level)
+      alignment = 16; /* GR3D linear mip chains use 16-byte rows. */
    if (template->target == PIPE_BUFFER) alignment = 1;
    if ((template->target != PIPE_BUFFER && template->target != PIPE_TEXTURE_2D) ||
        template->depth0 != 1 || template->array_size != 1 ||

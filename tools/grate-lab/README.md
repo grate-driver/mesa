@@ -14,15 +14,15 @@ uploads and a limited set of vertex lighting instructions. They also add range
 checks before resource access, optional diagnostic logging and a smaller upload
 manager with cleanup.
 
-Validated: context creation/destruction, one RGB texture upload using Mesa's CPU
-format conversion, and illuminated, depth-tested engine geometry on GR3D.
-Explicit eight-level RGBA8 mip uploads/readbacks also pass on both softpipe
-and Tegra. This validates allocation and CPU transfers, not mip sampling.
-A narrow single-texture GLSL TEX path and an opaque glyph atlas also pass
-framebuffer checks; see below.
-Not validated/implemented: general texture sampling, GPU mip addressing,
-bitmap text, arbitrary applications, NaN/Inf correctness of arithmetic CMP
-lowering, full GL conformance, long-running stability or other devices.
+Validated paths include context creation/destruction, RGB upload through Mesa's
+CPU format conversion, illuminated engine geometry, restricted GLSL texture
+sampling, an opaque GL font atlas, depth occlusion, explicit RGBA8 mip storage
+and nearest-mipmap GPU sampling across all eight levels. See the individual
+probes and integrated showcase below for the limits of each test.
+
+Unimplemented or unvalidated features include general sampler configurations,
+transparent bitmap text, arbitrary applications, NaN/Inf semantics of arithmetic
+CMP lowering, full GL conformance, long-running stability and other devices.
 
 The engine test deliberately suppresses GLUT bitmap characters and its unused
 reflection-mipmap initialization. The default LIT scene is untextured. These are
@@ -197,7 +197,8 @@ implement glBitmap, transparent text, blending, discard or a font API.
 The earlier fixed-function GL_REPLACE probe stopped on unsupported TXP
 (projective texture sampling), before a texture draw. That failure remains
 unfixed: the explicit GLSL probe tests TEX directly rather than hiding TXP
-limitations. Mip-filtered sampling and automatic mip generation are untested.
+limitations. Restricted nearest-mipmap sampling is now tested in the showcase below;
+automatic mip generation remains untested.
 
 Compile the probes with your ARM cross compiler/sysroot, using the private
 Mesa GL headers/library and target X11 library (`-lGL -lX11`). Run each with
@@ -232,3 +233,25 @@ and per-task GPU trace proving actual GR2D/GR3D submissions by the unchanged
 system Xorg. This helps distinguish desktop EXA compositing from llvmpipe
 reported for a default OpenGL context. No experimental Mesa desktop switch
 was needed for that result.
+
+## Integrated OpenGL showcase and GPU mip sampling
+
+[showcase/README.md](showcase/README.md) contains a standalone textured-gear
+application with an opaque OpenGL text atlas, Z-buffer tests and real GPU mip
+selection. It validates its framebuffer before showing PASS. Both private
+softpipe and Tegra passed all individual checks, the combined test and the
+animated scene. The application and all libraries remain in a private prefix.
+
+The mip sampler uses the 16-byte linear row alignment used by libgrate's mip
+allocator, with checked offsets and total BO size. Non-mip resources retain
+the previous layout. GPU descriptors enable mipmaps and set the actual last
+level. The initial supported configuration is a complete level-zero POT
+RGBA8 view, nearest mip selection, zero LOD bias and minimum LOD zero. Other
+configurations stop explicitly.
+
+CPU resource and sampler command regressions can be run through
+`check-vp.py --resources` and `check-vp.py --sampler` with the same build,
+sysroot, QEMU, runtime and archive arguments as the vertex test. The resource
+test exercises actual create/map/copy code with guarded mock BOs; the sampler
+test checks actual emitted descriptors and the unchanged level-zero path.
+`captured-demo.tgsi` adds the actual MVP vertex program to the vertex fixtures.

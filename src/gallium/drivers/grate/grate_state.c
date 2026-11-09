@@ -749,14 +749,32 @@ emit_simple_texture(struct grate_context *context)
    int size_error = drm_tegra_bo_get_size(res->bo, &bo_size);
    assert(!size_error);
 
-   /* One linear 2D texture without mipmaps. */
+   /* Restricted linear RGBA8 texture, optionally with a POT mip chain. */
    const struct pipe_sampler_state *sampler = context->fragment_sampler;
+   bool mipmapped = sampler && sampler->min_mip_filter != PIPE_TEX_MIPFILTER_NONE;
+   if (mipmapped) {
+      assert(sampler->min_mip_filter == PIPE_TEX_MIPFILTER_NEAREST &&
+             sampler->min_lod == 0 && sampler->max_lod >= texture->last_level &&
+             sampler->lod_bias == 0 &&
+             !(width & (width - 1)) && !(height & (height - 1)) &&
+             view->u.tex.last_level == texture->last_level &&
+             res->mip.total <= bo_size);
+      struct grate_mip_layout expected;
+      assert(grate_mip_layout_init(&expected, width, height, 4,
+                                   texture->last_level + 1, 16));
+      assert(expected.levels == res->mip.levels && expected.total == res->mip.total);
+      for (unsigned i = 0; i < expected.levels; i++)
+         assert(expected.pitch[i] == res->mip.pitch[i] &&
+                expected.offset[i] == res->mip.offset[i] &&
+                expected.size[i] == res->mip.size[i]);
+   }
    assert(sampler &&
           (sampler->min_img_filter == PIPE_TEX_FILTER_NEAREST ||
            sampler->min_img_filter == PIPE_TEX_FILTER_LINEAR) &&
           (sampler->mag_img_filter == PIPE_TEX_FILTER_NEAREST ||
            sampler->mag_img_filter == PIPE_TEX_FILTER_LINEAR) &&
-          sampler->min_mip_filter == PIPE_TEX_MIPFILTER_NONE &&
+          (sampler->min_mip_filter == PIPE_TEX_MIPFILTER_NONE ||
+           sampler->min_mip_filter == PIPE_TEX_MIPFILTER_NEAREST) &&
           view->format == texture->format &&
           !res->tiled &&
           texture->target == PIPE_TEXTURE_2D &&
@@ -802,7 +820,9 @@ emit_simple_texture(struct grate_context *context)
       desc1 |= TGR3D_TEXTURE_DESC1_WRAP_T_MIRRORED_REPEAT;
 
    grate_stream_push(stream, desc1);
-   uint32_t desc2 = TGR3D_TEXTURE_DESC2_MIPMAP_DISABLE;
+   uint32_t desc2 = mipmapped ?
+      TGR3D_VAL(TEXTURE_DESC2, MAX_LOD, texture->last_level) :
+      TGR3D_TEXTURE_DESC2_MIPMAP_DISABLE;
    if (!(width & (width - 1)) && !(height & (height - 1))) {
       desc2 |= TGR3D_VAL(TEXTURE_DESC2, WIDTH_LOG2, log2_width);
       desc2 |= TGR3D_VAL(TEXTURE_DESC2, HEIGHT_LOG2, log2_height);
