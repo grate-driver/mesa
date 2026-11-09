@@ -5,6 +5,7 @@
 - [Recorded validation and the latest 20-second run](validation/2026-11-09/README.md)
 - [Machine-readable results](validation/2026-11-09/results.json)
 - [Existing Xfce desktop XRender/EXA hardware proof](DESKTOP.md)
+- [Native Molecule, source-over blending and cache investigation](research/molecule/README.md)
 - [Archived, unfinished TXP investigation](research/txp/README.md)
 
 The compiled driver in this branch contains the validated fixes and the

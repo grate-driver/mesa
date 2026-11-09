@@ -1,0 +1,496 @@
+--- a/src/gallium/drivers/grate/grate_compiler.h
++++ b/src/gallium/drivers/grate/grate_compiler.h
+@@ -4,6 +4,7 @@
+ #include "util/list.h"
+ 
+ #include <stdint.h>
++#include <stdbool.h>
+ 
+ struct tgsi_parse_context;
+ 
+@@ -25,9 +26,12 @@
+    int num_inputs;
+    int color_input;
+    int max_tram_row;
++   bool unverified_uniform_texcoords;
+ };
+ 
+ struct grate_fp_shader {
++   unsigned simple_coord_mask;
++   unsigned simple_uniform_coord_mask;
+    int simple_tex_temp;
+    unsigned simple_tex_alpha_one;
+    unsigned simple_num_immediates;
+--- a/src/gallium/drivers/grate/grate_context.h
++++ b/src/gallium/drivers/grate/grate_context.h
+@@ -42,6 +42,8 @@
+    struct pipe_sampler_view *fragment_sampler_view;
+    struct pipe_sampler_state *fragment_sampler;
+ 
++   struct pipe_blend_state *blend;
++   unsigned blend_mode;
+    struct grate_zsa_state *zsa;
+    struct grate_rasterizer_state *rast;
+ 
+--- a/src/gallium/drivers/grate/grate_program.h
++++ b/src/gallium/drivers/grate/grate_program.h
+@@ -24,6 +24,7 @@
+    struct pipe_shader_state base;
+    struct grate_shader_blob blob;
+    struct grate_fp_info info;
++   struct grate_shader_blob blend_blob[3];
+ };
+ 
+ void
+--- a/src/gallium/drivers/grate/grate_program.c
++++ b/src/gallium/drivers/grate/grate_program.c
+@@ -213,52 +213,119 @@
+    FREE(so);
+ }
+ 
+-static void *
+-grate_create_fs_state(struct pipe_context *pcontext,
+-                      const struct pipe_shader_state *template)
++/* Common source-over modes: premultiplied, straight, straight RGB/separate alpha. */
++static void
++append_source_over(struct grate_fp_shader *fp, unsigned mode)
+ {
+-   struct grate_context *context = grate_context(pcontext);
+-   struct grate_fragment_shader_state *so =
+-      CALLOC_STRUCT(grate_fragment_shader_state);
+-
+-   if (!so)
+-      return NULL;
+-
+-   so->base = *template;
+-
+-   if (grate_debug & GRATE_DEBUG_TGSI) {
+-      fprintf(stderr, "DEBUG: TGSI:\n");
+-      tgsi_dump(template->tokens, 0);
+-      fprintf(stderr, "\n");
++   struct fp_instr *last = list_last_entry(&fp->fp_instructions, struct fp_instr, link);
++   assert(last->dw.enable && last->dw.index == 1);
++   unsigned source = last->dw.src_regs == FP_DW_REGS_R2_R3 ? 2 : 0;
++   list_for_each_entry(struct fp_instr, i, &fp->fp_instructions, link)
++      i->dw.enable = false;
++   assert(list_length(&fp->fp_instructions) < 62);
++   assert(list_length(&fp->alu_instructions) < 62);
++   for (unsigned stage = 0; stage < 2; ++stage) {
++      struct fp_instr *i = CALLOC_STRUCT(fp_instr);
++      struct fp_alu_instr_packet *p = CALLOC_STRUCT(fp_alu_instr_packet);
++      assert(i && p);
++      i->alu_sched.address = list_length(&fp->alu_instructions);
++      i->alu_sched.num_instructions = 1;
++      for (unsigned c = 0; c < 4; ++c) {
++         struct fp_alu_src_operand zero = { .index=31, .datatype=FP_DATATYPE_FIXED10 };
++         struct fp_alu_src_operand one = zero; one.sub_reg_select_high = true;
++         struct fp_alu_src_operand alpha = {
++            .index=stage ? 3 : source+1, .datatype=FP_DATATYPE_FIXED10,
++            .sub_reg_select_high=true
++         };
++         struct fp_alu_instr *alu = &p->slots[c];
++         alu->op = FP_ALU_OP_MAD;
++         alu->dst = (struct fp_alu_dst_operand) {
++            .index=2+c/2, .write_low_sub_reg=!(c&1),
++            .write_high_sub_reg=c&1, .saturate=true
++         };
++         alu->src[3] = one;
++         if (!stage) {
++            /* Preserve original alpha while premultiplying RGB. TEX may
++             * leave its result in r0/r1: copy before framebuffer fetch. */
++            alu->src[0] = (struct fp_alu_src_operand) {
++               .index=source+c/2, .datatype=FP_DATATYPE_FIXED10,
++               .sub_reg_select_high=c&1
++            };
++            alu->src[1] = mode != 1 && c < 3 ? alpha : one;
++            alu->src[2] = zero;
++         } else {
++            alu->src[0] = (struct fp_alu_src_operand) {
++               .index=c/2, .datatype=FP_DATATYPE_FIXED10,
++               .sub_reg_select_high=c&1
++            };
++            alpha.minus_one=true; alpha.negate=true;
++            alu->src[1] = alpha;
++            alu->src[2] = (struct fp_alu_src_operand) {
++               .index=2+c/2, .datatype=FP_DATATYPE_FIXED10,
++               .sub_reg_select_high=c&1
++            };
++            if (mode == 2 && c == 3) {
++               /* glBlendFunc(SRC_ALPHA,INV_SRC_ALPHA): alpha is a*a. */
++               alu->src[3] = alu->src[2];
++               alu->multiply_addend = true;
++            }
++         }
++      }
++      if (stage) {
++         i->pseq_word=0x00810008; /* RT1 -> r0/r1 (OpenTegra framebuffer fetch). */
++         i->dw=(struct fp_dw_instr){.enable=true,.index=1,.src_regs=FP_DW_REGS_R2_R3};
++      }
++      list_addtail(&p->link,&fp->alu_instructions);
++      list_addtail(&i->link,&fp->fp_instructions);
+    }
++}
+ 
++static bool
++grate_create_fs_blob(struct grate_context *context, const struct tgsi_token *tokens,
++                     unsigned blend_mode, struct grate_shader_blob *blob,
++                     struct grate_fp_info *info)
++{
+    struct tgsi_parse_context parser;
+-   unsigned ok = tgsi_parse_init(&parser, template->tokens);
++   unsigned ok = tgsi_parse_init(&parser, tokens);
+    assert(ok == TGSI_PARSE_OK);
+ 
+    struct grate_fp_shader fp;
+    grate_tgsi_to_fp(&fp, &parser);
++   if (blend_mode) append_source_over(&fp, blend_mode);
+ 
+    struct util_dynarray buf;
+    util_dynarray_init(&buf, NULL);
+ 
+ #define PUSH(x) util_dynarray_append(&buf, uint32_t, (x))
++   int num_fp_instrs = list_length(&fp.fp_instructions);
++   assert(num_fp_instrs < 64);
++
+    PUSH(host1x_opcode_incr(TGR3D_ALU_BUFFER_SIZE, 1));
+-   PUSH(0x58000000);
++   PUSH(num_fp_instrs > 1 ? 0x4a000000 : 0x58000000);
++   if (num_fp_instrs > 1) {
++      /* OpenTegra's matching one-row ALU buffer / recirculation setup. */
++      PUSH(host1x_opcode_incr(0x501, 1));
++      PUSH(0x223212cf);
++   }
+ 
+    PUSH(host1x_opcode_imm(TGR3D_FP_PSEQ_QUAD_ID, 0));
+    PUSH(host1x_opcode_imm(TGR3D_FP_UPLOAD_INST_ID_COMMON, 0));
+    PUSH(host1x_opcode_imm(TGR3D_FP_UPLOAD_MFU_INST_ID, 0));
+    PUSH(host1x_opcode_imm(TGR3D_FP_UPLOAD_ALU_INST_ID, 0));
+ 
+-   int num_fp_instrs = list_length(&fp.fp_instructions);
+-   assert(num_fp_instrs < 64);
+ 
+    PUSH(host1x_opcode_incr(TGR3D_FP_PSEQ_ENGINE_INST, 1));
+    PUSH(0x20006000 | num_fp_instrs);
+ 
++   unsigned exec = 0, dw_exec = 0;
++   list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link) {
++      exec++;
++      if (instr->dw.enable)
++         dw_exec = exec;
++   }
++   assert(dw_exec && dw_exec <= (unsigned)num_fp_instrs);
+    PUSH(host1x_opcode_incr(TGR3D_FP_PSEQ_DW_CFG, 1));
+-   PUSH(0x00000040);
++   PUSH(TGR3D_VAL(FP_PSEQ_DW_CFG, PSEQ_TO_DW_EXEC_NB, dw_exec));
+ 
+    if (context->tegra114) {
+       /* XXX: maybe not needed */
+@@ -267,11 +334,12 @@
+       PUSH(0x00000000);
+    }
+ 
+-   PUSH(host1x_opcode_imm(TGR3D_FP_PSEQ_UPLOAD_INST_BUFFER_FLUSH, 0));
+ 
+    PUSH(host1x_opcode_nonincr(TGR3D_FP_PSEQ_UPLOAD_INST, num_fp_instrs));
+    list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link)
+-      PUSH(0x00000000);
++      PUSH(instr->pseq_word);
++   /* OpenTegra gen_shader_bin.c commits the PSEQ buffer AFTER upload. */
++   PUSH(host1x_opcode_imm(TGR3D_FP_PSEQ_UPLOAD_INST_BUFFER_FLUSH, 0));
+ 
+    PUSH(host1x_opcode_nonincr(TGR3D_FP_UPLOAD_MFU_SCHED, num_fp_instrs));
+    list_for_each_entry(struct fp_instr, instr, &fp.fp_instructions, link)
+@@ -331,9 +399,27 @@
+ #undef PUSH
+    util_dynarray_trim(&buf);
+ 
+-   so->blob.num_commands = buf.size / sizeof(uint32_t);
+-   so->blob.commands = buf.data;
+-   so->info = fp.info;
++   blob->num_commands = buf.size / sizeof(uint32_t);
++   blob->commands = buf.data;
++   *info = fp.info;
++   tgsi_parse_free(&parser);
++   list_for_each_entry_safe(struct fp_instr, i, &fp.fp_instructions, link) { list_del(&i->link); FREE(i); }
++   list_for_each_entry_safe(struct fp_alu_instr_packet, i, &fp.alu_instructions, link) { list_del(&i->link); FREE(i); }
++   list_for_each_entry_safe(struct fp_mfu_instr, i, &fp.mfu_instructions, link) { list_del(&i->link); FREE(i); }
++   return true;
++}
++
++static void *
++grate_create_fs_state(struct pipe_context *pcontext, const struct pipe_shader_state *template)
++{
++   struct grate_fragment_shader_state *so = CALLOC_STRUCT(grate_fragment_shader_state);
++   if (!so) return NULL;
++   so->base=*template;
++   if (grate_debug & GRATE_DEBUG_TGSI) tgsi_dump(template->tokens,0);
++   struct grate_context *ctx=grate_context(pcontext);
++   grate_create_fs_blob(ctx,template->tokens,0,&so->blob,&so->info);
++   for (unsigned mode=1;mode<=3;++mode)
++      grate_create_fs_blob(ctx,template->tokens,mode,&so->blend_blob[mode-1],&so->info);
+    return so;
+ }
+ 
+@@ -346,7 +432,10 @@
+ static void
+ grate_delete_fs_state(struct pipe_context *pcontext, void *so)
+ {
+-   FREE(so);
++   struct grate_fragment_shader_state *s=so;
++   FREE(s->blob.commands);
++   for(unsigned i=0;i<3;++i) FREE(s->blend_blob[i].commands);
++   FREE(s);
+ }
+ 
+ void
+--- a/src/gallium/drivers/grate/grate_state.c
++++ b/src/gallium/drivers/grate/grate_state.c
+@@ -288,8 +288,9 @@
+ static void
+ grate_bind_blend_state(struct pipe_context *pcontext, void *so)
+ {
+-   const struct pipe_blend_state *blend = so;
+-   assert(!blend || !blend->rt[0].blend_enable);
++   /* Mesa may prepare unused blend states while compiling display lists.
++    * Validation belongs at execution, before the command stream is emitted. */
++   grate_context(pcontext)->blend = so;
+ }
+ 
+ static void
+@@ -846,7 +847,7 @@
+    struct grate_stream *stream = &context->gr3d->stream;
+ 
+    emit_shader(stream, &context->vshader->blob);
+-   emit_shader(stream, &context->fshader->blob);
++   emit_shader(stream, context->blend_mode ? &context->fshader->blend_blob[context->blend_mode-1] : &context->fshader->blob);
+ 
+    uint32_t cull_face_linker_setup = TGR3D_VAL(CULL_FACE_LINKER_SETUP,
+                                                UNK_18_31, 0x2e38);
+@@ -885,6 +886,29 @@
+ void
+ grate_emit_state(struct grate_context *context)
+ {
++   context->blend_mode=0;
++   if (context->blend && context->blend->rt[0].blend_enable) {
++      const struct pipe_blend_state *state=context->blend;
++      const struct pipe_rt_blend_state *b=&state->rt[0];
++      if (!state->independent_blend_enable && !state->logicop_enable &&
++          !state->alpha_to_coverage && !state->alpha_to_one &&
++          b->colormask==15 && b->rgb_func==PIPE_BLEND_ADD && b->alpha_func==PIPE_BLEND_ADD &&
++          b->rgb_dst_factor==PIPE_BLENDFACTOR_INV_SRC_ALPHA &&
++          b->alpha_dst_factor==PIPE_BLENDFACTOR_INV_SRC_ALPHA) {
++         if (b->rgb_src_factor==PIPE_BLENDFACTOR_ONE && b->alpha_src_factor==PIPE_BLENDFACTOR_ONE) context->blend_mode=1;
++         if (b->rgb_src_factor==PIPE_BLENDFACTOR_SRC_ALPHA && b->alpha_src_factor==PIPE_BLENDFACTOR_SRC_ALPHA) context->blend_mode=2;
++         if (b->rgb_src_factor==PIPE_BLENDFACTOR_SRC_ALPHA && b->alpha_src_factor==PIPE_BLENDFACTOR_ONE) context->blend_mode=3;
++      }
++      if (!context->blend_mode) {
++         fprintf(stderr,"GRATE_DIAG STOP: unsupported blend draw rgb=%u/%u/%u alpha=%u/%u/%u mask=%u\n",
++                 b->rgb_func,b->rgb_src_factor,b->rgb_dst_factor,b->alpha_func,b->alpha_src_factor,b->alpha_dst_factor,b->colormask);
++         abort();
++      }
++   }
++   if (context->fshader && context->fshader->info.unverified_uniform_texcoords) {
++      fprintf(stderr, "GRATE_DIAG STOP: uniform texture-coordinate path is not verified\n");
++      abort();
++   }
+    emit_render_targets(context);
+    emit_viewport(context);
+    emit_guardband(context);
+--- a/src/gallium/drivers/grate/grate_draw.c
++++ b/src/gallium/drivers/grate/grate_draw.c
+@@ -249,7 +249,9 @@
+    grate_stream_push(stream, host1x_opcode_imm(0x903, 0));
+ 
+    grate_stream_push(stream, host1x_opcode_incr(0xa00, 13));
+-   grate_stream_push(stream, 0x00000e00); /* TGR3D_FDC_CONTROL */
++   /* GR2D clears and other contexts can change render-target memory.
++    * Discard stale fragment data before framebuffer fetch (OpenTegra init). */
++   grate_stream_push(stream, 0x00000e00 | TGR3D_FDC_CONTROL_INVALIDATE);
+    grate_stream_push(stream, 0x00000000);
+    grate_stream_push(stream, 0x000001ff);
+    grate_stream_push(stream, 0x000001ff);
+@@ -371,6 +373,13 @@
+       return;
+    }
+ 
++   if (context->blend_mode) {
++      grate_stream_push(stream,host1x_opcode_imm(0xb00,1));
++      grate_stream_push(stream,host1x_opcode_imm(0xe41,1));
++      grate_stream_push(stream,host1x_opcode_imm(0xb00,2));
++      grate_stream_push(stream,host1x_opcode_imm(0xe41,3));
++      grate_stream_push(stream,host1x_opcode_imm(0xb00,3));
++   }
+    /* draw params */
+    value  = TGR3D_VAL(DRAW_PARAMS, INDEX_MODE, index_size);
+    value |= context->rast->draw_params;
+--- a/src/gallium/drivers/grate/fp/tgsi.c
++++ b/src/gallium/drivers/grate/fp/tgsi.c
+@@ -90,6 +90,16 @@
+ emit_vMOV(struct grate_fp_shader *fp, const struct tgsi_dst_register *dst,
+           bool saturate, const struct tgsi_src_register *src)
+ {
++   if (dst->File == TGSI_FILE_TEMPORARY) {
++      /* The restricted coordinate path stores vec4 TEMP[0] in row r0-r3. */
++      assert(dst->Index == 0 && !saturate && !src->Negate && !src->Absolute &&
++             (src->File == TGSI_FILE_INPUT || src->File == TGSI_FILE_CONSTANT));
++      fp->simple_coord_mask |= dst->WriteMask;
++      if (src->File == TGSI_FILE_CONSTANT)
++         fp->simple_uniform_coord_mask |= dst->WriteMask;
++      else
++         fp->simple_uniform_coord_mask &= ~dst->WriteMask;
++   }
+    struct fp_instr *inst = CALLOC_STRUCT(fp_instr);
+    list_inithead(&inst->link);
+ 
+@@ -138,7 +148,7 @@
+       alu->slots[alu_instrs++] = fp_alu_sMOV(fp_alu_dst(dst, i, saturate), src0);
+    }
+    inst->alu_sched.num_instructions = 1;
+-   inst->alu_sched.address = list_length(&fp->fp_instructions);
++   inst->alu_sched.address = list_length(&fp->alu_instructions);
+ 
+    if (mfu != NULL) {
+       inst->mfu_sched.num_instructions = 1;
+@@ -169,9 +179,15 @@
+            dst->File == TGSI_FILE_TEMPORARY) &&
+           dst->Index == 0 && dst->WriteMask == 0xf);
+    assert(fp->simple_tex_temp == -1);
+-   assert(coord->File == TGSI_FILE_INPUT && coord->Index == 0 &&
+-          coord->SwizzleX == TGSI_SWIZZLE_X &&
++   bool project = inst->Instruction.Opcode == TGSI_OPCODE_TXP;
++   assert(!inst->Instruction.Saturate && !coord->Negate && !coord->Absolute);
++   assert(coord->Index == 0 && coord->SwizzleX == TGSI_SWIZZLE_X &&
+           coord->SwizzleY == TGSI_SWIZZLE_Y);
++   assert(inst->Texture.Texture == TGSI_TEXTURE_2D);
++   unsigned required = 3 | (project ? 1u << coord->SwizzleW : 0);
++   assert(coord->File == TGSI_FILE_INPUT ||
++          (coord->File == TGSI_FILE_TEMPORARY &&
++           (fp->simple_coord_mask & required) == required));
+    assert(sampler->File == TGSI_FILE_SAMPLER &&
+           sampler->Index == 0);
+ 
+@@ -181,14 +197,38 @@
+    list_inithead(&out->link);
+    list_inithead(&mfu->link);
+ 
+-   mfu->var[0].op = FP_VAR_OP_FP20;
+-   mfu->var[0].tram_row = coord->Index;
+-   mfu->var[1].op = FP_VAR_OP_FP20;
+-   mfu->var[1].tram_row = coord->Index;
++   if (coord->File == TGSI_FILE_INPUT) {
++      for (unsigned i = 0; i < 4; i++) {
++         if (required & (1u << i)) {
++            mfu->var[i].op = FP_VAR_OP_FP20;
++            mfu->var[i].tram_row = coord->Index;
++         }
++      }
++   }
+    out->mfu_sched.num_instructions = 1;
+    out->mfu_sched.address = list_length(&fp->mfu_instructions);
+    list_addtail(&mfu->link, &fp->mfu_instructions);
+ 
++   if (project) {
++      struct fp_mfu_instr *divide = CALLOC_STRUCT(fp_mfu_instr);
++      assert(divide);
++      list_inithead(&divide->link);
++      divide->sfu.op = FP_SFU_OP_RCP;
++      divide->sfu.reg = coord->SwizzleW;
++      divide->mul[0].dst = FP_MFU_MUL_DST_ROW_REG_0;
++      divide->mul[0].src[0] = FP_MFU_MUL_SRC_ROW_REG_0;
++      divide->mul[0].src[1] = FP_MFU_MUL_SRC_SFU_RESULT;
++      divide->mul[1].dst = FP_MFU_MUL_DST_ROW_REG_1;
++      divide->mul[1].src[0] = FP_MFU_MUL_SRC_ROW_REG_1;
++      divide->mul[1].src[1] = FP_MFU_MUL_SRC_SFU_RESULT;
++      out->mfu_sched.num_instructions++;
++      list_addtail(&divide->link, &fp->mfu_instructions);
++   }
++   fp->simple_coord_mask = 0; /* TEX overwrites the coordinate rows. */
++   if (coord->File == TGSI_FILE_TEMPORARY &&
++       (fp->simple_uniform_coord_mask & required))
++      fp->info.unverified_uniform_texcoords = true;
++   fp->simple_uniform_coord_mask = 0;
+    out->tex_word = 0x00000400; /* TEX enable, sampler 0, r0/r1 */
+    out->dw.enable = dst->File == TGSI_FILE_OUTPUT;
+    out->dw.index = 1;
+@@ -209,8 +249,8 @@
+ 
+    /* Initial implementation: texture result times a uniform. */
+    assert(fp->simple_tex_temp == 0);
+-   assert(list_length(&fp->fp_instructions) == 1);
+-   assert(list_is_empty(&fp->alu_instructions));
++   assert(!list_is_empty(&fp->fp_instructions));
++
+    assert(dst->File == TGSI_FILE_OUTPUT &&
+           dst->Index == 0 && dst->WriteMask == 0xf);
+    assert(tex->File == TGSI_FILE_TEMPORARY && tex->Index == 0 &&
+@@ -223,7 +263,8 @@
+           !factor->Negate && !factor->Absolute);
+ 
+    struct fp_instr *batch =
+-      list_first_entry(&fp->fp_instructions, struct fp_instr, link);
++      list_last_entry(&fp->fp_instructions, struct fp_instr, link);
++   assert(batch->tex_word && batch->alu_sched.num_instructions == 0);
+    struct fp_alu_instr_packet *alu = CALLOC_STRUCT(fp_alu_instr_packet);
+    assert(alu);
+    list_inithead(&alu->link);
+@@ -259,12 +300,13 @@
+       };
+    }
+ 
+-   batch->alu_sched.address = 0;
++   batch->alu_sched.address = list_length(&fp->alu_instructions);
+    batch->alu_sched.num_instructions = 1;
+    batch->dw.enable = 1;
+    batch->dw.index = 1;
+    batch->dw.src_regs = FP_DW_REGS_R2_R3;
+    list_addtail(&alu->link, &fp->alu_instructions);
++   fp->simple_coord_mask = 0;
+    fp->simple_tex_temp = -1;
+ }
+ 
+@@ -313,6 +355,7 @@
+       emit_vMOV(fp, &inst->Dst[0].Register, saturate,
+                     &inst->Src[0].Register);
+       break;
++   case TGSI_OPCODE_TXP:
+    case TGSI_OPCODE_TEX:
+       emit_simple_tex(fp, inst);
+       break;
+@@ -364,6 +407,8 @@
+ void
+ grate_tgsi_to_fp(struct grate_fp_shader *fp, struct tgsi_parse_context *tgsi)
+ {
++   /* All metadata starts defined, including rejected/unverified paths. */
++   memset(fp, 0, sizeof(*fp));
+    list_inithead(&fp->fp_instructions);
+    list_inithead(&fp->alu_instructions);
+    list_inithead(&fp->mfu_instructions);
+--- a/src/gallium/drivers/grate/fp/fpir.h
++++ b/src/gallium/drivers/grate/fp/fpir.h
+@@ -54,6 +54,7 @@
+ 
+    enum fp_alu_op op;
+    enum fp_scale scale;
++   bool multiply_addend;
+ 
+    struct fp_alu_dst_operand dst;
+    struct fp_alu_src_operand src[4];
+@@ -147,7 +148,7 @@
+ struct fp_instr {
+    struct list_head link;
+    uint32_t tex_word;
+-   // TODO: PSEQ
++   uint32_t pseq_word;
+    struct fp_sched mfu_sched;
+    // TODO: TEX
+    struct fp_sched alu_sched;
+--- a/src/gallium/drivers/grate/fp/pack.c
++++ b/src/gallium/drivers/grate/fp/pack.c
+@@ -52,6 +52,7 @@
+       uint32_t words[2];
+    } tmp = {
+       .opcode = instr->op,
++      .rD_enable = instr->multiply_addend,
+       .dst_reg = instr->dst.index,
+       .saturate_result = instr->dst.saturate,
+ 
