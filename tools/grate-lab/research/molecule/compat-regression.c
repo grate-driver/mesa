@@ -130,8 +130,8 @@ static void check(const char *text, int project, int constant, int qchan) {
           assert(op->op == FP_ALU_OP_MAD);
           if (op->dst.index == 31)
             continue;
-          assert(op->dst.index < 4 && !op->dst.write_low_sub_reg &&
-                 !op->dst.write_high_sub_reg);
+          assert(op->dst.index < 4 && op->dst.write_low_sub_reg &&
+                 op->dst.write_high_sub_reg);
           r[op->dst.index] =
               value(op->src[0], r, uniform) * value(op->src[1], r, uniform) +
               value(op->src[2], r, uniform) * value(op->src[3], r, uniform);

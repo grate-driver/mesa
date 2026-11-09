@@ -8,6 +8,7 @@
 #include "util/u_memory.h"
 
 #include "grate_common.h"
+#include "grate_diagnostics.h"
 #include "grate_context.h"
 #include "grate_program.h"
 #include "grate_resource.h"
@@ -288,8 +289,9 @@ grate_create_blend_state(struct pipe_context *pcontext,
 static void
 grate_bind_blend_state(struct pipe_context *pcontext, void *so)
 {
-   const struct pipe_blend_state *blend = so;
-   assert(!blend || !blend->rt[0].blend_enable);
+   /* Mesa may prepare unused blend states while compiling display lists.
+    * Validation belongs at execution, before the command stream is emitted. */
+   grate_context(pcontext)->blend = so;
 }
 
 static void
@@ -718,20 +720,24 @@ emit_fs_uniforms(struct grate_context *context)
 {
    const struct pipe_constant_buffer *buffer =
       &context->constant_buffer[PIPE_SHADER_FRAGMENT];
-   if (!buffer->user_buffer)
-      return;
-
-   assert(buffer->buffer_offset == 0);
-   assert(buffer->buffer_size % sizeof(float) == 0);
-   unsigned count = buffer->buffer_size / sizeof(float);
-   assert(count <= 32);
-   const float *values = buffer->user_buffer;
    struct grate_stream *stream = &context->gr3d->stream;
-
-   grate_stream_push(stream,
-      host1x_opcode_incr(TGR3D_FP_CONST(0), count));
-   for (unsigned i = 0; i < count; i++)
-      grate_stream_push(stream, grate_float_to_fp20(values[i]));
+   if (buffer->user_buffer) {
+      assert(buffer->buffer_offset == 0);
+      assert(buffer->buffer_size % sizeof(float) == 0);
+      unsigned count = buffer->buffer_size / sizeof(float);
+      assert(count <= 32);
+      const float *values = buffer->user_buffer;
+      grate_stream_push(stream,host1x_opcode_incr(TGR3D_FP_CONST(0),count));
+      for (unsigned i=0;i<count;i++)
+         grate_stream_push(stream,grate_float_to_fp20(values[i]));
+   }
+   if(context->sampler_bias_active) {
+      assert(context->fragment_sampler && !context->fshader->bias_uniform_conflict);
+      if (grate_diagnostics_enabled()) fprintf(stderr,"GRATE_DIAG LOD_BIAS value=%g fp20=0x%05x row=3 blend=%u\n",
+         context->fragment_sampler->lod_bias,grate_float_to_fp20(context->fragment_sampler->lod_bias),context->blend_mode);
+      grate_stream_push(stream,host1x_opcode_incr(TGR3D_FP_CONST(31),1));
+      grate_stream_push(stream,grate_float_to_fp20(context->fragment_sampler->lod_bias));
+   }
 }
 static void
 emit_simple_texture(struct grate_context *context)
@@ -752,10 +758,15 @@ emit_simple_texture(struct grate_context *context)
    /* Restricted linear RGBA8 texture, optionally with a POT mip chain. */
    const struct pipe_sampler_state *sampler = context->fragment_sampler;
    bool mipmapped = sampler && sampler->min_mip_filter != PIPE_TEX_MIPFILTER_NONE;
+   if (sampler && grate_diagnostics_enabled()) fprintf(stderr,
+      "GRATE_DIAG SAMPLER min=%u mag=%u mip=%u minlod=%g maxlod=%g bias=%g size=%ux%u resource_levels=%u view=%u..%u\n",
+      sampler->min_img_filter,sampler->mag_img_filter,sampler->min_mip_filter,
+      sampler->min_lod,sampler->max_lod,sampler->lod_bias,width,height,texture->last_level,
+      view->u.tex.first_level,view->u.tex.last_level);
    if (mipmapped) {
-      assert(sampler->min_mip_filter == PIPE_TEX_MIPFILTER_NEAREST &&
+      assert((sampler->min_mip_filter == PIPE_TEX_MIPFILTER_NEAREST || sampler->min_mip_filter == PIPE_TEX_MIPFILTER_LINEAR) &&
              sampler->min_lod == 0 && sampler->max_lod >= texture->last_level &&
-             sampler->lod_bias == 0 &&
+             isfinite(sampler->lod_bias) && fabsf(sampler->lod_bias) <= 16.0f &&
              !(width & (width - 1)) && !(height & (height - 1)) &&
              view->u.tex.last_level == texture->last_level &&
              res->mip.total <= bo_size);
@@ -774,7 +785,7 @@ emit_simple_texture(struct grate_context *context)
           (sampler->mag_img_filter == PIPE_TEX_FILTER_NEAREST ||
            sampler->mag_img_filter == PIPE_TEX_FILTER_LINEAR) &&
           (sampler->min_mip_filter == PIPE_TEX_MIPFILTER_NONE ||
-           sampler->min_mip_filter == PIPE_TEX_MIPFILTER_NEAREST) &&
+           sampler->min_mip_filter == PIPE_TEX_MIPFILTER_NEAREST || sampler->min_mip_filter == PIPE_TEX_MIPFILTER_LINEAR) &&
           view->format == texture->format &&
           !res->tiled &&
           texture->target == PIPE_TEXTURE_2D &&
@@ -798,6 +809,8 @@ emit_simple_texture(struct grate_context *context)
    grate_stream_push(stream,
       host1x_opcode_incr(TGR3D_TEXTURE_DESC1(0), 2));
    uint32_t desc1 = TGR3D_VAL(TEXTURE_DESC1, FORMAT, res->format);
+   if (sampler->min_mip_filter == PIPE_TEX_MIPFILTER_LINEAR)
+      desc1 |= TGR3D_TEXTURE_DESC1_MINFILTER_LINEAR_BETWEEN;
    if (sampler->min_img_filter == PIPE_TEX_FILTER_LINEAR)
       desc1 |= TGR3D_TEXTURE_DESC1_MINFILTER_LINEAR_WITHIN;
    if (sampler->mag_img_filter == PIPE_TEX_FILTER_LINEAR)
@@ -835,7 +848,7 @@ emit_simple_texture(struct grate_context *context)
 }
 
 static void
-emit_shader(struct grate_stream *stream, struct grate_shader_blob *blob)
+emit_shader(struct grate_stream *stream, const struct grate_shader_blob *blob)
 {
    grate_stream_push_words(stream, blob->commands, blob->num_commands, 0);
 }
@@ -846,7 +859,10 @@ emit_program(struct grate_context *context)
    struct grate_stream *stream = &context->gr3d->stream;
 
    emit_shader(stream, &context->vshader->blob);
-   emit_shader(stream, &context->fshader->blob);
+   const struct grate_shader_blob *fs = context->sampler_bias_active ?
+      &context->fshader->biased_blob[context->blend_mode] :
+      (context->blend_mode ? &context->fshader->blend_blob[context->blend_mode-1] : &context->fshader->blob);
+   emit_shader(stream, fs);
 
    uint32_t cull_face_linker_setup = TGR3D_VAL(CULL_FACE_LINKER_SETUP,
                                                UNK_18_31, 0x2e38);
@@ -882,9 +898,51 @@ emit_program(struct grate_context *context)
 
 }
 
+static bool
+select_sampler_bias(struct grate_context *context)
+{
+   context->sampler_bias_active=false;
+   if(!context->fshader || !context->fshader->uses_texture || !context->fragment_sampler)
+      return true;
+   float bias=context->fragment_sampler->lod_bias;
+   if(!isfinite(bias) || fabsf(bias)>16.0f) return false;
+   if(bias==0) return true;
+   if(context->fshader->bias_uniform_conflict) return false;
+   if(!context->fshader->biased_blob[context->blend_mode].commands) return false;
+   context->sampler_bias_active=true;
+   return true;
+}
+
 void
 grate_emit_state(struct grate_context *context)
 {
+   context->blend_mode=0;
+   if (context->blend && context->blend->rt[0].blend_enable) {
+      const struct pipe_blend_state *state=context->blend;
+      const struct pipe_rt_blend_state *b=&state->rt[0];
+      if (!state->independent_blend_enable && !state->logicop_enable &&
+          !state->alpha_to_coverage && !state->alpha_to_one &&
+          b->colormask==15 && b->rgb_func==PIPE_BLEND_ADD && b->alpha_func==PIPE_BLEND_ADD &&
+          b->rgb_dst_factor==PIPE_BLENDFACTOR_INV_SRC_ALPHA &&
+          b->alpha_dst_factor==PIPE_BLENDFACTOR_INV_SRC_ALPHA) {
+         if (b->rgb_src_factor==PIPE_BLENDFACTOR_ONE && b->alpha_src_factor==PIPE_BLENDFACTOR_ONE) context->blend_mode=1;
+         if (b->rgb_src_factor==PIPE_BLENDFACTOR_SRC_ALPHA && b->alpha_src_factor==PIPE_BLENDFACTOR_SRC_ALPHA) context->blend_mode=2;
+         if (b->rgb_src_factor==PIPE_BLENDFACTOR_SRC_ALPHA && b->alpha_src_factor==PIPE_BLENDFACTOR_ONE) context->blend_mode=3;
+      }
+      if (!context->blend_mode) {
+         fprintf(stderr,"GRATE_DIAG STOP: unsupported blend draw rgb=%u/%u/%u alpha=%u/%u/%u mask=%u\n",
+                 b->rgb_func,b->rgb_src_factor,b->rgb_dst_factor,b->alpha_func,b->alpha_src_factor,b->alpha_dst_factor,b->colormask);
+         abort();
+      }
+   }
+   if(!select_sampler_bias(context)) {
+      fprintf(stderr,"GRATE_DIAG STOP: unsupported sampler bias or shader constant-slot collision\n");
+      abort();
+   }
+   if (context->fshader && context->fshader->info.unverified_uniform_texcoords) {
+      fprintf(stderr, "GRATE_DIAG STOP: uniform texture-coordinate path is not verified\n");
+      abort();
+   }
    emit_render_targets(context);
    emit_viewport(context);
    emit_guardband(context);

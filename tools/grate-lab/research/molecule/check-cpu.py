@@ -4,16 +4,17 @@ import argparse,json,pathlib,shlex,subprocess
 p=argparse.ArgumentParser()
 for n in ['build-dir','driver-source','grate-archive','sysroot','qemu','runtime-lib']:
  p.add_argument('--'+n,type=pathlib.Path,required=True)
-p.add_argument('--ninja',default='ninja');p.add_argument('--sampler',action='store_true');a=p.parse_args()
+p.add_argument('--ninja',default='ninja');p.add_argument('--sampler',action='store_true');p.add_argument('--bias',action='store_true');a=p.parse_args()
+if a.sampler and a.bias:p.error('Select sampler or bias, not both')
 build=a.build_dir.resolve();driver=a.driver_source.resolve();lab=pathlib.Path(__file__).resolve().parent
-out=build/('grate-compat-sampler-cpu' if a.sampler else 'grate-compat-cpu');out.mkdir(exist_ok=True)
+out=build/('grate-compat-sampler-cpu' if a.sampler else 'grate-lod-bias-cpu' if a.bias else 'grate-compat-cpu');out.mkdir(exist_ok=True)
 e=next(e for e in json.loads((build/'compile_commands.json').read_text()) if pathlib.Path(e['file']).name=='grate_program.c')
 args=shlex.split(e['command']);compile=[];i=0
 while i<len(args):
  x=args[i]
  if x in ['-o','-MF','-MQ']:i+=2;continue
  if x=='-MD':i+=1;continue
- if x==e['file']:x=str(lab/('sampler-regression.c' if a.sampler else 'compat-regression.c'))
+ if x==e['file']:x=str(lab/('sampler-regression.c' if a.sampler else 'lod-bias-regression.c' if a.bias else 'compat-regression.c'))
  x=x.replace('../source/src/gallium/drivers/grate',str(driver))
  compile.append(x);i+=1
 compile+=['-I'+str(driver),'-o',str(out/'regression.o')]

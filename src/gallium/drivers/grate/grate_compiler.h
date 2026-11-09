@@ -4,6 +4,7 @@
 #include "util/list.h"
 
 #include <stdint.h>
+#include <stdbool.h>
 
 struct tgsi_parse_context;
 
@@ -25,9 +26,12 @@ struct grate_fp_info {
    int num_inputs;
    int color_input;
    int max_tram_row;
+   bool unverified_uniform_texcoords;
 };
 
 struct grate_fp_shader {
+   unsigned simple_coord_mask;
+   unsigned simple_uniform_coord_mask;
    int simple_tex_temp;
    unsigned simple_tex_alpha_one;
    unsigned simple_num_immediates;

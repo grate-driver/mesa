@@ -249,7 +249,9 @@ grate_init_state(struct grate_context *context)
    grate_stream_push(stream, host1x_opcode_imm(0x903, 0));
 
    grate_stream_push(stream, host1x_opcode_incr(0xa00, 13));
-   grate_stream_push(stream, 0x00000e00); /* TGR3D_FDC_CONTROL */
+   /* GR2D clears and other contexts can change render-target memory.
+    * Discard stale fragment data before framebuffer fetch (OpenTegra init). */
+   grate_stream_push(stream, 0x00000e00 | TGR3D_FDC_CONTROL_INVALIDATE);
    grate_stream_push(stream, 0x00000000);
    grate_stream_push(stream, 0x000001ff);
    grate_stream_push(stream, 0x000001ff);
@@ -371,6 +373,13 @@ grate_draw_vbo(struct pipe_context *pcontext,
       return;
    }
 
+   if (context->blend_mode) {
+      grate_stream_push(stream,host1x_opcode_imm(0xb00,1));
+      grate_stream_push(stream,host1x_opcode_imm(0xe41,1));
+      grate_stream_push(stream,host1x_opcode_imm(0xb00,2));
+      grate_stream_push(stream,host1x_opcode_imm(0xe41,3));
+      grate_stream_push(stream,host1x_opcode_imm(0xb00,3));
+   }
    /* draw params */
    value  = TGR3D_VAL(DRAW_PARAMS, INDEX_MODE, index_size);
    value |= context->rast->draw_params;

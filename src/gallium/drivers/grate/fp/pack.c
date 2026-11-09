@@ -52,6 +52,7 @@ grate_fp_pack_alu(uint32_t *dst, struct fp_alu_instr *instr)
       uint32_t words[2];
    } tmp = {
       .opcode = instr->op,
+      .rD_enable = instr->multiply_addend,
       .dst_reg = instr->dst.index,
       .saturate_result = instr->dst.saturate,
 

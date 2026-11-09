@@ -1,8 +1,9 @@
 # Native Molecule compatibility investigation
 
-These are **unapplied research snapshots**, separate from the validated R11
-showcase driver. None is installed by the main build scripts. Full Molecule
-compatibility and complete OpenGL support have not been achieved.
+The current branch driver includes the R21/R22 implementation and builds it
+normally in the isolated lab configuration. The cumulative patches below are
+**historical snapshots**, not extra patches to apply to the current source.
+Full Molecule compatibility and complete OpenGL support remain unfinished.
 
 The chosen independent application is the unmodified, signed Alpine ARMv7
 XScreenSaver 6.15 `molecule` executable. The private test loads a three-atom
@@ -10,7 +11,8 @@ water PDB at 640x480 with labels, titles and electron shells disabled. A
 diagnostic preload reports the real EGL renderer, counts swaps and reads
 back frame 3; it does not suppress application features or GL calls.
 Softpipe renders the actual red oxygen and white hydrogen atoms. Hardware
-has not yet reached a successful frame in these snapshots.
+still has not reached its first complete native frame; R22 advances
+past font/bias setup and submits geometry before hitting a draw-count guard.
 
 ## Snapshot reproduction
 
@@ -65,6 +67,22 @@ runs, not long-term stability or conformance results.
   minLOD 0, maxLOD 1000, a 512x32 texture with levels 0..9). Bias remains
   rejected before submission; the native application still has no first frame.
 
+- R19 adds TXB variants for sampler bias, a reserved-uniform collision guard,
+  signed uploads and a 63,936-component probe. CPU checks passed but hardware
+  ignored the requested bias. R20 tried R2 instead of R3 and failed identically.
+- R21 identifies the actual defect in the upstream GRATE `texture-filter`
+  shader: full FP20 ALU writes use `.lh`, both destination enables. Mask00
+  discards the result. It restores bias in R3, fixes temporary-coordinate MOV
+  masks and adds an exact packed-mask regression. The first 108 flat bias
+  cases pass; the UV fixture then hits an incomplete-view guard.
+- R22 uses the identical R21 driver and corrects the fixture to a complete
+  four-level chain with magnifying biases for UV checks. All **63,936 RGBA
+  bias comparisons pass on both renderers**, including projective coordinates,
+  uniform color modulation and two source-over layers. Self/blend/trilinear
+  regressions pass. Molecule accepts its real +0.25 sampler, submits geometry,
+  then aborts at `draws->count > 0 && draws->count < 2048`, before its first
+  frame. New kernel faults, protected-file changes and leftover tests: zero.
+
 ## Tests included
 
 `compat-regression.c` includes the actual compiler/emitter and exercises
@@ -75,8 +93,11 @@ It also checks encoded D-enable and final DW/PSEQ command ordering.
 The known-unverified uniform TXP draw guard stays enabled.
 
 Use `check-cpu.py --help` with an existing Mesa cross-build, the matching
-R16 or R18 driver source/archive, ARM musl sysroot and QEMU. It opens no GPU device.
-`cpu-results.json` and `sampler-cpu-results.json` record successful portable-harness runs.
+R21/R22 driver source/archive, ARM musl sysroot and QEMU. It opens no GPU device.
+`cpu-results.json` and `sampler-cpu-results.json` record earlier harness runs.
+`lod-bias-cpu-results.json` records the current regression against the actual
+public driver source. `check-cpu.py --bias` targets R21/R22; its corrected
+FP20-mask expectations intentionally reject the earlier broken implementation.
 
 `blend-probe.c` is the standalone RGBA8 result test used by R17. Build it via
 `CC=... sh build-probe.sh <sysroot/include/link flags>`. Supply the expected
@@ -89,20 +110,26 @@ It does not install or select a system driver.
 
 ## Remaining work
 
-Native Molecule still requires a sampler LOD bias. GRATE documents TXB's
-bias-enable bit 12 and FP20 bias in R3 for the r0/r1/r2/r3 source layout.
-A safe implementation must interpolate/project coordinates first, insert a
-bias-load execution block, then issue TXB with correct ALU/DW scheduling.
-A reserved uniform needs explicit user-constant collision checks; embedded
-constants are another option. Keep the existing zero-bias path and verify
-positive/negative fractional bias, clamps and unchanged UV pattern before
-retrying the application. Do not silently drop the requested bias.
+Sampler LOD bias is now implemented for the restricted sampler0 2D path.
+Nonzero-bias variants borrow uniform31 only if the shader never reads
+CONST[7] or indirect constants; otherwise execution is rejected. Zero-bias
+variants keep all application uniforms. Bias loading follows projection;
+full FP20 writes require both enable bits, as in the upstream filter shader.
 
-Uniform-coordinate TXP, transparent labels, arbitrary fragment arithmetic/
-alpha test, all texture sizes/formats, scissor/stencil and broader API
-coverage remain unfinished. The advertised max-LOD-bias capability is wider
-than the implementation and also needs resolution. These short tests do not
-justify a global driver switch.
+`lod-bias-probe.c` / `build-bias-probe.sh` exercise 324 flat mip cases across
+TEX, TXP and TXP*tint+two-layer source-over. That is 63,504 component samples
+with 8/255 tolerance. Nine magnifying UV biases on a complete quadrant mip
+chain add 432 samples with 4/255 tolerance. No UV scaling workaround is used.
+Private payload debug information was stripped for transfer; all 24 allocated
+ELF sections remained byte-identical (`strip-audit.json`).
+
+Molecule still requires correct handling of empty/large draw commands. The
+assertion does not identify which side of the count guard failed; that must
+be diagnosed before changing the limit. Uniform-coordinate TXP remains
+blocked despite the TEMP mask fix, pending its own GPU result tests.
+Transparent native labels, general fragment arithmetic/alpha test, texture
+formats/sizes, scissor/stencil and broader API/conformance coverage remain
+unfinished. These short tests do not justify a global driver switch.
 
 References:
 
@@ -110,3 +137,6 @@ References:
 - [OpenTegra framebuffer fetch, cache initialization and draw sequencing](https://github.com/grate-driver/xf86-video-opentegra/blob/master/src/gpu/gr3d.c)
 - [OpenTegra post-upload PSEQ commit](https://github.com/grate-driver/xf86-video-opentegra/blob/master/src/exa/gen_shader_bin.c)
 - [GRATE fragment instruction set](https://github.com/grate-driver/grate/blob/master/docs/fragment-shader-isa.md)
+
+- [Reference TXB shader with full FP20 destination enables](https://github.com/grate-driver/grate/blob/ce8c4d2c62880ee5ffab90fd5f4c0554d4dbcc6d/tests/grate/asm/filter_quad_fs.txt)
+- [Upstream LOD-bias and mip-filter test](https://github.com/grate-driver/grate/blob/ce8c4d2c62880ee5ffab90fd5f4c0554d4dbcc6d/tests/grate/texture-filter.c)

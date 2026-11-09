@@ -42,6 +42,9 @@ struct grate_context {
    struct pipe_sampler_view *fragment_sampler_view;
    struct pipe_sampler_state *fragment_sampler;
 
+   struct pipe_blend_state *blend;
+   unsigned blend_mode;
+   bool sampler_bias_active;
    struct grate_zsa_state *zsa;
    struct grate_rasterizer_state *rast;
 

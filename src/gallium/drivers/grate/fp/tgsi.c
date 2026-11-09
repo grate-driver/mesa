@@ -78,8 +78,12 @@ fp_alu_dst(const struct tgsi_dst_register *dst, int subreg, bool saturate)
       ret.index += o / 2;
       ret.write_low_sub_reg = (o % 2) == 0;
       ret.write_high_sub_reg = (o % 2) != 0;
-   } else
+   } else {
       ret.index += subreg;
+      /* TEMP coordinates are full FP20: enable both halves, like rN.lh. */
+      ret.write_low_sub_reg = true;
+      ret.write_high_sub_reg = true;
+   }
 
    ret.saturate = saturate;
 
@@ -90,6 +94,16 @@ static void
 emit_vMOV(struct grate_fp_shader *fp, const struct tgsi_dst_register *dst,
           bool saturate, const struct tgsi_src_register *src)
 {
+   if (dst->File == TGSI_FILE_TEMPORARY) {
+      /* The restricted coordinate path stores vec4 TEMP[0] in row r0-r3. */
+      assert(dst->Index == 0 && !saturate && !src->Negate && !src->Absolute &&
+             (src->File == TGSI_FILE_INPUT || src->File == TGSI_FILE_CONSTANT));
+      fp->simple_coord_mask |= dst->WriteMask;
+      if (src->File == TGSI_FILE_CONSTANT)
+         fp->simple_uniform_coord_mask |= dst->WriteMask;
+      else
+         fp->simple_uniform_coord_mask &= ~dst->WriteMask;
+   }
    struct fp_instr *inst = CALLOC_STRUCT(fp_instr);
    list_inithead(&inst->link);
 
@@ -138,7 +152,7 @@ emit_vMOV(struct grate_fp_shader *fp, const struct tgsi_dst_register *dst,
       alu->slots[alu_instrs++] = fp_alu_sMOV(fp_alu_dst(dst, i, saturate), src0);
    }
    inst->alu_sched.num_instructions = 1;
-   inst->alu_sched.address = list_length(&fp->fp_instructions);
+   inst->alu_sched.address = list_length(&fp->alu_instructions);
 
    if (mfu != NULL) {
       inst->mfu_sched.num_instructions = 1;
@@ -169,9 +183,15 @@ emit_simple_tex(struct grate_fp_shader *fp,
            dst->File == TGSI_FILE_TEMPORARY) &&
           dst->Index == 0 && dst->WriteMask == 0xf);
    assert(fp->simple_tex_temp == -1);
-   assert(coord->File == TGSI_FILE_INPUT && coord->Index == 0 &&
-          coord->SwizzleX == TGSI_SWIZZLE_X &&
+   bool project = inst->Instruction.Opcode == TGSI_OPCODE_TXP;
+   assert(!inst->Instruction.Saturate && !coord->Negate && !coord->Absolute);
+   assert(coord->Index == 0 && coord->SwizzleX == TGSI_SWIZZLE_X &&
           coord->SwizzleY == TGSI_SWIZZLE_Y);
+   assert(inst->Texture.Texture == TGSI_TEXTURE_2D);
+   unsigned required = 3 | (project ? 1u << coord->SwizzleW : 0);
+   assert(coord->File == TGSI_FILE_INPUT ||
+          (coord->File == TGSI_FILE_TEMPORARY &&
+           (fp->simple_coord_mask & required) == required));
    assert(sampler->File == TGSI_FILE_SAMPLER &&
           sampler->Index == 0);
 
@@ -181,14 +201,38 @@ emit_simple_tex(struct grate_fp_shader *fp,
    list_inithead(&out->link);
    list_inithead(&mfu->link);
 
-   mfu->var[0].op = FP_VAR_OP_FP20;
-   mfu->var[0].tram_row = coord->Index;
-   mfu->var[1].op = FP_VAR_OP_FP20;
-   mfu->var[1].tram_row = coord->Index;
+   if (coord->File == TGSI_FILE_INPUT) {
+      for (unsigned i = 0; i < 4; i++) {
+         if (required & (1u << i)) {
+            mfu->var[i].op = FP_VAR_OP_FP20;
+            mfu->var[i].tram_row = coord->Index;
+         }
+      }
+   }
    out->mfu_sched.num_instructions = 1;
    out->mfu_sched.address = list_length(&fp->mfu_instructions);
    list_addtail(&mfu->link, &fp->mfu_instructions);
 
+   if (project) {
+      struct fp_mfu_instr *divide = CALLOC_STRUCT(fp_mfu_instr);
+      assert(divide);
+      list_inithead(&divide->link);
+      divide->sfu.op = FP_SFU_OP_RCP;
+      divide->sfu.reg = coord->SwizzleW;
+      divide->mul[0].dst = FP_MFU_MUL_DST_ROW_REG_0;
+      divide->mul[0].src[0] = FP_MFU_MUL_SRC_ROW_REG_0;
+      divide->mul[0].src[1] = FP_MFU_MUL_SRC_SFU_RESULT;
+      divide->mul[1].dst = FP_MFU_MUL_DST_ROW_REG_1;
+      divide->mul[1].src[0] = FP_MFU_MUL_SRC_ROW_REG_1;
+      divide->mul[1].src[1] = FP_MFU_MUL_SRC_SFU_RESULT;
+      out->mfu_sched.num_instructions++;
+      list_addtail(&divide->link, &fp->mfu_instructions);
+   }
+   fp->simple_coord_mask = 0; /* TEX overwrites the coordinate rows. */
+   if (coord->File == TGSI_FILE_TEMPORARY &&
+       (fp->simple_uniform_coord_mask & required))
+      fp->info.unverified_uniform_texcoords = true;
+   fp->simple_uniform_coord_mask = 0;
    out->tex_word = 0x00000400; /* TEX enable, sampler 0, r0/r1 */
    out->dw.enable = dst->File == TGSI_FILE_OUTPUT;
    out->dw.index = 1;
@@ -209,8 +253,8 @@ emit_simple_tex_mul(struct grate_fp_shader *fp,
 
    /* Initial implementation: texture result times a uniform. */
    assert(fp->simple_tex_temp == 0);
-   assert(list_length(&fp->fp_instructions) == 1);
-   assert(list_is_empty(&fp->alu_instructions));
+   assert(!list_is_empty(&fp->fp_instructions));
+
    assert(dst->File == TGSI_FILE_OUTPUT &&
           dst->Index == 0 && dst->WriteMask == 0xf);
    assert(tex->File == TGSI_FILE_TEMPORARY && tex->Index == 0 &&
@@ -223,7 +267,8 @@ emit_simple_tex_mul(struct grate_fp_shader *fp,
           !factor->Negate && !factor->Absolute);
 
    struct fp_instr *batch =
-      list_first_entry(&fp->fp_instructions, struct fp_instr, link);
+      list_last_entry(&fp->fp_instructions, struct fp_instr, link);
+   assert(batch->tex_word && batch->alu_sched.num_instructions == 0);
    struct fp_alu_instr_packet *alu = CALLOC_STRUCT(fp_alu_instr_packet);
    assert(alu);
    list_inithead(&alu->link);
@@ -259,12 +304,13 @@ emit_simple_tex_mul(struct grate_fp_shader *fp,
       };
    }
 
-   batch->alu_sched.address = 0;
+   batch->alu_sched.address = list_length(&fp->alu_instructions);
    batch->alu_sched.num_instructions = 1;
    batch->dw.enable = 1;
    batch->dw.index = 1;
    batch->dw.src_regs = FP_DW_REGS_R2_R3;
    list_addtail(&alu->link, &fp->alu_instructions);
+   fp->simple_coord_mask = 0;
    fp->simple_tex_temp = -1;
 }
 
@@ -313,6 +359,7 @@ emit_tgsi_instr(struct grate_fp_shader *fp, const struct tgsi_full_instruction *
       emit_vMOV(fp, &inst->Dst[0].Register, saturate,
                     &inst->Src[0].Register);
       break;
+   case TGSI_OPCODE_TXP:
    case TGSI_OPCODE_TEX:
       emit_simple_tex(fp, inst);
       break;
@@ -364,6 +411,8 @@ emit_tgsi_declaration(struct grate_fp_shader *fp, const struct tgsi_full_declara
 void
 grate_tgsi_to_fp(struct grate_fp_shader *fp, struct tgsi_parse_context *tgsi)
 {
+   /* All metadata starts defined, including rejected/unverified paths. */
+   memset(fp, 0, sizeof(*fp));
    list_inithead(&fp->fp_instructions);
    list_inithead(&fp->alu_instructions);
    list_inithead(&fp->mfu_instructions);

@@ -17,7 +17,9 @@ manager with cleanup.
 Validated paths include context creation/destruction, RGB upload through Mesa's
 CPU format conversion, illuminated engine geometry, restricted GLSL texture
 sampling, an opaque GL font atlas, depth occlusion, explicit RGBA8 mip storage
-and nearest-mipmap GPU sampling across all eight levels. See the individual
+and nearest-mipmap GPU sampling across all eight levels. The current source
+also includes restricted source-over blending, trilinear filtering, varying
+TXP, and sampler LOD bias validated in R22. See the individual
 probes and integrated showcase below for the limits of each test.
 
 Unimplemented or unvalidated features include general sampler configurations,
@@ -180,9 +182,10 @@ unchanged and no new kernel faults were recorded.
 The fragment backend and sampler-state port builds on the Surface RT patch in
 [#19](https://github.com/grate-driver/mesa/pull/19). The Mesa 22.2.4 sampler-view
 ownership API is handled explicitly and context cleanup releases the view.
-The supported experiment is a single linear four-byte-per-pixel 2D texture,
+The original probe uses a single linear four-byte-per-pixel 2D texture,
 level zero, a matching natural row pitch, and sampler0. Min/mag nearest and
-GLSL texture2D with input0 coordinates were tested. This is not a general
+GLSL texture2D with input0 coordinates were tested. Broader current paths are
+described in the R22 section below. This is not a general
 fragment-shader compiler; other shader shapes can still abort.
 
 `texture-probe.c` renders a four-quadrant RGBA8 image through a GLSL1.20 TEX
@@ -196,8 +199,10 @@ These are correctness checks, not FPS benchmarks. The text probe does not
 implement glBitmap, transparent text, blending, discard or a font API.
 The earlier fixed-function GL_REPLACE probe stopped on unsupported TXP
 (projective texture sampling), before a texture draw. That failure remains
-unfixed: the explicit GLSL probe tests TEX directly rather than hiding TXP
-limitations. Restricted nearest-mipmap sampling is now tested in the showcase below;
+documented in the historical records: the original GLSL probe tests TEX
+directly. Varying TXP is now implemented and separately tested with sampler
+bias. Uniform-coordinate TXP remains guarded pending separate GPU validation.
+Restricted nearest-mipmap sampling is tested in the showcase below;
 automatic mip generation remains untested.
 
 Compile the probes with your ARM cross compiler/sysroot, using the private
@@ -222,8 +227,10 @@ It performs no GPU calls.
 The on-device `uniform-color-probe.c` passed 12,544 framebuffer pixel checks
 (on softpipe and Tegra; one-byte tolerance for color conversion). It checks
 a direct GLSL uniform color, not texture projection. Constant-coordinate TXP
-is still incorrect in the separate development revision; that TXP work is
-not included here. No full desktop switch to these experimental GL libraries
+was incorrect in the archived development revisions. The current source fixes
+full FP20 destination masks and includes varying TXP; the uniform-coordinate
+execution guard remains until that path has a separate result test. No full
+desktop switch to these experimental GL libraries
 has been made.
 
 ## Existing Xfce desktop path
@@ -245,9 +252,14 @@ animated scene. The application and all libraries remain in a private prefix.
 The mip sampler uses the 16-byte linear row alignment used by libgrate's mip
 allocator, with checked offsets and total BO size. Non-mip resources retain
 the previous layout. GPU descriptors enable mipmaps and set the actual last
-level. The initial supported configuration is a complete level-zero POT
-RGBA8 view, nearest mip selection, zero LOD bias and minimum LOD zero. Other
-configurations stop explicitly.
+level. Supported configurations remain complete level-zero POT RGBA8 views,
+minimum LOD zero, and max LOD at least the resource last level. Nearest and
+linear mip selection are tested. The current driver supports finite sampler0
+LOD bias from -16 through +16, with nonzero-bias execution rejected when the
+shader reads CONST[7] or indirectly addressed uniforms. This conservatively
+protects the borrowed uniform31 slot. Zero-bias shader/uniform behavior stays
+unchanged. Partial mip views and narrow, padded level-zero textures such as
+4x4 are still rejected. Other configurations stop explicitly.
 
 CPU resource and sampler command regressions can be run through
 `check-vp.py --resources` and `check-vp.py --sampler` with the same build,
@@ -259,5 +271,39 @@ test checks actual emitted descriptors and the unchanged level-zero path.
 ## Complete source and validation index
 
 [INDEX.md](INDEX.md) links the driver lab, showcase, machine-readable device
-results, the later 20-second display run and an archive of unfinished TXP
-experiments. Archived patches are not applied to the validated driver.
+results, the later 20-second display run and historical TXP/compatibility
+snapshots. The current driver includes the R21/R22 implementation below;
+historical cumulative patches must only be applied to their documented base.
+
+
+## Sampler LOD bias and source-over (R22)
+
+The driver now selects a separate TXB variant for nonzero sampler bias, after
+coordinate interpolation and projective division. It loads bias into FP20
+R3 and enables TEX bias bit12. Both ALU destination write bits must be set:
+mask00 discards the result. This also corrects temporary-coordinate MOV masks.
+The implementation keeps the zero-bias variant and checks uniform-slot
+collisions before submission. No requested bias is silently dropped.
+
+The [Molecule investigation](research/molecule/README.md) includes portable
+`check-cpu.py --bias`, a standalone `lod-bias-probe.c`, and pass/fail records.
+The CPU test checks exact packed masks, signed upload, stage scheduling,
+restoration and collision/nonfinite/range guards. In both private softpipe
+and Tegra, **63,936 RGBA component comparisons pass**: nine biases including
+-16,-2,-1,-0.25,0,+0.25,+1,+2,+16; six base LODs; nearest/linear within-level
+filters; TEX and projective TXP; and TXP multiplied by a uniform tint with
+two source-over layers. A complete four-level quadrant texture separately
+checks that magnifying biases preserve UV. Tolerances are 8/255 for LOD
+quantization and 4/255 for spatial patterns, with an 8-bit alpha visual.
+
+Existing combined texture/text/depth/mipmap, 11,760-component blend and
+9,800-component trilinear regressions pass again. Source-over supports only
+additive premultiplied, straight, and straight-RGB/separate-ONE-alpha modes,
+full RGBA mask and one render target; unsupported combinations are rejected.
+Fragment cache invalidation prevents stale destinations across GR2D clears.
+
+The unmodified XScreenSaver Molecule now passes its +0.25 font sampler and
+submits geometry, but **still aborts before its first frame** at the existing
+draw-count guard (`count > 0 && count < 2048`). Labels, shells, general shader
+coverage, large/empty draw handling and long-running reliability are not
+validated. All tests remain isolated per process; no system Mesa switch.

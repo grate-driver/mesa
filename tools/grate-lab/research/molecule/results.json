@@ -612,5 +612,583 @@
     "health_ok": true,
     "critical_files_unchanged": true,
     "test_processes_remaining": 0
+  },
+  "r19": {
+    "completed": false,
+    "stopped": "Test failed: grate-bias",
+    "tests": [
+      {
+        "test": "softpipe-self",
+        "result": {
+          "mode": "softpipe",
+          "phase": "self",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.606,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-blend",
+        "result": {
+          "mode": "softpipe",
+          "phase": "blend",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.449,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-mip",
+        "result": {
+          "mode": "softpipe",
+          "phase": "mip",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.633,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-bias",
+        "result": {
+          "mode": "softpipe",
+          "phase": "bias",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 12.657,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-opaque",
+        "result": {
+          "mode": "softpipe",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 5.234,
+          "fault_marker": false,
+          "renderer_confirmed": true,
+          "captured": true,
+          "frames": 29,
+          "quit_sender_exit": 0,
+          "diagnostic_stop": false,
+          "completed": true
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-self",
+        "result": {
+          "mode": "grate",
+          "phase": "self",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.038,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-blend",
+        "result": {
+          "mode": "grate",
+          "phase": "blend",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 0.45,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-mip",
+        "result": {
+          "mode": "grate",
+          "phase": "mip",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 0.396,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-bias",
+        "result": {
+          "mode": "grate",
+          "phase": "bias",
+          "exit": 10,
+          "reason": "natural",
+          "seconds": 0.399,
+          "fault_marker": false,
+          "completed": false,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      }
+    ],
+    "health_ok": true,
+    "critical_files_unchanged": true,
+    "test_processes_remaining": 0,
+    "auth_removed": true,
+    "temporary_inhibitor_released": true
+  },
+  "r20": {
+    "completed": false,
+    "stopped": "Test failed: grate-bias",
+    "tests": [
+      {
+        "test": "softpipe-self",
+        "result": {
+          "mode": "softpipe",
+          "phase": "self",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.505,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-blend",
+        "result": {
+          "mode": "softpipe",
+          "phase": "blend",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.313,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-mip",
+        "result": {
+          "mode": "softpipe",
+          "phase": "mip",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.531,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-bias",
+        "result": {
+          "mode": "softpipe",
+          "phase": "bias",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 12.494,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-opaque",
+        "result": {
+          "mode": "softpipe",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 5.213,
+          "fault_marker": false,
+          "renderer_confirmed": true,
+          "captured": true,
+          "frames": 46,
+          "quit_sender_exit": 0,
+          "diagnostic_stop": false,
+          "completed": true
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-self",
+        "result": {
+          "mode": "grate",
+          "phase": "self",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 0.945,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-blend",
+        "result": {
+          "mode": "grate",
+          "phase": "blend",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 0.416,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-mip",
+        "result": {
+          "mode": "grate",
+          "phase": "mip",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 0.386,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-bias",
+        "result": {
+          "mode": "grate",
+          "phase": "bias",
+          "exit": 10,
+          "reason": "natural",
+          "seconds": 0.316,
+          "fault_marker": false,
+          "completed": false,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      }
+    ],
+    "health_ok": true,
+    "critical_files_unchanged": true,
+    "test_processes_remaining": 0,
+    "auth_removed": true,
+    "temporary_inhibitor_released": true
+  },
+  "r21": {
+    "completed": false,
+    "stopped": "Test failed: grate-bias",
+    "tests": [
+      {
+        "test": "softpipe-self",
+        "result": {
+          "mode": "softpipe",
+          "phase": "self",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.408,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-blend",
+        "result": {
+          "mode": "softpipe",
+          "phase": "blend",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.32,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-mip",
+        "result": {
+          "mode": "softpipe",
+          "phase": "mip",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.515,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-bias",
+        "result": {
+          "mode": "softpipe",
+          "phase": "bias",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 12.449,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-opaque",
+        "result": {
+          "mode": "softpipe",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 5.166,
+          "fault_marker": false,
+          "renderer_confirmed": true,
+          "captured": true,
+          "frames": 48,
+          "quit_sender_exit": 0,
+          "diagnostic_stop": false,
+          "completed": true
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-self",
+        "result": {
+          "mode": "grate",
+          "phase": "self",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 0.951,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-blend",
+        "result": {
+          "mode": "grate",
+          "phase": "blend",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 0.516,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-mip",
+        "result": {
+          "mode": "grate",
+          "phase": "mip",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 0.382,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-bias",
+        "result": {
+          "mode": "grate",
+          "phase": "bias",
+          "exit": -6,
+          "reason": "natural",
+          "seconds": 0.52,
+          "fault_marker": false,
+          "completed": false,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      }
+    ],
+    "health_ok": true,
+    "critical_files_unchanged": true,
+    "test_processes_remaining": 0,
+    "auth_removed": true,
+    "temporary_inhibitor_released": true
+  },
+  "r22": {
+    "completed": false,
+    "stopped": "Test failed: grate-opaque",
+    "tests": [
+      {
+        "test": "softpipe-self",
+        "result": {
+          "mode": "softpipe",
+          "phase": "self",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.52,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-blend",
+        "result": {
+          "mode": "softpipe",
+          "phase": "blend",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.315,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-mip",
+        "result": {
+          "mode": "softpipe",
+          "phase": "mip",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.561,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-bias",
+        "result": {
+          "mode": "softpipe",
+          "phase": "bias",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 12.454,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "softpipe-opaque",
+        "result": {
+          "mode": "softpipe",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 5.202,
+          "fault_marker": false,
+          "renderer_confirmed": true,
+          "captured": true,
+          "frames": 48,
+          "quit_sender_exit": 0,
+          "diagnostic_stop": false,
+          "completed": true
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-self",
+        "result": {
+          "mode": "grate",
+          "phase": "self",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 0.951,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-blend",
+        "result": {
+          "mode": "grate",
+          "phase": "blend",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 0.412,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-mip",
+        "result": {
+          "mode": "grate",
+          "phase": "mip",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 0.421,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-bias",
+        "result": {
+          "mode": "grate",
+          "phase": "bias",
+          "exit": 0,
+          "reason": "natural",
+          "seconds": 1.012,
+          "fault_marker": false,
+          "completed": true,
+          "diagnostic_stop": false
+        },
+        "new_kernel_faults": 0
+      },
+      {
+        "test": "grate-opaque",
+        "result": {
+          "mode": "grate",
+          "exit": -6,
+          "reason": "natural",
+          "seconds": 0.908,
+          "fault_marker": false,
+          "renderer_confirmed": true,
+          "captured": false,
+          "frames": null,
+          "quit_sender_exit": null,
+          "diagnostic_stop": false,
+          "completed": false
+        },
+        "new_kernel_faults": 0
+      }
+    ],
+    "health_ok": true,
+    "critical_files_unchanged": true,
+    "test_processes_remaining": 0,
+    "auth_removed": true,
+    "temporary_inhibitor_released": true,
+    "driver_identical_to_r21": true
   }
 }
