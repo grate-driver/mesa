@@ -224,3 +224,11 @@ a direct GLSL uniform color, not texture projection. Constant-coordinate TXP
 is still incorrect in the separate development revision; that TXP work is
 not included here. No full desktop switch to these experimental GL libraries
 has been made.
+
+## Existing Xfce desktop path
+
+[DESKTOP.md](DESKTOP.md) documents a separate XRender transparency/text test
+and per-taskGPU trace proving actualGR2D/GR3D submissions by the unchanged
+systemXorg. This helps distinguish desktopEXA compositing from llvmpipe
+reported for a defaultOpenGL context. No experimentalMesa desktop switch
+was needed for that result.
